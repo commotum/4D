@@ -18,11 +18,19 @@ three strongly related elements, instead of a group of uni-dimensional
 elements that *could* be related to each other, as in traditional
 real-valued neural networks.
 
-s
-s
-s
 
-Modern transformer architectures ingest data as linear token streams, relying on sinusoidal or learned positional encodings to signal order. While adequate for language, this one-dimensional representation collapses richer spatial and relational structures, and deletes, deforms, or obfuscates information essential to model's ability to correctly interpret or process the problem space. 
+Modern transformer architectures ingest data as linear token streams, relying on sinusoidal or learned positional encodings to signal order. While adequate for modeling sequential tasks such as language, the requriethis inherently one-dimensional timeline collapses richer spatial and relational structures, deleting, deforming, or obfuscating information critical for faithfully interpreting complex problem spaces.
+
+
+
+Modern transformer architectures ingest data as linear token streams, relying on sinusoidal or learned positional encodings to signal order. While adequate for modeling sequential tasks such as language, when faced with viseo-spatial modeling tasks the very nature of these architectures imposes a paradigm for data of  “flatten-and-index” requirement this inherently one-dimensional timeline collapses richer spatial and relational structures, deleting, deforming, or obfuscating information critical for faithfully interpreting complex problem spaces.
+
+
+this paradigm struggles to adequately model viseospatial information 
+
+
+when faced with viseo-spatial modeling tasks the very nature of these architectures imposes a paradigm for data of  “flatten-and-index” requirement this inherently one-dimensional timeline collapses richer spatial and relational structures, deleting, deforming, or obfuscating information critical for faithfully interpreting complex problem spaces.
+
 
 
 Yet this inherently one-dimensional timeline collapses richer spatial and relational structures, deleting, deforming, or obfuscating information critical for faithfully interpreting complex problem spaces
