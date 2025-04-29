@@ -19,7 +19,7 @@ elements that *could* be related to each other, as in traditional
 real-valued neural networks.
 
 s
-
+s
 
 Modern transformer architectures ingest data as linear token streams, relying on sinusoidal or learned positional encodings to signal order. While adequate for language, this one-dimensional representation collapses richer spatial and relational structures, and deletes, deforms, or obfuscates information essential to model's ability to correctly interpret or process the problem space. 
 
