@@ -19,7 +19,13 @@ elements that *could* be related to each other, as in traditional
 real-valued neural networks.
 
 
-Modern transformer architectures ingest data as linear token streams, relying on sinusoidal or learned positional encodings to signal order. While adequate for modeling sequential tasks such as language, the requriethis inherently one-dimensional timeline collapses richer spatial and relational structures, deleting, deforming, or obfuscating information critical for faithfully interpreting complex problem spaces.
+Modern transformer architectures ingest data as linear token streams, relying on sinusoidal or learned positional encodings to signal order, achieving SOTA results in modeling sequential tasks such as language. However, when faced with visuospatial tasks these models 
+
+
+demonstrate a failure to generalize understanding of spatial structures and relationships.
+
+
+, the requriethis inherently one-dimensional timeline collapses richer spatial and relational structures, deleting, deforming, or obfuscating information critical for faithfully interpreting complex problem spaces.
 
 
 
