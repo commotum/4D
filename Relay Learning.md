@@ -20,3 +20,6 @@ Prophetic perfect tense in practice.
   url          = {http://www.jmlr.org/papers/volume3/bengio03a/bengio03a.pdf}
 }
 
+
+"Last time, I asked: 'What does mathematics mean to you?', and some people answered: 'The manipulation of numbers, the manipulation of structures.' And if I had asked what music means to you, would you have answered: 'The manipulation of notes?' "
+-Serge Lang
