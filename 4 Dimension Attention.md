@@ -12,3 +12,7 @@ In 2019 the ARC-AGI benchmark introduced a set of visual reasoning tasks that br
 Addressing this limitation requires moving beyond positional encodings uniquely restricted to temporal indices. Instead, embeddings must inherently reflect the intrinsic dependencies between space and time. By extending Rotary Positional Embeddings (RoPE) from two to four dimensions via a Minkowski-metricized Clifford (3,1) algebra, we introduce structural embeddings that naturally capture the fundamental interdependencies of our universe and the objects and events within it. 
 
 This approach eliminates the artificial flattening requirement that necessarily discards vital geometric and relational information, and removes the structural blinders that previously constrained transformers' capacity to handle inherently multidimensional information. Simply put, it provides transformers with a built-in ability to perceive, reason about, and generalize across spatial structures and temporal sequences—without sacrificing their established computational advantages.
+
+---
+
+## 1 Introduction
