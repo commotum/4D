@@ -11,4 +11,9 @@ The ARC-AGI benchmark, a set of visual reasoning tasks introduced by François C
 
 
 
+
+---
+
+Rough:
+
 Recent progress in large language models (LLMs) has achieved impressive performance across numerous cognitive benchmarks, yet these models persistently fail to adequately process, reason about, and generalize from visual and spatial data.
