@@ -33,7 +33,7 @@ Intro Paragraph Here
 
 [^3]: A. Dosovitskiy *et al.*, “An Image Is Worth 16×16 Words: Transformers for Image Recognition at Scale,” *ICLR* 2021; A. Jaegle *et al.*, “Perceiver IO: A General Architecture for Structured Inputs & Outputs,” *ICML* 2021; B. Mildenhall *et al.*, “NeRF: Representing Scenes as Radiance Fields for View Synthesis,” *ECCV* 2020; M. Tancik *et al.*, “Fourier Features Let Networks Learn High Frequency Functions in Low Dimensional Domains,” *NeurIPS* 2020.
 
-## Drafts
+#### Drafts
 
 These encodings view \(x,y,z\) (and sometimes \(t\)) as **independent** scalars; any cross-dimension geometry, metric invariance, or causal coupling must be rediscovered from scratch by attention weights. Consequently, space and time remain merely *tagged* onto the sequence rather than *embedded* as a single, coupled manifold, leaving transformers blind to the intrinsic spacetime symmetries that real-world reasoning demands.
 
