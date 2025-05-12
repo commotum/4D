@@ -69,3 +69,40 @@ With its toy-scale visual tasks, the 2019 ARC-AGI benchmark again laid bare the 
 Attempts to “spatialize” attention—Vision Transformer (ViT), Perceiver-IO, NeRF’s Fourier-feature MLP, and related grids or Fourier encodings—still flatten images, videos, or point clouds into token lists and append per-axis positional codes[^3]. Because these codes treat \(x,y,z\) (and sometimes \(t\)) as **independent** scalars, any cross-dimension geometry or causal coupling must be rediscovered from scratch; space and time remain *tagged on* rather than *built in*.
 
 We move past this limitation by extending Rotary Positional Embeddings (RoPE) from two to four dimensions via a Minkowski-metric Clifford \((3,1)\) algebra. The resulting **structural embeddings** embed \((x,y,z,t)\) as a single spacetime vector, eliminating the flattening that discards geometric relations and equipping transformers with native, frame-invariant reasoning over spatial structures and temporal sequences—without sacrificing their proven computational advantages.
+
+
+Ablation Studies are Crucial: For any chosen task, compare your model with 4D Clifford RoPE against:
+
+The same model with no positional encoding.
+The same model with standard 1D absolute positional encodings (flattening the spatio-temporal input).
+The same model with 2D RoPE (e.g., applied to spatial dimensions, with time handled by a separate 1D encoding, or one spatial dimension + time).
+The same model with a "naive" 4D sinusoidal positional encoding (concatenating sinusoidal encodings for t, x, y, z).
+If possible, a version where only the spatial part (3D RoPE-like) or only the temporal part is used from your 4D RoPE. This will help isolate whether the specific structure of your 4D Clifford RoPE, and its unified treatment of space-time, provides a measurable benefit (e.g., lower loss, higher accuracy, better generalization, faster convergence) on tasks that should benefit from it.
+
+
+## From RoFormer / RoPE
+
+- Position encoding enables valuable supervision for dependency modeling between elements at different positions of the sequence.
+- Explores various methods of integrating positional information into the learning process of transformer-based language models.
+- RoPE encodes the absolute position with a rotation matrix and meanwhile incorporates the explicit relative position dependency in self-attention formulation.
+
+RoPE enables valuable properties, including:
+
+1. Flexibility of sequence length
+2. Decaying inter-token dependency with increasing relative distances
+3. Equipping the linear self-attention with relative position encoding.
+
+Pre-trained Language Models (PLMs) utilize the self-attention mechanism to semantically capture the contextual representation of a given corpus. As a consequence, PLMs achieve a significant improvement in terms of parallelization over RNNs and improve the modeling ability of longer intra-token relations compared to CNNs.
+
+It is noteworthy that the self-attention architecture of the current PLMs has shown to be position-agnostic. Various approaches have been proposed to encode the position information into the learning process.
+
+Split into three major camps:
+
+1. Absolute Position Encoding
+     a. through a pre-defined function Vaswani et al. [2017]
+     b. with a trainable absolute position encoding Radford et al. [2019]
+2. Relative Position Encoding
+     a. into the attention mechanism.
+3. Alternatives
+     a. perspective of Neural ODE
+     b. model the position information in complex space
