@@ -17,8 +17,8 @@ This approach eliminates the artificial flattening requirement that necessarily 
 
 ## 01 Introduction
 
-> “There was a guy who was a great wingshot on a quail hunt in Georgia. He killed everything he saw, he dropped ’em all morning. One of the other guys said, ‘You’re the best wingshot I’ve ever seen.’ At lunch the guy asked him, ‘Do you shoot with one eye open or both?’ He paused and thought about it. Finally, he said, ‘I don’t know.’”[^4]
-> — Cormac McCarthy, quoted in *The New Yorker*, April 22, 2017
+> “There was a guy who was a great wingshot on a quail hunt in Georgia. He killed everything he saw, he dropped ’em all morning. One of the other guys said, ‘You’re the best wingshot I’ve ever seen.’ At lunch the guy asked him, ‘Do you shoot with one eye open or both?’ He paused and thought about it. Finally, he said, ‘I don’t know.’”
+> — Cormac McCarthy, quoted in *The New Yorker*, April 22, 2017[^4]
 
 
 
