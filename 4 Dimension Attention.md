@@ -17,8 +17,9 @@ This approach eliminates the artificial flattening requirement that necessarily 
 
 ## 01 Introduction
 
-> "There was a man who was an excellent wingshot on a quail hunt in Georgia. He hit everything he saw—dropped birds all morning. One of his companions said, 'You're the best wingshot I've ever seen.' At lunch, the companion asked him, 'Do you shoot with one eye open or both?' The man paused, thought about it, and finally said, 'I don't know.'"
-> — Cormac McCarthy
+> “There was a guy who was a great wingshot on a quail hunt in Georgia. He killed everything he saw, he dropped ’em all morning. One of the other guys said, ‘You’re the best wingshot I’ve ever seen.’ At lunch the guy asked him, ‘Do you shoot with one eye open or both?’ He paused and thought about it. Finally, he said, ‘I don’t know.’”
+> — Cormac McCarthy, quoted in *The New Yorker*, April 22, 2017
+
 
 
 ---
@@ -33,3 +34,4 @@ This approach eliminates the artificial flattening requirement that necessarily 
 
 [^3]: Many attempts to “spatialize” attention simply flatten an image, video, or point cloud into a token list and then concatenate per-axis positional codes—e.g., ViT’s learned patch indices, sinusoidal grids, or high-frequency Fourier features—leaving tokens fundamentally one-dimensional. See A. Dosovitskiy *et al.*, “An Image Is Worth 16×16 Words,” *ICLR* 2021; A. Jaegle *et al.*, “Perceiver IO,” *ICML* 2021; B. Mildenhall *et al.*, “NeRF,” *ECCV* 2020; and M. Tancik *et al.*, “Fourier Features,” *NeurIPS* 2020.
 
+[^#]: Nick Romeo, “Cormac McCarthy Explains the Unconscious,” *The New Yorker*, April 22, 2017, https://www.newyorker.com/books/page-turner/cormac-mccarthy-explains-the-unconscious.
