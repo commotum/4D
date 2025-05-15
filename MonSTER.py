@@ -1,14 +1,17 @@
 """
 MonSTER: Minkowski Space Time Embedding Rotors
 
-MonSTER computes 4-dimensional, Minkowski-metric-respecting relative positional
-encodings for transformer attention, built upon the principles of the real Clifford
-algebra Cl(1,3) with a (+, –, –, –) metric signature. This version calculates a
-unique 4D Lorentz transformation, R_eff, based directly on the relative spacetime
-displacement ΔP = (Δt, Δx, Δy, Δz) between query and key elements. This R_eff
-is generated block-wise using different frequencies for multi-scale representation.
-The resulting R_eff matrices modulate attention scores, typically within a Minkowski
-dot product. This ensures that the same displacement ΔP consistently yields the
+Introducing MonSTER a 4D generalization of RoPE (Rotary Position Embedding), 
+computing Minkowski-metric-respecting relative positional encodings for 
+transformer attention. Built upon the principles of the real Clifford algebra 
+Cl(1,3) with a (+, -, -, -) metric signature, MonSTER extends RoPE's 2D 
+rotations to full 4D Lorentz transformations. This version calculates a unique 
+4D Lorentz transformation, R_eff, based directly on the relative spacetime 
+displacement ΔP = (Δt, Δx, Δy, Δz) between query and key elements. This R_eff is 
+generated block-wise using different frequencies for multi-scale representation, 
+similar to RoPE's frequency-based approach but generalized to spacetime. The 
+resulting R_eff matrices modulate attention scores, typically within a Minkowski 
+dot product. This ensures that the same displacement ΔP consistently yields the 
 same geometric transformation influencing attention, crucial for tasks like ARC-AGI.
 
 Key Steps for Computing R_eff_b per block b:
