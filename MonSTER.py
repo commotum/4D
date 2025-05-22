@@ -66,15 +66,14 @@ def get_delta_monster(
     num_blocks: int,
     base_time: float = 10000.,
     base_space: float = 10000.,
-    time_rapidity_scale_C_t: float = 2.0,
     epsilon: float = 1e-8,
     dtype=jnp.float32
 ):
     """
     Computes block-diagonal relative spacetime Lorentz transformation matrices
     (R_eff_b) from raw spacetime displacements (Δt_raw, Δcoords_raw).
-    Designed for ARC-AGI: uses raw pixel/step differences for deltas, tamps temporal
-    rapidity with tanh, and uses distinct frequency bases for time and space.
+    Designed for ARC-AGI: uses raw pixel/step differences for deltas, and uses 
+    distinct frequency bases for time and space.
 
     Args:
         delta_t_raw: Raw temporal displacement (Δt). Shape can be (...).
@@ -82,7 +81,6 @@ def get_delta_monster(
         num_blocks: Number of frequency blocks (B).
         base_time: Base for temporal inverse frequencies.
         base_space: Base for spatial inverse frequencies.
-        time_rapidity_scale_C_t: Saturation scale C_t for tanh on temporal rapidity.
         epsilon: Small value for numerical stability.
         dtype: Data type for calculations.
 
@@ -119,9 +117,11 @@ def get_delta_monster(
     M_rot_b = M_rot_b.at[..., 0, 0].set(1.0)
     M_rot_b = M_rot_b.at[..., 1:, 1:].set(R3_b)
 
-    phi_b_prescale = delta_t_scaled
-    safe_C_t = jnp.maximum(time_rapidity_scale_C_t, epsilon) # ensure C_t is not zero for division
-    phi_b = safe_C_t * jnp.tanh(phi_b_prescale / safe_C_t)
+    # Note: Temporal inputs (delta_t_raw) are expected to be in a domain where
+    # the hyperbolic boosts won't explode numerically. This is typically achieved
+    # by ensuring temporal displacements are within reasonable bounds relative to
+    # the base_time parameter. No explicit clamping is needed.
+    phi_b = delta_t_scaled
 
     ch_b = jnp.cosh(phi_b)
     sh_b = jnp.sinh(phi_b)
