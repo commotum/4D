@@ -35,12 +35,16 @@ To distinguish an agent from its world is to draw a line. On one side is the age
 $o_1,a_1,o_2,a_2,o_3,a_3,...$
 each element of which depends only on those preceding it. See Figure 1. Define $E = \{O \times A\}^*$ as the set of all possible experiences.
 
-Let us call the experience sequence up through some action a history. Formally, any world can be completely specified by a probability distribution over next observations conditional on history, that is, by the probability $P(o|h)$ that the next observation is $o$ given history $h$, for all $o \in O$ and $h \in E$. To know $P$ exactly and completely is to know everything there is to know about the agent’s world.[^1] Short of that, we may have an approximate model of the world.
+Let us call the experience sequence up through some action a history. Formally, any world can be completely specified by a probability distribution over next observations conditional on history, that is, by the probability $P(o|h)$ that the next observation is $o$ given history $h$, for all $o \in O$ and $h \in E$. To know $P$ exactly and completely is to know everything there is to know about the agent’s world. Short of that, we may have an approximate model of the world.
+
+---
+
+> Suppose we have a model of the world, an approximation $\hat{P}$ to $P$. How can we define the quality of the model? First, we need only look at the future; we can take the history so far as given and just consider further histories after that. Thus, $\hat{P}$ and $P$ can be taken to give distributions for future histories. I offer a policy-dependent measure of the loss of a model, that is, of how much it does not predict the data:
+$$L_{\pi}(P || \hat{P}) = \lim_{n\to\infty} \sum_{l=0}^{n} \frac{1}{|H_t|} \sum_{h\in H_l} \sum_{o} n P(o|h) \log \frac{1}{\hat{P}(o|h)}$$
+
+---
 
 *[Figure 1: Experience is the signals crossing the line separating agent from world.]*
-
-[^1]: Suppose we have a model of the world, an approximation $\hat{P}$ to $P$. How can we define the quality of the model? First, we need only look at the future; we can take the history so far as given and just consider further histories after that. Thus, $\hat{P}$ and $P$ can be taken to give distributions for future histories. I offer a policy-dependent measure of the loss of a model, that is, of how much it does not predict the data:
-$$L_{\pi}(P || \hat{P}) = \lim_{n\to\infty} \sum_{l=0}^{n} \frac{1}{|H_t|} \sum_{h\in H_l} \sum_{o} n P(o|h) \log \frac{1}{\hat{P}(o|h)}$$
 
 ## 2. Predictive knowledge
 
