@@ -1,10 +1,7 @@
----
-title: "Verification"
-author: "Rich Sutton"
-date: "2001-11-14"
----
-
 # Verification
+
+## Rich Sutton
+### November 14, 2001
 
 If the human designers of an AI are not to be burdened with ensuring that what their AI knows is correct, then the AI will have to ensure it itself. It will have to be able to verify the knowledge that it has gained or been given.
 
