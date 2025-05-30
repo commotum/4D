@@ -22,7 +22,7 @@
 ### 2016-2019
 - [The Definition of Intelligence](DefinitionOfIntelligence.md) (2016)
 - [The Bitter Lesson](BitterLesson.md) (3/13/2019)
-- [Podcast re My Life So Far](Podcast%20re%20My%20Life%20So%20Far.md) (4/4/2019)
+- [Podcast re My Life So Far](PodcastMyLifeSoFar.md) (4/4/2019)
 
 ### Writing Advice
 - [Advice for Writing Peer Reviews](ReviewAdvice.md)
