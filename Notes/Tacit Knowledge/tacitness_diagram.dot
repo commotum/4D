@@ -1,36 +1,31 @@
-digraph G {
-    rankdir=LR; // Lay out from Left to Right
+digraph tacitness {
+    rankdir=LR;
+    node [shape=box, style=rounded];
+    Q1 [label="Has knowledge asset\\nbeen explicated?"];
+    Q2 [label="Is it easy to\\nreplicate?"];
+    Q3 [label="Is it easy to\\narticulate?"];
+    Q4 [label="Is it endemic to the\\nfirm’s culture?"];
+    Q5 [label="Are its origins\\ndeep and obscure?"];
 
-    node [shape=box, style=rounded]; // Default shape for nodes
+    Low     [shape=ellipse, label="Low"];
+    LowMed  [shape=ellipse, label="Low/Medium"];
+    Med     [shape=ellipse, label="Medium"];
+    MedHigh [shape=ellipse, label="Medium/High"];
+    High    [shape=ellipse, label="High"];
+    Ultra   [shape=ellipse, label="Ultra"];
 
-    // Define Nodes
-    n1 [label="Has knowledge asset\nbeen explicated?"];
-    n2 [label="Is it easy to replicate?"];
-    n3 [label="Is it easy to\narticulate?"];
-    n4 [label="Is it endemic to\nthe firm's culture?"];
-    n5 [label="Are its origins deep\nand obscure?"];
+    Q1 -> Low     [label="yes"];
+    Q1 -> Q2      [label="no"];
 
-    // Define Outcome Nodes (or points)
-    low1 [label="Low", shape=plaintext];
-    low2 [label="Low", shape=plaintext];
-    low3 [label="Low", shape=plaintext];
-    low4 [label="Low", shape=plaintext];
-    high [label="High", shape=plaintext];
+    Q2 -> LowMed  [label="yes"];
+    Q2 -> Q3      [label="no"];
 
-    // Define Edges
-    n1 -> low1 [label="yes"];
-    n1 -> n2 [label="no"];
-    n2 -> low2 [label="yes"];
-    n2 -> n3 [label="no"];
-    n3 -> low3 [label="yes"];
-    n3 -> n4 [label="no"];
-    n4 -> n5 [label="yes"];
-    n4 -> low4 [label="no"];
-    n5 -> high [label="yes"];
-    n5 -> low4 [label="no"];
+    Q3 -> Med     [label="yes"];
+    Q3 -> Q4      [label="no"];
 
-    // The vertical "Degree of 'tacitness'" label and arrow
-    // are best added in a vector graphics editor after generating the SVG,
-    // as precise placement and rotated text along a custom path
-    // are complex to achieve robustly in pure DOT for this type of diagram.
+    Q4 -> MedHigh [label="no"];
+    Q4 -> Q5      [label="yes"];
+
+    Q5 -> High    [label="no"];
+    Q5 -> Ultra   [label="yes"];
 }
