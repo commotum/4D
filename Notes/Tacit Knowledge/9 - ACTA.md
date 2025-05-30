@@ -114,6 +114,6 @@ If you’ve read to the end of this piece, I’d like to encourage you to give A
 
 To be honest, I've found that last bit to be the most rewarding part of putting ACTA to practice. The look of delight on John's face at the end of our two calls was pretty damned awesome. Godspeed, and good luck.
 
-Originally published , last updated .
+Originally published 11 August 2021, last updated 19 July 2022.
 
 [![Feature image for Tacit Expertise Extraction, Software Engineering Edition](https://commoncog.com/content/images/size/w300/2024/02/tacit_knowledge_software_engineering.jpg)](https://commoncog.com/tacit-expertise-extraction-software-engineer/)[![Feature image for One Definition of Wisdom](https://commoncog.com/content/images/size/w300/2024/02/charlie_munger_wisdom.jpg)](https://commoncog.com/one-definition-of-wisdom/)[![Feature image for Mental Strength in Judo, Mental Strength in Life](https://commoncog.com/content/images/size/w300/2023/05/mental_strength_judo_life-1.jpg)](https://commoncog.com/mental-strength-judo-life/)[![Feature image for Creating New Drills for Deliberate Practice](https://commoncog.com/content/images/size/w300/2023/04/deliberate_practice_create_new_drills.jpg)](https://commoncog.com/creating-drills-deliberate-practice/)
