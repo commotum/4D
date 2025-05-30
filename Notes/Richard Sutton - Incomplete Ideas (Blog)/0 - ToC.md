@@ -16,7 +16,7 @@
 - [Robot Rights](robotrightssutton.md) (10/13/04)
 
 ### 2007-2008
-- [Half a Manifesto](Half%20a%20Manifesto.md) (2007)
+- [Half a Manifesto](HalfAManifesto.md) (2007)
 - [14 Principles of Experience Oriented Intelligence](14Principles.md) (2008)
 
 ### 2016-2019
