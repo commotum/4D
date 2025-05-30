@@ -40,7 +40,8 @@ Let us call the experience sequence up through some action a history. Formally, 
 ---
 
 > Suppose we have a model of the world, an approximation $\hat{P}$ to $P$. How can we define the quality of the model? First, we need only look at the future; we can take the history so far as given and just consider further histories after that. Thus, $\hat{P}$ and $P$ can be taken to give distributions for future histories. I offer a policy-dependent measure of the loss of a model, that is, of how much it does not predict the data:
-$$L_{\pi}(P || \hat{P}) = \lim_{n\to\infty} \sum_{l=0}^{n} \frac{1}{|H_t|} \sum_{h\in H_l} \sum_{o} n P(o|h) \log \frac{1}{\hat{P}(o|h)}$$
+>
+> $$L_{\pi}(P || \hat{P}) = \lim_{n\to\infty} \sum_{l=0}^{n} \frac{1}{|H_t|} \sum_{h\in H_l} \sum_{o} n P(o|h) \log \frac{1}{\hat{P}(o|h)}$$
 
 ---
 
