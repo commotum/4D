@@ -1,0 +1,36 @@
+digraph G {
+    rankdir=LR; // Lay out from Left to Right
+
+    node [shape=box, style=rounded]; // Default shape for nodes
+
+    // Define Nodes
+    n1 [label="Has knowledge asset\nbeen explicated?"];
+    n2 [label="Is it easy to replicate?"];
+    n3 [label="Is it easy to\narticulate?"];
+    n4 [label="Is it endemic to\nthe firm's culture?"];
+    n5 [label="Are its origins deep\nand obscure?"];
+
+    // Define Outcome Nodes (or points)
+    low1 [label="Low", shape=plaintext];
+    low2 [label="Low", shape=plaintext];
+    low3 [label="Low", shape=plaintext];
+    low4 [label="Low", shape=plaintext];
+    high [label="High", shape=plaintext];
+
+    // Define Edges
+    n1 -> low1 [label="yes"];
+    n1 -> n2 [label="no"];
+    n2 -> low2 [label="yes"];
+    n2 -> n3 [label="no"];
+    n3 -> low3 [label="yes"];
+    n3 -> n4 [label="no"];
+    n4 -> n5 [label="yes"];
+    n4 -> low4 [label="no"];
+    n5 -> high [label="yes"];
+    n5 -> low4 [label="no"];
+
+    // The vertical "Degree of 'tacitness'" label and arrow
+    // are best added in a vector graphics editor after generating the SVG,
+    // as precise placement and rotated text along a custom path
+    // are complex to achieve robustly in pure DOT for this type of diagram.
+}
