@@ -17,7 +17,7 @@
 
 ### 2007-2008
 - [Half a Manifesto](Half%20a%20Manifesto.md) (2007)
-- [14 Principles of Experience Oriented Intelligence](14%20Principles%20of%20Experience%20Oriented%20Intelligence.md) (2008)
+- [14 Principles of Experience Oriented Intelligence](14Principles.md) (2008)
 
 ### 2016-2019
 - [The Definition of Intelligence](DefinitionOfIntelligence.md) (2016)
