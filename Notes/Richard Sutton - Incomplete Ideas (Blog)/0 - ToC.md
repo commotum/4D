@@ -26,8 +26,8 @@
 
 ### Writing Advice
 - [Advice for Writing Peer Reviews](ReviewAdvice.md)
-- [Advice for General Technical Writing](Advice%20for%20General%20Technical%20Writing.md)
+- [Advice for General Technical Writing](TechnicalWritingAdvice.md)
 
 ### Other Resources
-- [Rich's Slogans](Rich's%20Slogans.md) (and see others at rlai.net)
+- [Rich's Slogans](Slogans.md) (and see others at rlai.net)
 - [The One-Step Trap](OneStepTrap.md) (Harry Browne 1933-2006)
