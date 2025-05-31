@@ -37,4 +37,4 @@ Continue Reading: 👓 Commoncog’s Best Series
 - [Becoming Data Driven in Business](https://commoncog.com/becoming-data-driven-in-business/) — The data literacy course you never had.
 - [A Framework for Putting Mental Models to Practice](https://commoncog.com/a-framework-for-putting-mental-models-to-practice/) — Mental model thinking is typically a fad. Here’s how to actually put Munger’s observations to practice.
 
-Originally published , last updated .
+Originally published 23 June 2020, last updated 21 February 2024.
