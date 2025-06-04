@@ -1,27 +1,38 @@
-Competition - Linguistic
-Scrabble
+# Competition - Linguistic
 
-Puzzle - Linguistic
-Crossword
-Hangman
-Wordle
-Cryptogram (“YVCCF, RJSY!” → “HELLO, JAKE!”)
-Word Ladder (COLD → CORD → CARD → WARD → WARM)
-Rebus Puzzle (👁️🐝M, 🌧️+ 🏹)
+- Scrabble
 
-Puzzle - Spatial
-Sudoku
-Tetris
-Rubik’s Cube (all variations, incl. 2×2 – 17×17)
-Jigsaw puzzles
-Sliding-tile puzzles (15-puzzle) (Rush hour)
 
-Competition - Spatial
-Tic-Tac-Toe
-Chess
-Checkers
-Go
-Connect Four
+# Puzzle - Linguistic
+
+- Crossword
+- Hangman
+- Wordle
+- Cryptogram ("YVCCF, RJSY!" → "HELLO, JAKE!")
+- Word Ladder (COLD → CORD → CARD → WARD → WARM)
+- Rebus Puzzle (👁️🐝M, 🌧️+ 🏹)
+- Scattegories?
+
+
+# Puzzle - Spatial
+
+- Sudoku
+- Tetris
+- Rubik's Cube (all variations, incl. 2×2 – 17×17)
+- Jigsaw puzzles
+- Sliding-tile puzzles (15-puzzle) (Rush hour)
+
+
+# Competition - Spatial
+
+- Tic-Tac-Toe
+- Chess
+- Checkers
+- Go
+- Connect Four
+
+
+
 
 https://www.puzzle-nonograms.com/
 https://www.puzzle-sudoku.com/
