@@ -12,6 +12,7 @@
 - Word Ladder (COLD → CORD → CARD → WARD → WARM)
 - Rebus Puzzle (👁️🐝M, 🌧️+ 🏹)
 - Scattegories?
+- Cards Against Humanity
 
 
 # Puzzle - Spatial
@@ -30,6 +31,13 @@
 - Checkers
 - Go
 - Connect Four
+
+
+# Competition - Strategic
+
+- Settlers of Catan
+- Monopoly
+- Pokemon
 
 
 
