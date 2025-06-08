@@ -22,6 +22,8 @@
 - Rubik's Cube (all variations, incl. 2×2 – 17×17)
 - Jigsaw puzzles
 - Sliding-tile puzzles (15-puzzle) (Rush hour)
+- Towers of Hanoi
+
 
 
 # Competition - Spatial
@@ -74,3 +76,16 @@ Pattern (3-D) Folding / Spatial Relations – Choose which 3-D solid results whe
 Identify an “anchor” face, then see where a distinctive edge or dot must land. (shemmassianconsulting.com)
 
 
+# Apple Paper Excerpt
+
+3.1 Puzzle Environments
+
+We evaluate LRM reasoning on four controllable puzzles spanning compositional depth, planning complexity, and distributional settings. The puzzles are defined below and illustrated in Fig. 3.
+
+**Tower of Hanoi** is a puzzle featuring three pegs and $n$ disks of different sizes stacked on the first peg in size order (largest at bottom). The goal is to transfer all disks from the first peg to the third peg. Valid moves include moving only one disk at a time, taking only the top disk from a peg, and never placing a larger disk on top of a smaller one. The difficulty in this task can be controlled by the number of initial disks as the minimum number of required moves with $n$ initial disks will be $2^n-1$. However, in this work we do not grade for optimality of final solution and only measuring the correctness of each move and reaching the target state.
+
+**Checker Jumping** is a one-dimensional puzzle arranging red checkers, blue checkers, and a single empty space in a line. The objective is to swap the positions of all red and blue checkers, effectively mirroring the initial configuration. Valid moves include sliding a checker into an adjacent empty space or jumping over exactly one checker of the opposite color to land in an empty space. No checker can move backward in the puzzle process. The complexity of this task can be controlled by the number of checkers: with $2 n$ checkers, the minimum number of moves required will be $(n+1)^2-1$.
+
+**River Crossing** is a constraint satisfaction planning puzzle involving $n$ actors and their corresponding $n$ agents who must cross a river using a boat. The goal is to transport all $2 n$ individuals from the left bank to the right bank. The boat can carry at most $k$ individuals and cannot travel empty. Invalid situations arise when an actor is in the presence of another agent without their own agent present, as each agent must protect their client from competing agents. The complexity of this task can also be controlled by the number of actor/agent pairs present. For $n=2, n=3$ pairs, we use boat capacity of $k=2$ and for larger number of pairs we use $k=3$.
+
+**Blocks World** is a block-stacking puzzle requiring rearrangement of blocks from an initial configuration into a specified goal configuration. The objective is to find the minimum number of moves needed for this transformation. Valid moves are restricted to the topmost block of any stack, which can be placed either on an empty stack or on top of another block. The complexity in this task can be controlled by the number of blocks present.
