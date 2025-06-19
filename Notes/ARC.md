@@ -1,20 +1,5 @@
 # The Challenge
 
-An ARC-AGI task involves a small “training” set of three to five input–output pixel grids, each grid represented using integer-encoded colors. All training pairs exemplify a shared but hidden transformation. After observing these examples, the task provides exactly one additional input grid (with its correct output withheld). The objective is to predict the withheld output by generalizing from the training grids.
-
-
-# The Dataset
-
-Our training dataset contains millions of explicit code-image pairs. Each pair consists of a p5.js sketch and the specific image or set of images it generates. Specifically, the dataset includes:
-
-- Single Images: sketches generating one static image.
-- Before–After Image Pairs: sketches applying a simple visual transformation through two images depicting before and after states.
-- Before–After Image Sets: sketches applying a common visual transformation to multiple images with clear before and after states.
-
-These pairs are structured into a graduated curriculum, beginning with simple black-and-white shapes (points, lines, triangles, rectangles, circles), progressively adding spatial arrangements, color fills and outlines, basic 2D transformations (rotation, scaling, shear), layered operations (clipping, masking), fundamental 3D shapes (boxes, spheres), lighting and material effects, and ultimately fully composed 2D and 3D scenes. This stepwise progression allows the model to first learn basic visual concepts, then combine these elements into more complex visual structures.
-
-# The Challenge
-
 An ARC‑AGI task consists of a small **training set** (typically three‑to‑five) of input–output pixel grids, each grid expressed with integer‑encoded colours.
 All training pairs share a *hidden* visual transformation.
 After observing these examples, the model receives **one further input grid** whose correct output is withheld.
