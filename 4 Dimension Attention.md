@@ -1,4 +1,4 @@
-# 4 Dimension Attention
+# MonSTERs and Their Unextolled Virtues
 ## Structural Embeddings for Native Space-Time Intelligence
 **Jacob Peterson**  
 *peterj29@oregonstate.edu*
@@ -66,3 +66,23 @@ Additionally, retrieving the original RGB values from the high-dimensional embed
 
 Quaternion algebra is abundantly covered in existing literature, and the cited references provide thorough treatment; thus, we shall not beleaguer you here with their basic properties.
 
+
+Quaternions came from Hamilton after his really good work had been done, and though beautifully ingenious, have been an unmixed evil to those who have touched them in any way.
+- Lord Kelvin
+
+
+# The Surprisingly Virtuous Nature of MonSTERs and "Unmixed Evils"
+
+# MonSTERs and Their Unextolled Virtues
+## Structural Embeddings for Native Space-Time Intelligence
+
+## Structural Embeddings for Native Space-Time Intelligence
+## Structural Embeddings and 4-Dimensional Attention for Native Space-Time Intelligence
+## Structural Embeddings for Transformer-Native Space-Time Intelligence
+## Structural Embeddings for Attention-Based Space-Time Intelligence
+
+# 4 Dimension Attention
+## Structural Embeddings for Native Space-Time Intelligence
+
+
+This paper introduces a novel approach to attention-based transformer architectures, embedding spacetime structures natively via Minkowski Space-Time Embedding Rotors (MonSTER)."
