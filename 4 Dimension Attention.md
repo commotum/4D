@@ -49,3 +49,20 @@ https://x.com/tim_zaman/status/1891394901440684151
 
 https://x.com/paul_cal/status/1890824247792037898
 
+
+
+
+# Type and Value Embeddings
+
+Standard token-based approaches in large language models (LLMs) typically rely on constrained vocabularies due to computational and representational limitations. Common data types, such as RGB colors or 64-bit integers (int64), present an immense combinatorial challenge. For instance, the RGB color space alone contains over 16 million unique values, vastly exceeding the vocabularies used by popular models like LLaMA-3.2 (\~128K tokens), DeepSeek-V3 (\~129K tokens), Claude (\~65K tokens), GPT-4 (\~100K tokens), GPT-4o (\~200K tokens), and Gemma (\~256K tokens). Likewise, the int64 data type spans approximately $9.22 \times 10^{18}$ distinct values, rendering explicit tokenization computationally infeasible.
+
+To address this challenge, we propose representing tokens through both a **type** and a **value**, enabling a structured embedding approach that significantly reduces model complexity. Under this strategy, each data type is assigned a compact, low-dimensional representation systematically projected into a higher-dimensional embedding space through a learned linear transformation—an operation we term an *up-projection*.
+
+Taking RGB values as a concrete example, each RGB token can be efficiently modeled as a purely imaginary quaternion, mapping the hexadecimal range `[00, FF]` to the floating-point range `[-1.0, 1.0]` using BF16 precision. Consequently, each RGB token is succinctly represented by just four BF16 values. To achieve a high-dimensional token embedding (e.g., 512 dimensions), this representation requires only a learned real-valued matrix of shape $512 \times 4$. Remarkably, this reduces the embedding parameters required for all possible RGB tokens—from explicitly storing embeddings for more than 16 million distinct values—to merely 2,048 parameters.
+
+Further efficiency can be attained by employing quaternion-valued weight matrices, effectively quartering parameter counts. While traditionally projecting four real dimensions would require 16 real weights, quaternion arithmetic allows the same projection using just four quaternion weights. Thus, the original real-valued matrix of size $512 \times 4 = 2048$ parameters becomes just 128 quaternion weights (512 real-valued parameters), substantially expanding representational efficiency without increasing complexity.
+
+Additionally, retrieving the original RGB values from the high-dimensional embeddings is computationally straightforward due to the constant-time complexity $O(1)$ of quaternion inversion. By applying the inverse quaternion transformations, the original RGB values are recovered precisely from the token embeddings, providing an efficient and exact decoding mechanism suitable for real-world applications.
+
+Quaternion algebra is abundantly covered in existing literature, and the cited references provide thorough treatment; thus, we shall not beleaguer you here with their basic properties.
+

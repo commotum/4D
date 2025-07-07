@@ -111,3 +111,32 @@ Split into three major camps:
 ## Non-Reals
 
 > *“It has been shown that QNNs are able to restore the spatial relations within 3D coordinates (Matsui et al., 2004), **and within color pixels (Isokawa et al., 2003), while real-valued NN failed**.”* — Section 2 (Motivations) of **“Quaternion Recurrent Neural Networks”** by Parcollet et al., ICLR 2019. 
+
+
+
+
+
+
++ a1a2 - b1b2 - c1c2 - d1d2
++ a1b2 + b1a2 + c1d2 - d1c2
++ a1c2 - b1d2 + c1a2 + d1b2
++ a1d2 + b1c2 - c1b2 + d1a2
+
+
+
++ a1a2 - b1b2 - c1c2 - d1d2
++ b1a2 + a1b2 - d1c2 + c1d2 
++ c1a2 + d1b2 + a1c2 - b1d2 
++ d1a2 - c1b2 + b1c2 + a1d2
+
+
+
++ a1a2 - b1b2 - c1c2 - d1d2
+
+
+- d1c2 + a1b2 + c1d2 + b1a2
+- b1d2 + c1a2 + d1b2 + a1c2
+- c1b2 + a1d2 + b1c2 + d1a2
+
+
+aw + bw + cw + dw + ax + bx + cx + dx + ay + by + cy + dy + az + bz + cz + dz

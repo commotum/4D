@@ -121,6 +121,7 @@ def get_delta_monster(
     # the hyperbolic boosts won't explode numerically. This is typically achieved
     # by ensuring temporal displacements are within reasonable bounds relative to
     # the base_time parameter. No explicit clamping is needed.
+    
     phi_b = delta_t_scaled
 
     ch_b = jnp.cosh(phi_b)
