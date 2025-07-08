@@ -7,11 +7,11 @@
 
 ### Abstract
 
-Despite impressive linguistic capabilities and substantial progress across numerous cognitive benchmarks, large language models and other transformer-based architectures have consistently fallen short in tasks involving spatial reasoning and perception. The root of this persistent limitation is architectural: modern transformers inherently encode information as linear, strictly one-dimensional sequences.
+Despite substantial progress across numerous cognitive benchmarks, large language models and other transformer-based architectures have consistently fallen short in tasks involving spatial reasoning and perception such as tic-tac-toe, ? The ARC Challenge, Sudoku, . The root of this persistent limitation is architectural: modern transformers inherently encode information as linear, strictly one-dimensional sequences.
 
-Overcoming this constraint requires embeddings that move beyond purely temporal indexing. Instead, embeddings must inherently encode the intrinsic relationships between space and time. By generalizing two-dimensional Rotary Positional Embeddings (RoPE) to four-dimensional Minkowski Space-Time Embedding Rotors (MonSTERs), it is possible to eliminate the artificial flattening step which necessarily discards vital geometric and relational information[^3]. These structural—not positional—embeddings remove the blinders that previously constrained transformers' capacity to handle inherently multidimensional information.
+Overcoming this constraint requires embeddings that move beyond purely temporal indexing. Instead, embeddings must inherently encode the intrinsic relationships between space and time. By generalizing two-dimensional Rotary Positional Embeddings (RoPE) to four-dimensional Minkowski Space-Time Embedding Rotors (MonSTERs), the artificial flattening step, which necessarily discards vital geometric and relational information[^3], is eleminated. These structural—not positional—embeddings remove the blinders that previously constrained transformers' capacity to handle inherently multidimensional information.
 
-Simply put, MonSTERs provide Transformers with a built-in ability to perceive, reason about, and generalize across spatial structures and temporal sequences—without sacrificing their established computational advantages.
+Simply put, MonSTERs provide Transformers with a built-in ability to simultaneously perceive, reason about, and generalize across both spatial structures and temporal sequences—without sacrificing their established computational advantages.
 
 ---
 
