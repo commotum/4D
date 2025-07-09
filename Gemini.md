@@ -1281,3 +1281,212 @@ Opens in a new window
 
 arxiv.org
 arxiv.org
+
+
+
+
+
+"""
+MonSTER: Minkowski Space-Time Embedding Rotors
+
+This module provides functions to compute MonSTER, a 4D generalization of
+RoPE (Rotary Position Embedding).
+
+---
+### Key Steps for Computing the Rotor
+---
+
+Here are the key steps for computing the effective Lorentz rotor, R_eff_b,
+for a given block b. This process begins with unit normalization to correctly
+handle the physics without requiring numerical clamps.
+
+1.  **Unit-Normalization (Lattice Units)** ⚛️
+    - A spatial grid spacing is chosen, typically a power of two for numerical
+      efficiency (e.g., s = 2^k m).
+    - A corresponding time-step is defined as tau = s / c.
+    - Physical coordinates are converted to dimensionless "lattice" coordinates
+      where c=1:
+        n_t = t / tau, n_x = x / s, n_y = y / s, n_z = z / s
+
+2.  **Raw Integer Displacement** 📏
+    - The displacement is calculated in these new lattice units.
+        Delta_n = (Delta_n_t, ...) = (n_t_key - n_t_query, ...)
+
+3.  **Frequency Scaling** 🌊
+    - Block-specific inverse frequencies are applied to the temporal and
+      spatial components.
+        Delta_t_b = Delta_n_t * inv_freq_time_b
+        Delta_s_b = (Delta_n_x, ...) * inv_freq_space_b
+
+4.  **Compute Boost Rapidity** 🚀
+    - Because c=1 in our units, the scaled time displacement directly
+      becomes the boost rapidity.
+        phi_b = Delta_t_b
+
+5.  **Compute Spatial Rotation** 🔄
+    - The rotation angle is the magnitude of the scaled spatial displacement:
+      theta_b = ||Delta_s_b||.
+    - The rotation axis is its direction: u_rot_b = Delta_s_b / ||Delta_s_b||.
+      A default axis is used if the magnitude is near zero.
+
+6.  **Build Block-wise Transforms** 🧱
+    - **Spatial Rotation** M_rot_b: A 4x4 matrix representing the rotation.
+    - **Lorentz Boost** M_boost_b: A 4x4 matrix for the boost with
+      rapidity phi_b along the same axis.
+
+7.  **Combine into the Effective Rotor** ✨
+    - The final transformation is the composition of the boost and rotation.
+        R_eff_b = M_boost_b @ M_rot_b
+    - The operations commute because they share the same axis.
+
+8.  **Modulate Attention** 🧠
+    - For feature blocks Q_b and K_b, the rotor is inserted into the
+      attention calculation:
+        Attention Score ∝ Sum_b (Q_b^T * eta * R_eff_b * K_b)
+"""
+
+import jax
+import jax.numpy as jnp
+
+def get_monster_rotors(
+    pos_q,
+    pos_k,
+    num_blocks: int,
+    s: float = 1.0, # Spatial grid unit in meters, e.g., 2^k
+    c: float = 299792458.0, # Speed of light in m/s
+    base_time: float = 10000.,
+    base_space: float = 10000.,
+    epsilon: float = 1e-8,
+    dtype=jnp.float32
+):
+    """Computes MonSTER rotors from query and key spacetime positions.
+
+    Args:
+        pos_q: Query positions (t, x, y, z). Shape (..., 4).
+        pos_k: Key positions (t, x, y, z). Shape (..., 4).
+        num_blocks: Number of frequency blocks (B) for multi-scale representation.
+        s: The characteristic spatial grid spacing in physical units (e.g., meters).
+           Choosing `s` as a power of two can be numerically advantageous.
+        c: The speed of light in units consistent with `s` (e.g., m/s).
+        base_time: The base for the geometric progression of temporal frequencies.
+        base_space: The base for the geometric progression of spatial frequencies.
+        epsilon: A small value for numerical stability when normalizing the rotation axis.
+        dtype: The data type for all computations (e.g., jnp.float32).
+
+    Returns:
+        R_eff_blocks: A stack of 4x4 Lorentz transformation matrices, one for each
+                      frequency block. The shape is (..., num_blocks, 4, 4).
+    """
+    pos_q = jnp.asarray(pos_q, dtype=dtype)
+    pos_k = jnp.asarray(pos_k, dtype=dtype)
+
+    # Step 1: Unit-Normalization (Lattice Units)
+    tau = s / c
+
+    # Step 2: Raw Integer Displacement
+    delta_pos_raw = pos_k - pos_q
+    delta_t_raw = delta_pos_raw[..., 0]
+    delta_coords_raw = delta_pos_raw[..., 1:]
+
+    delta_n_t = delta_t_raw / tau
+    delta_n_coords = delta_coords_raw / s
+
+    # Compute rotors using the normalized displacements
+    return _compute_rotors_from_normalized_displacements(
+        delta_n_t=delta_n_t,
+        delta_n_coords=delta_n_coords,
+        num_blocks=num_blocks,
+        base_time=base_time,
+        base_space=base_space,
+        epsilon=epsilon,
+        dtype=dtype
+    )
+
+
+def _compute_rotors_from_normalized_displacements(
+    delta_n_t,
+    delta_n_coords,
+    num_blocks: int,
+    base_time: float,
+    base_space: float,
+    epsilon: float,
+    dtype
+):
+    """Internal helper to compute rotors from normalized displacements."""
+    # Step 3: Frequency Scaling
+    freqs = jnp.arange(num_blocks, dtype=dtype)
+    inv_freq_time = 1.0 / (base_time ** (freqs / num_blocks))
+    inv_freq_space = 1.0 / (base_space ** (freqs / num_blocks))
+
+    delta_t_scaled = jnp.einsum('...,b->...b', delta_n_t, inv_freq_time)
+    delta_s_scaled = jnp.einsum('...i,b->...bi', delta_n_coords, inv_freq_space)
+
+    # Step 4: Compute Boost Rapidity
+    phi_b = delta_t_scaled
+
+    # Step 5: Compute Spatial Rotation
+    theta_b = jnp.linalg.norm(delta_s_scaled, axis=-1, ord=2)
+
+    default_spatial_axis = jnp.array([0., 0., 1.], dtype=dtype)
+    axis_shape = delta_s_scaled.shape
+    default_axis_bc = jnp.broadcast_to(default_spatial_axis, axis_shape)
+
+    is_zero_spatial_delta = theta_b < epsilon
+    axis_u_rot_b = jnp.where(
+        is_zero_spatial_delta[..., None],
+        default_axis_bc,
+        delta_s_scaled / jnp.maximum(theta_b[..., None], epsilon)
+    )
+
+    # Step 6: Build Block-wise Transforms
+    R3_b = _build_rotation_matrix(axis_u_rot_b, theta_b)
+
+    pref_B_shape = R3_b.shape[:-2]
+    M_rot_b = jnp.zeros((*pref_B_shape, 4, 4), dtype=dtype)
+    M_rot_b = M_rot_b.at[..., 0, 0].set(1.0)
+    M_rot_b = M_rot_b.at[..., 1:, 1:].set(R3_b)
+
+    ch_b = jnp.cosh(phi_b)
+    sh_b = jnp.sinh(phi_b)
+    axis_u_boost_b = axis_u_rot_b
+
+    M_boost_b = jnp.zeros((*pref_B_shape, 4, 4), dtype=dtype)
+    M_boost_b = M_boost_b.at[..., 0, 0].set(ch_b)
+    M_boost_b = M_boost_b.at[..., 0, 1:].set(-axis_u_boost_b * sh_b[..., None])
+    M_boost_b = M_boost_b.at[..., 1:, 0].set(-axis_u_boost_b * sh_b[..., None])
+
+    eye3 = jnp.eye(3, dtype=dtype)
+    uuT_boost_b = jnp.einsum('...bi,...bj->...bij', axis_u_boost_b, axis_u_boost_b)
+    ch_b_minus_1_exp = (ch_b - 1.0)[..., None, None]
+
+    M_boost_b = M_boost_b.at[..., 1:, 1:].set(eye3 + ch_b_minus_1_exp * uuT_boost_b)
+
+    # Step 7: Combine into the Effective Rotor
+    R_eff_blocks = jnp.einsum("...bij,...bjk->...bik", M_boost_b, M_rot_b)
+
+    return R_eff_blocks
+
+
+def _build_rotation_matrix(axis, theta):
+    """Rodrigues' formula for 3x3 rotation about 'axis' by angle 'theta'."""
+    theta_exp = theta[..., None]
+    cos_t = jnp.cos(theta_exp)
+    sin_t = jnp.sin(theta_exp)
+
+    uuT = jnp.einsum('...bi,...bj->...bij', axis, axis)
+
+    zeros = jnp.zeros_like(axis[..., 0])
+    u_cross = jnp.stack([
+        zeros, -axis[..., 2], axis[..., 1],
+        axis[..., 2], zeros, -axis[..., 0],
+        -axis[..., 1], axis[..., 0], zeros
+    ], axis=-1).reshape((*axis.shape[:-1], 3, 3))
+
+    I3 = jnp.eye(3, dtype=axis.dtype)
+    cos_t_exp_mat = cos_t[..., None]
+    sin_t_exp_mat = sin_t[..., None]
+
+    return (cos_t_exp_mat * I3 +
+            (1 - cos_t_exp_mat) * uuT +
+            sin_t_exp_mat * u_cross)
+            

@@ -129,3 +129,63 @@ The most robust and universal approach is to **define a single abstract spatial 
 * **Efficiency:** For GPU efficiency, you can choose `s` to be a power-of-two fraction of a meter (e.g., $s = 2^{-10} \approx 0.00097 \text{ m}$ or 1 mm). Multiplications and divisions by `s` can then be implemented as efficient bit-shifts.
 
 By adopting this strategy, you create a system that is robust, generalizable, and avoids the brittleness of learnable parameters or the instability of unscaled units, providing a solid foundation for your MonSTER architecture.
+
+
+"""
+MonSTER: Minkowski Space-Time Embedding Rotors
+
+This module provides functions to compute MonSTER, a 4D generalization of
+RoPE (Rotary Position Embedding).
+
+---
+### Key Steps for Computing the Rotor
+---
+
+Here are the key steps for computing the effective Lorentz rotor, R_eff_b,
+for a given block b. This process begins with unit normalization to correctly
+handle the physics without requiring numerical clamps.
+
+1.  **Unit-Normalization (Lattice Units)** ⚛️
+    - A spatial grid spacing is chosen, typically a power of two for numerical
+      efficiency (e.g., s = 2^k m).
+    - A corresponding time-step is defined as tau = s / c.
+    - Physical coordinates are converted to dimensionless "lattice" coordinates
+      where c=1:
+        n_t = t / tau, n_x = x / s, n_y = y / s, n_z = z / s
+
+2.  **Raw Integer Displacement** 📏
+    - The displacement is calculated in these new lattice units.
+        Delta_n = (Delta_n_t, ...) = (n_t_key - n_t_query, ...)
+
+3.  **Frequency Scaling** 🌊
+    - Block-specific inverse frequencies are applied to the temporal and
+      spatial components.
+        Delta_t_b = Delta_n_t * inv_freq_time_b
+        Delta_s_b = (Delta_n_x, ...) * inv_freq_space_b
+
+4.  **Compute Boost Rapidity** 🚀
+    - Because c=1 in our units, the scaled time displacement directly
+      becomes the boost rapidity.
+        phi_b = Delta_t_b
+
+5.  **Compute Spatial Rotation** 🔄
+    - The rotation angle is the magnitude of the scaled spatial displacement:
+      theta_b = ||Delta_s_b||.
+    - The rotation axis is its direction: u_rot_b = Delta_s_b / ||Delta_s_b||.
+      A default axis is used if the magnitude is near zero.
+
+6.  **Build Block-wise Transforms** 🧱
+    - **Spatial Rotation** M_rot_b: A 4x4 matrix representing the rotation.
+    - **Lorentz Boost** M_boost_b: A 4x4 matrix for the boost with
+      rapidity phi_b along the same axis.
+
+7.  **Combine into the Effective Rotor** ✨
+    - The final transformation is the composition of the boost and rotation.
+        R_eff_b = M_boost_b @ M_rot_b
+    - The operations commute because they share the same axis.
+
+8.  **Modulate Attention** 🧠
+    - For feature blocks Q_b and K_b, the rotor is inserted into the
+      attention calculation:
+        Attention Score ∝ Sum_b (Q_b^T * eta * R_eff_b * K_b)
+"""
