@@ -7,9 +7,9 @@
 
 ### Abstract
 
-Despite substantial progress across numerous cognitive benchmarks, large language models and other transformer-based architectures have consistently fallen short in tasks involving spatial reasoning and perception such as tic-tac-toe, ? The ARC Challenge, Sudoku, . The root of this persistent limitation is architectural: modern transformers inherently encode information as linear, strictly one-dimensional sequences.
+large language models and other transformer-based architectures have notech numerous cognitive benchmarks, large language models and other transformer-based architectures have consistently fallen short in tasks involving spatial reasoning and perception such as tic-tac-toe, ? The ARC Challenge, Sudoku, . The root of this persistent limitation is architectural: modern transformers inherently encode information as linear, strictly one-dimensional sequences.
 
-Overcoming this constraint requires embeddings that move beyond purely temporal indexing. Instead, embeddings must inherently encode the intrinsic relationships between space and time. By generalizing two-dimensional Rotary Positional Embeddings (RoPE) to four-dimensional Minkowski Space-Time Embedding Rotors (MonSTERs), the artificial flattening step, which necessarily discards vital geometric and relational information[^3], is eleminated. These structural—not positional—embeddings remove the blinders that previously constrained transformers' capacity to handle inherently multidimensional information.
+Overcoming this constraint requires embeddings that move beyond purely temporal indexing. Instead, embeddings must inherently encode the intrinsic relationships between space and time. By generalizing two-dimensional Rotary Positional Embeddings (RoPE) to four-dimensional Minkowski Space-Time Embedding Rotors (MonSTERs), the transformer's artificial flattening requirement, which necessarily discards vital geometric and relational information[^3], is eleminated. These structural—not positional—embeddings remove the blinders that previously constrained transformers' capacity to handle inherently multidimensional information.
 
 Simply put, MonSTERs provide Transformers with a built-in ability to simultaneously perceive, reason about, and generalize across both spatial structures and temporal sequences—without sacrificing their established computational advantages.
 
@@ -94,3 +94,38 @@ Addressing this limitation requires moving beyond positional encodings uniquely 
 This approach eliminates the artificial flattening requirement that necessarily discards vital geometric and relational information[^3], and removes the structural blinders that previously constrained transformers' capacity to handle inherently multidimensional information. Simply put, it provides transformers with a built-in ability to perceive, reason about, and generalize across spatial structures and temporal sequences—without sacrificing their established computational advantages.
 
 Achieving 93% and 98% accuracy on, respectively, the first and second generations of ARC-AGI benchmarks, our model demonstrates unprecedented zero-shot spatial reasoning capabilities enabled by native 4D spacetime intelligence. Crucially, the model had zero prior exposure to ARC's public or private training and test sets, instead training exclusively on unrelated visual coding tasks, logic puzzles, and interactive games, underscoring the profound generalization power inherent in structurally-aware embeddings.
+
+
+Based on your conversations, the best path forward for picking units in your MonSTER embedding scheme is to establish a principled, universal scaling method that ensures numerical stability without sacrificing the physical intuition of the Minkowski metric.
+
+The core challenge you faced was the numerical explosion of `sinh` and `cosh` functions. This occurs because these functions grow exponentially ($e^x$), and their arguments became too large. The root cause was a mismatch in the numerical scale between your temporal (`Δt`) and spatial (`Δx, Δy, Δz`) inputs. When using raw, unscaled integer steps for both, the temporal argument gets multiplied by the massive physical constant `c` (the speed of light), making it orders of magnitude larger than the spatial argument and causing an overflow.
+
+The best path forward synthesizes the final insights from your discussion into a single, robust strategy:
+
+### The Universal Scaling Strategy
+
+The most robust and universal approach is to **define a single abstract spatial unit, `s`, and derive the corresponding temporal unit from it using the physical constant `c`**. This method is both numerically stable and physically grounded.
+
+1.  **Define a Base Spatial Unit `s`:** The key is to choose `s` such that the largest possible coordinate differences within your model's attention window remain within a safe numerical range for the hyperbolic functions. A good practice is:
+    * Determine the **maximum expected relative offset** in any dimension, `N_max`. For a 1D sequence of length 4096, `N_max` is 4095. For a 512x512 image patch, `N_max` is `sqrt(511²+511²) ≈ 723`.
+    * Choose a **maximum safe argument**, `A_max`, for the `sinh`/`cosh` functions (e.g., `A_max = 5.0`, which is well within the stable range of `bfloat16`).
+    * Set your abstract spatial unit `s` with the formula:
+        $$
+        s = \frac{A_{\max}}{N_{\max}} \quad (\text{in meters per step})
+        $$
+
+2.  **Derive the Temporal Unit `t_unit`:** To ensure space and time are on equal footing, the abstract temporal unit must be the time it takes light to travel the spatial unit `s`.
+    $$
+    t_{\text{unit}} = \frac{s}{c} \quad (\text{in seconds per step})
+    $$
+    where $c \approx 3 \times 10^8 \text{ m/s}$.
+
+### Why This is the Best Path
+
+* **Numerical Stability:** This method guarantees that the arguments to `sinh` and `cosh` will not exceed `A_max`, preventing overflows. For a one-step jump in time, the argument to the hyperbolic functions becomes `c * t_unit = c * (s/c) = s`. For a one-step jump in space, the argument is simply `s`. They are perfectly balanced.
+* **Universality:** This approach works for any data modality without modification.
+    * For **abstract data** (like text tokens or ARC pixels), you use these calculated `s` and `t_unit` values to scale your integer position differences.
+    * For **physical data** (like sensor readings from a robot), you convert the real-world measurements (in meters and seconds) into your abstract step units by dividing them by `s` and `t_unit`, respectively. The core MonSTER code remains unchanged.
+* **Efficiency:** For GPU efficiency, you can choose `s` to be a power-of-two fraction of a meter (e.g., $s = 2^{-10} \approx 0.00097 \text{ m}$ or 1 mm). Multiplications and divisions by `s` can then be implemented as efficient bit-shifts.
+
+By adopting this strategy, you create a system that is robust, generalizable, and avoids the brittleness of learnable parameters or the instability of unscaled units, providing a solid foundation for your MonSTER architecture.
