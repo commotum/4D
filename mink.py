@@ -58,3 +58,49 @@ def minkowski_norm(v: ArrayLike) -> jnp.ndarray:
         The Minkowski norm (squared) with shape (...)
     """
     return minkowski_dot(v, v)
+
+
+import jax.numpy as jnp
+import numpy as np
+import logging
+
+logger = logging.getLogger(__name__)
+
+def demo_compare_dot_products():
+    """
+    Generate two random 4-vectors with integer values, compute their standard dot product
+    and Minkowski dot product, and log the results for comparison.
+    """
+    # Seed for reproducibility
+    rng = np.random.default_rng(seed=42)
+    a = rng.integers(low=-10, high=10, size=(4,))
+    b = rng.integers(low=-10, high=10, size=(4,))
+
+    logger.info(f"Random 4-vector a: {a}")
+    logger.info(f"Random 4-vector b: {b}")
+
+    # Standard dot product
+    standard_dot = jnp.dot(a, b)
+    logger.info(f"Standard dot product: {standard_dot}")
+
+    # Minkowski dot product
+    mink_dot = minkowski_dot(a, b)
+    logger.info(f"Minkowski dot product: {mink_dot}")
+
+    print("a =", a)
+    print("b =", b)
+    print("Standard dot product:", standard_dot)
+    print("Minkowski dot product:", mink_dot)
+
+# Optionally run the demo if this file is executed directly
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    demo_compare_dot_products()
+
+
+    def main() -> None:
+        """
+        Main function to configure logging and run the Minkowski dot product demo.
+        """
+        logging.basicConfig(level=logging.INFO)
+        demo_compare_dot_products()
