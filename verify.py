@@ -93,23 +93,7 @@ print(f"Complex dot difference: {abs(complex_dot_mn - complex_dot_ij):.6f}")
 
 
 
-# Spatial grid unit in meters, e.g., 2^k
-s: float = 1.0
-# Speed of light in m/s
-c: float = 299792458.0
 
-# Step 1: Unit-Normalization (Lattice Units)
-# Define the time-step tau such that c = s/tau = 1 in lattice units.
-
-# Example usage: Light travel time over a distance
-distance = 1.0  # 1 light-second
-time = distance / c  # = 1 second
-
-
-
-
-# Step 1: Unit-Normalization
-# Without normalization, the sinh, and cosh functions 
 
 """
 In physics, the speed of light $ c $ (approximately $ 3 \times 10^8 \, \text{m/s} $) 
@@ -181,6 +165,24 @@ If your data involves very different physical scales (e.g., small lab experiment
 
 
 """
+
+# Spatial grid unit in meters, e.g., 2^k
+s: float = 1.0
+# Speed of light in m/s
+c: float = 299792458.0
+
+# Step 1: Unit-Normalization (Lattice Units)
+# Define the time-step tau such that c = s/tau = 1 in lattice units.
+
+# Example usage: Light travel time over a distance
+distance = 1.0  # 1 light-second
+time = distance / c  # = 1 second
+
+
+
+
+# Step 1: Unit-Normalization
+# Without normalization, the sinh, and cosh functions 
 
 
 tau = 1 / c
