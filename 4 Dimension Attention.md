@@ -9,7 +9,7 @@
 
 With its toy-scale visual tasks, the 2019 ARC-AGI benchmark again laid bare the jagged[^1] nature of AI performance first highlighted by Moravec in the 1980s[^2]. Despite impressive linguistic capabilities, leading models of the time demonstrated a pronounced inability to process or reason about visual information. To date, enormous progress on numerous cognitive benchmarks has failed to translate to spatial domains. The root of this persistent limitation is architectural: modern transformers inherently encode information as strictly linear, unidimensional sequences.
 
-Overcoming this constraint requires embeddings that move beyond purely temporal indexing. Instead, embeddings must inherently encode the intrinsic relationships between space and time. By generalizing two-dimensional Rotary Positional Embeddings (RoPE) to four-dimensional Minkowski Space-Time Embedding Rotors (MonSTERs), the transformer's artificial flattening requirement, which necessarily discards vital geometric and relational information[^3], is eliminated. These structural (not positional) embeddings remove the blinders that previously constrained transformers' capacity to handle inherently multidimensional information.
+Overcoming this constraint requires embeddings that move beyond purely temporal indexing. Instead, embeddings must inherently encode the intrinsic relationships between space and time. By generalizing two-dimensional Rotary Positional Embeddings (RoPE) to four-dimensional Minkowski Space-Time Embedding Rotors (MonSTERs), the transformer's artificial flattening requirement, which necessarily discards vital geometric and relational information[^3], is eliminated. These structural (not positional) embeddings remove the blinders and distortions that previously constrained transformer attention to a single axis.
 
 Simply put, MonSTERs provide Transformers with a built-in ability to simultaneously perceive, reason about, and generalize across both spatial structures and temporal sequences—without sacrificing their established computational advantages.
 
@@ -45,6 +45,18 @@ https://x.com/tim_zaman/status/1891394901440684151
 
 https://x.com/paul_cal/status/1890824247792037898
 
+
+
+
+These structural (not positional) embeddings remove the blinders that previously constrained transformer attention to a single axis.
+
+These structural (not positional) embeddings remove the blinders that previously constrained transformers' attention, freeing it to operate isotropically across all dimensions.
+
+These structural (not positional) embeddings remove the blinders that previously constrained transformers' capacity to uniformly handle inherently multidimensional information.
+
+These structural (not positional) embeddings remove the blinders that previously constrained transformers' capacity to uniformly handle token distances across multiple dimensions.
+
+These structural (not positional) embeddings remove the blinders that previously kept transformers from isotropically handling multidimensional tokens.
 
 
 
