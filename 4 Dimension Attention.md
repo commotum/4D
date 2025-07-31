@@ -261,3 +261,260 @@ If your data involves very different physical scales (e.g., small lab experiment
 
 
 """
+
+Below is a small, self-contained NumPy helper that builds **real $Cl(1,3)$** rotors (even multivectors) for **Lorentz boosts** and **spatial rotations** in the $(+,-,-,-)$ signature, and applies them to 4-vectors stored in $(t,x,y,z)$ order as 4D NumPy arrays.
+
+* Boost rotor: $R=\cosh(\tfrac{\varphi}{2})-(e_0\wedge \hat{\mathbf{n}})\sinh(\tfrac{\varphi}{2})$, where $\varphi=\operatorname{artanh}|\boldsymbol{\beta}|$ and $\hat{\mathbf{n}}=\boldsymbol{\beta}/|\boldsymbol{\beta}|$.
+* Rotation rotor: $R=\cos(\tfrac{\theta}{2})-\mathbf{J}\sin(\tfrac{\theta}{2})$ with $\mathbf{J}= \hat{n}_x\,e_{23}+\hat{n}_y\,e_{31}+\hat{n}_z\,e_{12}$.
+* Action on a vector $v$ uses the usual sandwich $v' = R\,v\,\tilde R$. In code we realize this via the equivalent $4\times4$ Lorentz matrix $\Lambda$ (so you can apply it efficiently to batches of 4-vectors).
+
+```python
+import numpy as np
+
+# Minkowski metric with (+, -, -, -)
+ETA = np.diag([1.0, -1.0, -1.0, -1.0])
+
+# -------- Utilities --------
+
+def _unit(v, eps=1e-15):
+    n = np.linalg.norm(v)
+    if n < eps:
+        return v * 0.0, 0.0
+    return v / n, n
+
+def _check_lorentz(L, tol=1e-12):
+    """Return True if L satisfies L^T η L = η (within tol)."""
+    return np.allclose(L.T @ ETA @ L, ETA, atol=tol)
+
+def apply_lorentz(vecs, L):
+    """
+    Apply Lorentz transform to 4-vectors.
+    vecs: array(..., 4) with components (t, x, y, z)
+    L: (4,4) Lorentz matrix acting as v' = L @ v
+    """
+    vecs = np.asarray(vecs)
+    # Treat vecs as row-vectors (…,4); multiply by L^T
+    return vecs @ L.T
+
+# -------- Boosts (β-form and rapidity-form) --------
+
+def boost_matrix_from_beta(beta):
+    """
+    Build a standard Lorentz boost matrix (signature +---) for 3-velocity beta=(βx,βy,βz).
+    Units: c=1. Requires |β| < 1.
+    """
+    beta = np.asarray(beta, dtype=float).reshape(3)
+    b2 = beta @ beta
+    if b2 >= 1.0:
+        raise ValueError("||beta|| must be < 1 (units c=1).")
+    if b2 == 0.0:
+        return np.eye(4)
+
+    gamma = 1.0 / np.sqrt(1.0 - b2)
+    # Spatial 3x3 block
+    if b2 > 0:
+        outer = np.outer(beta, beta)
+        K = np.eye(3) + (gamma - 1.0) * outer / b2
+    else:
+        K = np.eye(3)
+
+    L = np.empty((4, 4), dtype=float)
+    L[0, 0] = gamma
+    L[0, 1:] = -gamma * beta
+    L[1:, 0] = -gamma * beta
+    L[1:, 1:] = K
+    return L
+
+def boost_rotor_from_beta(beta):
+    """
+    Return the Cl(1,3) rotor parameters for a pure boost with 3-velocity beta.
+    Output:
+      R = (s, biv) where s is scalar part,
+      and biv = (b01, b02, b03, b23, b31, b12) in that order.
+      Also returns the 4x4 Lorentz matrix Λ associated with the rotor action.
+    Convention: R = cosh(φ/2) - (e0∧n) sinh(φ/2), signature (+---).
+    """
+    beta = np.asarray(beta, dtype=float).reshape(3)
+    n, b = _unit(beta)
+    if b == 0.0:
+        s = 1.0
+        biv = np.zeros(6)
+        L = np.eye(4)
+        return (s, biv), L
+
+    phi = np.arctanh(b)       # rapidity
+    c = np.cosh(0.5 * phi)
+    s_h = np.sinh(0.5 * phi)
+
+    # Bivector coefficients: (e01, e02, e03, e23, e31, e12)
+    # For a pure boost along n, only time-space planes are nonzero.
+    # R = cosh(φ/2) - (e0∧n) sinh(φ/2)  -> negative sign by convention.
+    b01, b02, b03 = -n * s_h
+    biv = np.array([b01, b02, b03, 0.0, 0.0, 0.0], dtype=float)
+
+    # Associated Lorentz matrix
+    L = boost_matrix_from_beta(beta)
+    return (c, biv), L
+
+def boost_rotor_from_rapidity(phi, axis):
+    """
+    Same as above but specifying rapidity φ and spatial axis.
+    axis: 3-vector (need not be unit).
+    """
+    axis = np.asarray(axis, dtype=float).reshape(3)
+    n, a = _unit(axis)
+    if a == 0.0 or abs(phi) < 1e-15:
+        return (1.0, np.zeros(6)), np.eye(4)
+
+    c = np.cosh(0.5 * phi)
+    s_h = np.sinh(0.5 * phi)
+    b01, b02, b03 = -n * s_h
+    biv = np.array([b01, b02, b03, 0.0, 0.0, 0.0], dtype=float)
+
+    # Convert to β for the matrix
+    beta_mag = np.tanh(phi)
+    L = boost_matrix_from_beta(beta_mag * n)
+    return (c, biv), L
+
+# -------- Spatial rotations --------
+
+def rotation_matrix(axis, theta):
+    """
+    4x4 proper rotation that leaves time untouched and rotates space by angle theta about axis.
+    axis: 3-vector. If zero, returns identity.
+    """
+    axis = np.asarray(axis, dtype=float).reshape(3)
+    n, a = _unit(axis)
+    R = np.eye(4)
+    if a == 0.0 or abs(theta) < 1e-15:
+        return R
+
+    ct = np.cos(theta)
+    st = np.sin(theta)
+    nx, ny, nz = n
+    # Rodrigues' formula for 3x3 spatial part
+    K = np.array([[0, -nz, ny],
+                  [nz, 0, -nx],
+                  [-ny, nx, 0]], dtype=float)
+    n_outer = np.outer(n, n)
+    R[1:, 1:] = ct * np.eye(3) + st * K + (1 - ct) * n_outer
+    return R
+
+def rotation_rotor(axis, theta):
+    """
+    Return rotor parameters for a spatial rotation by angle theta about 'axis'.
+    Output rotor coefficients as in boost case.
+    Convention: R = cos(θ/2) - J sin(θ/2),
+      with J = n_x e23 + n_y e31 + n_z e12.
+    """
+    axis = np.asarray(axis, dtype=float).reshape(3)
+    n, a = _unit(axis)
+    if a == 0.0 or abs(theta) < 1e-15:
+        return (1.0, np.zeros(6)), np.eye(4)
+
+    c = np.cos(0.5 * theta)
+    s = np.sin(0.5 * theta)
+
+    # Map axis components to spatial bivectors:
+    # about x -> e23, about y -> e31, about z -> e12
+    b23 = -n[0] * s
+    b31 = -n[1] * s
+    b12 = -n[2] * s
+    biv = np.array([0.0, 0.0, 0.0, b23, b31, b12], dtype=float)
+
+    L = rotation_matrix(n, theta)
+    return (c, biv), L
+
+# -------- Composition helpers --------
+
+def compose(*Ls):
+    """
+    Compose Lorentz transforms left-to-right: result = Lk ... L2 L1.
+    (So apply to a column vector v as v' = result @ v.)
+    """
+    if len(Ls) == 0:
+        return np.eye(4)
+    M = np.eye(4)
+    for L in Ls:
+        M = L @ M
+    return M
+
+# -------- Example usage and quick checks --------
+
+if __name__ == "__main__":
+    # Example: boost with β = (0.6, 0, 0) then rotate 90° about z.
+    beta = np.array([0.6, 0.0, 0.0])
+    (s_boost, biv_boost), Lb = boost_rotor_from_beta(beta)
+
+    axis = np.array([0.0, 0.0, 1.0])
+    (s_rot, biv_rot), Lr = rotation_rotor(axis, np.pi / 2)
+
+    # Compose: rotation after boost
+    L = compose(Lr, Lb)
+    assert _check_lorentz(L)
+
+    # Apply to a batch of 4-vectors (shape (N, 4))
+    vecs = np.array([
+        [1.0, 1.0, 0.0, 0.0],   # (t, x, y, z)
+        [2.0, -1.0, 3.0, 0.5],
+    ])
+    vecs_prime = apply_lorentz(vecs, L)
+
+    # Rotor coefficients shown for reference (even subalgebra):
+    # bivector order = (e01, e02, e03, e23, e31, e12)
+    print("Boost rotor (scalar, biv):", s_boost, biv_boost)
+    print("Rotation rotor (scalar, biv):", s_rot, biv_rot)
+    print("Transformed vectors:\n", vecs_prime)
+```
+
+### Notes & conventions
+
+* **Signature** is $(+,-,-,-)$. The boost matrix implements
+
+  $$
+  t'=\gamma\,(t-\boldsymbol{\beta}\!\cdot\!\mathbf{x}),\quad
+  \mathbf{x}'=\mathbf{x}+\frac{\gamma-1}{\beta^2}(\boldsymbol{\beta}\!\cdot\!\mathbf{x})\boldsymbol{\beta}-\gamma\,\boldsymbol{\beta}\,t,
+  $$
+
+  with $c=1$.
+* The returned rotor coefficients `(scalar, biv)` live in the **even subalgebra** $\{1,e_{01},e_{02},e_{03},e_{23},e_{31},e_{12}\}$. The **matrix** `L` implements the same action $v' = R v \tilde R$ on vectors, which is fast and easy to batch over arrays.
+* `compose(L2, L1)` yields the transformation **L2 ∘ L1**.
+* `_check_lorentz(L)` verifies $L^\top \eta L=\eta$ within tolerance.
+
+If you want the full sandwich product implemented directly on the multivector coefficients (without going through the 4×4 matrix), I can add that too—but for acting on $(N,4)$ arrays this matrix route is the most efficient and matches the standard conventions.
+
+---
+
+Would this be less efficient to do?
+
+"If you want the full sandwich product implemented directly on the multivector coefficients (without going through the 4×4 matrix)"
+
+---
+
+Mostly, yes—it’s *usually* less efficient in plain NumPy.
+
+**Why the 4×4 route wins (in NumPy):**
+
+* Applying a fixed Lorentz transform to many 4-vectors is just a batched GEMM: `vecs @ L.T`. That calls highly optimized BLAS (MKL/Accelerate/OpenBLAS) and costs \~28 flops per vector (16 mul + 12 add). It’s hard to beat.
+* A direct sandwich $v' = R\,v\,\tilde R$ with multivector coefficients does quite a bit more work:
+
+  * You form $(a+B)v$ and then multiply by $(a-B)$.
+  * Even if you hand-expand and fuse terms, you’re looking at several commutator/contractor patterns and many more scalar ops per vector (typically 2–4× the flops of a 4×4 multiply), plus more temporaries/broadcasts.
+* NumPy doesn’t fuse those operations; you pay Python overhead for each ufunc/broadcast unless you write a single, dense kernel. BLAS avoids that overhead.
+
+**When a direct sandwich can make sense**
+
+* **Tiny workloads** (a handful of vectors) where absolute runtime is dominated by Python overhead anyway. Differences are negligible.
+* **JIT / compiled kernels.** If you write the sandwich in Numba/Cython/C++ (or use a GA library with compiled kernels), you can close the gap or even outperform GEMM for specialized cases.
+* **Symbolics/gradients.** If you’re optimizing over rotor parameters, staying in rotor space can be cleaner; but then you’d likely be in JAX/PyTorch rather than NumPy.
+
+**Practical guidance**
+
+* For “apply this transform to lots of vectors”: build `L` once from the rotor and use `vecs @ L.T`. It will be fastest and simplest.
+* If you’re composing many transforms: compose *rotors* (cheap) and only convert to `L` once at the end, then apply to your batch. That gets you rotor ergonomics *and* GEMM speed.
+* If you want the *no-matrix* path *and* speed: JIT a direct sandwich (Numba) or I can give you a fused NumPy implementation for **pure boosts** and **pure rotations** that avoids building `L` (it’s essentially the closed-form formulas you already have), but for mixed bivectors the matrix is still the most straightforward and performant in NumPy.
+
+If you’d like, I can:
+
+1. add a Numba-accelerated `sandwich(v, rotor)` kernel, or
+2. a tiny benchmark script so you can compare `vecs @ L.T` vs. a direct sandwich on your machine. Which would you prefer?
