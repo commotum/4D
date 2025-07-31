@@ -288,3 +288,32 @@ print(f"\n<L(s3)c, L(s4)d>_η  (pair 2): {dot34_abs:.9f}")
 print(f"<c, L(Δ)d>_η        (pair 2): {dot34_rel:.9f}")
 print("Difference (pair 2):", abs(dot34_abs - dot34_rel))
 
+
+"""
+Terminal Output:
+
+Dot product <q_m e^(im theta), k_n e^(in theta)> (m=7, n=2): 0.007527
+Complex formulation Re[q_m k_n* e^(i(m-n)theta)]: 0.007527
+Dot product <q_i e^(i i theta), k_j e^(i j theta)> (i=10, j=5): 0.003827
+Complex formulation Re[q_i k_j* e^(i(i-j)theta)]: 0.003827
+
+Comparing relative positions m-n = 5 and i-j = 5:
+Dot product difference: 0.003700
+Complex dot difference: 0.003700
+
+Lorentz Rotors:
+Δ12: [ 2. -5. -8. -8.]
+Δ34: [ 2. -5. -8. -8.]
+Same displacement?  True
+Matrix identity holds (pair 1)? True
+Matrix identity holds (pair 2)? True
+
+--- Results ---
+<L(s1)a, L(s2)b>_η  (pair 1): 0.001316573
+<a, L(Δ)b>_η        (pair 1): 0.001316573
+Difference (pair 1): 8.673617379884035e-19
+
+<L(s3)c, L(s4)d>_η  (pair 2): -0.005991758
+<c, L(Δ)d>_η        (pair 2): -0.005991758
+Difference (pair 2): 0.0
+"""
