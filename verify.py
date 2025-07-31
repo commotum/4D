@@ -248,6 +248,87 @@ print(f"<c, L(Δ)d>_η        (pair 2): {dot34_rel:.9f}")
 print("Difference (pair 2):", abs(dot34_abs - dot34_rel))
 
 
+# --------------------------------------------------------------------------- #
+
+# 4D standard basis vectors (axes) in Minkowski space
+AXIS_T = np.array([1, 0, 0, 0], dtype=np.float64)  # Time axis (γ₀)
+AXIS_X = np.array([0, 1, 0, 0], dtype=np.float64)  # X axis (γ₁)
+AXIS_Y = np.array([0, 0, 1, 0], dtype=np.float64)  # Y axis (γ₂)
+AXIS_Z = np.array([0, 0, 0, 1], dtype=np.float64)  # Z axis (γ₃)
+
+# Compute the Lorentz Rotors for the basis vectors
+# Compute Lorentz rotors for each standard basis vector
+rotor_T = L_from_position(AXIS_T)
+rotor_X = L_from_position(AXIS_X)
+rotor_Y = L_from_position(AXIS_Y)
+rotor_Z = L_from_position(AXIS_Z)
+
+
+print()
+print("Basis Vectors:")
+
+# Print the rotors in a readable format
+def print_rotor(name: str, rotor: np.ndarray) -> None:
+    """Pretty-print a Lorentz rotor matrix with a label."""
+    print(f"\n{name} (Lorentz rotor for {name[-1]} axis):")
+    print(np.array2string(rotor, precision=4, suppress_small=True))
+
+print_rotor("rotor_T", rotor_T)
+print_rotor("rotor_X", rotor_X)
+print_rotor("rotor_Y", rotor_Y)
+print_rotor("rotor_Z", rotor_Z)
+
+# Compare minkowski dot products between token embeddings and the basis vectors
+# Compare Minkowski dot products between token embeddings and the basis vectors
+
+def compare_token_basis_dot_products():
+    """
+    Compare Minkowski dot products between token embeddings (a, b, c, d)
+    and the 4D Minkowski basis vectors (AXIS_T, AXIS_X, AXIS_Y, AXIS_Z).
+    Prints the results in a readable table.
+    """
+    import logging
+
+    logger = logging.getLogger("verify.compare_token_basis_dot_products")
+    logger.info("Comparing Minkowski dot products between tokens and basis vectors.")
+
+    tokens = {
+        "a": a,
+        "b": b,
+        "c": c,
+        "d": d,
+    }
+    bases = {
+        "T": AXIS_T,
+        "X": AXIS_X,
+        "Y": AXIS_Y,
+        "Z": AXIS_Z,
+    }
+
+    print("\nMinkowski dot products <token, basis>_η:")
+    print("         T         X         Y         Z")
+    print("      ----------------------------------------")
+    for t_name, t_vec in tokens.items():
+        row = [f"{t_name} |"]
+        for b_name, b_vec in bases.items():
+            dot = minkowski_dot(t_vec, b_vec)
+            row.append(f"{dot:10.6f}")
+        print(" ".join(row))
+
+    print("\nStandard dot products <token, basis> (Euclidean):")
+    print("         T         X         Y         Z")
+    print("      ----------------------------------------")
+    for t_name, t_vec in tokens.items():
+        row = [f"{t_name} |"]
+        for b_name, b_vec in bases.items():
+            dot = np.dot(t_vec, b_vec)
+            row.append(f"{dot:10.6f}")
+        print(" ".join(row))
+
+compare_token_basis_dot_products()
+
+
+
 """
 Terminal Output:
 
