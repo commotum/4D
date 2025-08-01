@@ -1,3 +1,7 @@
+# Original implementation of verify.py shows that the RoPE principle holds for
+# both 2D and 4D vectors. Some factual and mathematical errors.
+
+
 import numpy as np
 
 # Input vectors

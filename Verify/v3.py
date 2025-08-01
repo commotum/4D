@@ -1,3 +1,6 @@
+# An extension of verify2.py that demonstrates the RoPE properties on randomly
+# generated vectors.
+
 import numpy as np
 import random
 

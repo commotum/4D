@@ -1,3 +1,14 @@
+# A polished implementation of verify.py that demonstrates the core RoPE 
+# RoPE properties for 2D vectors, namely:
+#
+# 1. Equivalence of Formulations: Rotating vectors at absolute positions is 
+#    equivalent to using the complex relative position formula.
+# 2. Norm Preservation: Rotational encoding does not change a vector's length.
+# 3. Shift Invariance: The dot product between two encoded vectors depends only
+#    on their relative positional difference, not their absolute positions.
+
+
+
 import numpy as np
 
 # --- Setup ---

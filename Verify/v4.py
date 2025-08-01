@@ -1,3 +1,16 @@
+# The following code implements two additional tests to cover all 5 properties 
+# of RoPE:
+# - Property 4: Extensibility to N-Dimensional Vectors
+# - Property 5: Multiscale Coverage and Remote Attenuation
+#
+# These tests are designed to complement the existing 2D tests by:
+#   - Demonstrating that RoPE can be applied blockwise to higher-dimensional 
+#     vectors (Property 4).
+#   - Showing that the similarity between vectors decays with increasing relative 
+#     distance, especially when using a multiscale frequency schedule (Property 5).
+
+
+
 import numpy as np
 import random
 
