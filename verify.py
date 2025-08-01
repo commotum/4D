@@ -7,16 +7,32 @@ c = np.array([-0.01, -0.02, -0.03, -0.04], dtype=np.float32)
 d = np.array([-0.05, -0.06, -0.07, -0.08], dtype=np.float32)
 
 # Precomputed dot products (as provided)
-aa = np.dot(a, a)
-ab = np.dot(a, b)
-ac = np.dot(a, c)
-ad = np.dot(a, d)
-bb = np.dot(b, b)
-bc = np.dot(b, c)
-bd = np.dot(b, d)
-cc = np.dot(c, c)
-cd = np.dot(c, d)
-dd = np.dot(d, d)
+token_pairs = [
+    (a, a),
+    (a, b),
+    (a, c),
+    (a, d),
+    (b, b),
+    (b, c),
+    (b, d),
+    (c, c),
+    (c, d),
+    (d, d)
+]
+
+dot_products = []
+
+for i, j in token_pairs:
+    dot = np.dot(i, j)
+    dot_products.append(dot)
+
+
+# Position Pairs
+
+position_pairs = [
+    (7, 2),
+    (10, 5)
+]
 
 # Positions
 m = 7
