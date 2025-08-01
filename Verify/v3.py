@@ -34,6 +34,37 @@ def apply_rotation_4d(vec, pos, theta_pair):
     rotated2 = apply_rotation_2d(vec2, pos, theta_pair[1])
     return np.concatenate([rotated1, rotated2])
 
+def complex_relative_dot_product_4d(q, k, rel_pos, theta_pair):
+    """
+    Calculates the dot product using the relative position formula for 4D vectors.
+    This is the "clever" formulation of RoPE that directly uses the relative distance.
+    """
+    # Split into two 2D vectors for paired rotation
+    q1, q2 = q[:2], q[2:]
+    k1, k2 = k[:2], k[2:]
+    
+    # Calculate dot product for each 2D pair using complex numbers
+    def complex_relative_dot_product_2d(q_2d, k_2d, rel_pos, theta):
+        """Calculates the dot product using the relative position formula for 2D vectors."""
+        # Represent 2D vectors as complex numbers
+        q_complex = q_2d[0] + 1j * q_2d[1]
+        k_complex = k_2d[0] + 1j * k_2d[1]
+
+        # Rotation in complex plane is multiplication by e^(i*theta)
+        rotational_term = np.exp(1j * rel_pos * theta).astype(np.complex64)
+
+        # The core RoPE formula
+        # <R_m*q, R_n*k> = Re( (q * k_conjugate) * e^(i*(m-n)*theta) )
+        dot_product_complex = q_complex * np.conj(k_complex) * rotational_term
+
+        return np.real(dot_product_complex)
+    
+    # Sum the dot products from both 2D pairs
+    dot1 = complex_relative_dot_product_2d(q1, k1, rel_pos, theta_pair[0])
+    dot2 = complex_relative_dot_product_2d(q2, k2, rel_pos, theta_pair[1])
+    
+    return dot1 + dot2
+
 def run_test(test_num):
     """
     Runs a single experiment to verify the RoPE principle.
@@ -49,8 +80,8 @@ def run_test(test_num):
     # The values are uniformly distributed between -0.6 and 0.6.
     q = (0.6 - (-0.6)) * np.random.rand(4) - 0.6
     k = (0.6 - (-0.6)) * np.random.rand(4) - 0.6
-    print(f"Random Query Vector (q): {np.round(q, 4)}")
-    print(f"Random Key Vector   (k): {np.round(k, 4)}\n")
+    print(f"Random Query Vector (q): [{q[0]:+.3f} {q[1]:+.3f} {q[2]:+.3f} {q[3]:+.3f}]")
+    print(f"Random Key Vector   (k): [{k[0]:+.3f} {k[1]:+.3f} {k[2]:+.3f} {k[3]:+.3f}]\n")
 
 
     # 2. We want to show that the dot product <R_m*q, R_n*k> depends only on (m-n).
@@ -90,6 +121,11 @@ def run_test(test_num):
         dot_products.append(dot_product)
         print(f"Dot product for pair {i+1}: {dot_product:.8f}\n")
 
+    # Calculate the direct dot product using the relative position formula
+    direct_dot_product = complex_relative_dot_product_4d(q, k, delta, theta)
+    print(f"Position Delta:  (d={delta})")
+    print(f"Dot product for delta:  {direct_dot_product:.8f}\n")
+
     # --- Verification ---
     
     # The punchline: Because the relative distance is the same for all pairs,
@@ -105,6 +141,15 @@ def run_test(test_num):
         print(f"Difference (1 vs 2): {abs(dot1 - dot2)}")
         print(f"Difference (1 vs 3): {abs(dot1 - dot3)}")
         print(f"Difference (2 vs 3): {abs(dot2 - dot3)}")
+    
+    print("\nAre all three dot products equal to the direct calculation?")
+    all_equal_to_direct = np.allclose([dot1, dot2, dot3], direct_dot_product)
+    print(f"Answer: {all_equal_to_direct}")
+    if not all_equal_to_direct:
+        print(f"Difference (1 vs direct): {abs(dot1 - direct_dot_product)}")
+        print(f"Difference (2 vs direct): {abs(dot2 - direct_dot_product)}")
+        print(f"Difference (3 vs direct): {abs(dot3 - direct_dot_product)}")
+    
     print("\n" + "="*40 + "\n")
 
 
