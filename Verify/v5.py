@@ -82,7 +82,7 @@ def get_transform_from_position(s):
     # The order of multiplication does not matter since they commute.
     return rot_x(angle_beta) @ boost_x(rapidity_alpha)
 
-# --- 3. Experiment: Relative Positions ---
+# --- 3. Experiment Data ---
 
 # Define a single pair of query (q) and key (k) vectors.
 # Using the same vectors for both tests isolates the effect of position.
@@ -94,22 +94,15 @@ k = np.array([+0.06, +0.04, +0.02, +0.01], dtype=np.float64)
 pos1_q = np.array([25, 25, 15, 23], dtype=np.float64)
 pos1_k = np.array([27, 20,  7, 15], dtype=np.float64)
 delta_1 = pos1_k - pos1_q
-print(f"Position Pair 1: \n q_pos={pos1_q}, \n k_pos={pos1_k}")
-print(f"Relative Displacement: {delta_1}\n")
 
 pos2_q = np.array([28, 20,  9, 15], dtype=np.float64)
 pos2_k = np.array([30, 15,  1,  7], dtype=np.float64)
 delta_2 = pos2_k - pos2_q
-print(f"Position Pair 2: q_pos={pos2_q}, k_pos={pos2_k}")
-print(f"Relative Displacement: {delta_2}\n")
 
 # Verify that the displacements are indeed identical.
 assert np.all(delta_1 == delta_2), "Displacements do not match!"
-print("Displacement vectors are identical, as required for the test.")
 
-# --- 4. Calculations & Verification ---
-
-print("\n--- Verification of RoPE Principle in 4D ---")
+# --- 4. Calculations ---
 
 # Test 1: Apply transformations for the first pair of positions.
 L1_q = get_transform_from_position(pos1_q)
@@ -125,12 +118,37 @@ q_transformed_2 = apply_lorentz_transform(q, L2_q)
 k_transformed_2 = apply_lorentz_transform(k, L2_k)
 dot_product_2 = minkowski_dot(q_transformed_2, k_transformed_2)
 
-# The punchline: Because the relative displacement is the same for both pairs,
-# the resulting Minkowski inner products should be identical.
-print(f"Dot product for Pair 1: {dot_product_1:.9f}")
-print(f"Dot product for Pair 2: {dot_product_2:.9f}\n")
+# --- 5. Verification & Output ---
 
-print("Are the dot products equal?")
-print(f"Answer: {np.allclose(dot_product_1, dot_product_2)}")
-print(f"Difference: {abs(dot_product_1 - dot_product_2)}")
+def format_vector(vec, precision=2):
+    """Formats a numpy vector for clean printing with alignment."""
+    # Check if all elements are effectively whole numbers
+    if np.all(np.isclose(vec, np.round(vec))):
+        return f"[{', '.join(f'{x:>4.0f}' for x in vec)}]"
+    else:
+        return f"[{', '.join(f'{x:>{precision+4}.{precision}f}' for x in vec)}]"
 
+print("--- Experiment Setup ---")
+print(f"Query Vector (q):      {format_vector(q)}")
+print(f"Key Vector   (k):      {format_vector(k)}\n")
+
+print("--- Position Pair 1 ---")
+print(f"  q position (s1):     {format_vector(pos1_q)}")
+print(f"  k position (s2):     {format_vector(pos1_k)}")
+print(f"  Displacement (s2-s1):{format_vector(delta_1)}\n")
+
+print("--- Position Pair 2 ---")
+print(f"  q position (s3):     {format_vector(pos2_q)}")
+print(f"  k position (s4):     {format_vector(pos2_k)}")
+print(f"  Displacement (s4-s3):{format_vector(delta_2)}\n")
+
+print("--- Verification of RoPE Principle in 4D ---")
+print("The inner product should be identical for both pairs due to the same relative displacement.\n")
+
+label_width = 25
+val_width = 16
+print(f"{'Dot Product (Pair 1):':<{label_width}} {dot_product_1:{val_width}.9f}")
+print(f"{'Dot Product (Pair 2):':<{label_width}} {dot_product_2:{val_width}.9f}")
+print("-" * (label_width + val_width + 1))
+print(f"{'Products are equal?':<{label_width}} {str(np.allclose(dot_product_1, dot_product_2)):>{val_width}}")
+print(f"{'Absolute Difference:':<{label_width}} {abs(dot_product_1 - dot_product_2):>{val_width}.2e}")
