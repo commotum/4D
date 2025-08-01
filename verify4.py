@@ -158,8 +158,8 @@ def demo_5a_remote_attenuation_identical_vec(theta_base=10000.0):
     print("--- 5a. Demo: Remote Attenuation (Identical Vectors) ---")
     dim = 128
     num_runs = 200
-    max_exponent = 14
-    distances = [2**i for i in range(max_exponent)]
+    num_blocks = 32 # Will test up to 256 * 32 = 8192
+    distances = [256 * i for i in range(1, num_blocks + 1)]
     avg_cos = np.zeros(len(distances), dtype=np.float32)
 
     for _ in range(num_runs):
@@ -187,8 +187,8 @@ def demo_5b_remote_attenuation_correlated_vec(rho=0.9, theta_base=10000.0):
     print("--- 5b. Demo: Remote Attenuation (Correlated Vectors) ---")
     dim = 128
     num_runs = 200
-    max_exponent = 14
-    distances = [2**i for i in range(max_exponent)]
+    num_blocks = 32 # Will test up to 256 * 32 = 8192
+    distances = [256 * i for i in range(1, num_blocks + 1)]
     avg_cos = np.zeros(len(distances), dtype=np.float32)
 
     for _ in range(num_runs):
@@ -223,4 +223,5 @@ if __name__ == "__main__":
     demo_4_n_dim_extension()
     demo_5a_remote_attenuation_identical_vec()
     demo_5b_remote_attenuation_correlated_vec()
+
 
