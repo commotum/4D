@@ -88,7 +88,7 @@ import numpy as np
 
 def generate_experiment_data(
     dim: int = 4,
-    pos_range: tuple = (0, 50),
+    pos_range: tuple = (0, 25),
     vec_range: tuple = (-0.65, 0.65),
     seed: int = None
 ):
