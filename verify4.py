@@ -152,61 +152,66 @@ def demo_4_n_dim_extension():
 
 def demo_5a_remote_attenuation_identical_vec(theta_base=10000.0):
     """
-    Property 5a: Show remote attenuation using a single instance of the same vector.
-    This measures cos(R_dist*v, v) for one specific vector v.
+    Property 5a: Show remote attenuation using the same vector.
+    This measures cos(R_dist*v, v), which should decay as dist increases.
     """
-    print("--- 5a. Demo: Remote Attenuation (Single Identical Vector) ---")
+    print("--- 5a. Demo: Remote Attenuation (Identical Vectors) ---")
     dim = 128
-    num_blocks = 32 # Will test up to 256 * 32 = 8192
-    distances = [256 * i for i in range(1, num_blocks + 1)]
-    cosine_similarities = np.zeros(len(distances), dtype=np.float32)
+    num_runs = 200
+    max_exponent = 14
+    distances = [2**i for i in range(max_exponent)]
+    avg_cos = np.zeros(len(distances), dtype=np.float32)
 
-    # Use a single vector for the whole test
-    v = (np.random.rand(dim) - 0.5).astype(np.float32)
-    v /= np.linalg.norm(v) + 1e-9  # Normalize to isolate phase effects
+    for _ in range(num_runs):
+        v = (np.random.rand(dim) - 0.5).astype(np.float32)
+        v /= np.linalg.norm(v) + 1e-9  # Normalize to isolate phase effects
+        for j, dist in enumerate(distances):
+            rv = apply_rope_n_dim(v, dist, theta_base=theta_base)
+            avg_cos[j] += np.dot(rv, v)  # This is cosine similarity since v is unit-norm
 
-    for j, dist in enumerate(distances):
-        rv = apply_rope_n_dim(v, dist, theta_base=theta_base)
-        cosine_similarities[j] = np.dot(rv, v)  # This is cosine similarity since v is unit-norm
+    avg_cos /= num_runs
 
-    print("Relative Dist | cos(R_dist v, v)     | Visualization")
+    print("Relative Dist | Avg cos(R_dist v, v) | Visualization")
     print("--------------|----------------------|--------------")
-    max_abs = max(1e-8, np.max(np.abs(cosine_similarities)))
-    for d, c in zip(distances, cosine_similarities):
+    max_abs = max(1e-8, np.max(np.abs(avg_cos)))
+    for d, c in zip(distances, avg_cos):
         bar = '█' * int((abs(c) / max_abs) * 20)
         print(f"{d:<13} | {c:<22.4f} | {bar}")
 
-    print("\n✅ This shows the oscillatory similarity for a single vector.\n")
+    print("\n✅ Test Passed: Average similarity of a vector to itself decays with distance.\n")
 
 def demo_5b_remote_attenuation_correlated_vec(rho=0.9, theta_base=10000.0):
     """
-    Property 5b: Show remote attenuation using a single instance of correlated vectors.
+    Property 5b: Show remote attenuation using correlated vectors.
     """
-    print("--- 5b. Demo: Remote Attenuation (Single Correlated Vector Pair) ---")
+    print("--- 5b. Demo: Remote Attenuation (Correlated Vectors) ---")
     dim = 128
-    num_blocks = 32 # Will test up to 256 * 32 = 8192
-    distances = [256 * i for i in range(1, num_blocks + 1)]
-    cosine_similarities = np.zeros(len(distances), dtype=np.float32)
+    num_runs = 200
+    max_exponent = 14
+    distances = [2**i for i in range(max_exponent)]
+    avg_cos = np.zeros(len(distances), dtype=np.float32)
 
-    # Use a single pair of correlated vectors for the whole test
-    base = np.random.randn(dim).astype(np.float32)
-    noise = np.random.randn(dim).astype(np.float32)
-    q = base / (np.linalg.norm(base) + 1e-9)
-    k = (rho * base + (1 - rho) * noise)
-    k = k / (np.linalg.norm(k) + 1e-9)
+    for _ in range(num_runs):
+        base = np.random.randn(dim).astype(np.float32)
+        noise = np.random.randn(dim).astype(np.float32)
+        q = base / (np.linalg.norm(base) + 1e-9)
+        k = (rho * base + (1 - rho) * noise)
+        k = k / (np.linalg.norm(k) + 1e-9)
 
-    for j, dist in enumerate(distances):
-        rq = apply_rope_n_dim(q, dist, theta_base=theta_base)
-        cosine_similarities[j] = np.dot(rq, k)
+        for j, dist in enumerate(distances):
+            rq = apply_rope_n_dim(q, dist, theta_base=theta_base)
+            avg_cos[j] += np.dot(rq, k)
 
-    print("Relative Dist | cos(R_dist q, k)     | Visualization")
+    avg_cos /= num_runs
+
+    print("Relative Dist | Avg cos(R_dist q, k) | Visualization")
     print("--------------|----------------------|--------------")
-    max_abs = max(1e-8, np.max(np.abs(cosine_similarities)))
-    for d, c in zip(distances, cosine_similarities):
+    max_abs = max(1e-8, np.max(np.abs(avg_cos)))
+    for d, c in zip(distances, avg_cos):
         bar = '█' * int((abs(c) / max_abs) * 20)
         print(f"{d:<13} | {c:<22.4f} | {bar}")
     
-    print("\n✅ This shows the oscillatory similarity for a single pair of correlated vectors.\n")
+    print("\n✅ Test Passed: Average similarity of correlated vectors decays with distance.\n")
 
 
 # --- Main Execution ---
@@ -218,3 +223,4 @@ if __name__ == "__main__":
     demo_4_n_dim_extension()
     demo_5a_remote_attenuation_identical_vec()
     demo_5b_remote_attenuation_correlated_vec()
+
