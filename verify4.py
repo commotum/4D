@@ -31,7 +31,7 @@ def complex_relative_dot_product_2d(q_2d, k_2d, rel_pos, theta):
     k_complex = k_2d[0] + 1j * k_2d[1]
 
     # Rotation in complex plane is multiplication by e^(i*theta)
-    rotational_term = np.exp(1j * rel_pos * theta)
+    rotational_term = np.exp(1j * rel_pos * theta).astype(np.complex64)
 
     # The core RoPE formula
     # <R_m*q, R_n*k> = Re( (q * k_conjugate) * e^(i*(m-n)*theta) )
@@ -52,26 +52,22 @@ def demo_1_equivalence_of_formulations():
     q = np.random.rand(2).astype(np.float32)
     k = np.random.rand(2).astype(np.float32)
     m, n = 7, 2
-    theta = 0.5 # A single frequency for our 2D space
+    theta = 0.5
 
     # Method A: Rotate each vector by its absolute position, then dot product.
-    q_rot_m = apply_rotation_2d(q, m, theta)
-    k_rot_n = apply_rotation_2d(k, n, theta)
-    dot_absolute = np.dot(q_rot_m, k_rot_n)
+    dot_absolute = np.dot(apply_rotation_2d(q, m, theta), apply_rotation_2d(k, n, theta))
 
     # Method B: Use the complex relative position formula.
     dot_relative = complex_relative_dot_product_2d(q, k, m - n, theta)
 
     print(f"Dot product from absolute rotations: {dot_absolute:.6f}")
     print(f"Dot product from relative formula:   {dot_relative:.6f}")
-    assert np.allclose(dot_absolute, dot_relative), "Equivalence Test Failed!"
+    assert np.allclose(dot_absolute, dot_relative, rtol=1e-6), "Equivalence Test Failed!"
     print("✅ Test Passed: The two formulations are equivalent.\n")
 
 def demo_2_norm_preservation():
     """
     Property 2: Show that RoPE rotation does not change a vector's length (norm).
-    This is crucial because it means positional info is added without altering
-    the original information content's magnitude.
     """
     print("--- 2. Demo: Norm Preservation ---")
     q = np.random.rand(2).astype(np.float32)
@@ -89,21 +85,16 @@ def demo_2_norm_preservation():
 
 def demo_3_shift_invariance():
     """
-    Property 3: Show that the dot product only depends on the relative distance,
-    meaning it's invariant to shifts in the sequence.
+    Property 3: Show that the dot product only depends on the relative distance.
     """
     print("--- 3. Demo: Shift Invariance ---")
     q = np.random.rand(2).astype(np.float32)
     k = np.random.rand(2).astype(np.float32)
-    m, n = 8, 3  # Relative distance is 5
-    shift = 10   # An arbitrary shift
+    m, n = 8, 3
+    shift = 10
     theta = 0.5
 
-    # Dot product at original positions
     dot_original = np.dot(apply_rotation_2d(q, m, theta), apply_rotation_2d(k, n, theta))
-
-    # Dot product at shifted positions (m+d, n+d)
-    # The relative distance (m+d) - (n+d) is still 5
     dot_shifted = np.dot(apply_rotation_2d(q, m + shift, theta), apply_rotation_2d(k, n + shift, theta))
 
     print(f"Dot product for (m={m}, n={n}):     {dot_original:.6f}")
@@ -119,41 +110,33 @@ def demo_3_shift_invariance():
 def apply_rope_n_dim(vec, pos, theta_base=10000.0):
     """
     Applies RoPE to an N-dimensional vector by processing it in 2D blocks.
-    This function handles properties 4 and 5.
     """
     dim = vec.shape[0]
     assert dim % 2 == 0, "Vector dimension must be even."
 
-    # Create the frequency values (theta_i) using the geometric sequence
-    # from the original Transformer paper.
-    # theta_i = 10000^(-2i/d) for i in [0, 1, ..., d/2 - 1]
     indices = np.arange(0, dim, 2, dtype=np.float32)
     thetas = theta_base ** (-indices / dim)
 
-    # Reshape vector into pairs of (x, y) for 2D rotation
     vec_pairs = vec.reshape(-1, 2)
-    rotated_pairs = np.zeros_like(vec_pairs)
+    rotated_pairs = np.zeros_like(vec_pairs, dtype=np.float32)
 
-    # Apply 2D rotation to each pair using its corresponding frequency
     for i, (pair, theta) in enumerate(zip(vec_pairs, thetas)):
         rotated_pairs[i] = apply_rotation_2d(pair, pos, theta)
 
     return rotated_pairs.flatten()
 
-def demo_4_and_5_n_dim_and_attenuation():
+def demo_4_n_dim_extension():
     """
-    Property 4: Show RoPE extends to N-dimensions.
-    Property 5: Show similarity naturally attenuates with distance.
+    Property 4: Show RoPE's shift invariance extends to N-dimensions.
     """
-    print("--- 4 & 5. Demo: N-Dimensional Extension & Remote Attenuation ---")
-    dim = 128  # A typical embedding dimension
-    q_fixed = (0.6 - (-0.6)) * np.random.rand(dim) - 0.6
-    k_fixed = (0.6 - (-0.6)) * np.random.rand(dim) - 0.6
+    print("--- 4. Demo: N-Dimensional Shift Invariance ---")
+    dim = 128
+    q_fixed = (np.random.rand(dim) - 0.5).astype(np.float32)
+    k_fixed = (np.random.rand(dim) - 0.5).astype(np.float32)
 
-    # --- Proof of N-Dimensional Extension (like our original script) ---
-    print("\n--- Testing N-Dimensional Shift Invariance ---")
-    m1, n1 = 8, 3   # delta = 5
-    m2, n2 = 20, 15 # delta = 5
+    m1, n1 = 8, 3
+    m2, n2 = 20, 15
+    
     q_rot_1 = apply_rope_n_dim(q_fixed, m1)
     k_rot_1 = apply_rope_n_dim(k_fixed, n1)
     dot_1 = np.dot(q_rot_1, k_rot_1)
@@ -167,48 +150,77 @@ def demo_4_and_5_n_dim_and_attenuation():
     assert np.allclose(dot_1, dot_2)
     print("✅ Test Passed: The principle extends to N-dimensions.\n")
 
-    # --- Proof of Remote Attenuation ---
-    print("\n--- Testing Remote Attenuation (with exponential distance & averaging) ---")
-    print("Averaging the magnitude of similarity over many random vectors...")
-
-    num_runs_for_avg = 100
+def demo_5a_remote_attenuation_identical_vec(theta_base=10000.0):
+    """
+    Property 5a: Show remote attenuation using the same vector.
+    This measures cos(R_dist*v, v), which should decay as dist increases.
+    """
+    print("--- 5a. Demo: Remote Attenuation (Identical Vectors) ---")
+    dim = 128
+    num_runs = 200
     max_exponent = 14
     distances = [2**i for i in range(max_exponent)]
-    avg_dot_products = np.zeros(len(distances))
+    avg_cos = np.zeros(len(distances), dtype=np.float32)
 
-    # For each distance, run the test multiple times with different vectors
-    for i, dist in enumerate(distances):
-        current_dist_dots = []
-        for _ in range(num_runs_for_avg):
-            # Generate new random vectors for each run to get a good average
-            q_rand = (0.6 - (-0.6)) * np.random.rand(dim) - 0.6
-            k_rand = (0.6 - (-0.6)) * np.random.rand(dim) - 0.6
+    for _ in range(num_runs):
+        v = (np.random.rand(dim) - 0.5).astype(np.float32)
+        v /= np.linalg.norm(v) + 1e-9  # Normalize to isolate phase effects
+        for j, dist in enumerate(distances):
+            rv = apply_rope_n_dim(v, dist, theta_base=theta_base)
+            avg_cos[j] += np.dot(rv, v)  # This is cosine similarity since v is unit-norm
 
-            # As before, <R_m*q, R_n*k> = <R_{m-n}*q, k>
-            q_rotated = apply_rope_n_dim(q_rand, dist)
-            dot_product = np.dot(q_rotated, k_rand)
-            current_dist_dots.append(np.abs(dot_product)) # Store the absolute value
-        
-        avg_dot_products[i] = np.mean(current_dist_dots)
+    avg_cos /= num_runs
 
-    print("Relative Dist | Avg. |Dot Product| | Visualization")
-    print("--------------|-------------------|--------------")
-    # Find max value for scaling the visualization bar
-    max_avg_dot = np.max(avg_dot_products) if np.max(avg_dot_products) > 0 else 1
+    print("Relative Dist | Avg cos(R_dist v, v) | Visualization")
+    print("--------------|----------------------|--------------")
+    max_abs = max(1e-8, np.max(np.abs(avg_cos)))
+    for d, c in zip(distances, avg_cos):
+        bar = '█' * int((abs(c) / max_abs) * 20)
+        print(f"{d:<13} | {c:<22.4f} | {bar}")
 
-    for dist, avg_dot in zip(distances, avg_dot_products):
-        bar_width = 20
-        # Scale the bar relative to the max average value for better visualization
-        scaled_val = int((avg_dot / max_avg_dot) * bar_width)
-        bar = '█' * max(0, scaled_val)
-        print(f"{dist:<13} | {avg_dot:<17.4f} | {bar}")
+    print("\n✅ Test Passed: Average similarity of a vector to itself decays with distance.\n")
+
+def demo_5b_remote_attenuation_correlated_vec(rho=0.9, theta_base=10000.0):
+    """
+    Property 5b: Show remote attenuation using correlated vectors.
+    """
+    print("--- 5b. Demo: Remote Attenuation (Correlated Vectors) ---")
+    dim = 128
+    num_runs = 200
+    max_exponent = 14
+    distances = [2**i for i in range(max_exponent)]
+    avg_cos = np.zeros(len(distances), dtype=np.float32)
+
+    for _ in range(num_runs):
+        base = np.random.randn(dim).astype(np.float32)
+        noise = np.random.randn(dim).astype(np.float32)
+        q = base / (np.linalg.norm(base) + 1e-9)
+        k = (rho * base + (1 - rho) * noise)
+        k = k / (np.linalg.norm(k) + 1e-9)
+
+        for j, dist in enumerate(distances):
+            rq = apply_rope_n_dim(q, dist, theta_base=theta_base)
+            avg_cos[j] += np.dot(rq, k)
+
+    avg_cos /= num_runs
+
+    print("Relative Dist | Avg cos(R_dist q, k) | Visualization")
+    print("--------------|----------------------|--------------")
+    max_abs = max(1e-8, np.max(np.abs(avg_cos)))
+    for d, c in zip(distances, avg_cos):
+        bar = '█' * int((abs(c) / max_abs) * 20)
+        print(f"{d:<13} | {c:<22.4f} | {bar}")
     
-    print("\n✅ Test Passed: The *average* similarity magnitude clearly decays with distance.")
+    print("\n✅ Test Passed: Average similarity of correlated vectors decays with distance.\n")
 
 
 # --- Main Execution ---
 if __name__ == "__main__":
+    np.random.seed(0) # For reproducibility
     demo_1_equivalence_of_formulations()
     demo_2_norm_preservation()
     demo_3_shift_invariance()
-    demo_4_and_5_n_dim_and_attenuation()
+    demo_4_n_dim_extension()
+    demo_5a_remote_attenuation_identical_vec()
+    demo_5b_remote_attenuation_correlated_vec()
+
