@@ -28,7 +28,27 @@ To show that a RoPE implementation works in all cases, you would need to demonst
       np.dot(apply_rotation_2d(q, m), apply_rotation_2d(k, n)) must equal 
       np.dot(apply_rotation_2d(q, m+d), apply_rotation_2d(k, n+d)).
 
-### 4. Remote Attenuation
+### 4. Multiscale Coverage and Remote Attenuation
+
+    - Show that by applying pairwise 2D rotations using the same geometric 
+      frequency schedule () from the original sinusoidal positional encoding 
+      retains:
+
+    1. Multiscale positional coverage: The geometric progression of frequencies ensures coverage across multiple distance scales.
+
+Remote attenuation effects: Phase misalignment across frequency bands naturally induces positional similarity decay with increasing relative distance.
+
+### 4. Extensibility to N-Dimensional Vectors
+
+    - 
+    
+    Show that RoPE can be applied blockwise using the frequency function to pairs of dimensions of the token embedding vector
+      by simply instead of viewing $\mathbf{q}=\left(q_1, q_2, q_3, q_4, \ldots, q_d\right)$
+      as a $d$ -dimensional real vector we view it as $\mathbf{q}=\left(q_1+i q_2, q_3+i q_4, \ldots q_{d-1}+i q_d\right) \in \mathbb{C}^{d / 2}$.
+
+
+
+### 5. Remote Attenuation
 
     - Show that it can be applied per block, or whatever
     - Show that RoPE's per-band rotations enhance the sinusoidal PE's 
