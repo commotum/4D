@@ -50,15 +50,15 @@ def apply_rotation_4d(vec, pos, theta_pair):
 # that have the same relative distance.
 
 # Position Pair 1: (m=7, n=2)
-m = 7
-n = 2
+m = 2
+n = 17
 delta_1 = m - n
 print(f"Position Pair 1: (m={m}, n={n})")
 print(f"Relative Distance: {delta_1}\n")
 
 # Position Pair 2: (i=10, j=5)
-i = 10
-j = 5
+i = 5
+j = 20
 delta_2 = i - j
 print(f"Position Pair 2: (i={i}, j={j})")
 print(f"Relative Distance: {delta_2}\n")

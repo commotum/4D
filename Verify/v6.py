@@ -88,7 +88,7 @@ import numpy as np
 
 def generate_experiment_data(
     dim: int = 4,
-    pos_range: tuple = (0, 25),
+    pos_range: tuple = (-15, 15),
     vec_range: tuple = (-0.65, 0.65),
     seed: int = None
 ):
@@ -118,6 +118,7 @@ def generate_experiment_data(
     k = np.random.uniform(vec_range[0], vec_range[1], size=dim).astype(np.float64)
 
     # Generate a random displacement vector (delta) of integers in pos_range
+    # Use randint with low=pos_range[0], high=pos_range[1]+1 to include both bounds
     delta = np.random.randint(pos_range[0], pos_range[1] + 1, size=dim).astype(np.float64)
 
     # Generate two random position vectors for pos1_q and pos2_q
