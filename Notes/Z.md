@@ -57,3 +57,77 @@ Since the goal is to embed useful spatial priors, you could tailor the function 
     For example, $z=0$ for top-left, $z=1$ for top-right, etc.
 
 Ultimately, this strategy of feature-engineering the $z$-coordinate is a pragmatic solution to adapt a higher-dimensional embedding space to a lower-dimensional problem. The optimal function $f(x,y)$ would likely be task-dependent, suggesting that an ensemble of models trained with different $z$-functions could be a powerful approach.
+
+
+
+[0, 1, 1],
+[0, 1, 0],
+[1, 0, 0].
+
+[1, 0, 0 | 0, 1, 1],
+[1, 1, 0 | 0, 1, 0],
+[0, 0, 1 | 1, 0, 0],
+-------------------
+[0, 0, 1 | 1, 0, 0],
+[0, 1, 0 | 0, 1, 1],
+[1, 1, 0 | 0, 0, 1]
+
+
+[1, 0, 0 | 1, 1, 1],
+[1, 1, 0 | 1, 1, 0],
+[1, 1, 1 | 1, 0, 0],
+-------------------
+[0, 0, 1 | 1, 1, 1],
+[0, 1, 1 | 0, 1, 1],
+[1, 1, 1 | 0, 0, 1]
+
+
+### Adapting Z-Functions to Sudoku
+
+Sudoku puzzles operate on a 9x9 grid (with coordinates typically 0-indexed from 0 to 8 for rows \(x\) and columns \(y\)), where the core constraints revolve around uniqueness within rows, columns, and 3x3 subgrids (blocks). Unlike ARC-AGI tasks, which often involve visual transformations with potential symmetries or patterns, Sudoku emphasizes logical constraints over geometric ones like radial distance or borders. However, the same principle of using a \(z = f(x, y)\) function applies: it injects an inductive bias into the token embeddings to help the model (e.g., a transformer with MonSTERs) implicitly group or relate cells that share constraints, potentially accelerating learning of row/column/block rules without explicit hard-coding.
+
+The grid's fixed structure makes \(z\)-functions that encode membership in constrained groups particularly valuable. Radial or center-based functions (like \(z = \sqrt{x^2 + y^2}\)) would likely be less effective here, as Sudoku lacks rotational or concentric patterns—distance from the origin doesn't align with the puzzle's logic and could introduce irrelevant noise.
+
+#### Recommended Z-Function: 3x3 Block ID
+
+A strong starting point is to set \(z\) to the ID of the 3x3 block that the cell belongs to. This directly embeds block-level grouping, making it easier for the model to "see" subgrid constraints intrinsically through the embedding space.
+
+\[
+z = \left\lfloor \frac{x}{3} \right\rfloor \times 3 + \left\lfloor \frac{y}{3} \right\rfloor
+\]
+
+- **How it works:** For a 9x9 grid, this yields \(z\) values from 0 to 8, uniquely identifying each block (e.g., top-left block: \(z=0\); bottom-right: \(z=8\)). Cells in the same block share the same \(z\), creating a natural "plane" in the 4D embedding where MonSTER rotations could preserve intra-block relationships.
+  
+- **Pros:** ✨ This biases the model toward block uniqueness without needing to learn it from scratch, which is crucial for Sudoku solving. It complements the existing \(x\) and \(y\) dimensions (which already help with rows and columns) by adding the third constraint dimension. In practice, this could improve generalization to variants like irregular Sudoku or larger grids.
+
+- **Cons:** 🤔 If the task involves no block constraints (unlikely for standard Sudoku), it might over-emphasize blocks at the expense of rows/columns. Also, since \(z\) is categorical (0-8), it doesn't capture fine-grained distances within blocks, but this discreteness aligns well with the puzzle's discrete logic.
+
+#### Alternative Functions for the Z-Component
+
+Tailor these based on the specific Sudoku variant or if you're focusing on certain constraints (e.g., rows over blocks). They build on the idea of encoding relational priors common in constraint satisfaction problems:
+
+- **Row-Column Parity (for alternating or diagonal hints):** Useful if exploring Sudoku variants with extra rules like anti-diagonal constraints.
+  \[
+  z = (x + y) \mod 3
+  \]
+  This creates a repeating pattern (0, 1, or 2) that could help detect conflicts in modular arithmetic terms, though it's less directly tied to core rules.
+
+- **Cell Value (Fusing Position and Content):** Similar to the pixel color idea in ARC, set \(z\) to the cell's value (1-9 for filled, 0 for empty). This fuses the puzzle state into the structural embedding.
+  \[
+  z = \text{value}(x, y)
+  \]
+  **Pros:** Encourages the model to relate positions with similar values, aiding in uniqueness checks. **Cons:** For unsolved puzzles, empty cells (z=0) might cluster unnecessarily, and it duplicates information if values are already in token features.
+
+- **Distance to Center (Hybrid Radial for Symmetry):** If the Sudoku has central symmetry or you're testing on symmetric puzzles.
+  \[
+  z = |x - 4| + |y - 4|
+  \]
+  (Manhattan distance to the center at (4,4).) This is a simpler alternative to Euclidean distance, better suited to grid logic, but still secondary to block-based functions.
+
+- **Combined Constraint Score:** A more complex function weighting multiple constraints, e.g., for advanced solvers.
+  \[
+  z = x + 9 \cdot y + 81 \cdot \left( \left\lfloor \frac{x}{3} \right\rfloor \times 3 + \left\lfloor \frac{y}{3} \right\rfloor \right)
+  \]
+  This uniquely encodes the full (row, column, block) triplet into a single \(z\) (0 to ~7000 range), but it risks overwhelming the embedding with too much density—use sparingly.
+
+For Sudoku, start with the block ID function, as it targets the most unique aspect of the rules. If training an ensemble, experiment with multiple \(z\)-functions (e.g., one for blocks, one for values) to cover different biases. This approach leverages the unused \(z\)-dimension to make spatial constraints "built-in," much like how the radial function aids ARC's concentric tasks.
