@@ -16,12 +16,19 @@ import numpy as np
 # --------------------------------------------------------------------------- #
 # 1.  Minkowski metric (+ – – –) and helpers
 # --------------------------------------------------------------------------- #
-ETA = np.diag([1.0, -1.0, -1.0, -1.0]).astype(np.float64)
 
+# This line creates the Minkowski metric tensor, 
+# commonly represented by η, the Greek letter eta.
+η = np.diag([1.0, -1.0, -1.0, -1.0]).astype(np.float64)
+
+# 1. Apply the metric to u: (u @ η) = u' (flipping spatial components)
+# 2. Compute final dot product (u'⋅v) = (u_t*v_t) - (u_s⋅v_s).
 def minkowski_dot(u, v):
     """<u,v>_η  for row vectors."""
-    return (u @ ETA) @ v
+    return (u @ η) @ v
 
+# 1. Prepare L for row-vector action by transposing: L → Lᵀ.
+# 2. Left-multiply by the vector to get the transformed vector: v' = v @ Lᵀ.
 def apply_lorentz(vector, L):
     """Row-vector action  v' = v · Lᵀ."""
     return vector @ L.T
@@ -57,8 +64,14 @@ def rot_u(theta, u=u_hat):
 # --------------------------------------------------------------------------- #
 # 3.  RoPE-style inverse-frequency ladder
 # --------------------------------------------------------------------------- #
-DIM         = 4                         # embedding dim (== vector dim here)
-inv_freq    = 1.0 / (10000 ** (np.arange(0, DIM, 2) / DIM))  # length 2
+ 
+DIM         = 512                         # embedding dim (== vector dim here)
+NUM_BLOCKS  = DIM // 4
+
+if DIM % NUM_BLOCKS != 0:
+    raise ValueError(f"DIM ({DIM}) must be divisible by 4. Got DIM % NUM_BLOCKS={DIM%NUM_BLOCKS}")
+
+inv_freq    = 1.0 / (10000 ** (np.arange(0, DIM, 4) / DIM))
 FREQ_INDEX  = 0                         # pick the lowest frequency for demo
 
 def L_from_position(s, idx=FREQ_INDEX):

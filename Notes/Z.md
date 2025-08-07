@@ -81,6 +81,7 @@ Ultimately, this strategy of feature-engineering the $z$-coordinate is a pragmat
 [0, 1, 1 | 0, 1, 1],
 [1, 1, 1 | 0, 0, 1]
 
+---
 
 ### Adapting Z-Functions to Sudoku
 
@@ -131,3 +132,29 @@ Tailor these based on the specific Sudoku variant or if you're focusing on certa
   This uniquely encodes the full (row, column, block) triplet into a single \(z\) (0 to ~7000 range), but it risks overwhelming the embedding with too much density—use sparingly.
 
 For Sudoku, start with the block ID function, as it targets the most unique aspect of the rules. If training an ensemble, experiment with multiple \(z\)-functions (e.g., one for blocks, one for values) to cover different biases. This approach leverages the unused \(z\)-dimension to make spatial constraints "built-in," much like how the radial function aids ARC's concentric tasks.
+
+---
+
+For ARC-AGI tasks, which involve inferring hidden visual transformations on 2D pixel grids, the most promising \(z\)-function should inject an inductive bias that captures common spatial patterns like symmetry, borders, or local relationships, as these are frequent in ARC challenges. Given the variety of transformations (e.g., rotations, reflections, or grid-based operations), the \(z\)-function needs to be versatile yet simple to avoid overfitting to specific tasks.
+
+### Recommended Z-Function to Test First: Checkerboard/Parity Pattern
+\[
+z = (x + y) \mod 2
+\]
+
+- **Why it’s promising:** 
+  - **Captures local relationships:** ARC tasks often involve patterns like alternations, diagonals, or checkerboard-like structures (e.g., toggling pixels in a specific pattern). This function assigns \(z=0\) or \(z=1\) based on the sum of coordinates, creating a binary "checkerboard" that naturally groups cells with similar local contexts (e.g., diagonal neighbors often share the same \(z\)).
+  - **Simplicity and generality:** With only two values, it avoids overcomplicating the embedding space while providing a useful prior for tasks involving grid-based or modular patterns, which are common in ARC. It’s less task-specific than radial distance or edge-based functions, making it a safer first bet.
+  - **Supports MonSTER rotations:** The binary \(z\) creates distinct planes in the 4D embedding, allowing the transformer to learn transformations that respect or exploit this parity without distorting the geometric properties of MonSTERs.
+
+- **Pros:** ✨ Lightweight, computationally cheap, and broadly applicable. It aligns with ARC’s frequent use of discrete, grid-based logic and can help the model quickly identify patterns like alternating colors or diagonal symmetries without needing to learn them from scratch.
+- **Cons:** 🤔 It may not directly help with tasks dominated by radial or border-based transformations (e.g., concentric circles or frame operations). However, its simplicity makes it less likely to introduce harmful noise compared to a radial function like \(z = \sqrt{x^2 + y^2}\), which could be irrelevant for non-symmetric tasks.
+
+### Why Not Other Functions First?
+- **Radial Distance (\(z = \sqrt{x^2 + y^2}\))**: Great for concentric or symmetric tasks, but many ARC tasks don’t rely on origin-based distance, and it risks adding noise for grid-based or asymmetric transformations.
+- **Distance to Nearest Edge (\(z = \min(x, y, H-1-y, W-1-x)\))**: Useful for border-related tasks, but ARC grids vary in size, and edge-based logic is less universal than grid patterns.
+- **Pixel Color (\(z = \text{color}(x, y)\))**: Fusing content with position is powerful but risks overfitting to initial grid states, especially since ARC transformations often modify colors dynamically.
+- **Quadrant ID**: Too coarse for small or irregular grids, limiting its utility across diverse ARC tasks.
+
+### Why Test Checkerboard First?
+The checkerboard pattern is a low-risk, high-reward choice because it’s simple, aligns with ARC’s grid-based nature, and captures a common structural motif (alternating patterns) without assuming too much about the task. It’s a good baseline for testing MonSTER embeddings, as it leverages the unused \(z\)-dimension to encode a spatial prior that’s likely relevant to many ARC transformations. If it underperforms, you can pivot to more specialized functions like radial distance or edge proximity based on task analysis. Start here to balance generality and utility.

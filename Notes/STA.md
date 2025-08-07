@@ -25,3 +25,8 @@ Positions are also 4D spacetime vectors $ p $. Normalize units so $ c=1 $.
 Operations: In STA, vector addition and multiplication handle boosts and rotations via rotors 
 (e.g., $ R = e^{-B/2} $ for bivector $ B $), preserving the norm $ a'^2 = (Ra\tilde{R})^2 = a^2 $.
 
+
+# [[cosh φ, sinh φ,     0,       0],
+#  [sinh φ, cosh φ,     0,       0],
+#  [0,      0,      cos φ,  −sin φ],
+#  [0,      0,      sin φ,   cos φ]]
