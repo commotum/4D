@@ -38,12 +38,13 @@ def apply_lorentz(vector, L):
 # --------------------------------------------------------------------------- #
 
 # Create a single spatial unit vector that will serve as our axis of rotation
-u_hat = np.array([1.0, 1.0, 1.0])
+û = np.array([1.0, 1.0, 1.0])
 
 # Normalize to unit length: û = (1,1,1)/√3.
-u_hat /= np.linalg.norm(u_hat)
+û /= np.linalg.norm(û)
 
-def boost_u(phi, u=u_hat):
+
+def boost_u(phi, u=û):
     """Lorentz boost mixing (t, û·r)."""
     ch, sh = np.cosh(phi), np.sinh(phi)
     L = np.eye(4)
@@ -53,7 +54,7 @@ def boost_u(phi, u=u_hat):
     L[1:, 1:] += (ch - 1.0) * np.outer(u, u)  # spatial block
     return L.astype(np.float64)
 
-def rot_u(theta, u=u_hat):
+def rot_u(theta, u=û):
     """Spatial rotation by θ about axis û (Rodrigues)."""
     c, s = np.cos(theta), np.sin(theta)
     ux, uy, uz = u
@@ -91,7 +92,7 @@ def L_from_position(s, idx=FREQ_INDEX):
     # r = s[1, 2, 3] 
     t, r = s[0], s[1:]
     φ = t            * inv_freq[idx]
-    θ = (u_hat @ r)  * inv_freq[idx]
+    θ = (û @ r)  * inv_freq[idx]
     # generators commute ⇒ order irrelevant
     return rot_u(θ) @ boost_u(φ)
 
@@ -140,7 +141,7 @@ dot2 = inner_product_after_transform(q, k, pos2_q, pos2_k)
 def fmt(v, prec=2):
     return "[" + ", ".join(f"{x:+.{prec}f}" for x in v) + "]"
 
-print("û axis:", fmt(u_hat, 4))
+print("û axis:", fmt(û, 4))
 print("inv_freq ladder:", inv_freq)
 print()
 
