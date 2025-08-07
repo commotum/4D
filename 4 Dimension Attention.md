@@ -38,7 +38,7 @@ Simply put, MonSTERs provide Transformers with a built-in ability to simultaneou
 
 
 
-
+The single-axis scheme really does have an axial degeneracy. 
 
 
 https://x.com/tim_zaman/status/1891394901440684151

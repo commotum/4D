@@ -36,8 +36,12 @@ def apply_lorentz(vector, L):
 # --------------------------------------------------------------------------- #
 # 2.  Generators for an arbitrary unit axis  û
 # --------------------------------------------------------------------------- #
+
+# Create a single spatial unit vector that will serve as our axis of rotation
 u_hat = np.array([1.0, 1.0, 1.0])
-u_hat /= np.linalg.norm(u_hat)          # (1,1,1)/√3
+
+# Normalize to unit length: û = (1,1,1)/√3.
+u_hat /= np.linalg.norm(u_hat)
 
 def boost_u(phi, u=u_hat):
     """Lorentz boost mixing (t, û·r)."""
@@ -77,10 +81,14 @@ FREQ_INDEX  = 0                         # pick the lowest frequency for demo
 def L_from_position(s, idx=FREQ_INDEX):
     """
     Build L(s) = Rot_u(θ) · Boost_u(φ)
-      φ =  t                 · inv_freq[idx]
-      θ = (û·r)              · inv_freq[idx]
+      φ =   t   · inv_freq[idx]
+      θ = (û·r) · inv_freq[idx]
     """
     s = np.asarray(s, dtype=np.float64)
+    
+    # s = [t, x, y, z]
+    # t = s[0]
+    # r = s[1, 2, 3] 
     t, r = s[0], s[1:]
     φ = t            * inv_freq[idx]
     θ = (u_hat @ r)  * inv_freq[idx]
