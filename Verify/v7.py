@@ -44,24 +44,34 @@ def apply_lorentz(vector, L):
 û /= np.linalg.norm(û)
 
 
-def boost_u(phi, u=û):
+def boost_u(φ, u=û):
     """Lorentz boost mixing (t, û·r)."""
-    ch, sh = np.cosh(phi), np.sinh(phi)
+    # Compute hyperbolic functions for rapidity φ.
+    ch, sh = np.cosh(φ), np.sinh(φ)
+    # Initialize 4D identity matrix.
     L = np.eye(4)
+    # Set time-time component to cosh(φ).
     L[0,0] = ch
-    L[0, 1:]  = -sh * u                 # time–space
-    L[1:, 0]  = -sh * u
-    L[1:, 1:] += (ch - 1.0) * np.outer(u, u)  # spatial block
+    # Set time-space mixing: off-diagonals with -sinh(φ) û.
+    L[0, 1:] = -sh * u
+    L[1:, 0] = -sh * u
+    # Adjust spatial block: add (cosh(φ) - 1) û ûᵀ.
+    L[1:, 1:] += (ch - 1.0) * np.outer(u, u)
     return L.astype(np.float64)
 
-def rot_u(theta, u=û):
+def rot_u(θ, u=û):
     """Spatial rotation by θ about axis û (Rodrigues)."""
-    c, s = np.cos(theta), np.sin(theta)
+    # Compute trigonometric functions for angle θ.
+    c, s = np.cos(θ), np.sin(θ)
+    # Unpack unit axis components.
     ux, uy, uz = u
+    # Build skew-symmetric matrix K for cross product.
     K = np.array([[  0, -uz,  uy],
                   [ uz,   0, -ux],
                   [-uy,  ux,   0]])
+    # Compute 3D rotation matrix via Rodrigues' formula.
     R3 = c * np.eye(3) + (1 - c) * np.outer(u, u) + s * K
+    # Embed into 4D matrix, acting only on spatial part.
     L = np.eye(4)
     L[1:, 1:] = R3
     return L.astype(np.float64)
