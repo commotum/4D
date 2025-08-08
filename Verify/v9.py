@@ -1,167 +1,203 @@
 import numpy as np
 
-# --------------------------------------------------------------------------- #
-# 1.  Minkowski metric (+ – – –) and helpers
-# --------------------------------------------------------------------------- #
+# ============================================================
+# MonSTER Triad (x,y,z) — 12 dims per frequency, DIM=768
+# ============================================================
 
-# This line creates the Minkowski metric tensor, 
-# commonly represented by η, the Greek letter eta.
-η = np.diag([1.0, -1.0, -1.0, -1.0]).astype(np.float64)
+# 1) Minkowski metric (+ - - -) and helpers (row-vector convention)
+ETA4 = np.diag([1.0, -1.0, -1.0, -1.0]).astype(np.float64)
 
-# 1. Apply the metric to u: (u @ η) = u' (flips spatial components)
-# 2. Compute final dot product (u'⋅v) = (u_t*v_t) - (u_s⋅v_s).
-def minkowski_dot(u, v):
-    """<u,v>_η  for row vectors."""
-    return (u @ η) @ v
+def minkowski_dot4(u4, v4):
+    """<u,v>_η for 4D row vectors."""
+    return (u4 @ ETA4) @ v4
 
-# 1. Prepare L for row-vector action by transposing: L → Lᵀ.
-# 2. Left-multiply by the vector to get the transformed vector: v' = v @ Lᵀ.
-def apply_lorentz(vector, L):
-    """Row-vector action  v' = v · Lᵀ."""
-    return vector @ L.T
+def apply_lorentz_row(v4, L4):
+    """Row-vector action: v' = v · Lᵀ."""
+    return v4 @ L4.T
 
-# --------------------------------------------------------------------------- #
-# 2.  Generators for an arbitrary unit axis  û
-# --------------------------------------------------------------------------- #
-u_hat = np.array([1.0, 1.0, 1.0])
-u_hat /= np.linalg.norm(u_hat)          # (1,1,1)/√3
-
-def boost_u(phi, u=u_hat):
-    """Lorentz boost mixing (t, û·r)."""
+# 2) Axis-specific 4×4 generators (boost along axis, rotation about axis)
+def boost_x(phi):
     ch, sh = np.cosh(phi), np.sinh(phi)
-    L = np.eye(4)
-    L[0,0] = ch
-    L[0, 1:]  = -sh * u                 # time–space
-    L[1:, 0]  = -sh * u
-    L[1:, 1:] += (ch - 1.0) * np.outer(u, u)  # spatial block
-    return L.astype(np.float64)
+    L = np.eye(4, dtype=np.float64)
+    L[0,0], L[0,1] = ch, -sh
+    L[1,0], L[1,1] = -sh, ch
+    return L
 
-def rot_u(theta, u=u_hat):
-    """Spatial rotation by θ about axis û (Rodrigues)."""
+def boost_y(phi):
+    ch, sh = np.cosh(phi), np.sinh(phi)
+    L = np.eye(4, dtype=np.float64)
+    L[0,0], L[0,2] = ch, -sh
+    L[2,0], L[2,2] = -sh, ch
+    return L
+
+def boost_z(phi):
+    ch, sh = np.cosh(phi), np.sinh(phi)
+    L = np.eye(4, dtype=np.float64)
+    L[0,0], L[0,3] = ch, -sh
+    L[3,0], L[3,3] = -sh, ch
+    return L
+
+def rot_x(theta):
     c, s = np.cos(theta), np.sin(theta)
-    ux, uy, uz = u
-    K = np.array([[  0, -uz,  uy],
-                  [ uz,   0, -ux],
-                  [-uy,  ux,   0]])
-    R3 = c * np.eye(3) + (1 - c) * np.outer(u, u) + s * K
-    L = np.eye(4)
-    L[1:, 1:] = R3
-    return L.astype(np.float64)
+    L = np.eye(4, dtype=np.float64)
+    # rotate (y,z)
+    L[2,2], L[2,3] = c, -s
+    L[3,2], L[3,3] = s,  c
+    return L
 
-# --------------------------------------------------------------------------- #
-# 3.  Minkowski Rotary Embedding Module (Precomputation)
-# --------------------------------------------------------------------------- #
- 
-DIM         = 512                         # embedding dim (== vector dim here)
-NUM_BLOCKS  = DIM // 4
+def rot_y(theta):
+    c, s = np.cos(theta), np.sin(theta)
+    L = np.eye(4, dtype=np.float64)
+    # rotate (z,x)
+    L[1,1], L[1,3] =  c, -s
+    L[3,1], L[3,3] =  s,  c
+    return L
 
-if DIM % 4 != 0:
-    raise ValueError(f"DIM ({DIM}) must be divisible by 4.")
+def rot_z(theta):
+    c, s = np.cos(theta), np.sin(theta)
+    L = np.eye(4, dtype=np.float64)
+    # rotate (x,y)
+    L[1,1], L[1,2] =  c, -s
+    L[2,1], L[2,2] =  s,  c
+    return L
 
-class MinkowskiRotaryEmbedding:
+def Lx_from_pos(t, x, omega):
+    phi   = omega * t
+    theta = omega * x
+    # Same-axis generators commute -> order irrelevant
+    return rot_x(theta) @ boost_x(phi)
+
+def Ly_from_pos(t, y, omega):
+    phi   = omega * t
+    theta = omega * y
+    return rot_y(theta) @ boost_y(phi)
+
+def Lz_from_pos(t, z, omega):
+    phi   = omega * t
+    theta = omega * z
+    return rot_z(theta) @ boost_z(phi)
+
+# 3) The Triad MonSTER module: cache per-position, per-frequency transforms
+DIM = 768                     # embedding dimension
+SLICE = 12                    # 3×(4D)
+assert DIM % SLICE == 0
+NUM_FREQ = DIM // SLICE       # 64
+
+class TriadMonSTER:
     """
-    Module to precompute and cache the Minkowski transformation matrices.
-    This is analogous to the RotaryEmbedding module that precomputes cos/sin tables.
+    Precompute block-diagonal Lorentz rotors for x/y/z axes per frequency.
+    Each frequency contributes 12 dims = [X 4D | Y 4D | Z 4D].
     """
-    def __init__(self, dim, base=10000):
+    def __init__(self, dim=DIM, base=10000.0):
+        if dim % SLICE != 0:
+            raise ValueError(f"dim must be divisible by {SLICE}. Got {dim}.")
         self.dim = dim
-        self.num_blocks = dim // 4
-        self.base = base
-        # Precompute the inverse frequencies, one for each 4D block
-        self.inv_freq = 1.0 / (self.base ** (np.arange(0, self.dim, 4) / self.dim))
-        # Cache for storing precomputed transformation matrices for given positions
+        self.num_freq = dim // SLICE
+        self.base = float(base)
+        # One inverse-frequency per frequency bucket (shared across x/y/z)
+        # Classic RoPE-style geometric schedule across frequencies:
+        self.inv_freq = self.base ** ( - np.arange(self.num_freq, dtype=np.float64) / self.num_freq )
         self._cache = {}
 
-    def _L_from_position(self, s, idx):
-        """Helper to build L(s) for a specific frequency index."""
+    def forward(self, s):
+        """
+        For 4D absolute position s=(t,x,y,z), build a list of (Lx,Ly,Lz) 4×4 matrices
+        per frequency. Returns a Python list of length NUM_FREQ, each item is a tuple
+        (Lx, Ly, Lz).
+        """
         s = np.asarray(s, dtype=np.float64)
-        t, r = s[0], s[1:]
-        
-        freq = self.inv_freq[idx]
-        φ = t * freq
-        θ = (u_hat @ r) * freq
-        
-        return rot_u(θ) @ boost_u(φ)
+        if s.shape != (4,):
+            raise ValueError("position must be a 4D vector (t, x, y, z).")
+        key = tuple(s.tolist())
+        if key in self._cache:
+            return self._cache[key]
 
-    def forward(self, position_vector):
-        """
-        Takes a 4D position vector and returns a list of 4x4 transformation matrices.
-        
-        Args:
-            position_vector (np.ndarray): The 4D position vector 's'.
-            
-        Returns:
-            list[np.ndarray]: A list of NUM_BLOCKS (e.g., 128) 4x4 matrices.
-        """
-        # Use a tuple representation of the position vector as a hashable cache key
-        pos_key = tuple(position_vector)
-        
-        if pos_key in self._cache:
-            return self._cache[pos_key]
+        t, x, y, z = s
+        out = []
+        for j in range(self.num_freq):
+            om = self.inv_freq[j]
+            Lx = Lx_from_pos(t, x, om)
+            Ly = Ly_from_pos(t, y, om)
+            Lz = Lz_from_pos(t, z, om)
+            out.append((Lx, Ly, Lz))
+        self._cache[key] = out
+        return out
 
-        # If not cached, compute the list of transformation matrices
-        L_matrices = [self._L_from_position(position_vector, i) for i in range(self.num_blocks)]
-        
-        self._cache[pos_key] = L_matrices
-        return L_matrices
-
-# --------------------------------------------------------------------------- #
-# 4.  Function to Apply the Precomputed Transformations
-# --------------------------------------------------------------------------- #
-
-def apply_rope_minkowski(embedding_vector, precomputed_Ls):
+# 4) Apply block-diagonal triad transforms across the embedding
+def apply_monster_triad(emb, L_tables, dim=DIM):
     """
-    Applies the precomputed Minkowski transformations to a full embedding vector.
-    This is analogous to the apply_rotary_pos_emb function.
-    
-    Args:
-        embedding_vector (np.ndarray): The high-dimensional vector (e.g., 512-dim).
-        precomputed_Ls (list[np.ndarray]): The list of precomputed 4x4 matrices from the module.
-        
-    Returns:
-        np.ndarray: The transformed high-dimensional vector.
+    emb: (dim,) row vector
+    L_tables: list of (Lx,Ly,Lz) per frequency from TriadMonSTER.forward(...)
+    Returns transformed embedding of shape (dim,)
     """
-    if embedding_vector.shape[0] != DIM:
-        raise ValueError(f"Input embedding vector must have dimension {DIM}")
+    if emb.shape != (dim,):
+        raise ValueError(f"embedding must be shape ({dim},), got {emb.shape}")
+    if len(L_tables) * SLICE != dim:
+        raise ValueError("L_tables length doesn't match embedding dim.")
 
-    transformed_vector = np.zeros_like(embedding_vector)
+    out = np.empty_like(emb)
+    for j, (Lx, Ly, Lz) in enumerate(L_tables):
+        base = j * SLICE
+        # X slice
+        bx = emb[base+0 : base+4]
+        out[base+0 : base+4] = apply_lorentz_row(bx, Lx)
+        # Y slice
+        by = emb[base+4 : base+8]
+        out[base+4 : base+8] = apply_lorentz_row(by, Ly)
+        # Z slice
+        bz = emb[base+8 : base+12]
+        out[base+8 : base+12] = apply_lorentz_row(bz, Lz)
+    return out
 
-    for i in range(NUM_BLOCKS):
-        start, end = i * 4, (i + 1) * 4
-        block = embedding_vector[start:end]
-        
-        # Apply the i-th precomputed transformation to the i-th block
-        transformed_block = apply_lorentz(block, precomputed_Ls[i])
-        
-        transformed_vector[start:end] = transformed_block
-        
-    return transformed_vector
+# 5) Big Minkowski inner product for triad layout (sum of per-4D blocks)
+def minkowski_dot_big(u, v, dim=DIM):
+    if u.shape != (dim,) or v.shape != (dim,):
+        raise ValueError("inputs must be flat row vectors of length dim.")
+    total = 0.0
+    for i in range(0, dim, 4):
+        total += minkowski_dot4(u[i:i+4], v[i:i+4])
+    return total
 
-# --------------------------------------------------------------------------- #
-# 5.  Example Usage
-# --------------------------------------------------------------------------- #
+# ============================================================
+# Demo / tiny tests
+# ============================================================
+if __name__ == "__main__":
+    np.random.seed(0)
 
-if __name__ == '__main__':
-    # 1. Instantiate the embedding module once in your model's __init__
-    minkowski_rope = MinkowskiRotaryEmbedding(dim=DIM)
+    triad = TriadMonSTER(dim=DIM, base=10000.0)
 
-    # 2. In your model's forward pass, get the position vector for a token
-    #    This could be from a grid, a sequence index, etc.
-    position_s = np.array([10, 5, -3, 8]) # Example 4D position
+    # Random 4D absolute positions
+    s_q  = np.array([ 7.0,  5.0, -3.0,  2.0], dtype=np.float64)
+    s_k  = np.array([-4.0, -2.0,  6.0, -1.0], dtype=np.float64)
+    dskq = s_k - s_q          # relative displacement
 
-    # 3. Precompute the list of 4x4 transformation matrices for this position
-    #    This is analogous to getting the cos/sin tables.
-    L_matrices_for_s = minkowski_rope.forward(position_s)
-    
-    print(f"Generated {len(L_matrices_for_s)} transformation matrices for position {position_s}.")
-    print(f"Shape of the first matrix: {L_matrices_for_s[0].shape}")
+    # Precompute per-position transforms
+    L_abs_q = triad.forward(s_q)      # list of (Lx,Ly,Lz)
+    L_abs_k = triad.forward(s_k)
+    L_rel   = triad.forward(dskq)     # should give the "relative" operator
 
-    # 4. Get your query or key embedding vector
-    q_embedding = np.random.randn(DIM)
+    # Random embeddings (row vectors)
+    q = np.random.uniform(-0.6, 0.6, size=DIM).astype(np.float64)
+    k = np.random.uniform(-0.6, 0.6, size=DIM).astype(np.float64)
 
-    # 5. Apply the positional encoding
-    q_rotated = apply_rope_minkowski(q_embedding, L_matrices_for_s)
+    # Apply absolute transforms
+    q_abs = apply_monster_triad(q, L_abs_q)
+    k_abs = apply_monster_triad(k, L_abs_k)
 
-    print(f"\nOriginal embedding (first 8 elements): {q_embedding[:8]}")
-    print(f"Rotated embedding (first 8 elements):  {q_rotated[:8]}")
+    # Check RoPE-style identity:
+    # < L(s_q) q , L(s_k) k >_ηbig  ==  < q , L(s_k - s_q) k >_ηbig
+    lhs = minkowski_dot_big(q_abs, k_abs)
+    k_rel = apply_monster_triad(k, L_rel)
+    rhs = minkowski_dot_big(q, k_rel)
 
+    print("RoPE-style identity holds? ", np.allclose(lhs, rhs, rtol=1e-10, atol=1e-12))
+    print(f"lhs: {lhs:+.12f}  rhs: {rhs:+.12f}")
+
+    # Minkowski norm preservation per 4D block (Lorentz isometry)
+    # For each 4D slice, ||v||_η should be preserved by any Lx/Ly/Lz.
+    norms_before = [minkowski_dot4(q[i:i+4], q[i:i+4]) for i in range(0, DIM, 4)]
+    norms_after  = [minkowski_dot4(q_abs[i:i+4], q_abs[i:i+4]) for i in range(0, DIM, 4)]
+    print("Per-4D Minkowski norms preserved? ", np.allclose(norms_before, norms_after, rtol=1e-10, atol=1e-12))
+
+    # Quick shape sanity
+    print("NUM_FREQ:", NUM_FREQ, " | DIM:", DIM, " | SLICE per freq:", SLICE)

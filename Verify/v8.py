@@ -68,7 +68,7 @@ def apply_biquat(g, v):
 # 3.  RoPE-style inverse-frequency ladder
 # --------------------------------------------------------------------------- #
 DIM         = 4                         # embedding dim (== vector dim here)
-inv_freq    = 1.0 / (10000 ** (np.arange(0, DIM, 2) / DIM))  # length 2
+inv_freq    = 1.0 / (10000 ** (np.arange(0, DIM, 4) / DIM))  # length 4
 FREQ_INDEX  = 0                         # pick the lowest frequency for demo
 
 u_hat = np.array([1.0, 1.0, 1.0])

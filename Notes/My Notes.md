@@ -238,3 +238,16 @@ Flattening a grid to a sequence bakes in the *wrong geometry*. Neighbors in 2-D 
   * Prefer relative/functional encodings over absolute tables so models extrapolate to new H×W.
 
 If you want, I can sketch a tiny ablation plan (same model, swap 1-D RoPE vs axial RoPE vs x/y embeddings + relative row/col bias) to quantify the anisotropy hit on a toy 30×30 task.
+
+
+
+Ok, so here's what we're gonna do, we're gonna develop a few different encoding mechanisms so we can compare for ablation studies. Each will be on DIM so that we know token size isn't a confounding factor.
+
+Encoding 1:
+Full Isotropic Absolute-Relative Fusion 4D MonSTERs on DIM=768 with 12 dims per sub block where we take the absolute 4D position and inject it into three separate generators each using one of the cardinal axes as their rotation axis for commutativity.
+
+Encoding 2:
+Two orthogonal 4D MonSTERs using two orthogonal generator axes, where the axes are computed using a fibonacci lattice position per num blocks where num blocks is DIM // 8
+
+Encoding 3:
+Pure/standard multidimensional RoPE with 2d sub blocks per t,x,y,z dimensions.
