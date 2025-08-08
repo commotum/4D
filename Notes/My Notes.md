@@ -140,3 +140,101 @@ Split into three major camps:
 
 
 aw + bw + cw + dw + ax + bx + cx + dx + ay + by + cy + dy + az + bz + cz + dz
+
+
+In the paper and, as far as I can tell, in the code, the authors seem to be saying that they flatten each 2d grid to a 1d sequence. In my mind this seems like it could really hurt the ability of the model to learn spatial relationships. Tokens/pixels/cells that are proximal/touching might be rated as distant. For example in a 30x30 grid tokens A1 and A2 have a delta of 30! Even though they're right next to each other. This delta reduces their attention scores one to another, even though they're highly related, forcing the model to learn those relationships for itself. 
+
+Am I misunderstanding what the authors are doing? Is there some advantage to having it be sequential that I'm missing (besides the fact that it's standard to do so)? Or are they splitting the RoPE into dimensions so every 4 dimensions are really pairs of 2 dims for x and 2 dims for y? It doesn't seem like it.
+
+Short answer: you’re reading it right. They **do** linearize each 2-D grid into a 1-D token sequence, and they use **standard 1-D RoPE**, not a 2-D (x/y-split) variant.
+
+* The paper frames everything as sequence-to-sequence and lists Rotary Positional Encoding as a Llama-style enhancement (no mention of a 2-D RoPE).
+* The default config in the repo literally sets `pos_encodings: rope`.
+* In code, RoPE is applied with `cos`/`sin` shaped **\[seq\_len, head\_dim]** and is mixed into Q/K once—i.e., a single 1-D position stream, not split per axis.
+* On the data side, ARC uses a fixed **30×30** canvas (so `seq_len = 900`).
+* They augment the grid before flattening by *adding a rightmost column and bottom row of EOS tokens* and optional random top-left padding; this creates explicit row/column “breaks” so the sequence doesn’t falsely treat the end of one row as adjacent to the start of the next.
+
+### Does that hurt spatial relations?
+
+It’s anisotropic, yes:
+
+* In their (row-major) flattening, **horizontal neighbors** differ by 1 position; **vertical neighbors** differ by 30. So vertical adjacency is a larger relative offset in the RoPE phase space than horizontal. But attention is still *global*—there’s no built-in distance decay like ALiBi—so the model can still attend across any offset if the content warrants it. RoPE makes attention depend on **relative** offset, not monotonically suppress large absolute distances by design. The extra EOS border also prevents spurious “neighbors” across line breaks, which helps.
+
+### Why make it sequential anyway?
+
+Three practical wins they lean on:
+
+1. **Reuse mature transformer plumbing** (FlashAttention, standard blocks), keep everything seq2seq, and keep the interface uniform across ARC, Sudoku, and Maze.
+2. **Data augmentation compensates**: they use dihedral symmetries and translations so the model sees many geometric variants, which helps it *learn* invariances instead of baking them into the positional scheme.
+3. The **HRM recurrence** (H/L cycles) is where they put the “reasoning”—multiple iterations over the same sequence let the network refine spatial hypotheses even if the positional encoding is 1-D.
+
+### Are they splitting RoPE dims (x/y) every few channels?
+
+No. There’s no 2-D RoPE or axial split in the code/config; it’s plain 1-D RoPE, and in one run they even switch to **learned** positions (again, still 1-D) via `arch.pos_encodings=learned`.&#x20;
+
+If you want tighter inductive bias for 2-D structure, obvious drop-ins would be: 2-D RoPE/axial RoPE, learned **x/y** embeddings added separately, relative position biases factored along rows/cols, or local+global block attention. But as written, HRM opts for “simple 1-D sequence + augmentation + iterative reasoning,” and their results suggest it’s enough for the tasks they target.
+
+
+
+# Drawbacks of sequential (1-D) encodings for 2-D spatial data
+
+## TL;DR
+
+Flattening a grid to a sequence bakes in the *wrong geometry*. Neighbors in 2-D aren’t consistently neighbors in 1-D, so the model has to *learn* the 2-D topology from scratch. That usually means worse sample-efficiency, anisotropic biases, and brittleness to shape changes—unless you add compensating tricks.
+
+## Core drawbacks
+
+* **Anisotropy of “distance”.** In row-major order, horizontal neighbors differ by **1**, vertical neighbors by **W** (e.g., 30). With RoPE/relative schemes, attention similarity becomes a function of this offset, so vertical relations are implicitly “farther” than horizontal ones—even when equally local in 2-D.
+
+* **Row/column boundary artifacts.** Tokens at the end of row *i* and start of row *i+1* become artificially adjacent in 1-D, while true vertical neighbors are separated by **W**. If you don’t insert explicit separators/borders, you get spurious couplings.
+
+* **Loss of 2-D inductive bias.** The transformer sees a path graph, not a grid. It must rediscover the 4- or 8-neighborhood structure (and symmetries like translations/rotations) from data, increasing sample complexity.
+
+* **Ordering bias.** The scan path (row-major vs column-major vs Hilbert curve) imprints a bias that has nothing to do with the task. Models can overfit to artifacts of that order.
+
+* **Poor equivariance/invariance.** Rotations, flips, and translations produce *very* different 1-D index patterns. Without explicit augmentation or architectural bias, generalization across viewpoints suffers.
+
+* **Generalization to new shapes is brittle.** Absolute learned positions tied to a specific sequence length don’t transfer to different widths/heights; even 1-D RoPE encodes offsets in steps of the 1-D index, not (dx, dy).
+
+* **Ambiguity across scales.** If you resize or pad the canvas, previously local relations can become “distant” in 1-D index space, shifting the model’s learned relational priors.
+
+* **Inefficient use of capacity.** Heads end up learning to *reconstruct coordinates/topology* before modeling content relationships, stealing parameters and layers from the actual task.
+
+*(Note:* plain softmax attention doesn’t hard-block long-range links, but with 1-D relative encodings the similarity structure still depends on that 1-D offset; methods like ALiBi further impose monotone distance penalties that exacerbate anisotropy.)
+
+## When this hurts the most
+
+* Grids with **high aspect ratio** or **large W/H** (the W-step jump is big).
+* Tasks where **vertical and horizontal cues are equally important** (e.g., mazes, cellular automata, segmentation).
+* **Low-data regimes**, where you can’t rely on augmentation to teach the geometry.
+
+## Practical mitigations
+
+* **Use 2-D positional schemes.**
+
+  * Axial/2-D RoPE (separate rotations for x and y, then combine).
+  * Learnable **x/y coordinate embeddings** added to tokens (and optionally interactions via relative biases factored along rows/cols).
+
+* **Constrain attention with locality.**
+
+  * Windowed or block-sparse attention aligned to the grid; add dilations/strides for multiscale context.
+  * Mix local (conv/SwIN-style) and global heads.
+
+* **Encode structure explicitly.**
+
+  * Provide (dx, dy) **relative position biases** (Manhattan/Chebyshev), or a **grid-graph** attention (edges to N/S/E/W neighbors).
+  * Append raw **(x, y)** channels to the token features.
+
+* **Handle boundaries.**
+
+  * Insert **row/column separators** or EOS borders to prevent false neighbors across line breaks.
+
+* **Data augmentation for symmetry.**
+
+  * Dihedral group (rotations/reflections), translations, and random crops to reduce reliance on scan order.
+
+* **Shape-robust positions.**
+
+  * Prefer relative/functional encodings over absolute tables so models extrapolate to new H×W.
+
+If you want, I can sketch a tiny ablation plan (same model, swap 1-D RoPE vs axial RoPE vs x/y embeddings + relative row/col bias) to quantify the anisotropy hit on a toy 30×30 task.
