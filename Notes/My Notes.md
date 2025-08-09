@@ -251,3 +251,41 @@ Two orthogonal 4D MonSTERs using two orthogonal generator axes, where the axes a
 
 Encoding 3:
 Pure/standard multidimensional RoPE with 2d sub blocks per t,x,y,z dimensions.
+
+
+Short answer: yeah—this is a legit 4D, Lorentz-metric version of Su’s “absolute → relative” fusion trick, and you implemented it cleanly.
+
+Here’s why your construction matches RoPE’s idea, just in Minkowski space:
+
+* Su’s RoPE applies an **absolute** transform $f(\cdot,m)$ to $q$ and $k$ such that the **dot** only depends on the **relative** offset:
+  $(R_m q)^\top (R_n k)=q^\top R_{n-m}k$.&#x20;
+  He frames this as “achieving relative encoding via an absolute operation.”&#x20;
+* You replaced the Euclidean-orthogonal rotations $R_m$ with **η-orthogonal** Lorentz maps $L(s)$ (boost+rotation) on each 4D block and use the **Minkowski** inner product. Provided $L(\cdot)$ comes from generators $G$ that satisfy $G^\top \eta+\eta G=0$ (true for your boost $K_i$ and same-axis rotation $J_i$), we have the exact identity
+  $(L(s_q)q)^\top \eta (L(s_k)k)=q^\top \eta\,L(s_k-s_q)k,$
+  which is the η-metric analog of Su’s Eq. (12). Conceptually, it’s the same fusion: absolute transforms on $Q,K$ collapse to a relative transform inside the dot.&#x20;
+
+Why your code is coherent
+
+* **Commuting generators (good):** In each 4D block you compose a boost along an axis with a rotation about the *same* axis. Those commute ($[J_i,K_i]=0$), so $L(\phi,\theta)=e^{\phi K_i}e^{\theta J_i}=e^{\phi K_i+\theta J_i}$. That’s exactly what lets $L(s_q)^\top \eta L(s_k)=\eta L(s_k-s_q)$ factor cleanly.
+* **Block-diagonal design (good):** Your 12-dim bucket is $[X4|Y4|Z4]$, each acted on by its own $L_x, L_y, L_z$. Blocks act on disjoint coordinates → they commute globally as well. Summing per-block Minkowski products in `minkowski_dot_big` matches a big block-diagonal metric.
+* **Parameter additivity (good):** You scale the parameters by the inverse-frequency ladder and a global unit. Since angles/rapidities are linear in $(t,x,y,z)$, the “relative = difference of absolutes” property holds per frequency.
+* **You even checked it:** the `lhs ~ rhs` test and the per-block norm preservation are the right sanity checks (and they’ll pass to machine epsilon if everything is set up as above). This mirrors Su’s derivation that absolute rotations yield relative dependence inside the dot. &#x20;
+
+Tiny nits / suggestions
+
+* **Rotation sign in `apply_block_y`:** Your $y$-axis rotation uses
+  $x' = c\,x - s\,z,\; z' = s\,x + c\,z$, i.e., a rotation by $-\theta_y$ under the usual right-hand convention. That’s fine (consistency matters more than convention), because you apply the *same* mapping to both $q$ and $k$ and you also build $L(s_k-s_q)$ with the same sign convention—so the identity still holds exactly. Just note it in the docstring so future-you doesn’t “fix” it and accidentally break consistency.
+* **Numerics:** With your $\phi=(t\,u)\lambda_j$ and $\lambda_j\le 1$, `cosh/sinh` won’t overflow, but if you ever change scales, clamp $|\phi|$ (e.g., ≤ 10) to be safe.
+* **Vectorization (optional):** If you care about speed, reshape `emb` to `(NUM_FREQ, 3, 4)` and apply the closed-forms across all `j` in one shot. You already did the important part—**scalar tables**—so this is gravy.
+* **Autograd:** To use this in PyTorch/JAX, rebuild `forward` with framework ops (no NumPy) so angles/rapidities are differentiable wrt $(t,x,y,z)$ or even trainable scalings.
+
+When would the identity break?
+
+* If you mix **non-commuting** generators in the same subspace (e.g., rotate about $x$ and then boost along $y$ within the *same* 4D block), the clean $s_k-s_q$ fusion won’t hold.
+* If you couple coordinates **across** your 4D blocks (i.e., off-block terms), you’d lose the blockwise factorization that your proof relies on.
+
+Mapping to Su’s terminology
+
+* Su explicitly shows that applying absolute rotations to $Q,K$ makes the **attention score depend only on the relative offset** (his Eq. 12). Your code is the same story with Lorentz isometries and the Minkowski inner product, so it’s a faithful generalization of the “fusion style” to 4D spacetime blocks. &#x20;
+
+If you want, I can help you add a short proof sketch to your file (show $A^\top\eta A=\eta$ for each `apply_block_*` and then derive $L(s_q)^\top\eta L(s_k)=\eta L(s_k-s_q)$), or port this to PyTorch with vectorization.
