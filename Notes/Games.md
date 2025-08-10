@@ -1,45 +1,78 @@
-# Competition - Linguistic
+# Game and Puzzle Taxonomy
 
-- Scrabble
+A categorized list of games and puzzles, organized by type and domain.
+
+---
+
+## 1. Single Player Games
+
+### 1.1 Linguistic
+
+- **Crossword**
+- **Hangman**
+- **Wordle**
+- **Cryptogram**  
+  _Example:_ `"YVCCF, RJSY!" → "HELLO, JAKE!"`
+- **Word Ladder**  
+  _Example:_ `COLD → CORD → CARD → WARD → WARM`
+- **Rebus Puzzle**  
+  _Example:_ `👁️🐝M`, `🌧️🏹`
+
+### 1.2 Spatial
+
+- **Sudoku**
+- **Killer Sudoku**
+- **Minesweeper**
+- **Tetris**
+- **Snake**
+- **Breakout**
+- **Rubik's Cube**  
+  _All variations, including 2×2 – 17×17_
+- **Jigsaw Puzzles**
+- **Sliding-Tile Puzzles**  
+  _Examples: 15-puzzle, Rush Hour_
+- **Towers of Hanoi**
+- **Nonograms**
+- **Solitaire**
 
 
-# Puzzle - Linguistic
+### 1.3 Strategic
 
-- Crossword
-- Hangman
-- Wordle
-- Cryptogram ("YVCCF, RJSY!" → "HELLO, JAKE!")
-- Word Ladder (COLD → CORD → CARD → WARD → WARM)
-- Rebus Puzzle (👁️🐝M, 🌧️+ 🏹)
-- Scattegories?
-- Cards Against Humanity
+- **PAC-MAN**
 
+---
 
-# Puzzle - Spatial
+## 2. Multiplayer Games
 
-- Sudoku
-- Tetris
-- Rubik's Cube (all variations, incl. 2×2 – 17×17)
-- Jigsaw puzzles
-- Sliding-tile puzzles (15-puzzle) (Rush hour)
-- Towers of Hanoi
+### 2.1 Linguistic
 
+- **Scrabble**
+- **Boggle**
+- **Bananagrams**
+- **Taboo**
+- **Codenames**
+- **Scattegories**
+- **Cards Against Humanity**
+- **Pictionary**
 
+### 2.2 Spatial
 
-# Competition - Spatial
+- **Tic-Tac-Toe**
+- **Connect Four**
+- **Chess**
+- **Checkers**
+- **Go**
+- **Battleship**
+- **Memory**
+- **Pong**
 
-- Tic-Tac-Toe
-- Chess
-- Checkers
-- Go
-- Connect Four
+### 2.3 Strategic
 
-
-# Competition - Strategic
-
-- Settlers of Catan
-- Monopoly
-- Pokemon
+- **Settlers of Catan**
+- **Monopoly**
+- **Pokemon**
+- **Keep Talking and Nobody Explodes**
+- **Among Us**
 
 
 

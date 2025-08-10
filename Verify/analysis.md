@@ -6,6 +6,9 @@
     2. [Rotary Position Embedding (RoPE) Implementation](#22-rotary-position-embedding-rope-implementation)
 3. [Discussion: How Attention Learns Sudoku Structure](#section-3-discussion--how-attention-learns-sudoku-structure)
 
+4. [Key Insights from the Dataset Scripts](#section-4-key-insights-from-the-dataset-scripts)
+
+
 ---
 
 ## Section 1: Review of RoPE Generalization to 4D Relativistic Framework
@@ -167,3 +170,57 @@ The Transformer's power comes from its ability to learn these complex, non-local
     - **Heads 3 and 4** might learn the even more complex, scattered pattern of indices required to enforce the 3x3 box constraints.
 
 So, you are correct to be skeptical. The 1D flattening **loses the explicit 2D structure**. However, the structure is still present *implicitly* in the sequence's patterns. The self-attention mechanism, guided by the precise relative positional information from RoPE, is powerful enough to rediscover these implicit 2D rules from the 1D data.
+
+---
+
+## Section 4: Key Insights from the Dataset Scripts
+
+The provided scripts for dataset generation (notably `build_sudoku_dataset.py`, `puzzle_dataset.py`, and `common.py`) reveal several important design patterns and implementation details relevant to how Sudoku, maze, and ARC datasets are prepared for model training.
+
+### 4.1 General Structure and Approach
+
+- **Dataset Construction:**  
+  Each puzzle type is wrapped as an iterable PyTorch dataset, with associated metadata such as vocabulary size, padding ID, and sequence length. This structure supports efficient batching and integration with standard PyTorch data loaders.
+
+- **Puzzle Grouping:**  
+  Puzzles are grouped by their original source (e.g., before augmentation), and indices are maintained to facilitate batching and shuffling.
+
+- **Augmentation Strategies:**  
+  - **Mazes/ARC:** Use dihedral group transformations (rotations, flips, mirrors) implemented in `common.py` to generate augmented variants.
+  - **Sudoku:** Uses custom augmentations, including:
+    - Random digit remapping (permuting 1–9)
+    - Transposing the grid
+    - Shuffling row and column bands (groups of three)
+  These augmentations increase dataset diversity and help prevent overfitting.
+
+- **Difficulty Handling:**  
+  There are no global or explicit "difficulty" parameters in the codebase. Instead, difficulty is handled per-script, typically via command-line arguments or filtering logic.
+
+### 4.2 Sudoku Dataset Details
+
+- **Source:**  
+  The Sudoku dataset is pulled from the Hugging Face repository `"sapientinc/sudoku-extreme"`, which is actually titled "Hardest Sudoku Puzzle Dataset V2" on Hugging Face. This dataset contains a mix of easy and very hard 9x9 puzzles, with a strong emphasis on "extreme" difficulty puzzles sourced from community forums and curated collections.
+
+- **Difficulty Measurement:**  
+  Each puzzle in the CSV includes a `rating` field, which quantifies difficulty as the number of backtracks required by the `tdoku` solver (higher values indicate harder puzzles, with some exceeding 105 backtracks). The terms "hard" and "extreme" are not defined by explicit variables or comments in the code; rather, they are reflected in output directory names and the source IDs in the dataset.
+
+- **Data Loading and Processing:**  
+  - The script loads a CSV with columns: `source`, `q` (the puzzle as a flattened string, with `.` for blanks), `a` (the solution), and `rating`.
+  - Puzzles are converted to 9x9 NumPy arrays, using 0 for blanks and 1–9 for filled cells.
+  - **Optional Filtering:**  
+    The `--min_difficulty` argument (default: None) allows filtering to include only puzzles with a `rating` above a specified threshold.
+  - **Subsampling:**  
+    The `--subsample-size` argument enables random selection of a subset of puzzles (e.g., 1000 for a 1k dataset).
+  - **Augmentation:**  
+    The `--num-aug` argument (default: 0) specifies how many augmented variants to generate per puzzle (applied only to the training set). Augmentations include digit remapping, transposing, and row/column band shuffling.
+  - **Output:**  
+    By default, the processed data is saved to `data/sudoku-extreme-full`, but custom output directories (e.g., `data/sudoku-extreme-1k-aug-1000`) are supported for subsampled or augmented datasets.
+
+### 4.3 Summary
+
+- The scripts are modular and dataset-agnostic, supporting a variety of puzzle types with flexible augmentation and filtering.
+- Difficulty is not hard-coded but is instead inferred from metadata and controlled via script arguments.
+- The distinction between "hard" and "extreme" puzzles is embedded in the dataset's source and output structure, not in the code logic itself.
+- Augmentation strategies are tailored to each puzzle type, with Sudoku receiving custom logic to preserve puzzle validity while maximizing diversity.
+
+---
