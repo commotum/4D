@@ -1,5 +1,5 @@
 # Hierarchical Reasoning MonSTERs
-## Structural Embeddings for Native Space-Time Intelligence
+## Minkowski Space-Time Embedding Rotors for Native Spatial and Temporal Intelligence
 **Jacob Peterson**  
 *peterj29@oregonstate.edu*
 
@@ -85,7 +85,9 @@ These structural (not positional) embeddings remove the blinders that previously
 
 These structural (not positional) embeddings remove the blinders that previously kept transformers from isotropically handling multidimensional tokens.
 
+## Structural Encoding through Minkowski Space-Time Embedding Rotors
 
+## Structural Embeddings for Native Space-Time Intelligence
 
 # Type and Value Embeddings
 
