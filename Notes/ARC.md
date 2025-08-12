@@ -183,3 +183,15 @@ Run the **unified** code to produce the predicted output grid and submit.
 | Visual evaluation  | SSIM + LPIPS                               |
 | Logging            | JSONL or SQLite                            |
 
+
+
+| Grid Data         |  Time Step  |
+|-------------------|-------------|
+| Example Input  1  | Time Step 1 |
+| Example Output 1  | Time Step 2 |
+| Example Input  2  | Time Step 3 |
+| Example Output 2  | Time Step 4 |
+| Example Input  3  | Time Step 5 |
+| Example Output 3  | Time Step 6 |
+| Test Input        | Time Step 7 |
+| Test Output       | Time Step 8 |
