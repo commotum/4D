@@ -1,11 +1,40 @@
-# MonSTERs and Their Unextolled Virtues
-## Structural Embeddings for Native Space-Time Intelligence
+#   MonSTERs
+##  Structural Embeddings for Native Space-Time Intelligence
+### A Four-Dimensional Extension of RoPE with Minkowski Space-Time Embedding Rotors
+
 **Jacob Peterson**  
 *peterj29@oregonstate.edu*
 
 ---
 
 ### Abstract
+
+Unlike Recurrent and Convolutional models, Transformer architectures have no 
+intrinsic notion of order or geometry. The same parallism that brings such drastic speed upsSelf-attention alone is permutation-invariant 
+and cannot infer positions without dedicated positional encodings.
+
+
+an additional positional
+encoding mechanism of some form. 
+
+
+ some form of additional 
+addition of have no 
+built-in sense of order or geometry
+
+
+Self-attention computes interactions between all token pairs simultaneously, allowing Transformers to process entire sequences in parallel rather than step-by-step as in recurrent models. This parallelism is a key factor behind their scalability and efficiency, enabling constant-depth computation regardless of sequence length. However, it comes at a cost: the attention mechanism itself is agnostic to the arrangement of tokens. Because each position is treated identically in the raw computation, self-attention is inherently permutation-invariant—it produces the same outputs if the input tokens are shuffled. As a result, Transformers have no intrinsic ability to track order or geometry; such information must be supplied explicitly through positional encodings or structural modifications to the attention mechanism.
+
+
+
+Transformer architectures differ fundamentally from recurrent and convolutional models in that self-attention alone is permutation-invariant: it has no intrinsic notion of order or geometry. To make sense of sequences or spatial structures, Transformers rely on positional encodings—auxiliary signals that inject information about token relationships into the model’s representation space. Existing approaches fall into two broad classes: absolute encodings, which append explicit position indices to the input, and relative encodings, which modify the attention mechanism itself to compute position-dependent weights. While these strategies have enabled remarkable performance in language and other sequential domains, their design implicitly assumes that data is one-dimensional, linear, and temporally ordered.
+
+Unlike RNNs and CNNs, Transformers have no built-in sense of order or geometry. Self-attention treats its inputs as a bag of tokens, blind to where each came from unless we tell it. That’s why positional encodings are essential: they inject the missing clues about how tokens relate to each other. Broadly, there are two ways to do this—absolute encodings, which tag each token with a fixed position, and relative encodings, which tweak attention so it can compare positions directly. Both approaches work well in linear, one-dimensional settings, but they quietly assume that’s all the world is.
+
+models such as RNNs and CNNs, Transformer Models require some form of positional encoding because pure Attention module cannot capture the input order
+
+
+the addition of positional encoding is essential for the Transformer model because a pure Attention module cannot capture the input order, i.e., it cannot distinguish between Tokens at different positions. For this, we have roughly two choices: 1. Find a way to integrate position information into the input, which constitutes the general approach of **absolute positional encoding**; 2. Find a way to fine-tune the Attention structure so that it has the ability to distinguish Tokens at different positions, which constitutes the general approach of **relative positional encoding**.
 
 With its toy-scale visual tasks, the 2019 ARC-AGI benchmark again laid bare the jagged[^1] nature of AI performance first highlighted by Moravec in the 1980s[^2]. Despite impressive linguistic capabilities, leading models of the time demonstrated a pronounced inability to process or reason about visual information. To date, enormous progress on numerous cognitive benchmarks has failed to translate to spatial domains. The root of this persistent limitation is architectural: modern transformers inherently encode information as strictly linear, unidimensional sequences.
 
@@ -58,7 +87,9 @@ These structural (not positional) embeddings remove the blinders that previously
 
 These structural (not positional) embeddings remove the blinders that previously kept transformers from isotropically handling multidimensional tokens.
 
+## Structural Encoding through Minkowski Space-Time Embedding Rotors
 
+## Structural Embeddings for Native Space-Time Intelligence
 
 # Type and Value Embeddings
 
