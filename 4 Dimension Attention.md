@@ -1,5 +1,7 @@
-# Hierarchical Reasoning MonSTERs
-## Minkowski Space-Time Embedding Rotors for Native Spatial and Temporal Intelligence
+#   MonSTERs
+##  Structural Embeddings for Native Space-Time Intelligence
+### A Four-Dimensional Extension of RoPE with Minkowski Space-Time Embedding Rotors
+
 **Jacob Peterson**  
 *peterj29@oregonstate.edu*
 
