@@ -21,6 +21,8 @@ A categorized list of games and puzzles, organized by type and domain.
 ### 1.2 Spatial
 
 - **Sudoku**
+- each row, column, and subsquare added up to the same number.
+- **Futoshiki**
 - **Killer Sudoku**
 - **Minesweeper**
 - **Tetris**
@@ -34,6 +36,7 @@ A categorized list of games and puzzles, organized by type and domain.
 - **Towers of Hanoi**
 - **Nonograms**
 - **Solitaire**
+- **Str8ts**
 
 
 ### 1.3 Strategic
