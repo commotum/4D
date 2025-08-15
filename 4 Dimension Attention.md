@@ -1,4 +1,4 @@
-#   MonSTERs
+# My MonSTERs & Me
 ##  Structural Embeddings for Native Space-Time Intelligence
 ### A Four-Dimensional Extension of RoPE with Minkowski Space-Time Embedding Rotors
 

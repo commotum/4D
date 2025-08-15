@@ -29,6 +29,9 @@ demonstrate a failure to generalize understanding of spatial structures and rela
 
 
 
+
+
+
 Modern transformer architectures ingest data as linear token streams, relying on sinusoidal or learned positional encodings to signal order. While adequate for modeling sequential tasks such as language, when faced with viseo-spatial modeling tasks the very nature of these architectures imposes a paradigm for data of  “flatten-and-index” requirement this inherently one-dimensional timeline collapses richer spatial and relational structures, deleting, deforming, or obfuscating information critical for faithfully interpreting complex problem spaces.
 
 
