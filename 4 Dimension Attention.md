@@ -109,6 +109,8 @@ Quaternion algebra is abundantly covered in existing literature, and the cited r
 Quaternions came from Hamilton after his really good work had been done, and though beautifully ingenious, have been an unmixed evil to those who have touched them in any way.
 - Lord Kelvin
 
+Encode 2D (x,y) for rows/cols, avoiding 1D snaking artifacts.
+
 
 # The Surprisingly Virtuous Nature of MonSTERs and "Unmixed Evils"
 
