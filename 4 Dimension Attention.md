@@ -128,7 +128,23 @@ Encode 2D (x,y) for rows/cols, avoiding 1D snaking artifacts.
 
 This paper introduces a novel approach to attention-based transformer architectures, embedding spacetime structures natively via Minkowski Space-Time Embedding Rotors (MonSTER)."
 
+Spatiotemporal Augmentation: Leverage MonSTERs by adding time dimension: Treat trajectories as 4D (t=step, x/y=grid coords, z=channels for values/markers). Augment with perturbations (e.g., noisy initial states, partial observability) to force spatiotemporal reasoning.
 
+4. Training Paradigm: Blending Autoregressive, RL, and Diffusion
+Your idea of "next state prediction over world model + console" is spot-on—it echoes world models in RL (e.g., Dreamer), but with supervised traces. Make it unlike/pLike all three:
+
+Core Loop: Train autoregressively on trajectories. At each step:
+
+Input: Current state (domain + console + indicatrix).
+Output: Predict next console tokens (e.g., reasoning/action like "Assign R6C1=8").
+Then, predict next domain/indicatrix states directly (like diffusion: denoise/predict updates).
+Loss: Cross-entropy on console tokens + MSE/L1 on predicted vs. ground-truth next states (from applying action to current domain).
+This creates a "consistency" loss: Model learns to align its imagined updates with action outcomes, like RL's model-based planning.
+
+
+RL Flavor: Fine-tune with RLHF/PPO on self-generated rollouts: Reward for solving puzzles correctly/fast, penalize invalid states. Use console for "policy" (action selection), domain predictions for "value/model".
+Diffusion Flavor: Treat state updates as noising/denoising: Add noise to domain, have model denoise via console reasoning. Or, diffuse over indicatrix markers to "focus" progressively.
+Why This Works: It's beyond next-token: Encourages planning (predict far states), correction (backtrack via console), and emergence (spatiotemporal patterns via MonSTERs). Start supervised on CSP traces, then self-supervised on perturbations.
 
 Introducing Minkowski Space Time Embedding Rotors (MonSTER) a 4D generalization of RoPE (Rotary Position Embedding), computing Minkowski-metric-respecting relative positional encodings for transformer attention. Built upon the principles of the real Clifford algebra Cl(1,3) with a (+, -, -, -) metric signature, MonSTER extends RoPE's 2D rotations to full 4D Lorentz transformations. This version calculates a unique 4D Lorentz transformation, R_eff, based directly on the relative spacetime displacement ΔP = (Δt, Δx, Δy, Δz) between query and key elements. This R_eff is generated block-wise using different frequencies for multi-scale representation, similar to RoPE's frequency-based approach but generalized to spacetime. The resulting R_eff matrices modulate attention scores, typically within a Minkowski dot product. This ensures that the same displacement ΔP consistently yields the same geometric transformation influencing attention.
 

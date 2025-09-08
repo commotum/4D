@@ -5,6 +5,8 @@ All training pairs share a *hidden* visual transformation.
 After observing these examples, the model receives **one further input grid** whose correct output is withheld.
 The objective is to **predict that withheld output** by inferring and applying the common transformation.
 
+ARC-AGI tasks are explicitly few-shot/meta-learning problems. Each task provides 3-5 correlated input-output grid pairs (demonstrations) that share a hidden visual transformation rule. The model must infer this rule from the correlations across examples and apply it to a new test input. This requires treating the task as a holistic "episode" where inter-example relationships (e.g., how the transformation evolves or is consistent across pairs) are key.
+
 ---
 
 # The Dataset
