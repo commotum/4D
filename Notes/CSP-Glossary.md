@@ -15,3 +15,6 @@
 | **subset**                                  | Rule family exploiting groups of candidates (e.g., naked/hidden pairs, triples) to eliminate others.                                                 | Classic subset techniques in puzzles like Sudoku; synonymous with **set constraints** in CSP.      |
 | **ECP (Elementary Constraint Propagation)** | Core propagation step that removes candidates conflicting with asserted c-values or constraints.                                                     | Equivalent to standard **constraint propagation** in CSP algorithms.                               |
 | **T\&E (Trial and Error)**                  | Strategy where a candidate is tentatively asserted, consequences are explored, and contradictions backtrack.                                         | Known as **backtracking** or **guess and check** in CSP literature.                                |
+
+
+https://chatgpt.com/s/cd_68c780f6528c819193687bbc75882619
