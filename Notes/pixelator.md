@@ -165,3 +165,20 @@ function userDraw(g, ctx) {
 }
 // —— End user area ——
 
+
+
+
+function setup() {
+  createCanvas(512,512, WEBGL);
+}
+
+function draw() {
+  let c1 = color(0, 0, 0)
+  background(c1);
+  let options = {freeRotation: true};
+  orbitControl(1, 1, 1, options);
+  normalMaterial();
+  box(120, 200);
+}
+
+// is there a way to set "units" to make things easy? as constants?
