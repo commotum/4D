@@ -64,3 +64,31 @@ Next Steps:
 2. Sudoku Solver
 3. Slitherlink
 4. 
+
+---
+
+Critiques:
+
+Step 2 — Differentiable token selection (no RL yet)
+
+Add a tiny selector head that scores tokens; keep all console & header tokens, and select Top‑K from the rest (K as a fraction of the context). Use hard Top‑K with straight‑through gradient. Train end‑to‑end with the standard HRM loss; add an L1/KL sparsity penalty to prefer fewer tokens.
+
+
+2) Why multi‑grid concat probably degraded for you
+
+Your diagnosis (RoPE distortion + padding + compute) is plausible, but I’d second‑guess and add two more culprits that are visible in the current pipeline:
+
+Labeling pressure on demo outputs. If you concatenate (demo_in, demo_out, …, test_in, test_out_masked) and train with a uniform seq‑to‑seq loss, the model is over‑incentivized to simply copy/denoise demo outputs rather than infer rules for the test. You need to mask out loss on demo outputs or drastically down‑weight them.
+
+No structural “junctions”. Concatenation without explicit junction tokens (per‑pair “summary” tokens that serve as cross‑grid hubs) turns the problem into long‑range all‑to‑all attention. HRM’s big wins come from recurrent computation depth with controlled interfaces (H/L cycles + ACT), not from raw context. Give it clean interfaces.
+
+(You can see how the current HRM keeps sequences short, uses per‑puzzle embeddings, and then relies on ACT for “how long to think,” not “how wide to attend.” Figures 3–5 & §2.
+
+
+5) Bootstrapping with CSPs: great, but watch distribution shift
+
+It’s a solid way to pretrain scope‑trigger‑action habits. Two caveats:
+
+Visual/statistical shift: ARC’s colored blobs and object induction differ from digit grids and constraints. Pretrain perception primitives that segment connected components and compute object sets, not just symbolic moves.
+
+Solver bias: you’ll inherit heuristics of your solvers (e.g., singletons in Sudoku). Mix in self‑play perturbations (add distractions, color remaps, object splits) as you suggest, and include counterfactual negatives (states where the same trigger should not fire) to regularize.
