@@ -579,3 +579,11 @@ If you’d like, I can:
 
 1. add a Numba-accelerated `sandwich(v, rotor)` kernel, or
 2. a tiny benchmark script so you can compare `vecs @ L.T` vs. a direct sandwich on your machine. Which would you prefer?
+
+
+
+
+
+
+
+
