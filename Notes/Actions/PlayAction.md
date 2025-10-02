@@ -1,3 +1,17 @@
+# PlayAction - Schema.org Type
+
+**Description:**
+The act of playing/exercising/training/performing for enjoyment, leisure, recreation, competition, or exercise.
+
+**Related actions:**
+
+* [ListenAction](https://schema.org/ListenAction): Unlike ListenAction (under ConsumeAction), PlayAction refers to **performing** for an audience or event, not consuming music.
+* [WatchAction](https://schema.org/WatchAction): Unlike WatchAction (under ConsumeAction), PlayAction refers to **showing/displaying** for an audience or event, not consuming visual content.
+
+---
+
+## Properties
+
 | Property                                                                  | Expected Type                                                                                                                                                                   | Description                                                       |
 | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
 | **Properties from [Action](https://schema.org/Action)**                   |                                                                                                                                                                                 |                                                                   |
