@@ -1,0 +1,2656 @@
+Directory structure:
+└── michaelhodel-arc-dsl/
+    ├── README.md
+    ├── arc_types.py
+    ├── constants.py
+    ├── dsl.py
+    ├── LICENSE
+    ├── main.py
+    └── tests.py
+
+================================================
+FILE: README.md
+================================================
+# Domain Specific Language for the Abstraction and Reasoning Corpus (ARC-DSL)
+
+The DSL was created with the aim of being expressive enough to allow programs solving arbitrary ARC tasks, and generic, i.e. consisting of only few primitives, each useful for many tasks (see [`dsl.py`](dsl.py)). As a proof of concept, solver programs for the training tasks were written (see [`solvers.py`](solvers.py)). See [`arc_dsl_writeup.pdf`](arc_dsl_writeup.pdf) for a more detailed description of the work.
+
+
+## Example solver program for task 00d62c1b written in the DSL
+
+![Task 00d62c1b](00d62c1b.png)
+
+```python
+def solve_00d62c1b(I):
+    objs = objects(grid=I, univalued=T, diagonal=F, without_bg=F)
+    black_objs = colorfilter(objs=objs, value=ZERO)
+    borders = rbind(function=bordering, fixed=I)
+    does_not_border = compose(outer=flip, inner=borders)
+    enclosed = mfilter(container=black_objs, function=does_not_border)
+    O = fill(grid=I, value=FOUR, patch=enclosed)
+    return O
+```
+
+The function `solve_00d62c1b` takes an input grid `I` and returns the correct output grid `O`. An explanation of what the variables store and how their values were computed:
+
+- `objs`: the set of objects extracted from the input grid `I` that are single-color only, where individual objects may only have cells that are connected directly, and cells may be of the background color (black); the result of calling the `objects` primitive on `I` with `univalued=True`, `diagonal=False` and `without_background=True`
+- `black_objs`: the subset of the objects `objs` which are black; the result of filtering objects by their color, i.e. calling `colorfilter` with `objects=objs` and `color=ZERO` (black)
+- `borders`: a function taking an object and returning `True` iff that object is at the border of the grid; the result of fixing the right argument of the `bordering` primitive to `I` by calling the function `rbind` on `function=bordering` and `fixed=I`
+- `does_not_border`: a function that returns the inverse of the previous function, i.e. a function that returns `True` iff an object does not touch the grid border; the result of composing the `flip` primitive (which simply negates a boolean) and `borders`
+- `enclosed`: a single object defined as the union of objects `black_objs` for which function `does_not_border` returns `True`, i.e. the black objects which do not touch the grid border (corresponding to the "holes" in the green objects); the result of calling `mfilter` (which combines `merge` and `filter`) with `container=black_objs` and `condition=does_not_border`
+- `O`: the output grid, created by coloring all pixels of the object `enclosed` yellow; the result of calling the `fill` primitive on `I` with `color=FOUR` (yellow) and `patch=enclosed`
+
+
+## Another solver example: 5521c0d9
+
+![Task 5521c0d9](5521c0d9.png)
+
+```python
+def solve_5521c0d9(I):
+    objs = objects(grid=I, univalued=T, diagonal=F, without_bgT)
+    foreground = merge(containers=objs)
+    empty_grid = cover(grid=I, patch=foreground)
+    offset_getter = chain(h=toivec, g=invert, f=height)
+    shifter = fork(outer=shift, a=identity, b=offset_getter)
+    shifted = mapply(function=shifter, container=objs)
+    O = paint(grid=empty_grid, obj=shifted)
+    return O
+```
+
+- `objs`: the set of objects extracted from the input grid `I` that are single-color only, ignoring the background color; the result of calling the `objects` primitive on `I` with `univalued=True`, `diagonal=False` and `without_background=True`
+- `foreground`: all the objects treated as a single object, the result of calling the `merge` primitive on the objects `objs`
+- `empty_grid`: a new grid, where `foreground` is removed (covered), i.e. replaced with the background color (black); the result of calling the `cover` primitive with `grid=I` and `patch=foreground`
+- `offset_getter`: a function that takes an object and returns a vector pointing up by as much as that object is high; the result of composing the three functions `toivec`, `invert` and `height`; the result of calling the `chain` primitive with `h=toivec`, `g=invert` and `f=height`
+- `shifter`: a function that takes an object and shifts it as much upwards as it is high; the result of calling the `fork` primitive with `outer=shift`, `a=identity` and `b=offset_getter`
+- `shifted`: all the objects shifted up by their heights, as a single object, obtained by appling the constructed function on the set of objects and merging the results; the result of calling the `mapply` primitive on `function=shifter` and `container=objs`
+- `O` the desired output grid, obtained by painting the resulting object onto the grid `empty_grid` where the original objects were removed from; the result of calling the `paint` primitive on `grid=empty_grid` and `obj=shifted`
+
+
+
+================================================
+FILE: arc_types.py
+================================================
+from typing import (
+    List,
+    Union,
+    Tuple,
+    Any,
+    Container,
+    Callable,
+    FrozenSet,
+    Iterable
+)
+
+Boolean = bool
+Integer = int
+IntegerTuple = Tuple[Integer, Integer]
+Numerical = Union[Integer, IntegerTuple]
+IntegerSet = FrozenSet[Integer]
+Grid = Tuple[Tuple[Integer]]
+Cell = Tuple[Integer, IntegerTuple]
+Object = FrozenSet[Cell]
+Objects = FrozenSet[Object]
+Indices = FrozenSet[IntegerTuple]
+IndicesSet = FrozenSet[Indices]
+Patch = Union[Object, Indices]
+Element = Union[Object, Grid]
+Piece = Union[Grid, Patch]
+TupleTuple = Tuple[Tuple]
+ContainerContainer = Container[Container]
+
+
+
+================================================
+FILE: constants.py
+================================================
+F = False
+T = True
+
+ZERO = 0
+ONE = 1
+TWO = 2
+THREE = 3
+FOUR = 4
+FIVE = 5
+SIX = 6
+SEVEN = 7
+EIGHT = 8
+NINE = 9
+TEN = 10
+
+NEG_ONE = -1
+NEG_TWO = -2
+
+DOWN = (1, 0)
+RIGHT = (0, 1)
+UP = (-1, 0)
+LEFT = (0, -1)
+
+ORIGIN = (0, 0)
+UNITY = (1, 1)
+NEG_UNITY = (-1, -1)
+UP_RIGHT = (-1, 1)
+DOWN_LEFT = (1, -1)
+
+ZERO_BY_TWO = (0, 2)
+TWO_BY_ZERO = (2, 0)
+TWO_BY_TWO = (2, 2)
+THREE_BY_THREE = (3, 3)
+
+
+
+================================================
+FILE: dsl.py
+================================================
+from arc_types import *
+
+
+def identity(
+    x: Any
+) -> Any:
+    """ identity function """
+    return x
+
+
+def add(
+    a: Numerical,
+    b: Numerical
+) -> Numerical:
+    """ addition """
+    if isinstance(a, int) and isinstance(b, int):
+        return a + b
+    elif isinstance(a, tuple) and isinstance(b, tuple):
+        return (a[0] + b[0], a[1] + b[1])
+    elif isinstance(a, int) and isinstance(b, tuple):
+        return (a + b[0], a + b[1])
+    return (a[0] + b, a[1] + b)
+
+
+def subtract(
+    a: Numerical,
+    b: Numerical
+) -> Numerical:
+    """ subtraction """
+    if isinstance(a, int) and isinstance(b, int):
+        return a - b
+    elif isinstance(a, tuple) and isinstance(b, tuple):
+        return (a[0] - b[0], a[1] - b[1])
+    elif isinstance(a, int) and isinstance(b, tuple):
+        return (a - b[0], a - b[1])
+    return (a[0] - b, a[1] - b)
+
+
+def multiply(
+    a: Numerical,
+    b: Numerical
+) -> Numerical:
+    """ multiplication """
+    if isinstance(a, int) and isinstance(b, int):
+        return a * b
+    elif isinstance(a, tuple) and isinstance(b, tuple):
+        return (a[0] * b[0], a[1] * b[1])
+    elif isinstance(a, int) and isinstance(b, tuple):
+        return (a * b[0], a * b[1])
+    return (a[0] * b, a[1] * b)
+    
+
+def divide(
+    a: Numerical,
+    b: Numerical
+) -> Numerical:
+    """ floor division """
+    if isinstance(a, int) and isinstance(b, int):
+        return a // b
+    elif isinstance(a, tuple) and isinstance(b, tuple):
+        return (a[0] // b[0], a[1] // b[1])
+    elif isinstance(a, int) and isinstance(b, tuple):
+        return (a // b[0], a // b[1])
+    return (a[0] // b, a[1] // b)
+
+
+def invert(
+    n: Numerical
+) -> Numerical:
+    """ inversion with respect to addition """
+    return -n if isinstance(n, int) else (-n[0], -n[1])
+
+
+def even(
+    n: Integer
+) -> Boolean:
+    """ evenness """
+    return n % 2 == 0
+
+
+def double(
+    n: Numerical
+) -> Numerical:
+    """ scaling by two """
+    return n * 2 if isinstance(n, int) else (n[0] * 2, n[1] * 2)
+
+
+def halve(
+    n: Numerical
+) -> Numerical:
+    """ scaling by one half """
+    return n // 2 if isinstance(n, int) else (n[0] // 2, n[1] // 2)
+
+
+def flip(
+    b: Boolean
+) -> Boolean:
+    """ logical not """
+    return not b
+
+
+def equality(
+    a: Any,
+    b: Any
+) -> Boolean:
+    """ equality """
+    return a == b
+
+
+def contained(
+    value: Any,
+    container: Container
+) -> Boolean:
+    """ element of """
+    return value in container
+
+
+def combine(
+    a: Container,
+    b: Container
+) -> Container:
+    """ union """
+    return type(a)((*a, *b))
+
+
+def intersection(
+    a: FrozenSet,
+    b: FrozenSet
+) -> FrozenSet:
+    """ returns the intersection of two containers """
+    return a & b
+
+
+def difference(
+    a: FrozenSet,
+    b: FrozenSet
+) -> FrozenSet:
+    """ set difference """
+    return type(a)(e for e in a if e not in b)
+
+
+def dedupe(
+    tup: Tuple
+) -> Tuple:
+    """ remove duplicates """
+    return tuple(e for i, e in enumerate(tup) if tup.index(e) == i)
+
+
+def order(
+    container: Container,
+    compfunc: Callable
+) -> Tuple:
+    """ order container by custom key """
+    return tuple(sorted(container, key=compfunc))
+
+
+def repeat(
+    item: Any,
+    num: Integer
+) -> Tuple:
+    """ repetition of item within vector """
+    return tuple(item for i in range(num))
+
+
+def greater(
+    a: Integer,
+    b: Integer
+) -> Boolean:
+    """ greater """
+    return a > b
+
+
+def size(
+    container: Container
+) -> Integer:
+    """ cardinality """
+    return len(container)
+
+
+def merge(
+    containers: ContainerContainer
+) -> Container:
+    """ merging """
+    return type(containers)(e for c in containers for e in c)
+
+
+def maximum(
+    container: IntegerSet
+) -> Integer:
+    """ maximum """
+    return max(container, default=0)
+
+
+def minimum(
+    container: IntegerSet
+) -> Integer:
+    """ minimum """
+    return min(container, default=0)
+
+
+def valmax(
+    container: Container,
+    compfunc: Callable
+) -> Integer:
+    """ maximum by custom function """
+    return compfunc(max(container, key=compfunc, default=0))
+
+
+def valmin(
+    container: Container,
+    compfunc: Callable
+) -> Integer:
+    """ minimum by custom function """
+    return compfunc(min(container, key=compfunc, default=0))
+
+
+def argmax(
+    container: Container,
+    compfunc: Callable
+) -> Any:
+    """ largest item by custom order """
+    return max(container, key=compfunc)
+
+
+def argmin(
+    container: Container,
+    compfunc: Callable
+) -> Any:
+    """ smallest item by custom order """
+    return min(container, key=compfunc)
+
+
+def mostcommon(
+    container: Container
+) -> Any:
+    """ most common item """
+    return max(set(container), key=container.count)
+
+
+def leastcommon(
+    container: Container
+) -> Any:
+    """ least common item """
+    return min(set(container), key=container.count)
+
+
+def initset(
+    value: Any
+) -> FrozenSet:
+    """ initialize container """
+    return frozenset({value})
+
+
+def both(
+    a: Boolean,
+    b: Boolean
+) -> Boolean:
+    """ logical and """
+    return a and b
+
+
+def either(
+    a: Boolean,
+    b: Boolean
+) -> Boolean:
+    """ logical or """
+    return a or b
+
+
+def increment(
+    x: Numerical
+) -> Numerical:
+    """ incrementing """
+    return x + 1 if isinstance(x, int) else (x[0] + 1, x[1] + 1)
+
+
+def decrement(
+    x: Numerical
+) -> Numerical:
+    """ decrementing """
+    return x - 1 if isinstance(x, int) else (x[0] - 1, x[1] - 1)
+
+
+def crement(
+    x: Numerical
+) -> Numerical:
+    """ incrementing positive and decrementing negative """
+    if isinstance(x, int):
+        return 0 if x == 0 else (x + 1 if x > 0 else x - 1)
+    return (
+        0 if x[0] == 0 else (x[0] + 1 if x[0] > 0 else x[0] - 1),
+        0 if x[1] == 0 else (x[1] + 1 if x[1] > 0 else x[1] - 1)
+    )
+
+
+def sign(
+    x: Numerical
+) -> Numerical:
+    """ sign """
+    if isinstance(x, int):
+        return 0 if x == 0 else (1 if x > 0 else -1)
+    return (
+        0 if x[0] == 0 else (1 if x[0] > 0 else -1),
+        0 if x[1] == 0 else (1 if x[1] > 0 else -1)
+    )
+
+
+def positive(
+    x: Integer
+) -> Boolean:
+    """ positive """
+    return x > 0
+
+
+def toivec(
+    i: Integer
+) -> IntegerTuple:
+    """ vector pointing vertically """
+    return (i, 0)
+
+
+def tojvec(
+    j: Integer
+) -> IntegerTuple:
+    """ vector pointing horizontally """
+    return (0, j)
+
+
+def sfilter(
+    container: Container,
+    condition: Callable
+) -> Container:
+    """ keep elements in container that satisfy condition """
+    return type(container)(e for e in container if condition(e))
+
+
+def mfilter(
+    container: Container,
+    function: Callable
+) -> FrozenSet:
+    """ filter and merge """
+    return merge(sfilter(container, function))
+
+
+def extract(
+    container: Container,
+    condition: Callable
+) -> Any:
+    """ first element of container that satisfies condition """
+    return next(e for e in container if condition(e))
+
+
+def totuple(
+    container: FrozenSet
+) -> Tuple:
+    """ conversion to tuple """
+    return tuple(container)
+
+
+def first(
+    container: Container
+) -> Any:
+    """ first item of container """
+    return next(iter(container))
+
+
+def last(
+    container: Container
+) -> Any:
+    """ last item of container """
+    return max(enumerate(container))[1]
+
+
+def insert(
+    value: Any,
+    container: FrozenSet
+) -> FrozenSet:
+    """ insert item into container """
+    return container.union(frozenset({value}))
+
+
+def remove(
+    value: Any,
+    container: Container
+) -> Container:
+    """ remove item from container """
+    return type(container)(e for e in container if e != value)
+
+
+def other(
+    container: Container,
+    value: Any
+) -> Any:
+    """ other value in the container """
+    return first(remove(value, container))
+
+
+def interval(
+    start: Integer,
+    stop: Integer,
+    step: Integer
+) -> Tuple:
+    """ range """
+    return tuple(range(start, stop, step))
+
+
+def astuple(
+    a: Integer,
+    b: Integer
+) -> IntegerTuple:
+    """ constructs a tuple """
+    return (a, b)
+
+
+def product(
+    a: Container,
+    b: Container
+) -> FrozenSet:
+    """ cartesian product """
+    return frozenset((i, j) for j in b for i in a)
+
+
+def pair(
+    a: Tuple,
+    b: Tuple
+) -> TupleTuple:
+    """ zipping of two tuples """
+    return tuple(zip(a, b))
+
+
+def branch(
+    condition: Boolean,
+    a: Any,
+    b: Any
+) -> Any:
+    """ if else branching """
+    return a if condition else b
+
+
+def compose(
+    outer: Callable,
+    inner: Callable
+) -> Callable:
+    """ function composition """
+    return lambda x: outer(inner(x))
+
+
+def chain(
+    h: Callable,
+    g: Callable,
+    f: Callable,
+) -> Callable:
+    """ function composition with three functions """
+    return lambda x: h(g(f(x)))
+
+
+def matcher(
+    function: Callable,
+    target: Any
+) -> Callable:
+    """ construction of equality function """
+    return lambda x: function(x) == target
+
+
+def rbind(
+    function: Callable,
+    fixed: Any
+) -> Callable:
+    """ fix the rightmost argument """
+    n = function.__code__.co_argcount
+    if n == 2:
+        return lambda x: function(x, fixed)
+    elif n == 3:
+        return lambda x, y: function(x, y, fixed)
+    else:
+        return lambda x, y, z: function(x, y, z, fixed)
+
+
+def lbind(
+    function: Callable,
+    fixed: Any
+) -> Callable:
+    """ fix the leftmost argument """
+    n = function.__code__.co_argcount
+    if n == 2:
+        return lambda y: function(fixed, y)
+    elif n == 3:
+        return lambda y, z: function(fixed, y, z)
+    else:
+        return lambda y, z, a: function(fixed, y, z, a)
+
+
+def power(
+    function: Callable,
+    n: Integer
+) -> Callable:
+    """ power of function """
+    if n == 1:
+        return function
+    return compose(function, power(function, n - 1))
+
+
+def fork(
+    outer: Callable,
+    a: Callable,
+    b: Callable
+) -> Callable:
+    """ creates a wrapper function """
+    return lambda x: outer(a(x), b(x))
+
+
+def apply(
+    function: Callable,
+    container: Container
+) -> Container:
+    """ apply function to each item in container """
+    return type(container)(function(e) for e in container)
+
+
+def rapply(
+    functions: Container,
+    value: Any
+) -> Container:
+    """ apply each function in container to value """
+    return type(functions)(function(value) for function in functions)
+
+
+def mapply(
+    function: Callable,
+    container: ContainerContainer
+) -> FrozenSet:
+    """ apply and merge """
+    return merge(apply(function, container))
+
+
+def papply(
+    function: Callable,
+    a: Tuple,
+    b: Tuple
+) -> Tuple:
+    """ apply function on two vectors """
+    return tuple(function(i, j) for i, j in zip(a, b))
+
+
+def mpapply(
+    function: Callable,
+    a: Tuple,
+    b: Tuple
+) -> Tuple:
+    """ apply function on two vectors and merge """
+    return merge(papply(function, a, b))
+
+
+def prapply(
+    function,
+    a: Container,
+    b: Container
+) -> FrozenSet:
+    """ apply function on cartesian product """
+    return frozenset(function(i, j) for j in b for i in a)
+
+
+def mostcolor(
+    element: Element
+) -> Integer:
+    """ most common color """
+    values = [v for r in element for v in r] if isinstance(element, tuple) else [v for v, _ in element]
+    return max(set(values), key=values.count)
+    
+
+def leastcolor(
+    element: Element
+) -> Integer:
+    """ least common color """
+    values = [v for r in element for v in r] if isinstance(element, tuple) else [v for v, _ in element]
+    return min(set(values), key=values.count)
+
+
+def height(
+    piece: Piece
+) -> Integer:
+    """ height of grid or patch """
+    if len(piece) == 0:
+        return 0
+    if isinstance(piece, tuple):
+        return len(piece)
+    return lowermost(piece) - uppermost(piece) + 1
+
+
+def width(
+    piece: Piece
+) -> Integer:
+    """ width of grid or patch """
+    if len(piece) == 0:
+        return 0
+    if isinstance(piece, tuple):
+        return len(piece[0])
+    return rightmost(piece) - leftmost(piece) + 1
+
+
+def shape(
+    piece: Piece
+) -> IntegerTuple:
+    """ height and width of grid or patch """
+    return (height(piece), width(piece))
+
+
+def portrait(
+    piece: Piece
+) -> Boolean:
+    """ whether height is greater than width """
+    return height(piece) > width(piece)
+
+
+def colorcount(
+    element: Element,
+    value: Integer
+) -> Integer:
+    """ number of cells with color """
+    if isinstance(element, tuple):
+        return sum(row.count(value) for row in element)
+    return sum(v == value for v, _ in element)
+
+
+def colorfilter(
+    objs: Objects,
+    value: Integer
+) -> Objects:
+    """ filter objects by color """
+    return frozenset(obj for obj in objs if next(iter(obj))[0] == value)
+
+
+def sizefilter(
+    container: Container,
+    n: Integer
+) -> FrozenSet:
+    """ filter items by size """
+    return frozenset(item for item in container if len(item) == n)
+
+
+def asindices(
+    grid: Grid
+) -> Indices:
+    """ indices of all grid cells """
+    return frozenset((i, j) for i in range(len(grid)) for j in range(len(grid[0])))
+
+
+def ofcolor(
+    grid: Grid,
+    value: Integer
+) -> Indices:
+    """ indices of all grid cells with value """
+    return frozenset((i, j) for i, r in enumerate(grid) for j, v in enumerate(r) if v == value)
+
+
+def ulcorner(
+    patch: Patch
+) -> IntegerTuple:
+    """ index of upper left corner """
+    return tuple(map(min, zip(*toindices(patch))))
+
+
+def urcorner(
+    patch: Patch
+) -> IntegerTuple:
+    """ index of upper right corner """
+    return tuple(map(lambda ix: {0: min, 1: max}[ix[0]](ix[1]), enumerate(zip(*toindices(patch)))))
+
+
+def llcorner(
+    patch: Patch
+) -> IntegerTuple:
+    """ index of lower left corner """
+    return tuple(map(lambda ix: {0: max, 1: min}[ix[0]](ix[1]), enumerate(zip(*toindices(patch)))))
+
+
+def lrcorner(
+    patch: Patch
+) -> IntegerTuple:
+    """ index of lower right corner """
+    return tuple(map(max, zip(*toindices(patch))))
+
+
+def crop(
+    grid: Grid,
+    start: IntegerTuple,
+    dims: IntegerTuple
+) -> Grid:
+    """ subgrid specified by start and dimension """
+    return tuple(r[start[1]:start[1]+dims[1]] for r in grid[start[0]:start[0]+dims[0]])
+
+
+def toindices(
+    patch: Patch
+) -> Indices:
+    """ indices of object cells """
+    if len(patch) == 0:
+        return frozenset()
+    if isinstance(next(iter(patch))[1], tuple):
+        return frozenset(index for value, index in patch)
+    return patch
+
+
+def recolor(
+    value: Integer,
+    patch: Patch
+) -> Object:
+    """ recolor patch """
+    return frozenset((value, index) for index in toindices(patch))
+
+
+def shift(
+    patch: Patch,
+    directions: IntegerTuple
+) -> Patch:
+    """ shift patch """
+    if len(patch) == 0:
+        return patch
+    di, dj = directions
+    if isinstance(next(iter(patch))[1], tuple):
+        return frozenset((value, (i + di, j + dj)) for value, (i, j) in patch)
+    return frozenset((i + di, j + dj) for i, j in patch)
+
+
+def normalize(
+    patch: Patch
+) -> Patch:
+    """ moves upper left corner to origin """
+    if len(patch) == 0:
+        return patch
+    return shift(patch, (-uppermost(patch), -leftmost(patch)))
+
+
+def dneighbors(
+    loc: IntegerTuple
+) -> Indices:
+    """ directly adjacent indices """
+    return frozenset({(loc[0] - 1, loc[1]), (loc[0] + 1, loc[1]), (loc[0], loc[1] - 1), (loc[0], loc[1] + 1)})
+
+
+def ineighbors(
+    loc: IntegerTuple
+) -> Indices:
+    """ diagonally adjacent indices """
+    return frozenset({(loc[0] - 1, loc[1] - 1), (loc[0] - 1, loc[1] + 1), (loc[0] + 1, loc[1] - 1), (loc[0] + 1, loc[1] + 1)})
+
+
+def neighbors(
+    loc: IntegerTuple
+) -> Indices:
+    """ adjacent indices """
+    return dneighbors(loc) | ineighbors(loc)
+
+
+def objects(
+    grid: Grid,
+    univalued: Boolean,
+    diagonal: Boolean,
+    without_bg: Boolean
+) -> Objects:
+    """ objects occurring on the grid """
+    bg = mostcolor(grid) if without_bg else None
+    objs = set()
+    occupied = set()
+    h, w = len(grid), len(grid[0])
+    unvisited = asindices(grid)
+    diagfun = neighbors if diagonal else dneighbors
+    for loc in unvisited:
+        if loc in occupied:
+            continue
+        val = grid[loc[0]][loc[1]]
+        if val == bg:
+            continue
+        obj = {(val, loc)}
+        cands = {loc}
+        while len(cands) > 0:
+            neighborhood = set()
+            for cand in cands:
+                v = grid[cand[0]][cand[1]]
+                if (val == v) if univalued else (v != bg):
+                    obj.add((v, cand))
+                    occupied.add(cand)
+                    neighborhood |= {
+                        (i, j) for i, j in diagfun(cand) if 0 <= i < h and 0 <= j < w
+                    }
+            cands = neighborhood - occupied
+        objs.add(frozenset(obj))
+    return frozenset(objs)
+
+
+def partition(
+    grid: Grid
+) -> Objects:
+    """ each cell with the same value part of the same object """
+    return frozenset(
+        frozenset(
+            (v, (i, j)) for i, r in enumerate(grid) for j, v in enumerate(r) if v == value
+        ) for value in palette(grid)
+    )
+
+
+def fgpartition(
+    grid: Grid
+) -> Objects:
+    """ each cell with the same value part of the same object without background """
+    return frozenset(
+        frozenset(
+            (v, (i, j)) for i, r in enumerate(grid) for j, v in enumerate(r) if v == value
+        ) for value in palette(grid) - {mostcolor(grid)}
+    )
+
+
+def uppermost(
+    patch: Patch
+) -> Integer:
+    """ row index of uppermost occupied cell """
+    return min(i for i, j in toindices(patch))
+
+
+def lowermost(
+    patch: Patch
+) -> Integer:
+    """ row index of lowermost occupied cell """
+    return max(i for i, j in toindices(patch))
+
+
+def leftmost(
+    patch: Patch
+) -> Integer:
+    """ column index of leftmost occupied cell """
+    return min(j for i, j in toindices(patch))
+
+
+def rightmost(
+    patch: Patch
+) -> Integer:
+    """ column index of rightmost occupied cell """
+    return max(j for i, j in toindices(patch))
+
+
+def square(
+    piece: Piece
+) -> Boolean:
+    """ whether the piece forms a square """
+    return len(piece) == len(piece[0]) if isinstance(piece, tuple) else height(piece) * width(piece) == len(piece) and height(piece) == width(piece)
+
+
+def vline(
+    patch: Patch
+) -> Boolean:
+    """ whether the piece forms a vertical line """
+    return height(patch) == len(patch) and width(patch) == 1
+
+
+def hline(
+    patch: Patch
+) -> Boolean:
+    """ whether the piece forms a horizontal line """
+    return width(patch) == len(patch) and height(patch) == 1
+
+
+def hmatching(
+    a: Patch,
+    b: Patch
+) -> Boolean:
+    """ whether there exists a row for which both patches have cells """
+    return len(set(i for i, j in toindices(a)) & set(i for i, j in toindices(b))) > 0
+
+
+def vmatching(
+    a: Patch,
+    b: Patch
+) -> Boolean:
+    """ whether there exists a column for which both patches have cells """
+    return len(set(j for i, j in toindices(a)) & set(j for i, j in toindices(b))) > 0
+
+
+def manhattan(
+    a: Patch,
+    b: Patch
+) -> Integer:
+    """ closest manhattan distance between two patches """
+    return min(abs(ai - bi) + abs(aj - bj) for ai, aj in toindices(a) for bi, bj in toindices(b))
+
+
+def adjacent(
+    a: Patch,
+    b: Patch
+) -> Boolean:
+    """ whether two patches are adjacent """
+    return manhattan(a, b) == 1
+
+
+def bordering(
+    patch: Patch,
+    grid: Grid
+) -> Boolean:
+    """ whether a patch is adjacent to a grid border """
+    return uppermost(patch) == 0 or leftmost(patch) == 0 or lowermost(patch) == len(grid) - 1 or rightmost(patch) == len(grid[0]) - 1
+
+
+def centerofmass(
+    patch: Patch
+) -> IntegerTuple:
+    """ center of mass """
+    return tuple(map(lambda x: sum(x) // len(patch), zip(*toindices(patch))))
+
+
+def palette(
+    element: Element
+) -> IntegerSet:
+    """ colors occurring in object or grid """
+    if isinstance(element, tuple):
+        return frozenset({v for r in element for v in r})
+    return frozenset({v for v, _ in element})
+
+
+def numcolors(
+    element: Element
+) -> IntegerSet:
+    """ number of colors occurring in object or grid """
+    return len(palette(element))
+
+
+def color(
+    obj: Object
+) -> Integer:
+    """ color of object """
+    return next(iter(obj))[0]
+
+
+def toobject(
+    patch: Patch,
+    grid: Grid
+) -> Object:
+    """ object from patch and grid """
+    h, w = len(grid), len(grid[0])
+    return frozenset((grid[i][j], (i, j)) for i, j in toindices(patch) if 0 <= i < h and 0 <= j < w)
+
+
+def asobject(
+    grid: Grid
+) -> Object:
+    """ conversion of grid to object """
+    return frozenset((v, (i, j)) for i, r in enumerate(grid) for j, v in enumerate(r))
+
+
+def rot90(
+    grid: Grid
+) -> Grid:
+    """ quarter clockwise rotation """
+    return tuple(row for row in zip(*grid[::-1]))
+
+
+def rot180(
+    grid: Grid
+) -> Grid:
+    """ half rotation """
+    return tuple(tuple(row[::-1]) for row in grid[::-1])
+
+
+def rot270(
+    grid: Grid
+) -> Grid:
+    """ quarter anticlockwise rotation """
+    return tuple(tuple(row[::-1]) for row in zip(*grid[::-1]))[::-1]
+
+
+def hmirror(
+    piece: Piece
+) -> Piece:
+    """ mirroring along horizontal """
+    if isinstance(piece, tuple):
+        return piece[::-1]
+    d = ulcorner(piece)[0] + lrcorner(piece)[0]
+    if isinstance(next(iter(piece))[1], tuple):
+        return frozenset((v, (d - i, j)) for v, (i, j) in piece)
+    return frozenset((d - i, j) for i, j in piece)
+
+
+def vmirror(
+    piece: Piece
+) -> Piece:
+    """ mirroring along vertical """
+    if isinstance(piece, tuple):
+        return tuple(row[::-1] for row in piece)
+    d = ulcorner(piece)[1] + lrcorner(piece)[1]
+    if isinstance(next(iter(piece))[1], tuple):
+        return frozenset((v, (i, d - j)) for v, (i, j) in piece)
+    return frozenset((i, d - j) for i, j in piece)
+
+
+def dmirror(
+    piece: Piece
+) -> Piece:
+    """ mirroring along diagonal """
+    if isinstance(piece, tuple):
+        return tuple(zip(*piece))
+    a, b = ulcorner(piece)
+    if isinstance(next(iter(piece))[1], tuple):
+        return frozenset((v, (j - b + a, i - a + b)) for v, (i, j) in piece)
+    return frozenset((j - b + a, i - a + b) for i, j in piece)
+
+
+def cmirror(
+    piece: Piece
+) -> Piece:
+    """ mirroring along counterdiagonal """
+    if isinstance(piece, tuple):
+        return tuple(zip(*(r[::-1] for r in piece[::-1])))
+    return vmirror(dmirror(vmirror(piece)))
+
+
+def fill(
+    grid: Grid,
+    value: Integer,
+    patch: Patch
+) -> Grid:
+    """ fill value at indices """
+    h, w = len(grid), len(grid[0])
+    grid_filled = list(list(row) for row in grid)
+    for i, j in toindices(patch):
+        if 0 <= i < h and 0 <= j < w:
+            grid_filled[i][j] = value
+    return tuple(tuple(row) for row in grid_filled)
+
+
+def paint(
+    grid: Grid,
+    obj: Object
+) -> Grid:
+    """ paint object to grid """
+    h, w = len(grid), len(grid[0])
+    grid_painted = list(list(row) for row in grid)
+    for value, (i, j) in obj:
+        if 0 <= i < h and 0 <= j < w:
+            grid_painted[i][j] = value
+    return tuple(tuple(row) for row in grid_painted)
+
+
+def underfill(
+    grid: Grid,
+    value: Integer,
+    patch: Patch
+) -> Grid:
+    """ fill value at indices that are background """
+    h, w = len(grid), len(grid[0])
+    bg = mostcolor(grid)
+    g = list(list(r) for r in grid)
+    for i, j in toindices(patch):
+        if 0 <= i < h and 0 <= j < w:
+            if g[i][j] == bg:
+                g[i][j] = value
+    return tuple(tuple(r) for r in g)
+
+
+def underpaint(
+    grid: Grid,
+    obj: Object
+) -> Grid:
+    """ paint object to grid where there is background """
+    h, w = len(grid), len(grid[0])
+    bg = mostcolor(grid)
+    g = list(list(r) for r in grid)
+    for value, (i, j) in obj:
+        if 0 <= i < h and 0 <= j < w:
+            if g[i][j] == bg:
+                g[i][j] = value
+    return tuple(tuple(r) for r in g)
+
+
+def hupscale(
+    grid: Grid,
+    factor: Integer
+) -> Grid:
+    """ upscale grid horizontally """
+    g = tuple()
+    for row in grid:
+        r = tuple()
+        for value in row:
+            r = r + tuple(value for num in range(factor))
+        g = g + (r,)
+    return g
+
+
+def vupscale(
+    grid: Grid,
+    factor: Integer
+) -> Grid:
+    """ upscale grid vertically """
+    g = tuple()
+    for row in grid:
+        g = g + tuple(row for num in range(factor))
+    return g
+
+
+def upscale(
+    element: Element,
+    factor: Integer
+) -> Element:
+    """ upscale object or grid """
+    if isinstance(element, tuple):
+        g = tuple()
+        for row in element:
+            upscaled_row = tuple()
+            for value in row:
+                upscaled_row = upscaled_row + tuple(value for num in range(factor))
+            g = g + tuple(upscaled_row for num in range(factor))
+        return g
+    else:
+        if len(element) == 0:
+            return frozenset()
+        di_inv, dj_inv = ulcorner(element)
+        di, dj = (-di_inv, -dj_inv)
+        normed_obj = shift(element, (di, dj))
+        o = set()
+        for value, (i, j) in normed_obj:
+            for io in range(factor):
+                for jo in range(factor):
+                    o.add((value, (i * factor + io, j * factor + jo)))
+        return shift(frozenset(o), (di_inv, dj_inv))
+
+
+def downscale(
+    grid: Grid,
+    factor: Integer
+) -> Grid:
+    """ downscale grid """
+    h, w = len(grid), len(grid[0])
+    g = tuple()
+    for i in range(h):
+        r = tuple()
+        for j in range(w):
+            if j % factor == 0:
+                r = r + (grid[i][j],)
+        g = g + (r, )
+    h = len(g)
+    dsg = tuple()
+    for i in range(h):
+        if i % factor == 0:
+            dsg = dsg + (g[i],)
+    return dsg
+
+
+def hconcat(
+    a: Grid,
+    b: Grid
+) -> Grid:
+    """ concatenate two grids horizontally """
+    return tuple(i + j for i, j in zip(a, b))
+
+
+def vconcat(
+    a: Grid,
+    b: Grid
+) -> Grid:
+    """ concatenate two grids vertically """
+    return a + b
+
+
+def subgrid(
+    patch: Patch,
+    grid: Grid
+) -> Grid:
+    """ smallest subgrid containing object """
+    return crop(grid, ulcorner(patch), shape(patch))
+
+
+def hsplit(
+    grid: Grid,
+    n: Integer
+) -> Tuple:
+    """ split grid horizontally """
+    h, w = len(grid), len(grid[0]) // n
+    offset = len(grid[0]) % n != 0
+    return tuple(crop(grid, (0, w * i + i * offset), (h, w)) for i in range(n))
+
+
+def vsplit(
+    grid: Grid,
+    n: Integer
+) -> Tuple:
+    """ split grid vertically """
+    h, w = len(grid) // n, len(grid[0])
+    offset = len(grid) % n != 0
+    return tuple(crop(grid, (h * i + i * offset, 0), (h, w)) for i in range(n))
+
+
+def cellwise(
+    a: Grid,
+    b: Grid,
+    fallback: Integer
+) -> Grid:
+    """ cellwise match of two grids """
+    h, w = len(a), len(a[0])
+    resulting_grid = tuple()
+    for i in range(h):
+        row = tuple()
+        for j in range(w):
+            a_value = a[i][j]
+            value = a_value if a_value == b[i][j] else fallback
+            row = row + (value,)
+        resulting_grid = resulting_grid + (row, )
+    return resulting_grid
+
+
+def replace(
+    grid: Grid,
+    replacee: Integer,
+    replacer: Integer
+) -> Grid:
+    """ color substitution """
+    return tuple(tuple(replacer if v == replacee else v for v in r) for r in grid)
+
+
+def switch(
+    grid: Grid,
+    a: Integer,
+    b: Integer
+) -> Grid:
+    """ color switching """
+    return tuple(tuple(v if (v != a and v != b) else {a: b, b: a}[v] for v in r) for r in grid)
+
+
+def center(
+    patch: Patch
+) -> IntegerTuple:
+    """ center of the patch """
+    return (uppermost(patch) + height(patch) // 2, leftmost(patch) + width(patch) // 2)
+
+
+def position(
+    a: Patch,
+    b: Patch
+) -> IntegerTuple:
+    """ relative position between two patches """
+    ia, ja = center(toindices(a))
+    ib, jb = center(toindices(b))
+    if ia == ib:
+        return (0, 1 if ja < jb else -1)
+    elif ja == jb:
+        return (1 if ia < ib else -1, 0)
+    elif ia < ib:
+        return (1, 1 if ja < jb else -1)
+    elif ia > ib:
+        return (-1, 1 if ja < jb else -1)
+
+
+def index(
+    grid: Grid,
+    loc: IntegerTuple
+) -> Integer:
+    """ color at location """
+    i, j = loc
+    h, w = len(grid), len(grid[0])
+    if not (0 <= i < h and 0 <= j < w):
+        return None
+    return grid[loc[0]][loc[1]] 
+
+
+def canvas(
+    value: Integer,
+    dimensions: IntegerTuple
+) -> Grid:
+    """ grid construction """
+    return tuple(tuple(value for j in range(dimensions[1])) for i in range(dimensions[0]))
+
+
+def corners(
+    patch: Patch
+) -> Indices:
+    """ indices of corners """
+    return frozenset({ulcorner(patch), urcorner(patch), llcorner(patch), lrcorner(patch)})
+
+
+def connect(
+    a: IntegerTuple,
+    b: IntegerTuple
+) -> Indices:
+    """ line between two points """
+    ai, aj = a
+    bi, bj = b
+    si = min(ai, bi)
+    ei = max(ai, bi) + 1
+    sj = min(aj, bj)
+    ej = max(aj, bj) + 1
+    if ai == bi:
+        return frozenset((ai, j) for j in range(sj, ej))
+    elif aj == bj:
+        return frozenset((i, aj) for i in range(si, ei))
+    elif bi - ai == bj - aj:
+        return frozenset((i, j) for i, j in zip(range(si, ei), range(sj, ej)))
+    elif bi - ai == aj - bj:
+        return frozenset((i, j) for i, j in zip(range(si, ei), range(ej - 1, sj - 1, -1)))
+    return frozenset()
+
+
+def cover(
+    grid: Grid,
+    patch: Patch
+) -> Grid:
+    """ remove object from grid """
+    return fill(grid, mostcolor(grid), toindices(patch))
+
+
+def trim(
+    grid: Grid
+) -> Grid:
+    """ trim border of grid """
+    return tuple(r[1:-1] for r in grid[1:-1])
+
+
+def move(
+    grid: Grid,
+    obj: Object,
+    offset: IntegerTuple
+) -> Grid:
+    """ move object on grid """
+    return paint(cover(grid, obj), shift(obj, offset))
+
+
+def tophalf(
+    grid: Grid
+) -> Grid:
+    """ upper half of grid """
+    return grid[:len(grid) // 2]
+
+
+def bottomhalf(
+    grid: Grid
+) -> Grid:
+    """ lower half of grid """
+    return grid[len(grid) // 2 + len(grid) % 2:]
+
+
+def lefthalf(
+    grid: Grid
+) -> Grid:
+    """ left half of grid """
+    return rot270(tophalf(rot90(grid)))
+
+
+def righthalf(
+    grid: Grid
+) -> Grid:
+    """ right half of grid """
+    return rot270(bottomhalf(rot90(grid)))
+
+
+def vfrontier(
+    location: IntegerTuple
+) -> Indices:
+    """ vertical frontier """
+    return frozenset((i, location[1]) for i in range(30))
+
+
+def hfrontier(
+    location: IntegerTuple
+) -> Indices:
+    """ horizontal frontier """
+    return frozenset((location[0], j) for j in range(30))
+
+
+def backdrop(
+    patch: Patch
+) -> Indices:
+    """ indices in bounding box of patch """
+    if len(patch) == 0:
+        return frozenset({})
+    indices = toindices(patch)
+    si, sj = ulcorner(indices)
+    ei, ej = lrcorner(patch)
+    return frozenset((i, j) for i in range(si, ei + 1) for j in range(sj, ej + 1))
+
+
+def delta(
+    patch: Patch
+) -> Indices:
+    """ indices in bounding box but not part of patch """
+    if len(patch) == 0:
+        return frozenset({})
+    return backdrop(patch) - toindices(patch)
+
+
+def gravitate(
+    source: Patch,
+    destination: Patch
+) -> IntegerTuple:
+    """ direction to move source until adjacent to destination """
+    si, sj = center(source)
+    di, dj = center(destination)
+    i, j = 0, 0
+    if vmatching(source, destination):
+        i = 1 if si < di else -1
+    else:
+        j = 1 if sj < dj else -1
+    gi, gj = i, j
+    c = 0
+    while not adjacent(source, destination) and c < 42:
+        c += 1
+        gi += i
+        gj += j
+        source = shift(source, (i, j))
+    return (gi - i, gj - j)
+
+
+def inbox(
+    patch: Patch
+) -> Indices:
+    """ inbox for patch """
+    ai, aj = uppermost(patch) + 1, leftmost(patch) + 1
+    bi, bj = lowermost(patch) - 1, rightmost(patch) - 1
+    si, sj = min(ai, bi), min(aj, bj)
+    ei, ej = max(ai, bi), max(aj, bj)
+    vlines = {(i, sj) for i in range(si, ei + 1)} | {(i, ej) for i in range(si, ei + 1)}
+    hlines = {(si, j) for j in range(sj, ej + 1)} | {(ei, j) for j in range(sj, ej + 1)}
+    return frozenset(vlines | hlines)
+
+
+def outbox(
+    patch: Patch
+) -> Indices:
+    """ outbox for patch """
+    ai, aj = uppermost(patch) - 1, leftmost(patch) - 1
+    bi, bj = lowermost(patch) + 1, rightmost(patch) + 1
+    si, sj = min(ai, bi), min(aj, bj)
+    ei, ej = max(ai, bi), max(aj, bj)
+    vlines = {(i, sj) for i in range(si, ei + 1)} | {(i, ej) for i in range(si, ei + 1)}
+    hlines = {(si, j) for j in range(sj, ej + 1)} | {(ei, j) for j in range(sj, ej + 1)}
+    return frozenset(vlines | hlines)
+
+
+def box(
+    patch: Patch
+) -> Indices:
+    """ outline of patch """
+    if len(patch) == 0:
+        return patch
+    ai, aj = ulcorner(patch)
+    bi, bj = lrcorner(patch)
+    si, sj = min(ai, bi), min(aj, bj)
+    ei, ej = max(ai, bi), max(aj, bj)
+    vlines = {(i, sj) for i in range(si, ei + 1)} | {(i, ej) for i in range(si, ei + 1)}
+    hlines = {(si, j) for j in range(sj, ej + 1)} | {(ei, j) for j in range(sj, ej + 1)}
+    return frozenset(vlines | hlines)
+
+
+def shoot(
+    start: IntegerTuple,
+    direction: IntegerTuple
+) -> Indices:
+    """ line from starting point and direction """
+    return connect(start, (start[0] + 42 * direction[0], start[1] + 42 * direction[1]))
+
+
+def occurrences(
+    grid: Grid,
+    obj: Object
+) -> Indices:
+    """ locations of occurrences of object in grid """
+    occs = set()
+    normed = normalize(obj)
+    h, w = len(grid), len(grid[0])
+    oh, ow = shape(obj)
+    h2, w2 = h - oh + 1, w - ow + 1
+    for i in range(h2):
+        for j in range(w2):
+            occurs = True
+            for v, (a, b) in shift(normed, (i, j)):
+                if not (0 <= a < h and 0 <= b < w and grid[a][b] == v):
+                    occurs = False
+                    break
+            if occurs:
+                occs.add((i, j))
+    return frozenset(occs)
+
+
+def frontiers(
+    grid: Grid
+) -> Objects:
+    """ set of frontiers """
+    h, w = len(grid), len(grid[0])
+    row_indices = tuple(i for i, r in enumerate(grid) if len(set(r)) == 1)
+    column_indices = tuple(j for j, c in enumerate(dmirror(grid)) if len(set(c)) == 1)
+    hfrontiers = frozenset({frozenset({(grid[i][j], (i, j)) for j in range(w)}) for i in row_indices})
+    vfrontiers = frozenset({frozenset({(grid[i][j], (i, j)) for i in range(h)}) for j in column_indices})
+    return hfrontiers | vfrontiers
+
+
+def compress(
+    grid: Grid
+) -> Grid:
+    """ removes frontiers from grid """
+    ri = tuple(i for i, r in enumerate(grid) if len(set(r)) == 1)
+    ci = tuple(j for j, c in enumerate(dmirror(grid)) if len(set(c)) == 1)
+    return tuple(tuple(v for j, v in enumerate(r) if j not in ci) for i, r in enumerate(grid) if i not in ri)
+
+
+def hperiod(
+    obj: Object
+) -> Integer:
+    """ horizontal periodicity """
+    normalized = normalize(obj)
+    w = width(normalized)
+    for p in range(1, w):
+        offsetted = shift(normalized, (0, -p))
+        pruned = frozenset({(c, (i, j)) for c, (i, j) in offsetted if j >= 0})
+        if pruned.issubset(normalized):
+            return p
+    return w
+
+
+def vperiod(
+    obj: Object
+) -> Integer:
+    """ vertical periodicity """
+    normalized = normalize(obj)
+    h = height(normalized)
+    for p in range(1, h):
+        offsetted = shift(normalized, (-p, 0))
+        pruned = frozenset({(c, (i, j)) for c, (i, j) in offsetted if i >= 0})
+        if pruned.issubset(normalized):
+            return p
+    return h
+
+
+
+================================================
+FILE: LICENSE
+================================================
+MIT License
+
+Copyright (c) 2023 Michael Hodel
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+
+================================================
+FILE: main.py
+================================================
+import os
+import json
+import inspect
+import tqdm
+
+import arc_types
+import constants
+import dsl
+import tests
+import solvers
+
+
+
+def get_data(train=True):
+    path = f'../data/{"training" if train else "evaluation"}'
+    data = {}
+    for fn in os.listdir(path):
+        with open(f'{path}/{fn}') as f:
+            data[fn.rstrip('.json')] = json.load(f)
+    ast = lambda g: tuple(tuple(r) for r in g)
+    return {
+        'train': {k: [{
+            'input': ast(e['input']),
+            'output': ast(e['output']),
+        } for e in v['train']] for k, v in data.items()},
+        'test': {k: [{
+            'input': ast(e['input']),
+            'output': ast(e['output']),
+        } for e in v['test']] for k, v in data.items()}
+    }
+
+
+def get_functions(path):
+    """ returns a list of available functions """
+    with open(path, 'r') as f:
+        code = f.read()
+    functions = []
+    for row in code.split('\n'):
+        if row.startswith('def '):
+            function = row.split('def ')[1].split('(')[0]
+            functions.append(function)
+    return functions
+
+
+def run_dsl_tests(dsl_module, test_module):
+    """ test DSL primitives """
+    dsl_functions = get_functions(dsl_module.__file__)
+    test_functions = get_functions(test_module.__file__)
+    expected = set([f'test_{f}' for f in dsl_functions])
+    assert set(test_functions) == expected
+    for fun in test_functions:
+        getattr(test_module, fun)()
+
+
+def test_solvers_formatting(solvers_module, dsl_module):
+    """ tests the implementd solvers for formatting """
+    with open('constants.py', 'r') as f:
+        constants = [c.split(' = ')[0] for c in f.readlines() if ' = ' in c]
+    definitions = {
+        function: inspect.getsource(getattr(solvers_module, function)) \
+            for function in get_functions(solvers_module.__file__)
+    }
+    dsl_interface = get_functions(dsl_module.__file__)
+    n_correct = 0
+    n = len(definitions)
+    for key, definition in definitions.items():
+        try:
+            lines = definition.split('\n')
+            assert lines[0] == f'def {key}(I):'
+            assert lines[-1] == ''
+            variables = set()
+            calls = set()
+            for line in lines[1:-2]:
+                variable, call = line.lstrip().split(' = ')
+                function, args = call.split('(')
+                assert variable not in dsl_interface
+                assert variable not in variables
+                assert call not in calls
+                variables.add(variable)
+                calls.add(call)
+                assert function in dsl_interface or function in variables
+                assert args[-1] == ')'
+                args = [args[:-1]] if ',' not in args else args[:-1].split(', ')
+                for arg in args:
+                    assert any([
+                        arg in variables, arg in dsl_interface,
+                        arg in constants, arg == 'I'
+                    ])
+            for v in variables:
+                assert sum([
+                    definition.count(vs) for vs in [
+                        f'({v})', f'({v}, ', f', {v})',
+                        f', {v}, ', f' {v} = ', f' {v}('
+                    ]
+                ]) > 1 or v == 'O'
+            n_correct += 1
+        except:
+            pass
+    print(f'{n_correct} out of {n} solvers formatted correctly.')
+
+
+def test_solvers_correctness(data, solvers_module):
+    """ tests the implemented solvers for correctness """
+    n_correct = 0
+    n = len(data["train"])
+    for key in tqdm.tqdm(data['train'].keys(), total=n):
+        task = data['train'][key] + data['test'][key]
+        try:
+            solver = getattr(solvers_module, f'solve_{key}')
+            for ex in task:
+                assert solver(ex['input']) == ex['output']
+            n_correct += 1
+        except:
+            pass
+    print(f'{n_correct} out of {n} tasks solved correctly.')
+
+
+def main():
+    data = get_data(train=True)
+    run_dsl_tests(dsl, tests)
+    test_solvers_formatting(solvers, dsl)
+    test_solvers_correctness(data, solvers)
+
+
+if __name__ == '__main__':
+    main()
+
+
+
+================================================
+FILE: tests.py
+================================================
+from dsl import *
+
+
+A = ((1, 0), (0, 1), (1, 0))
+B = ((2, 1), (0, 1), (2, 1))
+C = ((3, 4), (5, 5))
+D = ((1, 2, 3), (4, 5, 6), (7, 8, 0))
+E = ((1, 2), (4, 5))
+F = ((5, 6), (8, 0))
+G = ((1, 0, 0, 0, 3), (0, 1, 1, 0, 0), (0, 1, 1, 2, 0), (0, 0, 2, 2, 0), (0, 2, 0, 0, 0))
+H = ((0, 0, 0, 0, 0), (0, 2, 0, 2, 0), (2, 0, 0, 2, 0), (0, 0, 0, 0, 0), (0, 0, 2, 0, 0))
+I = ((0, 0, 2, 0, 0), (0, 2, 0, 2, 0), (2, 0, 0, 2, 0), (0, 2, 0, 2, 0), (0, 0, 2, 0, 0))
+J = ((0, 0, 2, 0, 0), (0, 2, 0, 2, 0), (0, 0, 2, 2, 0), (0, 2, 0, 2, 0), (0, 0, 2, 0, 0))
+K = ((0, 0, 1, 0, 0, 1, 0, 0), (0, 0, 1, 0, 0, 1, 0, 0), (1, 1, 1, 1, 1, 1, 1, 1), (0, 0, 1, 0, 0, 1, 0, 0), (0, 0, 1, 0, 0, 1, 0, 0), (1, 1, 1, 1, 1, 1, 1, 1), (0, 0, 1, 0, 0, 1, 0, 0), (0, 0, 1, 0, 0, 1, 0, 0))
+
+
+def test_identity():
+    assert identity(1) == 1
+ 
+
+def test_add():
+    assert add(1, 2) == 3
+    assert add(4, 6) == 10
+ 
+
+def test_subtract():
+    assert subtract(1, 2) == -1
+    assert subtract(4, 6) == -2
+ 
+
+def test_multiply():
+    assert multiply(2, 3) == 6
+    assert multiply(4, 3) == 12
+ 
+
+def test_divide():
+    assert divide(4, 2) == 2
+    assert divide(9, 2) == 4
+ 
+
+def test_invert():
+    assert invert(1) == -1
+    assert invert(-4) == 4
+ 
+
+def test_even():
+    assert not even(1)
+    assert even(2)
+ 
+
+def test_double():
+    assert double(1) == 2
+ 
+
+def test_halve():
+    assert halve(2) == 1
+    assert halve(5) == 2
+ 
+
+def test_flip():
+    assert flip(False)
+    assert not flip(True)
+ 
+
+def test_equality():
+    assert equality(A, A)
+    assert not equality(A, B)
+ 
+
+def test_contained():
+    assert contained(1, (1, 3))
+    assert not contained(2, {3, 4})
+ 
+
+def test_combine():
+    assert combine(frozenset({1, 2}), frozenset({3, 4})) == frozenset({1, 2, 3, 4})
+    assert combine((1, 2), (3, 4)) == (1, 2, 3, 4)
+ 
+
+def test_intersection():
+    assert intersection(frozenset({1, 2}), frozenset({2, 3})) == frozenset({2})
+ 
+
+def test_difference():
+    assert difference(frozenset({1, 2, 3}), frozenset({1, 2})) == frozenset({3})
+ 
+
+def test_dedupe():
+    assert dedupe((1, 2, 3, 3, 2, 4, 1)) == (1, 2, 3, 4)
+ 
+
+def test_order():
+    assert order(((1,), (1, 2, 3), (1, 2)), len) == ((1,), (1, 2), (1, 2, 3))
+    assert order((1, 4, -3), abs) == (1, -3, 4)
+ 
+
+def test_repeat():
+    assert repeat(C, 3) == (C, C, C)
+ 
+
+def test_greater():
+    assert greater(2, 1)
+    assert not greater(4, 10)
+ 
+
+def test_size():
+    assert size((1, 2, 3)) == 3
+    assert size(frozenset({2, 5})) == 2
+ 
+
+def test_merge():
+    assert merge(frozenset({frozenset({(1, (0, 0))}), frozenset({(1, (1, 1)), (1, (0, 1))})})) == frozenset({(1, (0, 0)), (1, (1, 1)), (1, (0, 1))})
+    assert merge(((1, 2), (3, 4, 5))) == (1, 2, 3, 4, 5)
+    assert merge(((4, 5), (7,))) == (4, 5, 7)
+ 
+
+def test_maximum():
+    assert maximum({1, 2, 5, 3}) == 5
+    assert maximum((4, 2, 6)) == 6
+ 
+
+def test_minimum():
+    assert minimum({1, 2, 5, 3}) == 1
+    assert minimum((4, 2, 6)) == 2
+ 
+
+def test_valmax():
+    assert valmax(((1,), (1, 2)), len) == 2
+ 
+
+def test_valmin():
+    assert valmin(((1,), (1, 2)), len) == 1
+ 
+
+def test_argmax():
+    assert argmax(((1,), (1, 2)), len) == (1, 2)
+ 
+
+def test_argmin():
+    assert argmin(((1,), (1, 2)), len) == (1,)
+ 
+
+def test_mostcommon():
+    assert mostcommon((1, 2, 2, 3, 3, 3)) == 3
+ 
+
+def test_leastcommon():
+    assert leastcommon((1, 2, 3, 4, 2, 3, 4)) == 1
+ 
+
+def test_initset():
+    assert initset(2) == frozenset({2})
+ 
+
+def test_both():
+    assert not both(True, False)
+    assert both(True, True)
+    assert not both(False, False)
+ 
+
+def test_either():
+    assert either(True, False)
+    assert either(True, True)
+    assert not either(False, False)
+ 
+
+def test_increment():
+    assert increment(1) == 2
+ 
+
+def test_decrement():
+    assert decrement(1) == 0
+ 
+
+def test_crement():
+    assert crement(1) == 2
+    assert crement(-2) == -3
+ 
+
+def test_sign():
+    assert sign(2) == 1
+    assert sign(0) == 0
+    assert sign(-1) == -1
+ 
+
+def test_positive():
+    assert positive(1)
+    assert not positive(-2)
+ 
+
+def test_toivec():
+    assert toivec(2) == (2, 0)
+ 
+
+def test_tojvec():
+    assert tojvec(3) == (0, 3)
+ 
+
+def test_sfilter():
+    assert sfilter((1, 2, 3), lambda x: x > 1) == (2, 3)
+    assert sfilter(frozenset({2, 3, 4}), lambda x: x % 2 == 0) == frozenset({2, 4})
+ 
+
+def test_mfilter():
+    assert mfilter(frozenset({frozenset({(2, (3, 3))}), frozenset({(1, (0, 0))}), frozenset({(1, (1, 1)), (1, (0, 1))})}), lambda x: len(x) == 1) == frozenset({(1, (0, 0)), (2, (3, 3))})
+ 
+
+def test_extract():
+    assert extract((1, 2, 3), lambda x: x > 2) == 3
+    assert extract(frozenset({2, 3, 4}), lambda x: x % 4 == 0) == 4
+ 
+
+def test_totuple():
+    assert totuple({1}) == (1,)
+ 
+
+def test_first():
+    assert first((2, 3)) == 2
+ 
+
+def test_last():
+    assert last((2, 3)) == 3
+ 
+
+def test_insert():
+    assert insert(1, frozenset({2})) == frozenset({1, 2})
+ 
+
+def test_remove():
+    assert remove(1, frozenset({1, 2})) == frozenset({2})
+ 
+
+def test_other():
+    assert other({1, 2}, 1) == 2
+ 
+
+def test_interval():
+    assert interval(1, 4, 1) == (1, 2, 3)
+    assert interval(5, 2, -1) == (5, 4, 3)
+ 
+
+def test_astuple():
+    assert astuple(3, 4) == (3, 4)
+ 
+
+def test_product():
+    assert product({1, 2}, {2, 3}) == frozenset({(1, 2), (1, 3), (2, 2), (2, 3)})
+ 
+
+def test_pair():
+    assert pair((1, 2), (4, 3)) == ((1, 4), (2, 3))
+ 
+
+def test_branch():
+    assert branch(True, 1, 3) == 1
+    assert branch(False, 4, 2) == 2
+ 
+
+def test_compose():
+    assert compose(lambda x: x ** 2, lambda x: x + 1)(2) == 9
+    assert compose(lambda x: x + 1, lambda x: x ** 2)(2) == 5
+ 
+
+def test_chain():
+    assert chain(lambda x: x + 3, lambda x: x ** 2, lambda x: x + 1)(2) == 12
+ 
+
+def test_matcher():
+    assert matcher(lambda x: x + 1, 3)(2)
+    assert not matcher(lambda x: x - 1, 3)(2)
+ 
+
+def test_rbind():
+    assert rbind(lambda a, b: a + b, 2)(3) == 5
+    assert rbind(lambda a, b: a == b, 2)(2)
+ 
+
+def test_lbind():
+    assert lbind(lambda a, b: a + b, 2)(3) == 5
+    assert lbind(lambda a, b: a == b, 2)(2)
+ 
+
+def test_power():
+    assert power(lambda x: x + 1, 3)(4) == 7
+ 
+
+def test_fork():
+    assert fork(lambda x, y: x * y, lambda x: x + 1, lambda x: x + 2)(2) == 12
+ 
+
+def test_apply():
+    assert apply(lambda x: x ** 2, (1, 2, 3)) == (1, 4, 9)
+    assert apply(lambda x: x % 2, frozenset({1, 2})) == frozenset({0, 1})
+ 
+
+def test_rapply():
+    assert rapply(frozenset({lambda x: x + 1, lambda x: x - 1}), 1) == {0, 2}
+ 
+
+def test_mapply():
+    assert mapply(lambda x: frozenset({(v + 1, (i, j)) for v, (i, j) in x}), frozenset({frozenset({(1, (0, 0))}), frozenset({(1, (1, 1)), (1, (0, 1))})})) == frozenset({(2, (0, 0)), (2, (1, 1)), (2, (0, 1))})
+ 
+
+def test_papply():
+    assert papply(lambda x, y: x + y, (1, 2), (3, 4)) == (4, 6)
+ 
+
+def test_mpapply():
+    assert mpapply(lambda x, y: frozenset({(x, (i, j)) for _, (i, j) in y}), (3, 4), frozenset({frozenset({(1, (0, 0))}), frozenset({(1, (1, 1)), (1, (0, 1))})})) == ((3, (0, 0)), (4, (1, 1)), (4, (0, 1)))
+ 
+
+def test_prapply():
+    assert prapply(lambda x, y: x + y, {1, 2}, {2, 3}) == frozenset({3, 4, 5})
+ 
+
+def test_mostcolor():
+    assert mostcolor(B) == 1
+    assert mostcolor(C) == 5
+ 
+
+def test_leastcolor():
+    assert leastcolor(B) == 0
+ 
+
+def test_height():
+    assert height(A) == 3
+    assert height(C) == 2
+    assert height(frozenset({(0, 4)})) == 1
+    assert height(frozenset({(1, (0, 0)), (1, (1, 1)), (1, (1, 2)), (1, (2, 1)), (1, (2, 2))})) == 3
+ 
+
+def test_width():
+    assert width(A) == 2
+    assert width(C) == 2
+    assert width(frozenset({(0, 4)})) == 1
+    assert width(frozenset({(1, (0, 0)), (1, (1, 1)), (1, (1, 2)), (1, (2, 1)), (1, (2, 2))})) == 3
+ 
+
+def test_shape():
+    assert shape(A) == (3, 2)
+    assert shape(C) == (2, 2)
+    assert shape(frozenset({(0, 4)})) == (1, 1)
+    assert shape(frozenset({(1, (0, 0)), (1, (1, 1)), (1, (1, 2)), (1, (2, 1)), (1, (2, 2))})) == (3, 3)
+ 
+
+def test_portrait():
+    assert portrait(A)
+    assert not portrait(C)
+ 
+
+def test_colorcount():
+    assert colorcount(A, 1) == 3
+    assert colorcount(C, 5) == 2
+    assert colorcount(frozenset({(1, (0, 0)), (2, (1, 0)), (2, (0, 1))}), 2) == 2
+    assert colorcount(frozenset({(1, (0, 0)), (2, (1, 0)), (2, (0, 1))}), 1) == 1
+ 
+
+def test_colorfilter():
+     assert colorfilter(frozenset({frozenset({(3, (0, 4))}), frozenset({(1, (0, 0))}), frozenset({(2, (4, 1))}), frozenset({(1, (1, 1)), (1, (1, 2)), (1, (2, 1)), (1, (2, 2))}), frozenset({(2, (3, 2)), (2, (2, 3)), (2, (3, 3))})}), 2) == frozenset({frozenset({(2, (4, 1))}), frozenset({(2, (3, 2)), (2, (2, 3)), (2, (3, 3))})})
+ 
+
+def test_sizefilter():
+    assert sizefilter(frozenset({frozenset({(3, (0, 4))}), frozenset({(1, (0, 0))}), frozenset({(2, (4, 1))}), frozenset({(1, (1, 1)), (1, (1, 2)), (1, (2, 1)), (1, (2, 2))}), frozenset({(2, (3, 2)), (2, (2, 3)), (2, (3, 3))})}), 1) == frozenset({frozenset({(3, (0, 4))}), frozenset({(1, (0, 0))}), frozenset({(2, (4, 1))})})
+ 
+
+def test_asindices():
+    assert asindices(A) == frozenset({(0, 0), (0, 1), (1, 0), (1, 1), (2, 0), (2, 1)})
+    assert asindices(C) == frozenset({(0, 0), (0, 1), (1, 0), (1, 1)})
+ 
+
+def test_ofcolor():
+    assert ofcolor(A, 0) == frozenset({(0, 1), (1, 0), (2, 1)})
+    assert ofcolor(B, 2) == frozenset({(0, 0), (2, 0)})
+    assert ofcolor(C, 1) == frozenset()
+ 
+
+def test_ulcorner():
+    assert ulcorner(frozenset({(1, 2), (0, 3), (4, 0)})) == (0, 0)
+    assert ulcorner(frozenset({(1, 2), (0, 0), (4, 3)})) == (0, 0)
+ 
+
+def test_urcorner():
+    assert urcorner(frozenset({(1, 2), (0, 3), (4, 0)})) == (0, 3)
+    assert urcorner(frozenset({(1, 2), (0, 0), (4, 3)})) == (0, 3)
+ 
+
+def test_llcorner():
+    assert llcorner(frozenset({(1, 2), (0, 3), (4, 0)})) == (4, 0)
+    assert llcorner(frozenset({(1, 5), (0, 0), (2, 3)})) == (2, 0)
+ 
+
+def test_lrcorner():
+    assert lrcorner(frozenset({(1, 2), (0, 3), (4, 0)})) == (4, 3)
+    assert lrcorner(frozenset({(1, 5), (0, 0), (2, 3)})) == (2, 5)
+ 
+
+def test_crop():
+    assert crop(A, (0, 0), (2, 2)) == ((1, 0), (0, 1))
+    assert crop(C, (0, 1), (1, 1)) == ((4,),)
+    assert crop(D, (1, 2), (2, 1)) == ((6,), (0,))
+ 
+
+def test_toindices():
+    assert toindices(frozenset({(1, (1, 1)), (1, (1, 0))})) == frozenset({(1, 1), (1, 0)})
+    assert toindices(frozenset({(1, 1), (0, 1)})) == frozenset({(1, 1), (0, 1)})
+ 
+
+def test_recolor():
+    assert recolor(3, frozenset({(2, (0, 0)), (1, (0, 1)), (5, (1, 0))})) == frozenset({(3, (0, 0)), (3, (0, 1)), (3, (1, 0))})
+    assert recolor(2, frozenset({(2, (2, 5)), (2, (1, 1))})) == frozenset({(2, (2, 5)), (2, (1, 1))})
+ 
+
+def test_shift():
+    assert shift(frozenset({(2, (1, 1)), (4, (1, 2)), (1, (2, 3))}), (1, 2)) == frozenset({(2, (2, 3)), (4, (2, 4)), (1, (3, 5))})
+    assert shift(frozenset({(1, 3), (0, 2), (3, 4)}), (0, -1)) == frozenset({(1, 2), (0, 1), (3, 3)})
+ 
+
+def test_normalize():
+    assert normalize(frozenset({(2, (1, 1)), (4, (1, 2)), (1, (2, 3))})) == frozenset({(2, (0, 0)), (4, (0, 1)), (1, (1, 2))})
+    assert normalize(frozenset({(1, 0), (0, 2), (3, 4)})) == frozenset({(1, 0), (0, 2), (3, 4)})
+ 
+
+def test_dneighbors():
+    assert dneighbors((1, 1)) == frozenset({(0, 1), (1, 0), (2, 1), (1, 2)})
+    assert dneighbors((0, 0)) == frozenset({(0, 1), (1, 0), (-1, 0), (0, -1)})
+    assert dneighbors((0, 1)) == frozenset({(0, 0), (1, 1), (-1, 1), (0, 2)})
+    assert dneighbors((1, 0)) == frozenset({(0, 0), (1, 1), (1, -1), (2, 0)})
+ 
+
+def test_ineighbors():
+    assert ineighbors((1, 1)) == frozenset({(0, 0), (0, 2), (2, 0), (2, 2)})
+    assert ineighbors((0, 0)) == frozenset({(1, 1), (-1, -1), (1, -1), (-1, 1)})
+    assert ineighbors((0, 1)) == frozenset({(1, 0), (1, 2), (-1, 0), (-1, 2)})
+    assert ineighbors((1, 0)) == frozenset({(0, 1), (2, -1), (2, 1), (0, -1)})
+ 
+
+def test_neighbors():
+    assert neighbors((1, 1)) == frozenset({(0, 0), (0, 1), (0, 2), (1, 0), (1, 2), (2, 0), (2, 1), (2, 2)})
+    assert neighbors((0, 0)) == frozenset({(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)})
+ 
+
+def test_objects():
+    assert objects(G, True, False, True) == frozenset({frozenset({(3, (0, 4))}), frozenset({(1, (0, 0))}), frozenset({(2, (4, 1))}), frozenset({(1, (1, 1)), (1, (1, 2)), (1, (2, 1)), (1, (2, 2))}), frozenset({(2, (3, 2)), (2, (2, 3)), (2, (3, 3))})})
+    assert objects(G, True, True, True) == frozenset({frozenset({(3, (0, 4))}), frozenset({(1, (0, 0)), (1, (1, 1)), (1, (1, 2)), (1, (2, 1)), (1, (2, 2))}), frozenset({(2, (4, 1)), (2, (3, 2)), (2, (2, 3)), (2, (3, 3))})})
+    assert objects(G, False, False, True) == frozenset({frozenset({(3, (0, 4))}), frozenset({(1, (0, 0))}), frozenset({(2, (4, 1))}), frozenset({(1, (1, 1)), (1, (1, 2)), (1, (2, 1)), (1, (2, 2)), (2, (3, 2)), (2, (2, 3)), (2, (3, 3))})})
+    assert objects(G, False, True, True) == frozenset({frozenset({(3, (0, 4))}), frozenset({(1, (0, 0)), (1, (1, 1)), (1, (1, 2)), (1, (2, 1)), (1, (2, 2)), (2, (4, 1)), (2, (3, 2)), (2, (2, 3)), (2, (3, 3))})})
+    assert objects(G, True, False, False) == frozenset({frozenset({(3, (0, 4))}), frozenset({(1, (0, 0))}), frozenset({(2, (4, 1))}), frozenset({(1, (1, 1)), (1, (1, 2)), (1, (2, 1)), (1, (2, 2))}), frozenset({(2, (3, 2)), (2, (2, 3)), (2, (3, 3))}), frozenset({(0, (1, 0)), (0, (2, 0)), (0, (3, 0)), (0, (4, 0)), (0, (3, 1))}), frozenset({(0, (0, 1)), (0, (0, 2)), (0, (0, 3)), (0, (1, 3)), (0, (1, 4)), (0, (2, 4)), (0, (3, 4)), (0, (4, 4)), (0, (4, 3)), (0, (4, 2))})})
+ 
+
+def test_partition():
+    assert partition(B) == frozenset({frozenset({(0, (1, 0))}), frozenset({(2, (0, 0)), (2, (2, 0))}), frozenset({(1, (0, 1)), (1, (1, 1)), (1, (2, 1))})})
+    assert partition(G) == frozenset({frozenset({(1, (0, 0)), (1, (1, 1)), (1, (1, 2)), (1, (2, 1)), (1, (2, 2))}), frozenset({(2, (4, 1)), (2, (3, 2)), (2, (2, 3)), (2, (3, 3))}), frozenset({(3, (0, 4))}), frozenset({(0, (0, 1)), (0, (0, 2)), (0, (0, 3)), (0, (1, 0)), (0, (1, 3)), (0, (1, 4)), (0, (2, 0)), (0, (2, 4)), (0, (3, 0)), (0, (3, 1)), (0, (3, 4)), (0, (4, 0)), (0, (4, 2)), (0, (4, 3)), (0, (4, 4))})})
+ 
+
+def test_fgpartition():
+    assert fgpartition(B) == frozenset({frozenset({(0, (1, 0))}), frozenset({(2, (0, 0)), (2, (2, 0))})})
+    assert fgpartition(G) == frozenset({frozenset({(1, (0, 0)), (1, (1, 1)), (1, (1, 2)), (1, (2, 1)), (1, (2, 2))}), frozenset({(2, (4, 1)), (2, (3, 2)), (2, (2, 3)), (2, (3, 3))}), frozenset({(3, (0, 4))})})
+ 
+
+def test_uppermost():
+    assert uppermost(frozenset({(0, 4)})) == 0
+    assert uppermost(frozenset({(1, (0, 0)), (1, (1, 1)), (1, (1, 2)), (1, (2, 1)), (1, (2, 2))})) == 0
+ 
+
+def test_lowermost():
+    assert lowermost(frozenset({(0, 4)})) == 0
+    assert lowermost(frozenset({(1, (0, 0)), (1, (1, 1)), (1, (1, 2)), (1, (2, 1)), (1, (2, 2))})) == 2
+ 
+
+def test_leftmost():
+    assert leftmost(frozenset({(0, 4)})) == 4
+    assert leftmost(frozenset({(1, (0, 0)), (1, (1, 1)), (1, (1, 2)), (1, (2, 1)), (1, (2, 2))})) == 0
+ 
+
+def test_rightmost():
+    assert rightmost(frozenset({(0, 4)})) == 4
+    assert rightmost(frozenset({(1, (0, 0)), (1, (1, 1)), (1, (1, 2)), (1, (2, 1)), (1, (2, 2))})) == 2
+ 
+
+def test_square():
+    assert square(C)
+    assert square(D)
+    assert not square(A)
+    assert not square(B)
+    assert not square(frozenset({(1, 1), (1, 0)}))
+    assert square(frozenset({(1, 1), (0, 0), (1, 0), (0, 1)}))
+    assert not square(frozenset({(0, 0), (1, 0), (0, 1)}))
+    assert square(frozenset({(1, (1, 1)), (2, (0, 0)), (2, (1, 0)), (3, (0, 1))}))
+ 
+
+def test_vline():
+    assert vline(frozenset({(1, (1, 1)), (1, (0, 1))}))
+    assert not vline(frozenset({(1, 1), (1, 0)}))
+ 
+
+def test_hline():
+    assert hline(frozenset({(1, (1, 1)), (1, (1, 0))}))
+    assert not hline(frozenset({(1, 1), (0, 1)}))
+ 
+
+def test_hmatching():
+    assert hmatching(frozenset({(1, (1, 1)), (2, (0, 0)), (2, (1, 0)), (3, (0, 1))}), frozenset({(1, (1, 3)), (2, (1, 4))}))
+    assert not hmatching(frozenset({(1, (1, 1)), (2, (0, 0)), (2, (1, 0)), (3, (0, 1))}), frozenset({(1, (2, 3)), (2, (2, 4))}))
+ 
+
+def test_vmatching():
+    assert vmatching(frozenset({(1, (1, 1)), (2, (0, 0)), (2, (1, 0)), (3, (0, 1))}), frozenset({(1, (3, 1)), (2, (4, 1))}))
+    assert not vmatching(frozenset({(1, (1, 1)), (2, (0, 0)), (2, (1, 0)), (3, (0, 1))}), frozenset({(1, (3, 2)), (2, (4, 2))}))
+ 
+
+def test_manhattan():
+    assert manhattan(frozenset({(0, 0), (1, 1)}), frozenset({(1, 2), (2, 3)})) == 1
+    assert manhattan(frozenset({(1, 1)}), frozenset({(2, 3)})) == 3
+ 
+
+def test_adjacent():
+    assert adjacent(frozenset({(0, 0)}), frozenset({(0, 1), (1, 0)}))
+    assert not adjacent(frozenset({(0, 0)}), frozenset({(1, 1)}))
+ 
+
+def test_bordering():
+    assert bordering(frozenset({(0, 0)}), D)
+    assert bordering(frozenset({(0, 2)}), D)
+    assert bordering(frozenset({(2, 0)}), D)
+    assert bordering(frozenset({(2, 2)}), D)
+    assert not bordering(frozenset({(1, 1)}), D)
+ 
+
+def test_centerofmass():
+    assert centerofmass(frozenset({(0, 0), (1, 1), (1, 2)})) == (0, 1)
+    assert centerofmass(frozenset({(0, 0), (1, 1), (2, 2)})) == (1, 1)
+    assert centerofmass(frozenset({(0, 0), (1, 1), (0, 1)})) == (0, 0)
+ 
+
+def test_palette():
+    assert palette(frozenset({(1, (1, 1)), (2, (0, 0)), (2, (1, 0)), (3, (0, 1))})) == frozenset({1, 2, 3})
+    assert palette(frozenset({(1, (1, 1)), (1, (0, 0)), (1, (1, 0)), (1, (0, 1))})) == frozenset({1})
+ 
+
+def test_numcolors():
+    assert numcolors(frozenset({(1, (1, 1)), (2, (0, 0)), (2, (1, 0)), (3, (0, 1))})) == 3
+    assert numcolors(frozenset({(1, (1, 1)), (1, (0, 0)), (1, (1, 0)), (1, (0, 1))})) == 1
+ 
+
+def test_color():
+    assert color(frozenset({(1, (1, 1)), (1, (0, 0)), (1, (1, 0)), (1, (0, 1))})) == 1
+    assert color(frozenset({(2, (3, 1))})) == 2
+ 
+
+def test_toobject():
+    assert toobject(frozenset({(0, 0), (0, 2)}), G) == frozenset({(1, (0, 0)), (0, (0, 2))})
+    assert toobject(frozenset({(0, 4)}), G) == frozenset({(3, (0, 4))})
+ 
+
+def test_asobject():
+    assert asobject(A) == frozenset({(0, (0, 1)), (0, (1, 0)), (0, (2, 1)), (1, (0, 0)), (1, (1, 1)), (1, (2, 0))})
+ 
+
+def test_rot90():
+    assert rot90(B) == ((2, 0, 2), (1, 1, 1))
+    assert rot90(C) == ((5, 3), (5, 4))
+ 
+
+def test_rot180():
+    assert rot180(B) == ((1, 2), (1, 0), (1, 2))
+    assert rot180(C) == ((5, 5), (4, 3))
+ 
+
+def test_rot270():
+    assert rot270(B) == ((1, 1, 1), (2, 0, 2))
+    assert rot270(C) == ((4, 5), (3, 5))
+ 
+
+def test_hmirror():
+    assert hmirror(B) == ((2, 1), (0, 1), (2, 1))
+    assert hmirror(C) == ((5, 5), (3, 4))
+    assert hmirror(frozenset({(0, 0), (1, 1)})) == frozenset({(1, 0), (0, 1)})
+    assert hmirror(frozenset({(0, 0), (1, 0), (1, 1)})) == frozenset({(1, 0), (0, 1), (0, 0)})
+    assert hmirror(frozenset({(0, 1), (1, 2)})) == frozenset({(0, 2), (1, 1)})
+ 
+
+def test_vmirror():
+    assert vmirror(B) == ((1, 2), (1, 0), (1, 2))
+    assert vmirror(C) == ((4, 3), (5, 5))
+    assert vmirror(frozenset({(0, 0), (1, 1)})) == frozenset({(1, 0), (0, 1)})
+    assert vmirror(frozenset({(0, 0), (1, 0), (1, 1)})) == frozenset({(1, 0), (1, 1), (0, 1)})
+    assert vmirror(frozenset({(0, 1), (1, 2)})) == frozenset({(0, 2), (1, 1)})
+ 
+
+def test_dmirror():
+    assert dmirror(B) == ((2, 0, 2), (1, 1, 1))
+    assert dmirror(C) == ((3, 5), (4, 5))
+    assert dmirror(frozenset({(0, 0), (1, 1)})) == frozenset({(0, 0), (1, 1)})
+    assert dmirror(frozenset({(0, 0), (1, 0), (1, 1)})) == frozenset({(0, 1), (1, 1), (0, 0)})
+    assert dmirror(frozenset({(0, 1), (1, 2)})) == frozenset({(0, 1), (1, 2)})
+ 
+
+def test_cmirror():
+    assert cmirror(B) == ((1, 1, 1), (2, 0, 2))
+    assert cmirror(C) == ((5, 4), (5, 3))
+    assert cmirror(frozenset({(0, 0), (1, 1)})) == frozenset({(0, 0), (1, 1)})
+    assert cmirror(frozenset({(0, 0), (1, 0), (1, 1)})) == frozenset({(0, 0), (1, 0), (1, 1)})
+    assert cmirror(frozenset({(0, 1), (1, 2)})) == frozenset({(0, 1), (1, 2)})
+ 
+
+def test_fill():
+    assert fill(B, 3, frozenset({(0, 0), (1, 1)})) == ((3, 1), (0, 3), (2, 1))
+    assert fill(C, 1, frozenset({(1, 0)})) == ((3, 4), (1, 5))
+ 
+
+def test_paint():
+    assert paint(B, frozenset({(1, (0, 0)), (2, (1, 1))})) == ((1, 1), (0, 2), (2, 1))
+    assert paint(C, frozenset({(6, (1, 0))})) == ((3, 4), (6, 5))
+ 
+
+def test_underfill():
+    assert underfill(C, 1, frozenset({(0, 0), (1, 0)})) == ((3, 4), (1, 5))
+ 
+
+def test_underpaint():
+    assert underpaint(B, frozenset({(3, (0, 0)), (3, (1, 1))})) == ((2, 1), (0, 3), (2, 1))
+    assert underpaint(C, frozenset({(3, (1, 1))})) == ((3, 4), (5, 3))
+ 
+
+def test_hupscale():
+    assert hupscale(B, 1) == B
+    assert hupscale(C, 1) == C
+    assert hupscale(B, 2) == ((2, 2, 1, 1), (0, 0, 1, 1), (2, 2, 1, 1))
+    assert hupscale(C, 2) == ((3, 3, 4, 4), (5, 5, 5, 5))
+ 
+
+def test_vupscale():
+    assert vupscale(B, 1) == B
+    assert vupscale(C, 1) == C
+    assert vupscale(B, 2) == ((2, 1), (2, 1), (0, 1), (0, 1), (2, 1), (2, 1))
+    assert vupscale(C, 2) == ((3, 4), (3, 4), (5, 5), (5, 5))
+ 
+
+def test_upscale():
+    assert upscale(B, 1) == B
+    assert upscale(C, 1) == C
+    assert upscale(B, 2) == ((2, 2, 1, 1), (2, 2, 1, 1), (0, 0, 1, 1), (0, 0, 1, 1), (2, 2, 1, 1), (2, 2, 1, 1))
+    assert upscale(C, 2) == ((3, 3, 4, 4), (3, 3, 4, 4), (5, 5, 5, 5), (5, 5, 5, 5))
+    assert upscale(frozenset({(3, (0, 1)), (4, (1, 0)), (5, (1, 1))}), 2) == frozenset({(3, (0, 2)), (3, (0, 3)), (3, (1, 2)), (3, (1, 3)), (4, (2, 0)), (4, (3, 0)), (4, (2, 1)), (4, (3, 1)), (5, (2, 2)), (5, (3, 2)), (5, (2, 3)), (5, (3, 3))})
+    assert upscale(frozenset({(3, (0, 0))}), 2) == frozenset({(3, (0, 0)), (3, (1, 0)), (3, (0, 1)), (3, (1, 1))})
+ 
+
+def test_downscale():
+    assert downscale(B, 1) == B
+    assert downscale(C, 1) == C
+    assert downscale(((2, 2, 1, 1), (2, 2, 1, 1), (0, 0, 1, 1), (0, 0, 1, 1), (2, 2, 1, 1), (2, 2, 1, 1)), 2) == B
+    assert downscale(((3, 3, 4, 4), (3, 3, 4, 4), (5, 5, 5, 5), (5, 5, 5, 5)), 2) == C
+ 
+
+def test_hconcat():
+    assert hconcat(A, B) == ((1, 0, 2, 1), (0, 1, 0, 1), (1, 0, 2, 1))
+    assert hconcat(B, A) == ((2, 1, 1, 0), (0, 1, 0, 1), (2, 1, 1, 0))
+ 
+
+def test_vconcat():
+    assert vconcat(A, B) == ((1, 0), (0, 1), (1, 0), (2, 1), (0, 1), (2, 1))
+    assert vconcat(B, A) == ((2, 1), (0, 1), (2, 1), (1, 0), (0, 1), (1, 0))
+    assert vconcat(B, C) == ((2, 1), (0, 1), (2, 1), (3, 4), (5, 5))
+ 
+
+def test_subgrid():
+    assert subgrid(frozenset({(3, (0, 0))}), C) == ((3,),)
+    assert subgrid(frozenset({(5, (1, 0)), (5, (1, 1))}), C) == ((5, 5),)
+    assert subgrid(frozenset({(2, (0, 1)), (4, (1, 0))}), D) == ((1, 2), (4, 5))
+    assert subgrid(frozenset({(1, (0, 0)), (0, (2, 2))}), D) == D
+ 
+
+def test_hsplit():
+    assert hsplit(B, 1) == (B,)
+    assert hsplit(B, 2) == (((2,), (0,), (2,)), ((1,), (1,), (1,)))
+    assert hsplit(C, 1) == (C,)
+    assert hsplit(C, 2) == (((3,), (5,)), ((4,), (5,)))
+ 
+
+def test_vsplit():
+    assert vsplit(B, 1) == (B,)
+    assert vsplit(B, 3) == (((2, 1),), ((0, 1),), ((2, 1),))
+    assert vsplit(C, 1) == (C,)
+    assert vsplit(C, 2) == (((3, 4),), ((5, 5),))
+ 
+
+def test_cellwise():
+    assert cellwise(A, B, 0) == ((0, 0), (0, 1), (0, 0))
+    assert cellwise(C, E, 0) == ((0, 0), (0, 5))
+ 
+
+def test_replace():
+    assert replace(B, 2, 3) == ((3, 1), (0, 1), (3, 1))
+    assert replace(C, 5, 0) == ((3, 4), (0, 0))
+ 
+
+def test_switch():
+    assert switch(C, 3, 4) == ((4, 3), (5, 5))
+ 
+
+def test_center():
+    assert center(frozenset({(1, (0, 0))})) == (0, 0)
+    assert center(frozenset({(1, (0, 0)), (1, (0, 2))})) == (0, 1)
+    assert center(frozenset({(1, (0, 0)), (1, (0, 2)), (1, (2, 0)), (1, (2, 2))})) == (1, 1)
+ 
+
+def test_position():
+    assert position(frozenset({(0, (1, 1))}), frozenset({(0, (2, 2))})) == (1, 1)
+    assert position(frozenset({(0, (2, 2))}), frozenset({(0, (1, 2))})) == (-1, 0)
+    assert position(frozenset({(0, (3, 3))}), frozenset({(0, (3, 4))})) == (0, 1)
+ 
+
+def test_index():
+    assert index(C, (0, 0)) == 3
+    assert index(D, (1, 2)) == 6
+ 
+
+def test_canvas():
+    assert canvas(3, (1, 2)) == ((3, 3),)
+    assert canvas(2, (3, 1)) == ((2,), (2,), (2,))
+ 
+
+def test_corners():
+    assert corners(frozenset({(1, 2), (0, 3), (4, 0)})) == frozenset({(0, 0), (0, 3), (4, 0), (4, 3)})
+    assert corners(frozenset({(1, 2), (0, 0), (4, 3)})) == frozenset({(0, 0), (0, 3), (4, 0), (4, 3)})
+ 
+
+def test_connect():
+    assert connect((1, 1), (2, 2)) == frozenset({(1, 1), (2, 2)})
+    assert connect((1, 1), (1, 4)) == frozenset({(1, 1), (1, 2), (1, 3), (1, 4)})
+ 
+
+def test_cover():
+    assert cover(C, frozenset({(0, 0)})) == ((5, 4), (5, 5))
+ 
+
+def test_trim():
+    assert trim(D) == ((5,),)
+ 
+
+def test_move():
+    assert move(C, frozenset({(3, (0, 0))}), (1, 1)) == ((5, 4), (5, 3))
+ 
+
+def test_tophalf():
+    assert tophalf(C) == ((3, 4),)
+    assert tophalf(D) == ((1, 2, 3),)
+ 
+
+def test_bottomhalf():
+    assert bottomhalf(C) == ((5, 5),)
+    assert bottomhalf(D) == ((7, 8, 0),)
+ 
+
+def test_lefthalf():
+    assert lefthalf(C) == ((3,), (5,))
+    assert lefthalf(D) == ((1,), (4,), (7,))
+ 
+
+def test_righthalf():
+    assert righthalf(C) == ((4,), (5,))
+    assert righthalf(D) == ((3,), (6,), (0,))
+ 
+
+def test_vfrontier():
+    assert vfrontier((3, 4)) == frozenset({(i, 4) for i in range(30)})
+ 
+
+def test_hfrontier():
+    assert hfrontier((3, 4)) == frozenset({(3, i) for i in range(30)})
+ 
+
+def test_backdrop():
+    assert backdrop(frozenset({(2, 3), (3, 2), (3, 3), (4, 1)})) == frozenset({(2, 1), (2, 2), (2, 3), (3, 1), (3, 2), (3, 3), (4, 1), (4, 2), (4, 3),})
+ 
+
+def test_delta():
+    assert delta(frozenset({(2, 3), (3, 2), (3, 3), (4, 1)})) == frozenset({(2, 1), (2, 2), (3, 1), (4, 2), (4, 3)})
+ 
+
+def test_gravitate():
+    assert gravitate(frozenset({(0, 0)}), frozenset({(0, 1)})) == (0, 0)
+    assert gravitate(frozenset({(0, 0)}), frozenset({(0, 4)})) == (0, 3)
+ 
+
+def test_inbox():
+    assert inbox(frozenset({(0, 0), (2, 2)})) == frozenset({(1, 1)})
+ 
+
+def test_outbox():
+    assert outbox(frozenset({(1, 1)})) == frozenset({(0, 0), (0, 1), (0, 2), (1, 0), (1, 2), (2, 0), (2, 1), (2, 2)})
+ 
+
+def test_box():
+    assert box(frozenset({(0, 0), (1, 1)})) == frozenset({(0, 0), (0, 1), (1, 0), (1, 1)})
+ 
+
+def test_shoot():
+    assert shoot((0, 0), (1, 1)) == frozenset({(i, i) for i in range(43)})
+ 
+
+def test_occurrences():
+    assert occurrences(G, frozenset({(1, (0, 0)), (1, (0, 1))})) == frozenset({(1, 1), (2, 1)})
+ 
+
+def test_frontiers():
+    assert frontiers(C) == frozenset({frozenset({(5, (1, 0)), (5, (1, 1))})})
+ 
+
+def test_compress():
+    assert compress(K) == ((0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0))
+ 
+
+def test_hperiod():
+    assert hperiod(frozenset({(8, (2, 1)), (8, (1, 3)), (2, (2, 4)), (8, (2, 3)), (2, (2, 2)), (2, (1, 2)), (8, (1, 1)), (8, (1, 5)), (2, (1, 4)), (8, (2, 5)), (2, (2, 0)), (2, (1, 0))})) == 2
+    assert hperiod(frozenset({(2, (2, 6)), (2, (2, 0)), (3, (2, 4)), (3, (2, 2)), (3, (2, 5)), (2, (2, 3)), (3, (2, 1))})) == 3
+ 
+
+def test_vperiod():
+    assert vperiod(frozenset({(2, (2, 6)), (2, (2, 0)), (3, (2, 4)), (3, (2, 2)), (3, (2, 5)), (2, (2, 3)), (3, (2, 1))})) == 1
+    assert vperiod(frozenset({(1, (2, 6)), (2, (3, 5)), (2, (3, 0)), (2, (2, 2)), (2, (2, 7)), (1, (3, 4)), (2, (2, 1)), (1, (2, 3)), (2, (2, 5)), (2, (2, 4)), (1, (3, 7)), (1, (2, 0)), (2, (3, 6)), (2, (3, 2)), (2, (3, 3)), (1, (3, 1))})) == 2
+
+
