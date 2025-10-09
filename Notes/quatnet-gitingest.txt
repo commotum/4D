@@ -1,0 +1,841 @@
+Directory structure:
+└── commotum-quatnet/
+    ├── README.md
+    ├── CMakeLists.txt
+    ├── DesignOverview.md
+    ├── LICENSE
+    ├── ref/
+    │   └── Quaternion Neural Network and Its Application.md
+    └── src/
+        ├── hamprod_kernel.cu
+        ├── hamprod_kernel.h
+        ├── main.cpp
+        ├── quatnet_layer.cpp
+        └── quatnet_layer.h
+
+================================================
+FILE: README.md
+================================================
+# QuatNet
+A library for Quaternion Neural Networks, powered by the HamProd Kernel. Accelerate deep learning with fewer parameters using efficient quaternion operations on Nvidia GPUs. Supports QNN layers and QRNNs for multidimensional data like images and 3D rotations.
+
+## Overview
+QuatNet is a framework for building Quaternion Neural Networks (QNNs), which use Quaternions (four-dimensional hypercomplex numbers that contain a real and three separate imaginary components) to process multidimensional data efficiently. Inspired by the need for optimized Quaternion operations outlined in the ICLR 2019 paper [*Quaternion Recurrent Neural Networks*](https://arxiv.org/abs/1806.04418), QuatNet introduces the **HamProd Kernel**, a standalone CUDA kernel designed for high-performance Hamilton product computations on Nvidia GPUs. By leveraging Quaternions, QuatNet achieves up to 4x fewer parameters than real-valued networks, with reduced CPU-GPU memory transfers, making it ideal for tasks like image processing, 3D kinematics, and speech recognition.
+
+## Features
+- **HamProd Kernel**: A fast CUDA kernel for the Hamilton product, optimized for GPU efficiency.
+- **QNN Layers**: Dense and recurrent layers for Quaternion-based neural networks.
+- **Efficiency**: Fewer parameters and lower memory overhead compared to real-valued networks.
+- **Applications**: Supports multidimensional data, including RGB images, 3D orientations, and sequential tasks via QRNNs.
+
+## Installation
+### Requirements
+- Nvidia GPU with CUDA Toolkit 11.8 or later
+- CMake 3.10+
+- C++ compiler (e.g., g++)
+
+### Build Instructions
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/QuatNet.git
+   cd QuatNet
+   ```
+2. Create a build directory and compile:
+   ```bash
+   mkdir build
+   cd build
+   cmake ..
+   make
+   ```
+3. Run the example:
+   ```bash
+   ./quatnet
+   ```
+
+## Usage
+QuatNet provides a simple API for building QNNs. Below is an example of using a quaternion dense layer:
+
+```cpp
+#include "quatnet_layer.h"
+
+int main() {
+    // Initialize layer: 4 inputs, 2 outputs
+    QuaternionDenseLayer layer(4, 2);
+    
+    // Allocate input/output on GPU
+    Quaternion *d_input, *d_output;
+    cudaMalloc(&d_input, 4 * sizeof(Quaternion));
+    cudaMalloc(&d_output, 2 * sizeof(Quaternion));
+    
+    // Set input (example)
+    Quaternion h_input[4] = {{1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1}};
+    cudaMemcpy(d_input, h_input, 4 * sizeof(Quaternion), cudaMemcpyHostToDevice);
+    
+    // Run forward pass
+    layer.forward(d_input, d_output);
+    
+    // Clean up
+    cudaFree(d_input);
+    cudaFree(d_output);
+    return 0;
+}
+```
+
+See `src/main.cpp` for a complete example.
+
+## Motivation
+QuatNet was inspired by the ICLR 2019 paper [*Quaternion Recurrent Neural Networks*](https://arxiv.org/abs/1806.04418), which noted that Quaternion neural networks, while computationally intensive due to the Hamilton product, could outperform real-valued networks with a properly engineered CUDA kernel. The **HamProd Kernel** addresses this by providing a high-performance, GPU-accelerated implementation, enabling QNNs to process data with fewer parameters and faster training/inference times.
+
+## Project Structure
+```
+QuatNet/
+├── src/
+│   ├── hamprod_kernel.cu    # Hamilton Product Kernel
+│   ├── hamprod_kernel.h
+│   ├── quatnet_layer.cpp    # QNN layer implementation
+│   ├── quatnet_layer.h
+│   ├── main.cpp             # Example program
+├── tests/                   # Unit tests (planned)
+├── CMakeLists.txt           # Build configuration
+├── README.md                # This file
+├── DesignOverview.md        # Kernel design notes and background
+├── LICENSE                  # MIT License
+```
+
+## Contributing
+Contributions are welcome! Whether you're adding new QNN layers, optimizing the **HamProd Kernel**, or testing on different GPUs, please:
+1. Fork the repo.
+2. Create a branch (`git checkout -b feature/your-feature`).
+3. Commit changes (`git commit -m "Add your feature"`).
+4. Push to your fork (`git push origin feature/your-feature`).
+5. Open a pull request.
+
+## License
+[MIT License](LICENSE)
+
+## Acknowledgments
+- Inspired by [*Quaternion Recurrent Neural Networks*](https://arxiv.org/abs/1806.04418) by Parcollet et al., ICLR 2019.
+- Built with CUDA for Nvidia GPUs.
+
+## Contact
+For questions or ideas, open an issue or reach out to @commotum on X.
+
+
+================================================
+FILE: CMakeLists.txt
+================================================
+cmake_minimum_required(VERSION 3.10)
+project(QuatNet LANGUAGES CXX CUDA)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CUDA_STANDARD 17)
+
+find_package(CUDA REQUIRED)
+include_directories(
+    ${CUDA_INCLUDE_DIRS}
+    /usr/local/cuda/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+set(CMAKE_CUDA_ARCHITECTURES 60 70 75 80 86)
+
+add_executable(quatnet
+    src/main.cpp
+    src/quatnet_layer.cpp
+    src/hamprod_kernel.cu
+)
+
+target_link_libraries(quatnet ${CUDA_LIBRARIES} ${CUDA_curand_LIBRARY})
+set_target_properties(quatnet PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+
+
+================================================
+FILE: DesignOverview.md
+================================================
+# High-Performance Hamilton Product CUDA Kernel for Quaternion Neural Networks
+
+## Overview
+
+This document outlines a highly optimized standalone CUDA kernel for the Hamilton product, tailored to quaternion-valued neural networks (QNNs) on **Nvidia GPUs**. We focus on both elementwise (vectorized) multiplication and batched matrix-style operations, covering data layouts, warp-level parallelism, shared-memory tiling, and relevant architectural nuances. The goal: **keep quaternion operations from being a bottleneck** during training and inference by fusing all arithmetic into a single efficient kernel.
+
+---
+
+## Quaternion Hamilton Product in QNNs
+
+A quaternion $q$ can be represented as
+$$q = w + x\mathbf{i} + y\mathbf{j} + z\mathbf{k}.$$
+The **Hamilton product** of $q = (a, b, c, d)$ and $r = (e, f, g, h)$ is:
+
+$$
+\begin{aligned}
+q * r = ( \quad
+&ae \ - \ bf \ - \ cg \ - \ dh, \\
+&af \ + \ be \ + \ ch \ - \ dg, \\
+&ag \ - \ bh \ + \ ce \ + \ df, \\
+&ah \ + \ bg \ - \ cf \ + \ de \quad ) 
+\end{aligned}
+$$
+
+This involves **16 real multiplications** and **12 real additions**. Although QNNs can use 4× fewer parameters than equivalent real-valued networks, the Hamilton product is more complex than a simple float multiply–add. Efficient parallelization on GPU is thus essential to avoid performance pitfalls.
+
+---
+
+## Elementwise Kernel Design
+
+The simplest approach assigns **one CUDA thread per quaternion multiply**. Each thread loads two quaternions from global memory, performs the 16 mul + 12 add, and writes out a single quaternion result. Here’s a stripped-down example:
+
+```cpp
+struct Quaternion { float w, x, y, z; };
+
+__global__ void hamiltonProductKernel(
+    const Quaternion* __restrict__ A,
+    const Quaternion* __restrict__ B,
+    Quaternion* __restrict__ C,
+    int N)
+{
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < N) {
+        float a = A[idx].w, b = A[idx].x, c = A[idx].y, d = A[idx].z;
+        float e = B[idx].w, f = B[idx].x, g = B[idx].y, h = B[idx].z;
+
+        float rw = a*e - b*f - c*g - d*h;
+        float rx = a*f + b*e + c*h - d*g;
+        float ry = a*g - b*h + c*e + d*f;
+        float rz = a*h + b*g - c*f + d*e;
+
+        C[idx] = {rw, rx, ry, rz};
+    }
+}
+```
+
+**Why one thread per quaternion?** 
+- Each thread fetches 8 floats (two quaternions) and writes 4 floats (result). 
+- The GPU’s warp-level parallelism allows handling large batches of quaternions in parallel.
+- This kernel tends to be **memory-bandwidth-bound** on modern hardware, so ensuring alignment and coalescing is vital.
+
+### AoS vs. SoA
+- **Array of Structures (AoS)**: Each quaternion is 16 bytes, and consecutive quaternions occupy contiguous 16-byte chunks. Threads in a warp read a contiguous region of memory, which is typically coalesced.
+- **Structure of Arrays (SoA)**: Storing components in separate arrays can also achieve coalescing but requires more pointers. Since the Hamilton product uses all four components, AoS is often simpler and efficient.
+
+---
+
+## Batched Matrix–Vector Multiplication for QNN Layers
+
+Many QNN layers do something like this:
+
+$$\mathbf{y_n}=\sum_{m=1}^{M} \mathbf{W}_{n,m} \otimes \mathbf{x_m}$$
+
+
+where $\mathbf{W}_{n,m}$ and $\mathbf{x}_m$ are quaternions. This is akin to a dense GEMM, except each "multiply" is a Hamilton product. If $N$ or $M$ is large, a naive one-thread-per-output approach can be slow because each thread loops over $M$. Instead, we use **tiling** in shared memory:
+
+1. **Partition $\mathbf{x}$ into tiles** (e.g., 32 quaternions) and load each tile once into shared memory.
+2. **Assign a warp** to each output quaternion $\mathbf{y}_n$. 
+3. **Within that warp**, each thread multiplies one piece of the tile: $W_{n,j} \otimes \mathbf{x}_j$, and then does a warp-level reduction (summation) of all partial results.
+4. Move to the next tile of $\mathbf{x}$ until we cover $M$. Accumulate in registers, then write $\mathbf{y}_n$ to global memory.
+
+**Why tiling?** We reuse each tile of $\mathbf{x}$ across multiple outputs, saving global memory bandwidth. We rely on warp shuffles or shared-memory reductions to combine partial sums. Recent GPU architectures also offer asynchronous copy and advanced concurrency, which can further reduce latency when done carefully.
+
+---
+
+## Architectural Considerations
+
+- **Memory Bandwidth**:  
+  Many modern GPUs offer high memory bandwidth. For elementwise quaternion multiply (28 FLOPs per quaternion), the operation can often be limited by how fast data can be read from global memory.  
+
+- **Parallelism & Warp Utilization**:  
+  - Each SM runs many warps concurrently.  
+  - Occupancy is typically high given the low register usage per thread.  
+  - Tiled matrix kernels leverage shared memory for higher arithmetic intensity.
+
+- **FP32 vs. Mixed Precision**:  
+  While tensor cores accelerate matrix ops on half or BF16 data, quaternions typically do not map neatly to those specialized instructions. A straightforward FP32 CUDA kernel is usually the most direct approach.
+
+---
+
+## Implementation Sketch: Tiled Warp-Parallel Kernel
+
+Below is **pseudo-code** for batched `W * x -> y`, using a warp to compute each output quaternion in partial tiles:
+
+```cpp
+// Suppose blockDim = 256 (8 warps); each warp computes one or more y's.
+__global__ void quatMatVecMulTiled(
+    const Quaternion* W,  // (N*M quaternions)
+    const Quaternion* x,  // (M quaternions)
+    Quaternion* y,        // (N quaternions, result)
+    int N, int M)
+{
+    extern __shared__ Quaternion tileX[]; // for up to tileSize quaternions
+    int warpId = (blockIdx.x * (blockDim.x / 32)) + (threadIdx.x / 32);
+    if (warpId >= N) return;
+
+    // Each warp will compute y[warpId], accumulating partial sums in registers:
+    Quaternion acc = {0,0,0,0};
+    int lane = threadIdx.x % 32;
+
+    // Loop over input tiles
+    for (int tileStart = 0; tileStart < M; tileStart += 32) {
+        // Load 32 quaternions from x into shared memory
+        int idx = tileStart + lane;
+        if (idx < M) {
+            tileX[lane] = x[idx];
+        }
+        __syncthreads();
+
+        // Each warp thread handles one element of this tile (if valid)
+        // Weight index = warpId*M + tileStart + lane
+        if (idx < M) {
+            Quaternion Wq = W[warpId*M + idx];
+            Quaternion Xq = tileX[lane];
+            // Hamilton product Wq * Xq
+            float rw = Wq.w*Xq.w - Wq.x*Xq.x - Wq.y*Xq.y - Wq.z*Xq.z;
+            float rx = Wq.w*Xq.x + Wq.x*Xq.w + Wq.y*Xq.z - Wq.z*Xq.y;
+            float ry = Wq.w*Xq.y - Wq.x*Xq.z + Wq.y*Xq.w + Wq.z*Xq.x;
+            float rz = Wq.w*Xq.z + Wq.x*Xq.y - Wq.y*Xq.x + Wq.z*Xq.w;
+
+            acc.w += rw; acc.x += rx; acc.y += ry; acc.z += rz;
+        }
+        __syncthreads();
+    }
+
+    // Optionally do warp-level reduction if partial sums need to be combined.
+    // If each lane is independent, the final result might already be in 'acc'.
+    // Write out one quaternion per warp.
+    if (lane == 0) {
+        y[warpId] = acc;
+    }
+}
+```
+
+This approach:
+- Loads sub-tiles of $\mathbf{x}$ into shared memory. 
+- Distributes multiplication among threads in a warp, accumulating partial results in registers. 
+- Reduces overhead by reusing $\mathbf{x}$ for multiple outputs if the block has multiple warps.
+
+---
+
+## Performance Insights
+
+- **Elementwise Multiply**:  
+  Often memory-bound. Proper coalescing, alignment, and large problem sizes can help approach peak memory throughput.  
+
+- **Batched Matrix Multiply**:  
+  With tiling, each input quaternion can be reused multiple times, boosting arithmetic intensity and potentially making the kernel more compute-bound. Large $N\text{-by-}M$ QNN layers can see significant speedups over naive scalar implementations.
+
+- **Implementation Complexity**:  
+  A fully optimized quaternion matrix–matrix multiply follows the same tiling logic used in traditional GEMM. The challenge is that each “multiply” is the Hamilton product, not a simple float multiply–add. Nonetheless, proper tiling and parallel reduction can dramatically improve throughput.
+
+---
+
+## Integration into QNN Layers
+
+1. **Keep Data on GPU**: Allocate `W`, `x`, and `y` in device memory to avoid unnecessary transfers.  
+2. **Use AoS Layout**: Each weight quaternion is `(w, x, y, z)` in a single 16-byte struct, aligned for efficient loads.  
+3. **Launch the Kernel**: 
+   ```cpp
+   // For an N x M quaternion matrix multiply:
+   dim3 block(256);
+   dim3 grid( (N + (block.x/32) - 1) / (block.x/32) );
+   size_t sharedBytes = 32 * sizeof(Quaternion); // tile for x
+   quatMatVecMulTiled<<<grid, block, sharedBytes>>>(d_W, d_x, d_y, N, M);
+   ```
+4. **Apply Activations / Next Layers**: Chain further quaternion operations as needed.  
+
+For backprop, similar kernels handle the gradient wrt inputs or weights, often invoking Hamilton products with conjugates.
+
+---
+
+## Conclusion
+
+A dedicated CUDA kernel for the Hamilton product significantly boosts performance in Quaternion Neural Networks. By:
+- **Fusing** arithmetic into a single pass,
+- Using **coalesced** memory access,
+- Exploiting **tiling** and shared memory,
+
+we transform quaternion arithmetic from a potential bottleneck into a highly parallelized routine. This lays the groundwork for efficient large-scale QNNs that can leverage the parameter savings of quaternions without sacrificing runtime.
+
+> *“Done right, a custom Hamilton product kernel unlocks QNN speed and scalability on Nvidia GPUs.”*
+
+---
+
+## References & Further Reading
+
+- **Quaternion Neural Networks**  
+  *Parcollet et al.* “Quaternion Recurrent Neural Networks” (ICLR 2019).  
+- **GPU Quaternion Ops**  
+  NVIDIA forums on [CUDA for quaternions (hyper-complex)](https://forums.developer.nvidia.com/t/cuda-for-quaternions-hyper-complex-numbers-operations/44116).  
+- **Tiling in GEMM**  
+  [CUDA C++ Programming Guide](https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html).  
+- **AoS vs. SoA**  
+  [Wikipedia: AoS and SoA](https://en.wikipedia.org/wiki/AoS_and_SoA).
+
+
+
+================================================
+FILE: LICENSE
+================================================
+MIT License
+
+Copyright (c) 2025 J.P.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+================================================
+FILE: ref/Quaternion Neural Network and Its Application.md
+================================================
+# Quaternion Neural Network and Its Application
+
+#### Teijiro Isokawa ${}^1$, Tomoaki Kusakabe ${}^1$, Nobuyuki Matsui ${}^1$, and Ferdinand Peper ${}^2$
+${}^1$ Division of Computer Engineering, Himeji Institute of Technology, Japan \{isokawa, tomoaki, matsui\}@comp.eng.himeji-tech.ac.jp  
+${}^2$ Communications Research Laboratory, Nanotechnology Group, Japan peper@crl.go.jp
+
+
+### Abstract  
+Quaternion neural networks are models of which computations in the neurons is based on quaternions, the four-dimensional equivalents of imaginary numbers. This paper shows by experiments that the quaternion-version of the Back Propagation (BP) algorithm achieves correct geometrical transformations in color space for an image compression problem, whereas real-valued BP algorithms fail.
+
+## 1 Introduction
+Though most real-valued neural network models are able to learn arbitrary nonlinear functions, they perform less well when it comes to geometrical transformations, like affine transformations in 2 or 3 dimensional space. Some researchers[1] have found that the use of complex-valued neural networks results in improved performance on such transformation problems. These results inspired the Quaternion Neural Network Model in [2], which is trained by a BP learning algorithm. Such models employ neurons in which all computations are based on quaternions, a four-dimensional extension of imaginary numbers discovered by Sir W.R. Hamilton, which have found extensive use in modern mathematics and physics[3]. It turns out that such a quaternion neural model learns 3D affine transformations very well[2]. Using this as the starting point in this paper, we apply a quaternion BP learning algorithm on a color image compression problem, which is a problem in which the fidelity of colors is only preserved when the affine transformations in color space are correct. Experiments show improved performance of our quaternion scheme as compared to real-valued BP.
+
+## 2 Quaternion
+Quaternions form a class of hypercomplex numbers that consist of a real number and three kinds of imaginary number, $\boldsymbol{i}, \boldsymbol{j}, \boldsymbol{k}$. Formally, a quaternion is defined as a vector $\boldsymbol{x}$ in a 4 -dimensional vector space, i.e.,
+
+$$
+\begin{equation}
+\boldsymbol{x}=x^{(e)}+x^{(i)} \boldsymbol{i}+x^{(j)} \boldsymbol{j}+x^{(k)} \boldsymbol{k} \qquad \qquad (1)
+\end{equation}
+$$
+
+where $x^{(e)}$ and $x^{(i)}, x^{(j)}, x^{(k)}$ are real numbers. $K^4$, the division ring of quaternions, thus constitutes the four-dimensional vector space over the real numbers with the bases $1, \boldsymbol{i}, \boldsymbol{j}, \boldsymbol{k}$.
+
+Quaternions satisfy the following identities, known as the Hamilton rules:
+
+$$
+\begin{aligned}
+\boldsymbol{i}^2 = \boldsymbol{j}^2 = \boldsymbol{k}^2 = \boldsymbol{i}\boldsymbol{j}\boldsymbol{k} = -1, &\qquad \qquad (2)\\
+\boldsymbol{i}\boldsymbol{j} = -\boldsymbol{j}\boldsymbol{i} = \boldsymbol{k}, 
+\boldsymbol{j}\boldsymbol{k} = -\boldsymbol{k}\boldsymbol{j} = \boldsymbol{i}, 
+\boldsymbol{k}\boldsymbol{i} = -\boldsymbol{i}\boldsymbol{k} = \boldsymbol{j}. &\qquad \qquad (3)
+\end{aligned}
+$$
+
+From these rules it follows immediately that multiplication of quaternions is not commutative.
+
+$$
+\begin{aligned}
+\overline{\boldsymbol{x}}=x^{(e)} -x^{(i)} \boldsymbol{i} -x^{(j)} \boldsymbol{j} -x^{(k)} \boldsymbol{k} &\qquad \qquad (4)
+\end{aligned}
+$$
+
+where $x^{(e)}$ is regarded as the real part and $x^{(i)} i+x^{(j)} j+x^{(k)} k$ as the imaginary part of $\boldsymbol{x}$.
+
+The quaternion norm of $\boldsymbol{x}, \mathrm{n}(\boldsymbol{x})$, is defined by
+
+$$
+\begin{aligned}
+n(\boldsymbol{x}) & =\sqrt{\boldsymbol{x} \overline{\boldsymbol{x}}}=\sqrt{\overline{\boldsymbol{x}} \boldsymbol{x}} \\ & =\sqrt{x^{(e)^2}+x^{(j)^2}+x^{(j)^2}+x^{(k)^2}} &\qquad \qquad (5)
+\end{aligned}
+$$
+
+For convenience in the following explanation, we define the purely imaginary quaternion as a quaternion with zero real part. A purely imaginary quaternion $x$ can thus be expressed as
+
+$$
+\begin{aligned}
+\boldsymbol{x}=x^{(i)} i+x^{(j)} j+x^{(k)} \boldsymbol{k} \qquad \qquad (6)
+\end{aligned}
+$$
+
+## 3 Geometric Description by Quaternion
+
+A rotation $\boldsymbol{g}$ in 3 D vector space $\boldsymbol{I} \in \boldsymbol{K}^3$ can be computed as
+
+$$
+\begin{aligned}
+\boldsymbol{g}=\boldsymbol{a} v \overline{\boldsymbol{a}} \qquad \qquad (7)
+\end{aligned}
+$$
+
+where $\boldsymbol{a}$ is a quaternion with $n(\boldsymbol{a})=1$ and $\boldsymbol{v}$ is a purely imaginary quaternion with $n(\boldsymbol{v})=1$. This quaternion $\boldsymbol{a}$ is denoted by
+
+$$
+\begin{aligned}
+\boldsymbol{a}=\cos \alpha+(\sin \alpha) \cdot \boldsymbol{u} \qquad \qquad (8)
+\end{aligned}
+$$
+
+where $\alpha$ is an angle satisfying $|\alpha| \leq \pi$ and $\boldsymbol{u}$ is a purely imaginary quaternion with $n(\boldsymbol{u})=1$. Eq.(7) can always be applied whether $\boldsymbol{u}$ and $\boldsymbol{v}$ are orthogonal or not. In the case that $\boldsymbol{u}$ and $\boldsymbol{v}$ are orthogonal, rotation $\boldsymbol{g}$ is expressed from Eq.(8) as
+
+$$
+\begin{aligned} 
+\boldsymbol{g}=(\cos 2 \alpha) \boldsymbol{v}+(\sin 2 \alpha) \boldsymbol{u} \times \boldsymbol{v} \qquad \qquad (9)
+\end{aligned}
+$$
+
+This shows the vector $\boldsymbol{v}$ rotated by the angle $2 \alpha$ around $\boldsymbol{u}$ (see Fig.1). In the case that $\boldsymbol{u}$ and $\boldsymbol{v}$ are not orthogonal, Eq.(7) is expressed as
+
+$$
+\begin{aligned} 
+\boldsymbol{g} & =\boldsymbol{a}\left(\boldsymbol{v}_1+\boldsymbol{v}_2\right) \overline{\boldsymbol{a}}=\boldsymbol{a} \boldsymbol{v}_1 \overline{\boldsymbol{a}}+\boldsymbol{a} \boldsymbol{v}_2 \overline{\boldsymbol{a}} \\
+&=\boldsymbol{v}_1+(\sin 2 \alpha)\left(\boldsymbol{u} \times \boldsymbol{v}_2\right)+(\cos 2 \alpha) \boldsymbol{v}_2 \qquad \qquad (10)
+\end{aligned}
+$$
+
+where $\boldsymbol{v}_1$ and $\boldsymbol{v}_2$ are the components of vector $\boldsymbol{v}$ and satisfy $\boldsymbol{v}_1 \parallel \boldsymbol{u}$ and $\boldsymbol{v}_2 \perp \boldsymbol{u}$. Thus Eq.(10) also shows the vector $\boldsymbol{v}$ rotated by the angle $2 \alpha$ around $\boldsymbol{u}$.
+
+## 4 Quaternion Neural Network
+
+In this section we propose a layered quaternion neural network model and a quaternion BP algorithm to train it. Our quaternion neuron model adopts purely imaginary quaternions as input and output signals. The output $y_j$ of quaternion neuron $j$ is expressed as
+
+$$
+\begin{aligned}
+\boldsymbol{s}_j &= \sum_{i}\;\frac{\boldsymbol{w}_{ji}\,\boldsymbol{x}_i\,\overline{\boldsymbol{w}}_{ji}}{\left|\boldsymbol{w}_{ji}\right|} \;-\; \boldsymbol{\theta}_j, \\
+\boldsymbol{y}_j &= f\!\Big(\boldsymbol{s}_j\Big)\,. 
+\end{aligned}
+$$
+
+where $i$ denotes the indices of neurons in the previous layer, and $\boldsymbol{x}, \boldsymbol{y}, \theta, \boldsymbol{s} \in I$, $\boldsymbol{w} \in \boldsymbol{K}^4$ respectively are the vector of inputs to the neurons, the vector of outputs from the neurons, the threshold, the internal potential, and the weights of the connections to the neurons in layer $i$. The activation function $f$ is defined by
+
+$$
+\begin{aligned}
+& f(s)=h\left(s^{(i)}\right) \boldsymbol{i}+h\left(s^{(j)}\right) \boldsymbol{j}+h\left(s^{(k)}\right) \boldsymbol{k} &\qquad \qquad (13) \\
+& h(x)=\frac{1}{1+e^{-x}} &\qquad \qquad (14)
+\end{aligned}
+$$
+
+The quaternion neurons as defined above form the basis of a layered quaternion neural network. We adopt the quaternion equivalent of the BP algorithm for training the network, and define the error $E$ between the output values of the network and the target training data as
+
+$$
+\begin{aligned}
+E & =\frac{1}{2}\left(e^{(i)^2}+e^{(j)^2}+e^{(k)^2}\right) \\
+e^{(\mu)} & =y_k^{(\mu)}-d^{(\mu)}, \mu=\{i, j, k\}
+\end{aligned}
+$$
+
+where $y_k^{(\mu)}$ is the output values of the neuron in the output layer and $d^{(\mu)}$ is the target value. The connection weights $\boldsymbol{w}$ are updated by the gradient descent method:
+
+$$
+\begin{aligned}
+\boldsymbol{w}^{\text {new }} & =\boldsymbol{w}^{o l d}+\Delta \boldsymbol{w} \\
+\Delta w^{(\nu)} & =-\eta \cdot \frac{\partial E}{\partial w^{(\nu)}}, \quad \nu=\{e, i, j, k\}
+\end{aligned}
+$$
+
+where $\eta$ is a constant denoting the learning coefficient.
+
+## 5 Experimental Results
+
+### 5.1 Image Compression by Neural Networks
+To show the improved performance of quaternion BP as compared to real-valued (conventional) BP, we conduct image compression using BP on the neural networks, a task first proposed in [4]. To conduct image compression, a neural network with three layers is used, such that the number of neurons in the input layer is the same as in the output layer, and the number of neurons in the hidden layer is less than the number of neurons in the input layer. The hidden layer thus acts as a bottleneck, through which the information from the input layer to the output layer must pass with as little information loss as possible. An image to be compressed is prepared and uniformly divided into many samples of small subimages. The network is then trained by inputting the samples to both the input as well as the output neurons of the network. As a result of the training the network will try to find values of its weights such that there is a strong association between the input and the output. Such types of networks are also called *autoassociators*. Figure 2 shows an example of a network for the image compression problem.
+
+The following conditions are used for the computer simulations. The images used consist of $256 \times 256(=65536)$ pixels, each of which has its color values represented by 24 bits. The images are divided into 4096 samples of $4 \times 4(=16)$ pixels in size. The neural networks have three layers, and the neurons of the networks are distributed over the layers in a 48-12-48 configuration for the real-valued network and a 16-4-16 configuration for the quaternion network. These particular configurations ensure that both networks have approximately the same number of weight parameters, and thus can be used to compare performances. The image shown in Fig.3(a) is used for training the network and the image shown in Fig.3(b) is used after training for evaluating the generalizing ability of the network. The PSNR(peak-signal to noise ratio) between the original image and the output image is used as a measure to evaluate the performance of the networks.
+
+### 5.2 Results
+The networks are trained by using the image of Fig.3(a) up to the point that a certain mean square error (MSE) between the target data and the output of the network is achieved. The number of training iterations is equal to 10,000 and 9,421 for the real-valued BP and the quaternion BP respectively. Table 1 shows the PSNRs of the output images when the image of Fig.3(a) is imposed on the networks after training. Note that the expression " $\{B, G, R\}$-plane" in this table denotes the PSNRs calculated by using only the blue, green, and red components of the images respectively and "total" expresses PSNRs calculated by using all three components of the images. We see that the PSNRs are almost equal because the MSEs of the networks after training are virtually the same.
+
+After training, Fig.3(b) is input to the networks to inspect the generalization abilities of the networks. Figure 4 shows the output images of the networks. The output image obtained by real-valued BP is reddish and its tone is different from the original image. Since large portions of the training image (Fig.3(a)) are red, the network is trained so as to project most colors onto red colors. The output image obtained by the quaternion BP, on the other hand, can catch the correct tone of the image. Table 2 also shows the PSNRs of the output images when the image of Fig.3(b) is input to the networks. The PSNRs calculated for the blue and green planes in the case of real-valued BP are less than those of the red plane, a tendency that can also be observed in Fig.4(a). On the other hand, in the case of the quaternion BP, the PSNRs of the blue plane(23.01(dB)) is larger than that of the green and the red plane, and it seems that learning in the quaternion BP is not affected by the distribution of the training image (Fig.3(a)).
+
+Table 1. PSNRs of output image (used Fig.3(a) as the input of network)
+\begin{tabular}{c|cc}
+\hline & Real-valued BP (dB) & Quaternion BP (dB) \\
+\hline \hline B-Plane & 26.92 & 27.55 \\
+G-Plane & 25.60 & 25.36 \\
+R-Plane & 27.79 & 27.49 \\
+\hline \hline Total & 26.68 & 26.67 \\
+\hline
+\end{tabular}
+
+Table 2. PSNRs of output image (used Fig.3(b) as the input of network)
+\begin{tabular}{c|cc}
+\hline & Real-valued BP (dB) & Quaternion BP (dB) \\
+\hline \hline B-Plane & 16.35 & 23.01 \\
+G-Plane & 18.30 & 21.16 \\
+R-Plane & 20.38 & 21.99 \\
+\hline \hline Total & 18.04 & 21.99 \\
+\hline
+\end{tabular}
+
+## 6 Conclusion
+We have investigated the performance of a quaternion neural network trained by the BP algorithm on a color image compression problem. This network contains quaternion neurons, whose computations and variables can be described in terms of a three-dimensional subspace of the four-dimensional space based on quaternions. We formulated a back propagation algorithm for training a quaternion neural network (quaternion BP), and compared its performance with BP on a real-valued neural network. Experimental results show that quaternion BP achieves correct transformations in color space of images, whereas real-valued BP failed.
+
+The color image compression problem thus boils down to performing a transformation in 3-dimensional color space. The initial weights in the network have random values, so initially the network transforms the color space randomly. Training the network using BP results in the modification of the weights, such that eventually the transform is made as much invariant as possible. Quaternion BP utilizes the affine transformation of the vectors in its processing. This affine transformation is done in the whole color space, whereas the transformation using real-valued BP applies only to a part of the color space. Based on this, the difference between the output images, when using the test image, can be explained by the difference in the abilities of real-valued BP and quaternion BP to correctly transform the color space. A detailed analysis of this supposition remains future work.
+
+## References
+[1] Arena,P., Fortuna,L., Muscato,G., Xibilia,M. G. : Neural Networks in Multidimensional Domains. Lecture Note in Control and Information Sciences 234 (1998)
+[2] Kusakabe, T., Kouda, N., Isokawa, T., Matsui, N. : A Study of Neural Network Based on Quaternion. Proceeding of SICE Annual Conference (2002) 776-779
+[3] Conway, A. W. : Quaternions and quantum mechanics. Pont, Acad. Sci. Acta 12 (1948) 204-277
+[4] Cottrell, G. W., Munro, P., Zipser,D. : Image compression by back propagation: An example of extensional propagation. ICS report 8702 (1987)
+
+
+================================================
+FILE: src/hamprod_kernel.cu
+================================================
+// hamprod_kernel.cu
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
+#include "hamprod_kernel.h"
+
+__global__ void hamprodKernel(const Quaternion* __restrict__ A,
+                              const Quaternion* __restrict__ B,
+                              Quaternion* __restrict__ C,
+                              int N) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < N) {
+        float a = A[idx].w, b = A[idx].x, c = A[idx].y, d = A[idx].z;
+        float e = B[idx].w, f = B[idx].x, g = B[idx].y, h = B[idx].z;
+        float rw = a * e - b * f - c * g - d * h;
+        float rx = a * f + b * e + c * h - d * g;
+        float ry = a * g - b * h + c * e + d * f;
+        float rz = a * h + b * g - c * f + d * e;
+        C[idx].w = rw;
+        C[idx].x = rx;
+        C[idx].y = ry;
+        C[idx].z = rz;
+    }
+}
+
+void launchHamprod(const Quaternion* A, const Quaternion* B,
+                   Quaternion* C, int N) {
+    dim3 blockDim(256);
+    dim3 gridDim((N + blockDim.x - 1) / blockDim.x);
+    hamprodKernel<<<gridDim, blockDim>>>(A, B, C, N);
+    cudaDeviceSynchronize();
+}
+
+__global__ void quatMatVecMul(const Quaternion* W, const Quaternion* input,
+                              Quaternion* output, int N, int M) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i < N) {
+        Quaternion sum = {0, 0, 0, 0};
+        for (int j = 0; j < M; ++j) {
+            Quaternion w = W[i * M + j];
+            Quaternion in = input[j];
+            Quaternion prod;
+            prod.w = w.w * in.w - w.x * in.x - w.y * in.y - w.z * in.z;
+            prod.x = w.w * in.x + w.x * in.w + w.y * in.z - w.z * in.y;
+            prod.y = w.w * in.y - w.x * in.z + w.y * in.w + w.z * in.x;
+            prod.z = w.w * in.z + w.x * in.y - w.y * in.x + w.z * in.w;
+            sum.w += prod.w;
+            sum.x += prod.x;
+            sum.y += prod.y;
+            sum.z += prod.z;
+        }
+        output[i] = sum;
+    }
+}
+
+void launchQuatMatVecMul(const Quaternion* W, const Quaternion* input,
+                         Quaternion* output, int N, int M) {
+    dim3 blockDim(256);
+    dim3 gridDim((N + blockDim.x - 1) / blockDim.x);
+    quatMatVecMul<<<gridDim, blockDim>>>(W, input, output, N, M);
+    cudaDeviceSynchronize();
+}
+
+__global__ void addBiasKernel(Quaternion* output, const Quaternion* bias, int N) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i < N) {
+        output[i].w += bias[i].w;
+        output[i].x += bias[i].x;
+        output[i].y += bias[i].y;
+        output[i].z += bias[i].z;
+    }
+}
+
+void launchAddBias(Quaternion* output, const Quaternion* bias, int N) {
+    dim3 blockDim(256);
+    dim3 gridDim((N + blockDim.x - 1) / blockDim.x);
+    addBiasKernel<<<gridDim, blockDim>>>(output, bias, N);
+    cudaDeviceSynchronize();
+}
+
+
+================================================
+FILE: src/hamprod_kernel.h
+================================================
+// hamprod_kernel.h
+#pragma once
+
+struct Quaternion {
+    float w, x, y, z;
+};
+
+void launchHamprod(const Quaternion* A, const Quaternion* B,
+                   Quaternion* C, int N);
+
+void launchQuatMatVecMul(const Quaternion* W, const Quaternion* input,
+                         Quaternion* output, int N, int M);
+
+void launchAddBias(Quaternion* output, const Quaternion* bias, int N);
+
+
+================================================
+FILE: src/main.cpp
+================================================
+#include "quatnet_layer.h"
+#include <iostream>
+
+int main() {
+    QuaternionDenseLayer layer(1024, 512);
+    Quaternion *d_input, *d_output;
+    cudaMalloc(&d_input, 1024 * sizeof(Quaternion));
+    cudaMalloc(&d_output, 512 * sizeof(Quaternion));
+    Quaternion h_input[1024];
+    for (int i = 0; i < 1024; i++) {
+        h_input[i] = {1, 1, 1, 1};
+    }
+    cudaMemcpy(d_input, h_input, 1024 * sizeof(Quaternion), cudaMemcpyHostToDevice);
+    for (int i = 0; i < 10000; i++) {
+        layer.forward(d_input, d_output);
+    }
+    Quaternion h_output[512];
+    cudaMemcpy(h_output, d_output, 512 * sizeof(Quaternion), cudaMemcpyDeviceToHost);
+    for (int i = 0; i < 2; i++) {
+        std::cout << "Output " << i << ": "
+                  << h_output[i].w << ", "
+                  << h_output[i].x << ", "
+                  << h_output[i].y << ", "
+                  << h_output[i].z << std::endl;
+    }
+    cudaFree(d_input);
+    cudaFree(d_output);
+    return 0;
+}
+
+
+
+================================================
+FILE: src/quatnet_layer.cpp
+================================================
+#include "quatnet_layer.h"
+#include <cuda_runtime.h>
+#include <stdexcept>
+#include <cmath>
+
+/**
+ * Here, we do a simple normal-based init for each quaternion component.
+ * Each weight is (w, x, y, z), each dimension ~ N(0, sigma^2).
+ * Then the overall magnitude of W is \chi_4-distributed, with expectation
+ * E(|W|^2)=4*sigma^2, as shown in the derivation.
+ */
+void QuaternionDenseLayer::initializeWeights() {
+    // For a typical "Xavier"-style variance, you might do:
+    //   sigma^2 = 1 / fan_in
+    // or some variant. You can adjust the formula as needed.
+    float fan_in = static_cast<float>(M); // each input is a Quaternion, but let's keep it simple
+    float fan_out = static_cast<float>(N);
+
+    // Example: "Xavier uniform" for quaternions is not standardized in literature,
+    // but let's just pick something analogous:
+    //   sigma^2 = 2 / (fan_in + fan_out)
+    // or you can do a simple 1 / fan_in:
+    float sigma2 = 2.0f / (fan_in + fan_out);
+    float sigma  = sqrtf(sigma2);
+
+    // We have N*M quaternions (4 floats each) + N quaternions for biases (4 floats each).
+    size_t numW = static_cast<size_t>(N)*M;  // # of quaternions in W
+    size_t numB = static_cast<size_t>(N);    // # of quaternions in bias
+    size_t totalQuaternions = numW + numB;
+    size_t totalFloats = 4 * totalQuaternions; // 4 floats per quaternion
+
+    // We'll generate normal random floats (mean=0, stddev=sigma) in device memory
+    float* d_randFloats = nullptr;
+    cudaMalloc(&d_randFloats, totalFloats * sizeof(float));
+
+    // Generate normal distribution on GPU:
+    curandGenerateNormal(gen, d_randFloats, totalFloats, 0.0f, sigma);
+
+    // Copy the first 4*numW floats into d_W, the next 4*N floats into d_b.
+    // Because d_W and d_b are arrays of Quaternion, each Quaternion is 4 floats.
+    // So we can do a single cudaMemcpy of 4*numW floats into d_W, etc.
+    cudaMemcpy(d_W, d_randFloats, numW * sizeof(Quaternion), cudaMemcpyDeviceToDevice);
+
+    // Bias floats start after the W floats
+    size_t offset = numW * 4;
+    cudaMemcpy(d_b, d_randFloats + offset, numB * sizeof(Quaternion), cudaMemcpyDeviceToDevice);
+
+    cudaFree(d_randFloats);
+}
+
+QuaternionDenseLayer::QuaternionDenseLayer(int input_dim, int output_dim)
+    : M(input_dim), N(output_dim)
+{
+    // Allocate device memory for W (N*M) and biases (N).
+    cudaError_t err = cudaMalloc(&d_W, N * M * sizeof(Quaternion));
+    if (err != cudaSuccess) throw std::runtime_error("Failed to allocate d_W");
+
+    err = cudaMalloc(&d_b, N * sizeof(Quaternion));
+    if (err != cudaSuccess) throw std::runtime_error("Failed to allocate d_b");
+
+    // Create RNG generator
+    curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT);
+    // Set a fixed seed or something else:
+    curandSetPseudoRandomGeneratorSeed(gen, 1234ULL);
+
+    // Initialize weights/bias
+    initializeWeights();
+}
+
+QuaternionDenseLayer::~QuaternionDenseLayer() {
+    cudaFree(d_W);
+    cudaFree(d_b);
+    curandDestroyGenerator(gen);
+}
+
+void QuaternionDenseLayer::forward(const Quaternion* d_input, Quaternion* d_output) {
+    // 1) Multiply W x input
+    //    Each of N threads accumulates over M quaternions
+    launchQuatMatVecMul(d_W, d_input, d_output, N, M);
+
+    // 2) Add bias
+    launchAddBias(d_output, d_b, N);
+}
+
+
+
+================================================
+FILE: src/quatnet_layer.h
+================================================
+#pragma once
+#include "hamprod_kernel.h"
+#include <curand.h>
+
+/**
+ * A simple quaternion-based dense layer that
+ * - has N outputs, each is a Quaternion
+ * - has M inputs, each is a Quaternion
+ * - uses naive (N x M) mat-vec multiply for forward pass
+ */
+class QuaternionDenseLayer {
+private:
+    Quaternion* d_W;   // Weights on device, size N*M
+    Quaternion* d_b;   // Biases on device, size N
+    int N, M;          // Output (N), input (M)
+    curandGenerator_t gen;
+
+    void initializeWeights();
+public:
+    QuaternionDenseLayer(int input_dim, int output_dim);
+    ~QuaternionDenseLayer();
+
+    /**
+     * Forward pass: out[i] = sum_{j=0..M-1} W[i*M + j] ⊗ in[j] + bias[i].
+     */
+    void forward(const Quaternion* d_input, Quaternion* d_output);
+};
+
+
