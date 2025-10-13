@@ -1,4 +1,5 @@
-# My MonSTERs & Me
+# MonSTERS for Spatiotemporal Reasoning
+## Isotropic Space+Time Positional Encodings in Linear Attention via Minkowski Space-Time Embedding Rotors
 ##  Structural Embeddings for Native Space-Time Intelligence
 ### A Four-Dimensional Extension of RoPE with Minkowski Space-Time Embedding Rotors
 
