@@ -31,6 +31,7 @@ In our interview, I did my best to represent the view that LLMs might function a
 ## Transcript
 
 ## Are LLMs a dead end? (00:00:00)
+
 **Dwarkesh Patel (00:00:00):**
 
 Today I’m chatting with Richard Sutton, who is one of the founding fathers of reinforcement learning and inventor of many of the main techniques used there, like TD learning and policy gradient methods. For that, he received this year’s Turing Award which, if you don’t know, is the Nobel Prize for computer science. Richard, congratulations.
@@ -174,6 +175,7 @@ Give me a sense of what the scalable method is.
 The scalable method is you learn from experience. You try things, you see what works. No one has to tell you. First of all, you have a goal. Without a goal, there’s no sense of right or wrong or better or worse. Large language models are trying to get by without having a goal or a sense of better or worse. That’s just exactly starting in the wrong place.
 
 ## Do humans do imitation learning? (00:13:04)
+
 **Dwarkesh Patel (00:13:04):**
 
 Maybe it’s interesting to compare this to humans. In both the case of learning from imitation versus experience and on the question of goals, I think there’s some interesting analogies. Kids will initially learn from imitation. You don’t think so?
@@ -279,6 +281,7 @@ Moravec’s paradox.
 That’s right, that’s right.
 
 ## The Era of Experience (00:23:10)
+
 **Dwarkesh Patel (00:23:10):**
 
 This alternative paradigm that you’re imagining…
@@ -382,6 +385,7 @@ The fourth one is what we’re really getting at, most transparently anyway. The
 That will be learned very richly from all the sensation that you receive, not just from the reward. It has to include the reward as well, but that’s a small part of the whole model, a small, crucial part of the whole model.
 
 ## Current architectures generalize poorly out of distribution (00:33:39)
+
 **Dwarkesh Patel (00:33:39):**
 
 One of my friends, Toby Ord, pointed out that if you look at the MuZero models that Google DeepMind deployed to learn Atari games, these models were initially not a general intelligence itself, but a general framework for training specialized intelligences to play specific games. That is to say that you couldn’t, using that framework, train a policy to play both chess and Go and some other game. You had to train each one in a specialized way.
@@ -447,6 +451,7 @@ My understanding is that this is working better and better, with coding agents. 
 There’s nothing in them which will cause it to generalize well. Gradient descent will cause them to find a solution to the problems they’ve seen. If there’s only one way to solve them, they’ll do that. But if there are many ways to solve it, some which generalize well, some which generalize poorly, there’s nothing in the algorithms that will cause them to generalize well. But people, of course, are evolved and if it’s not working out they fiddle with it until they find a way, perhaps until they find a way which generalizes well.
 
 ## Surprises in the AI field (00:41:29)
+
 **Dwarkesh Patel (00:41:29):**
 
 I want to zoom out and ask about being in the field of AI for longer than almost anybody who is commentating on it, or working in it now. I’m curious about what the biggest surprises have been. How much new stuff do you feel like is coming out? Or does it feel like people are just playing with old ideas? Zooming out, you got into this even before deep learning was popular. So how do you see the trajectory of this field over time and how new ideas have come about and everything? What’s been surprising?
@@ -472,6 +477,7 @@ AlphaGo actually didn’t use TD learning. It waited to see the final outcomes. 
 This has led me where I am. I’m in some sense a contrarian or someone thinking differently than the field is. I’m personally just content being out of sync with my field for a long period of time, perhaps decades, because occasionally I have been proved right in the past. The other thing I do—to help me not feel I’m out of sync and thinking in a strange way—is to look not at my local environment or my local field, but to look back in time and into history and to see what people have thought classically about the mind in many different fields. I don’t feel I’m out of sync with the larger traditions. I really view myself as a classicist rather than as a contrarian. I go to what the larger community of thinkers about the mind have always thought.
 
 ## Will The Bitter Lesson still apply after AGI? (00:46:41)
+
 **Dwarkesh Patel (00:46:41):**
 
 Some sort of left-field questions for you if you’ll tolerate them. The way I read the bitter lesson is that it’s not necessarily saying that human artisanal researcher tuning doesn’t work, but that it obviously scales much worse than compute, which is growing exponentially. So you want techniques which leverage the latter.
@@ -553,6 +559,7 @@ This is my attempt to add something to this view. A big issue will become corrup
 I think this will become a big concern, particularly when you’re like, “Oh, he’s figured out all about how to play some new game or he’s studied Indonesia, and you want to incorporate that into your mind.” You could think, “Oh, just read it all in, and that’ll be fine.” But no, you’ve just read a whole bunch of bits into your mind, and they could have viruses in them, they could have hidden goals, they can warp you and change you. This will become a big thing. How do you have cybersecurity in the age of digital spawning and re-reforming again?
 
 ## Succession to AI (00:53:48)
+
 **Dwarkesh Patel (00:53:48):**
 
 I guess this brings us to the topic of AI succession. You have a perspective that’s quite different from a lot of people that I’ve interviewed and a lot of people generally. I also think it’s a very interesting perspective. I want to hear about it.
