@@ -1,3 +1,7 @@
+# MonSTERs for Four-Dimension Attention
+## Minkowski Space-Time Embedding Rotors for 4D Generalization and World Modeling
+
+
 # MonSTERS for Spatiotemporal Reasoning
 ## Isotropic Space+Time Positional Encodings in Linear Attention via Minkowski Space-Time Embedding Rotors
 ##  Structural Embeddings for Native Space-Time Intelligence
@@ -125,6 +129,12 @@ Encode 2D (x,y) for rows/cols, avoiding 1D snaking artifacts.
 
 # 4 Dimension Attention
 ## Structural Embeddings for Native Space-Time Intelligence
+
+# MonSTERs for Four-Dimension Attention
+## Structural Embeddings for Native Space-Time Intelligence
+
+# MonSTERs for Four-Dimension Attention
+## Minkowski Space-Time Embedding Rotors for 4D Generalization and World Modeling
 
 
 This paper introduces a novel approach to attention-based transformer architectures, embedding spacetime structures natively via Minkowski Space-Time Embedding Rotors (MonSTER)."
