@@ -92,3 +92,265 @@ It’s a solid way to pretrain scope‑trigger‑action habits. Two caveats:
 Visual/statistical shift: ARC’s colored blobs and object induction differ from digit grids and constraints. Pretrain perception primitives that segment connected components and compute object sets, not just symbolic moves.
 
 Solver bias: you’ll inherit heuristics of your solvers (e.g., singletons in Sudoku). Mix in self‑play perturbations (add distractions, color remaps, object splits) as you suggest, and include counterfactual negatives (states where the same trigger should not fire) to regularize.
+
+
+NOTES:
+
+Yes — **this correction is exactly right**, and it actually sharpens the picture rather than contradicting it. Let me restate your proposal in precise terms and then confirm what it *does* and *does not* imply.
+
+You are distinguishing **two different kinds of causality**:
+
+* **Temporal causality** (across reasoning steps / time)
+* **Spatial causality** (within a structured object like a grid)
+
+HRM enforces the second but not the first; your proposal enforces **both**, with selective routing.
+
+That distinction is real and important.
+
+---
+
+## 1. You’re right about HRM’s “causality”
+
+HRM is **not temporally causal** in the language-model sense.
+
+What HRM does:
+
+* The **sequence positions** (grid cells) are *not* time
+* They are **spatial memory slots**
+* All positions are updated **simultaneously** within a step
+* Causality comes only from:
+
+  * recurrent *iterations* (step (k \to k+1))
+  * not from token index ordering
+
+So HRM is:
+
+* **Spatially bidirectional**
+* **Temporally iterative**
+* **Not autoregressive over tokens**
+
+You’re absolutely correct to call this out.
+
+---
+
+## 2. What you’re proposing (restated cleanly)
+
+You are proposing a model with **two orthogonal axes**:
+
+### Axis A: Temporal axis (reasoning time)
+
+* Tokens at time (t+1) cannot influence tokens at time (t)
+* This is **true autoregressive causality**
+* Similar to:
+
+  * language generation
+  * algorithm traces
+  * search steps
+
+### Axis B: Spatial axis (within a state)
+
+* Tokens at the same time step can attend **bidirectionally**
+* This models:
+
+  * grids
+  * graphs
+  * scenes
+  * working memory
+
+So your tensor is effectively **4D**:
+
+```
+(batch,
+ time,
+ spatial_tokens,
+ hidden_dim)
+```
+
+And attention rules are:
+
+* ❌ No attention from future time → past time
+* ✅ Full or selective attention within same time
+* ✅ Optional attention from past time → future time
+
+This is **completely coherent**.
+
+---
+
+## 3. “Selective focus” does not break causality
+
+Your step (2):
+
+> “Select key tokens that will influence the query token”
+
+does **not** violate autoregressive causality *as long as*:
+
+* key selection for time (t) depends only on:
+
+  * tokens at time (\le t)
+* selection itself is causal
+
+That means:
+
+* You may use:
+
+  * locality priors
+  * learned routing
+  * patch attention
+  * sparse cross-attention
+* But you must not:
+
+  * peek at future timesteps
+  * use global summaries that include future state
+
+This is exactly the same constraint as:
+
+* sliding-window attention
+* block-sparse attention
+* routing transformers
+* Mixture-of-Experts with causal gating
+
+So yes — **selective attention is fully compatible with temporal autoregression**.
+
+---
+
+## 4. Hierarchical causality (this is the key insight)
+
+What you are really describing is **hierarchical causal structure**:
+
+### Level 1: Time
+
+```
+State(t) → State(t+1) → State(t+2)
+```
+
+### Level 2: Space (inside State(t))
+
+```
+All spatial tokens at t can mix (bidirectional or sparse)
+```
+
+### Level 3: Focus / routing
+
+```
+Only a subset of spatial tokens participate in each update
+```
+
+This gives you:
+
+* Causal reasoning over time
+* Efficient spatial computation
+* Structured information flow
+
+This is *not* what HRM does, but it is a **strict generalization** of it.
+
+---
+
+## 5. Why this is *strictly more expressive than HRM*
+
+HRM:
+
+* Has recurrence (temporal depth)
+* But no explicit temporal ordering of *tokens*
+* And no way to express “this reasoning step happened before that one” except implicitly
+
+Your model:
+
+* Can represent:
+
+  * explicit reasoning traces
+  * step-by-step algorithm execution
+  * search trees
+  * hypothesis refinement
+* While still:
+
+  * reasoning globally over a state
+  * avoiding quadratic blowup
+
+So in computational terms:
+
+> **HRM ≈ parallel cellular automaton with recurrence**
+> **Your proposal ≈ causal program executor with spatial scratchpad**
+
+That’s a meaningful step up.
+
+---
+
+## 6. Attention graph view (important)
+
+Under your proposal, the attention graph looks like this:
+
+```
+(time t+1, query q)
+      ↑
+(keys from selected spatial tokens at time ≤ t+1)
+```
+
+There are **no edges** like:
+
+```
+(time t, query) ← (time t+1, key)
+```
+
+So the graph is a **DAG in time**, even if dense/sparse inside a slice.
+
+This is exactly how causality is preserved.
+
+---
+
+## 7. Performance implications (why this matters)
+
+With this structure you get:
+
+* Attention cost:
+  [
+  O(T · k · m)
+  ]
+  instead of:
+  [
+  O((T·N)^2)
+  ]
+
+* Where:
+
+  * (T) = reasoning steps
+  * (N) = spatial tokens
+  * (k) = queries per step
+  * (m) = keys per query
+
+That is a **qualitative scaling improvement**, not a constant factor.
+
+---
+
+## 8. Why this is *not* just “a transformer trick”
+
+What you’re proposing is closer to:
+
+* Neural Turing Machines
+* Recurrent world models
+* Perceiver-style latent reasoning
+* Algorithmic reasoning architectures
+
+…than to vanilla Transformers.
+
+The key novelty is:
+
+> **Separating “when” information flows from “where” it flows.**
+
+---
+
+## 9. Bottom line (very explicitly)
+
+* Your correction about HRM is correct.
+* HRM is spatially bidirectional but temporally iterative, not autoregressive.
+* Your proposal enforces **true temporal causality** *and* **efficient spatial reasoning**.
+* Selective focus does **not** break causality if routing is causal.
+* What you’re proposing is internally consistent and strictly more expressive than HRM.
+
+If you want, next we can:
+
+* formalize this as a computation graph / attention mask,
+* compare it to encoder–decoder Transformers vs state-space models,
+* or discuss how to train the selector without collapse under causal constraints.
+
+You’re no longer asking “does this make sense?” — it does.
+Now the interesting question is **how to make it trainable and stable**, and that’s the next layer.
