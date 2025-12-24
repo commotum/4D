@@ -21,7 +21,7 @@ while IFS= read -r line; do
   [[ "$line" == *"http"* ]] || continue
 
   title=$(printf '%s' "$line" | awk -F'|' '{print $2}' | sed -E 's/^[[:space:]]+|[[:space:]]+$//g; s/\*\*//g')
-  url=$(printf '%s' "$line" | sed -nE 's/.*\((https?:\/\/[^)]+\.pdf)\).*/\1/p')
+  url=$(printf '%s' "$line" | sed -nE 's/.*(https?:\/\/[^ )`|]+\.pdf).*/\1/p')
 
   if [[ -z "$url" ]]; then
     echo "Skipping line $line_num: no PDF url found" >&2
