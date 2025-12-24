@@ -1,5 +1,3 @@
-Here is the full content of the PDF converted into a structured Markdown format.
-
 # Language Models are Unsupervised Multitask Learners
 
 **Authors:** Alec Radford, Jeffrey Wu, Rewon Child, David Luan, Dario Amodei, Ilya Sutskever.
