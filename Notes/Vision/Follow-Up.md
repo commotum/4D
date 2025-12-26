@@ -1,20 +1,52 @@
-The term “multi-task” is probably overloaded here. In many papers, “multi-task” refers to evaluating a single architecture across multiple tasks or datasets, often via repeated fine-tuning or training separate task-specific models. In this sense, the architecture is shared, but task capability is fragmented across multiple trained model instances.
+### Clarifying “Multi-Task” vs. Architecture Reuse (Capability-Focused)
 
-This differs fundamentally from a stronger notion of multi-task learning, where a single trained model instance simultaneously supports multiple distinct tasks using shared weights, a unified representation, and a common inference interface.
+The term **“multi-task”** is often overloaded. In many papers, it refers to evaluating a single **architecture** across multiple tasks or datasets by training or fine-tuning **separate task-specific models**. In this case, the architecture is reused, but **task capability is fragmented across multiple trained model instances**.
 
-Does the paper demonstrate a single trained model instance that can perform multiple distinct tasks without task-specific fine-tuning, relying only on shared weights and input conditioning (e.g., prompts, task tokens, or unified objectives)? Or are separate models, fine-tuned weights, or task-specific heads required for each task?
+This differs fundamentally from a stronger notion of multi-task learning, where **a single trained model instance** simultaneously supports **multiple distinct tasks** using shared weights, a unified representation, and a common inference interface (e.g., conditioning via prompts, task tokens, or a unified objective), **without requiring task-specific fine-tuning**.
 
-Please report the following, citing evidence:
+
+### Capability Question (do not count ablations or variants):
+
+**For the purposes of task capability (not ablations, architectural variants, backbones, or hyperparameter sweeps):**
+If a practitioner wanted a system that can perform **all distinct tasks evaluated in this paper**, how many **separately trained model instances** would be required?
+
+- Do **not** count ablations, architectural variants, backbones, or experimental configurations as separate models **unless** they are required to perform different tasks.
+
+### Please report (with citations):
 
 1. **Number of distinct tasks evaluated**
-2. **Number of distinct trained model instances produced**
+2. **Number of trained model instances required to cover all tasks**
 3. **Task–Model Ratio = (1) / (2)**
 
-For example:
 
-* Pretrain once → fine-tune 8 times → 8 models for 8 tasks
-  → **Ratio = 1**
-* Jointly train one model on 8 tasks
-  → **Ratio = 8**
-* Single model trained on a task-agnostic corpus that performs N tasks via conditioning
-  → **Ratio = N (unbounded)**
+### Output format (required)
+
+Report the **Task–Model Ratio** using the following **display-math box** format.
+
+**Examples:**
+
+**Pretrain once → fine-tune 8 times (8 tasks, 8 models):**
+
+$$
+\boxed{
+\frac{8\ \text{tasks}}{8\ \text{models}} = 1
+}
+$$
+
+**Jointly train one model on 8 tasks (single multi-task model):**
+
+$$
+\boxed{
+\frac{8\ \text{tasks}}{1\ \text{model}} = 8
+}
+$$
+
+**Task-agnostic model (GPT-2–like; task via conditioning):**
+
+$$
+\boxed{
+\frac{N\ \text{tasks}}{1\ \text{model}} = N
+}
+$$
+
+Use this exact boxed equation format for all reported results.
