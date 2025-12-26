@@ -11,7 +11,7 @@ This differs fundamentally from a stronger notion of multi-task learning, where 
 If a practitioner wanted a system that can perform **all distinct tasks evaluated in this paper**, how many **separately trained model instances** would be required?
 
 - Do **not** count ablations, architectural variants, backbones, or experimental configurations as separate models **unless** they are required to perform different tasks.
-- **Important clarification:** If a task requires training or adding a **task-specific head, decoder, output module, or extension** (even when built on a shared or frozen backbone), it **counts as a separate trained model instance** for the purposes of this analysis.
+- If a task requires training or adding a **task-specific head, decoder, output module, or extension** (even when built on a shared or frozen backbone), it **counts as a separate trained model instance** for the purposes of this analysis.
 
 ### Please report (with citations):
 
