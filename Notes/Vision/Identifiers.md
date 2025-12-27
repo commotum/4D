@@ -2,7 +2,6 @@
 
 The following table contains examples of short identifiers. A short identifier should be **unique, stable, and easy to scan**, using the pattern **`YYYY_Key`**, where `YYYY` is the paper’s primary year and `Key` is a short, widely recognized name or abbreviation (e.g., *ViT*, *DETR*, *CLIP*). Prefer **community-standard names**, keep the key concise, avoid spaces or punctuation, and add a small suffix only if needed to disambiguate similar papers.
 
-
 | Short Identifier    | Full Title                                                                                 |
 | ------------------- | ------------------------------------------------------------------------------------------ |
 | 2020_DeformableDETR | Deformable DETR: Deformable Transformers for End-to-End Object Detection                   |
