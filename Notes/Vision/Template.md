@@ -4,4 +4,4 @@
 
 **Affiliation:** OpenAI.
 
-"*" Indicates Equal Contribution 
+*Equal Contribution 
