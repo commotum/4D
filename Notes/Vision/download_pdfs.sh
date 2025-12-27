@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-table_path="${1:-/home/jake/Developer/4D/Notes/Vision/Table.md}"
-out_dir="${2:-/home/jake/Developer/4D/Notes/Vision/pdfs}"
+table_path="${1:-/home/jake/Developer/4D/Notes/Vision/Table-2.md}"
+out_dir="${2:-/home/jake/Developer/4D/Notes/Vision/pdfs-3}"
 
 if [[ ! -f "$table_path" ]]; then
   echo "Table not found: $table_path" >&2
@@ -18,13 +18,19 @@ while IFS= read -r line; do
   line_num=$((line_num + 1))
 
   [[ "$line" =~ ^\|[[:space:]]*--- ]] && continue
-  [[ "$line" == *"http"* ]] || continue
 
   title=$(printf '%s' "$line" | awk -F'|' '{print $2}' | sed -E 's/^[[:space:]]+|[[:space:]]+$//g; s/\*\*//g')
-  url=$(printf '%s' "$line" | sed -nE 's/.*(https?:\/\/[^ )`|]+\.pdf).*/\1/p')
+  pdf_cell=$(printf '%s' "$line" | awk -F'|' '{print $5}' | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')
+
+  [[ "$pdf_cell" == *"http"* ]] || continue
+
+  url=$(printf '%s' "$pdf_cell" | sed -nE 's/.*\[[Pp][Dd][Ff]\]\((https?:\/\/[^)]+)\).*/\1/p')
+  if [[ -z "$url" ]]; then
+    url=$(printf '%s' "$pdf_cell" | sed -nE 's/.*(https?:\/\/[^ )`|]+).*/\1/p')
+  fi
 
   if [[ -z "$url" ]]; then
-    echo "Skipping line $line_num: no PDF url found" >&2
+    echo "Skipping line $line_num: no public PDF url found" >&2
     continue
   fi
 
