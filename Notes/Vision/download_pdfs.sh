@@ -12,6 +12,9 @@ fi
 mkdir -p "$out_dir"
 
 declare -A used_names=()
+declare -a downloaded=()
+declare -a failed=()
+declare -a skipped_local=()
 line_num=0
 
 while IFS= read -r line; do
@@ -21,6 +24,15 @@ while IFS= read -r line; do
 
   title=$(printf '%s' "$line" | awk -F'|' '{print $2}' | sed -E 's/^[[:space:]]+|[[:space:]]+$//g; s/\*\*//g')
   pdf_cell=$(printf '%s' "$line" | awk -F'|' '{print $5}' | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')
+
+  if printf '%s' "$pdf_cell" | grep -qi 'local copy'; then
+    if [[ -z "$title" ]]; then
+      title="paper_${line_num}"
+    fi
+    skipped_local+=("$title")
+    echo "Skipping local copy: $title"
+    continue
+  fi
 
   [[ "$pdf_cell" == *"http"* ]] || continue
 
@@ -60,7 +72,26 @@ while IFS= read -r line; do
   fi
 
   echo "Downloading: $title"
-  curl -L --fail --retry 3 --retry-delay 1 -o "$dest" "$url"
+  if curl -L --fail --retry 3 --retry-delay 1 -o "$dest" "$url"; then
+    downloaded+=("$title")
+    echo "Downloaded: $title"
+  else
+    failed+=("$title | $url")
+    echo "Failed download: $title" >&2
+  fi
 done < "$table_path"
 
 echo "Done. Files saved in: $out_dir"
+echo "Report:"
+if ((${#failed[@]})); then
+  echo "Failed downloads (${#failed[@]}):"
+  printf '  - %s\n' "${failed[@]}"
+else
+  echo "Failed downloads (0)"
+fi
+if ((${#skipped_local[@]})); then
+  echo "Skipped local copies (${#skipped_local[@]}):"
+  printf '  - %s\n' "${skipped_local[@]}"
+else
+  echo "Skipped local copies (0)"
+fi
