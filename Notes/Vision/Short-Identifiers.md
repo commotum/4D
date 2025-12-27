@@ -80,7 +80,7 @@ A short identifier should be **unique, stable, and easy to scan**, using the pat
 | 2024_NoPE               | Length Extrapolation of Causal Transformers without Position Encoding (NoPE)                    |
 | 2024_HARC               | H-ARC: A Robust Estimate of Human Performance on the Abstraction and Reasoning Corpus Benchmark |
 | 2024_PESurvey           | Length Extrapolation of Transformers: A Survey from the Perspective of Positional Encoding      |
-| 2024_WaveletTFs         | Beyond Position: The Emergence of Wavelet-like Properties in Transformers                       |
+| 2024_WaveletATTN        | Beyond Position: The Emergence of Wavelet-like Properties in Transformers                       |
 | 2024_ARCHeavy           | ARC-Heavy / ARC-Potpourri (dataset description embedded in Cornell report)                      |
 | 2024_IndTrans           | Combining Induction and Transduction for Abstract Reasoning                                     |
 | 2024_LPS                | Searching Latent Program Spaces                                                                 |
@@ -94,7 +94,7 @@ A short identifier should be **unique, stable, and easy to scan**, using the pat
 | 2025_MPVG               | Maximizing the Position Embedding for Vision Transformers (MPVG)                                |
 | 2025_SmolVLM            | SmolVLM: Redefining small and efficient multimodal models                                       |
 | 2025_LOOPE              | LOOPE: Learnable Optimal Patch Order in Vision Transformers                                     |
-| 2025_GatedAttention     | Gated Attention for LLMs: Non-linearity, Sparsity, Sink-Free                                    |
+| 2025_GatedAttn          | Gated Attention for LLMs: Non-linearity, Sparsity, Sink-Free                                    |
 | 2025_CircleRoPE         | Circle-RoPE: Cone-like Decoupled Rotary Positional Embedding for Large Vision-Language Models   |
 | 2025_RotaryMAE          | Rotary Masked Autoencoders Are Versatile Learners                                               |
 | 2025_LLaVA4D            | LLaVA-4D: Embedding Spatiotemporal Prompt into LMMs                                             |
@@ -104,7 +104,7 @@ A short identifier should be **unique, stable, and easy to scan**, using the pat
 | 2025_TransXSSM          | TransXSSM: Hybrid Transformer–SSM with Unified RoPE                                             |
 | 2025_CARoPE             | Context-aware Rotary Position Embedding (CARoPE)                                                |
 | 2025_PoPE               | Decoupling the "What" and "Where" With Polar Coordinate Positional Embeddings (PoPE)            |
-| 2025_LessIsMore         | Less is More: Recursive Reasoning with Tiny Networks                                            |
+| 2025_TRM                | Less is More: Recursive Reasoning with Tiny Networks                                            |
 | 2025_HARoPE             | Head-Wise Adaptive Rotary Positional Encoding (HARoPE)                                          |
 | 2025_NestedLearning     | Nested Learning: The Illusion of Deep Learning Architecture                                     |
 | 2025_DoPE               | DoPE: Denoising Rotary Position Embedding                                                       |
