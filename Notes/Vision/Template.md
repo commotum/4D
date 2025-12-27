@@ -2,10 +2,13 @@
 
 **Authors:** Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry, Amanda Askell, Pamela Mishkin, Jack Clark, Gretchen Krueger, Ilya Sutskever.
 
+**Google Scholar Citations:** [50271](https://scholar.google.com/scholar_lookup?arxiv_id=2103.00020)
+
+
 ### Preprint
 
-* **arXiv URL:** [https://arxiv.org/abs/2103.00020](https://arxiv.org/abs/2103.00020)
-* **Initial Submission Date:** February 26, 2021
+- **arXiv URL:** [https://arxiv.org/abs/2103.00020](https://arxiv.org/abs/2103.00020)
+- **Initial Submission Date:** February 26, 2021
 
 ### Peer-Reviewed Publication
 
