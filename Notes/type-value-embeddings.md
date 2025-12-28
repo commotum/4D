@@ -231,3 +231,9 @@ By replacing a row‑per‑value table with a **type‑conditioned quaternion ex
 
 > *Quaternion algebra is well covered in the literature, so we won’t recap basics here.*
 > “Quaternions came from Hamilton after his really good work had been done, and though beautifully ingenious, have been an unmixed evil to those who have touched them in any way.” — *Lord Kelvin*
+
+---
+
+IMPROVEMENTS:
+
+"Each value is first mapped to a minimal representation, then lifted into the model dimension by a learned up-projection (a structured embedding encoder)."
