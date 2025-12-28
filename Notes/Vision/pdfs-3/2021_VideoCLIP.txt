@@ -1,0 +1,838 @@
+                                                                 VideoCLIP: Contrastive Pre-training for
+                                                                   Zero-shot Video-Text Understanding
+                                            Hu Xu1 , Gargi Ghosh1 , Po-Yao Huang12 , Dmytro Okhonko1 , Armen Aghajanyan1
+                                                   Florian Metze,1 Luke Zettlemoyer1 and Christoph Feichtenhofer1
+                                                                              1
+                                                                                Facebook AI
+                                                                       2
+                                                                         Carnegie Mellon University
+                                                           {huxu,gghosh,berniehuang,oxo,armenag
+                                                             fmetze,lsz,feichtenhofer}@fb.com
+                                                                                                   1     Overlapping video-text clips              2      Retrieve harder videos
+
+                                                             Abstract                                                                         Retrieval                 Video K
+                                            We present VideoCLIP, a contrastive ap-                              Video 1
+
+                                            proach to pre-train a unified model for zero-
+
+
+
+
+                                                                                                                                                                 …
+                                            shot video and text understanding, with-
+                                                                                                                                                             Video 2
+                                            out using any labels on downstream tasks.
+arXiv:2109.14084v2 [cs.CV] 1 Oct 2021
+
+
+
+
+                                                                                                                                                                   how to
+                                            VideoCLIP trains a transformer for video and                                               time                     season a wok
+                                                                                                   First, you need..   Next, pour sauce..
+                                            text by contrasting temporally overlapping
+                                                                                                                                                               now, wipe with
+                                            positive video-text pairs with hard negatives                                                                      a paper towel
+
+                                            from nearest neighbor retrieval. Our exper-
+                                            iments on a diverse series of downstream                     VideoCLIP: Contrastive learning with hard-retrieved negatives and
+                                                                                                                 overlapping positives for video-text pre-training.
+                                            tasks, including sequence-level text-video re-
+                                            trieval, VideoQA, token-level action localiza-       Figure 1: VideoCLIP aims for zero-shot video under-
+                                            tion, and action segmentation reveal state-of-       standing via learning fine-grained association between
+                                            the-art performance, surpassing prior work,          video and text in a transformer using a contrastive ob-
+                                            and in some cases even outperforming su-             jective with two key novelties: (1) for positive pairs,
+                                            pervised approaches. Code is made avail-             we use video and text clips that are loosely temporarily
+                                            able at https://github.com/pytorch/                  overlapping instead of enforcing strict start/end times-
+                                            fairseq/tree/main/examples/MMPT.                     tamp overlap; (2) for negative pairs, we employ a re-
+                                                                                                 trieval based sampling technique that uses video clus-
+                                        1   Introduction                                         ters to form batches with mutually harder videos.
+
+                                        The popular “pre-training + fine-tuning” paradigm        2019), for zero-shot video understanding. We show
+                                        has revolutionized NLP (Devlin et al., 2019; Liu         that the resulting pre-trained model can be either
+                                        et al., 2019b; Yang et al., 2019; Lewis et al., 2020b)   directly applied to, or fine-tuned on, a series of
+                                        and CV (Chen et al., 2020a; He et al., 2020) over        video-text tasks at both the global sequence and
+                                        the last few years. Although models trained this         local clip/token level.
+                                        way can achieve impressive performance, they still          We find that straightforward objectives (Chen
+                                        require task-specific annotated data and fine-tuning     et al., 2020a) lead to poor results, and hypothe-
+                                        for each end task. Recent work adopt pre-training        size that learning fine-grained associations between
+                                        for zero-shot transfer to end tasks without fine-        video and text is crucial for success of zero-shot
+                                        tuning, including GPT (Radford et al., 2018, 2019;       transfer to end tasks. Since end tasks may require
+                                        Brown et al., 2020) for NLP tasks and CLIP (Rad-         different granularities of video-text correspondence.
+                                        ford et al., 2021) for image classification.             The granularity can be about sequence length (such
+                                           This paper focuses on pre-training for zero-shot      as long video versus short text (e.g.classification),
+                                        transfer to video-text understanding tasks. Our ap-      token level or sequence level) and semantics (“ap-
+                                        proach pre-trains a Transformer model (Vaswani           ple” vs “banana” or “apple” vs “car”). Previous
+                                        et al., 2017; Devlin et al., 2019) with a contrastive    efforts sample short, temporally aligned video and
+                                        objective (Oord et al., 2018; Chen et al., 2020a) us-    text clips with contrastive learning within a random
+                                        ing pairs of video-text clips. Different from CLIP       batch, falling short on learning the fine-grained
+                                        that scales pre-training data for zero-shot transfer     association between video frames and word tokens.
+                                        to image classification on an explicitly assembled          We present VideoCLIP that aims to pre-train a
+                                        dataset using a simple contrastive objective (Chen       unified video-text representation with contrastive
+                                        et al., 2020a), this paper uses a publicly established   learning using two key techniques (see Fig. 1) to
+                                        pre-training dataset, HowTo100M (Miech et al.,           compute the training objective.
+   First, we aim to improve the association of video     fully-supervised methods in some cases, and (ii)
+and text with different sequence lengths. Although       we introduce two novel techniques to improve the
+the majority of video clips and text transcriptions      learning of fine-grained video-text association.
+are not semantically aligned (Miech et al., 2019),
+current video-text models are trained with exact         2   Related Work
+temporal alignment. As a result, multiple or longer
+text clips may have better alignment with a video        Pre-training for Zero-shot Transfer. Recently,
+clip (Miech et al., 2020) and many clips may not         the paradigm of pre-training has made impressive
+have any corresponding captions (see a detailed dis-     progress with the scale of training data and compu-
+cussion of issues in §3.3). To address these issues,     tational power. For example, in NLP, the paradigm
+we pre-train with temporally overlapped pairs of         has shifted from learning word embeddings for
+video and text clips (of varying length), thereby        task-specific architecture (Mikolov et al., 2013; Bo-
+greatly increasing the quality and quantity of the       janowski et al., 2017; Peters et al., 2018), to pre-
+video-text alignment. We show in experiments that        training+fine-tuning (Devlin et al., 2019; Liu et al.,
+this simple and general approach significantly im-       2019b; Lewis et al., 2020b) and few-shot/zero-shot
+proves performance.                                      transfer (Radford et al., 2018, 2019; Brown et al.,
+   Second, we learn fine-grained video-text simi-        2020; Alayrac et al., 2020; Ramesh et al., 2021)
+larity from a contrastive loss with a new method         that have task-agnostic architecture. One line of
+for gathering (implicitly) harder negative pairs. Al-    pre-training for zero-shot transfer focuses on gen-
+though existing works contrast intra-video clips         erative (auto-regressive) models (Radford et al.,
+via sampling multiple clips from the same video          2018, 2019; Brown et al., 2020), where examples
+(Miech et al., 2019, 2020), we find that mining          and prompts of an end task are used as context
+clips from other videos can provide much more            for a language model to respond properly to that
+challenging negatives. We propose a retrieval aug-       task (Brown et al., 2020); the other line of studies
+mented pre-training approach to retrieve a cluster       focuses on discriminative models (Alayrac et al.,
+of videos that are similar to each other for each        2020; Miech et al., 2020), where a similarity search
+training batch. Retrieval-augmented pre-training         or ranking model learns a joint space (e.g. via
+alternatively performs retrieving video clusters and     contrastive learning (Chen et al., 2020a; He et al.,
+uses the retrieved video clusters for pre-training       2020)) and later transfer to a particular task. Re-
+(see § 3.4 for details).                                 cently, CLIP (Radford et al., 2021) transfers image-
+   After pre-training, we apply our model for zero-      text similarity to many image classification tasks,
+shot transfer without any fine-tuning on target          where the text branch serves as supervision for
+dataset labels. We directly use our pre-trained          learning a general image representation and subse-
+model on a diverse set of four tasks in five datasets,   quently serves as a hyper network for downstream
+including text-video retrieval (for text-to-video sim-   vision tasks. Our effort aligns with the latter line
+ilarity), VideoQA (for video-to-text similarity), ac-    of work, but is the first to transfer a pre-trained
+tion localization (for video frame to text label sim-    discriminative model to a broad range of tasks in
+ilarity) and segmentation (for video token to text       multi-modal video understanding.
+label similarity with rejection) (see §4).
+                                                         Multi-modal Video-Text Pre-training. Multi-
+   Our experiments reveal that VideoCLIP has             modal models have also adopted the pre-
+strong performance, even compared to supervised          training+fine-tuning paradigm. One line of work
+approaches which use human-annotated labels on           adopts multiple unimodal encoders for retrieval
+the downstream tasks. For example, in text-video         tasks. For example, (Miech et al., 2019, 2020;
+retrieval on Youcook2 (Zhou et al., 2017), Video-        Ging et al., 2020; Gabeur et al., 2020; Alayrac et al.,
+CLIP outperforms all existing zero-shot methods          2020; Patrick et al., 2021; Huang et al., 2021) adopt
+and even outperforms fully supervised pre-training       contrastive learning for pre-training and shows the
++ fine-tuning methods, but without using any labels.     possibility of zero-shot transfer to text-video re-
+   In summary, the main contributions of this paper      trieval tasks. CBT (Sun et al., 2019a), HERO (Li
+include: (i) we propose to pre-train a unified model     et al., 2020b), VideoAsMT (Korbar et al., 2020)
+that is capable of zero-shot transfer to multiple end    and UniVL (Luo et al., 2020) adopt multi-task
+tasks for video-text understanding, even surpassing      learning (MTL) for pre-training on retrieval tasks.
+HERO (Li et al., 2020b) and UniVL (Luo et al.,           video features, extracted by a convolutional neural
+2020) further adopt a cross-encoder to further learn     network (CNN), are first projected to video tokens
+the fusion of different modalities.                      before fed into our video transformer, as described
+   The other line of work adopts a single cross-         next.
+modal encoder and concatenates the vision and
+                                                         Video and Text Transformers. Let cv be a
+text sequences as inputs, including VideoBERT
+                                                         video clip of a sequence of continuous frames (we
+(Sun et al., 2019b), Unicoder-VL (Li et al., 2020a),
+                                                         use bold symbols to indicate sequences). We feed
+VL-BERT (Su et al., 2020), UNITER (Chen et al.,
+                                                         cv into a (frozen) pre-trained video encoder fθCNN
+2020b), VLP (Zhou et al., 2018), ActBERT (Zhu
+                                                         and then apply a trainable MLP, fθMLP , with weights
+and Yang, 2020) and VLM (Xu et al., 2021). Al-
+                                                         θMLP to obtain video tokens xv ∈ Rd with the same
+though this approach is intuitive, it limits the ca-
+                                                         embedding dimension, d, as for word embeddings
+pability of zero-shot transfer. For example, it is
+                                                         in our architecture:
+non-trivial to perform retrieval tasks on a single
+encoder as feeding vision and text in a pairwise               xv = fθMLP (stopgrad(fθCNN (cv ))),         (1)
+manner is not flexible and data efficient (Luo et al.,
+2020).                                                   where stopgrad is a stop-gradient operation, to
+Retrieval Augmented Training. Augmenting tra-            reflect that the video CNN is frozen.
+ditional training with a non-parametric retrieval           Similarly, vectors for text tokens xt are obtained
+component has recently shown impressive results          via embedding lookup as in BERT (Devlin et al.,
+in pre-training (Khandelwal et al., 2019; Guu et al.,    2019). Then xv and xt are feed into two separate
+2020; Lewis et al., 2020a) and QA (Izacard and           trainable Transformers, fθv and fθt , respectively, to
+Grave, 2020; Karpukhin et al., 2020). We find            obtain the hidden states for video and text tokens
+that contrastive learning and retrieval augmented
+training can have good synergy because the former                   hv = fθv (xv ), ht = fθt (xt ).        (2)
+aims to discriminate examples and the latter aims
+to find harder examples for discrimination. To the       To obtain the hidden states (i.e. global features)
+best of our knowledge, there is no existing work         of video and text clips, we apply average pooling
+of retrieval augmented training for video, perhaps       over the sequence of tokens for video and text,
+because videos exhibit unique challenges for data-       respectively
+efficient training (see §3.4).
+                                                           zv = AvgPool(hv ), zt = AvgPool(ht ). (3)
+3     VideoCLIP Pre-training
+                                                         We use average pooling (instead of using the
+In the paradigm of multi-modal video-text pre-           [CLS] token) to encourage fθv and fθt to learn
+training for zero-shot transfer, the key challenge is    token-level representations that may benefit token-
+to learn fine-grained association in-between video       level tasks, such as action localization and action
+and text to cover the diverse needs of end tasks.        segmentation (see Section 4).
+We cover VideoCLIP pre-training in this section,            VideoCLIP aims at pre-training the unified
+and discuss the needs of zero-shot transfer to differ-   video-text representation, captured by the Trans-
+ent end tasks in the next section. We first describe     former model parameters θv and θt for video and
+video and text model backbone and contrastive loss;      text, and consequently use it for zero-shot down-
+then we propose overlapped video and text clips          stream tasks. In appendix, we also explore shared
+to improve the association of positive pairs; lastly,    weights for video and text, θv ≡ θt , and our ab-
+we describe retrieval augmented pre-training to im-      lations show that separate video/text transformers
+prove the mining of negative examples.                   yields slightly better performance.
+                                                            Notably, using a frozen video backbone (fθCNN )
+3.1    Video and Text Encoding                           enables us to go beyond short-term visual input
+VideoCLIP consumes pairs of video and text clips         (typical video CNNs (Xie et al., 2018; Feichten-
+(v, t) as inputs. It makes no assumptions on the         hofer et al., 2019) only capture temporal windows
+encoder architectures and can work with any video        of ∼3 seconds), and allows us to model long-term
+and text backbone. We use Transformer (Vaswani           visual-textual correspondences spanning ∼32 sec-
+et al., 2017) model for both the video and text. The     onds. We describe our training methodology next.
+3.2    Contrastive Loss                                         with the exact temporally aligned transcription
+We use a contrastive loss (InfoNCE (Oord et al.,                “I am going to show you how to cook fried rice”.
+2018) objective) to learn the correspondence be-                However, a later video clip showing “rice in wok”
+tween video and text.                                           may have a better semantic visual alignment. One
+  In particular, we minimize the sum of two multi-              explanation for this low relevance of temporal
+modal contrastive losses:                                       alignment is that humans are less likely to speak
+          X                                                   and perform actions simultaneously.
+ L=−              log NCE(zv , zt ) + log NCE(zt , zv ) , (4)
+        (v,t)∈B
+                                                                   Using exact temporal alignment limits the exam-
+                                                                ples considered in the contrastive loss. Taking the
+where B is the batch that contains sampled video-
+                                                                previous NCE(zv , zt ) term as an example, the low
+text pairs and NCE(zv , zt ) and NCE(zt , zv ) cor-
+                                                                relevance (positive) pair could be in the numerator
+responds to the contrastive loss on video-to-text
+                                                                of the objective (5), whereas higher relevance pairs
+similarity and text-to-video similarity. Specifically,
+                                                                (e.g. rice in wok appearing later in a video with an
+the video-to-text contrastive loss is given by
+                                                                introductionary text clip of “I am going to show
+                                                                you how to cook fried rice”) are possibly used as
+                      exp zv · zt+ /τ
+                                          
+                                                                negative pairs, under exact temporal alignment for
+  NCE(zv , zt ) = P                               , (5)
+                    z∈{z + ,z − } exp (zv · z/τ )
+                             t   t
+                                                                constructing positive/negative samples. Although
+                                                                existing work (Miech et al., 2020) aligns multiple
+with τ being a temperature hyper-parameter and zt+              nearby text clips with one (short) video clip of fixed
+are positive embedded text clips overlapping with               3.2 seconds duration, this only partially solves the
+video clip embedding zv , and {zt− } are negative               low relevance problem and can attenuate noise, as
+embedded text clips that are implicitly formed by               the text clips may only partially correspond to the
+other text clips in the training batch. The text-to-            visuals and might have no temporal overlap with
+video loss NCE(zt , zv ) is defined symmetrically.              the short-duration video clip per se.
+The next sections (§3.3 and §3.4) describe how we
+                                                                Better Video-Text Association. As such, we be-
+construct the positive, zt+ , and negatives, {zt− }, in
+                                                                lieve a (self-supervised) method that can curate
+our pre-training objective (5).
+                                                                higher relevance video-text pairs at a large-scale is
+3.3    Overlapped Video-Text Clips                              crucial for effective learning. Our approach to sam-
+                                                                ple video and text pairs (v, t) of different lengths
+To build overlapping positive video/text pairs, we
+                                                                while requiring temporal overlap improves video-
+   (i) sample a text clip (because sampling a video
+                                                                text relevance and encourages fine-grained associ-
+clip first may not have nearby corresponding text);
+                                                                ation. As such, a video (or text clip) can have a
+   (ii) sample a timestamp within the boundary of
+                                                                better chance to be aligned or supervised by nearby
+text clip as the center for a video clip;
+                                                                text and vice versa. By contrast, video clips without
+   (iii) grow a video clip with random duration (up
+                                                                any temporally aligned text are never contributing
+to ∼32 seconds) from this center timestamp.
+                                                                as a positive video-text pair in our objective.
+   Our empirical results show this simple method
+works well in practice, and we discuss its benefits
+                                                                3.4   Retrieval Augmented Training
+w.r.t. prior efforts next.
+Low Relevance Temporal Alignment. Existing                      Our intention is to learn to model more fine-grained
+video-text pre-training methods, e.g., (Miech et al.,           video-text similarity by using difficult examples
+2019), consider temporally exactly aligned clips                in our contrastive pre-training objective (5). We
+(video and text clips sharing the same start/end                construct negatives in our training batch by using
+timestamps). Although strict alignment seems                    hard pairs {zt− }, which are semantically to the pairs
+natural, it is less likely that temporally aligned              in the numerator, using retrieval based sampling.
+video and text clips are also semantically close                   Recall that contrastive loss (e.g.in equation (5))
+in short clips. For example, a video clip of “a                 uses positive pairs in a batch B, and typically nega-
+person speaking” may have a low relevance1                      tive pairs are implicitly induced from other positive
+   1
+     We use the term low relevance instead of noisy alignment   pairs in the same batch.
+because temporally aligned clips may still have low relevance   Dense Video Cluster Retrieval. Our approach
+on certain perspectives, such as positive emotions, an opened
+mouth with any transcription popping up, and “going to” in      aims to find video clusters to construct a batch of
+transcription indicates visual contents may show up later.      training samples. We formulate this as a dense
+ Algorithm 1: Retrieval Augmented Train-                4   Zero-shot Transfer to End Tasks
+ ing
+  Input :V is video set; M is model.                    We present methods for zero-shot transfer of
+                                                        VideoCLIP to a variety of end tasks (without using
+1 foreach epoch do                                      any labels). For each task, we specify requirements
+2     infer global features for all videos V on         that highlight the aspect of pre-training.
+       M : each video V ∈ V’s global feature
+                                                        Text→Video Retrieval. Text→video retrieval
+       is computedP  as
+                1                                       tests the text-to-video similarity computed on the
+       zV = 2|BV | (v,t)∈BV (zv + zt ),
+                                                        learned video-text representation. NCE(zt , zv ) in
+      where BV indicates all clip pairs of V ;          Equation 4 contributes to this task as it discrim-
+3    build dense index on all videos’ zV ;              inates different video clips in the numerator and
+4    retrieve |C| video clusters, where each            denominator for a given text clip. It also tests the
+      cluster c ∈ C is sampled as                       distribution of hard negative examples in the de-
+      c ∼ kNN(zV , 2k), |c| = k from a                  nominator given it reports multiple recall metrics.
+      random video V ;
+                                                        Multiple-choice VideoQA. In multiple-choice
+5    sample overlapped video-text pairs from
+                                                        VideoQA (Yu et al., 2018), the model aligns each
+      c ∈ C to train M .
+                                                        video with one out of several text candidate an-
+6 end
+                                                        swers. It tests video→text similarities with a pre-
+                                                        trained model. We formulate this task as ranking
+                                                        candidate textual answers for a given video ques-
+retrieval process on the latent space of a video, de-   tion query. This corresponds to the NCE(zv , zt )
+rived from the video/text embeddings of our trans-      term in Equation 4, where the subtle differences in
+former that is trained by the contrastive loss (5).     texts are discriminated against each other.
+   Our overall training process can be described        Action Segmentation. Action segmentation as-
+as a two-stage method that alternatively performs       signs each token (or frame) of a video with one of
+retrieval and training in each epoch, and is summa-     the pre-defined labels to separate meaningful seg-
+rized in Algorithm 1.                                   ments of videos from the rest tokens (or frames).
+   For each epoch, Line 2-4 corresponds to the re-      This is similar to sequence labeling (e.g. named
+trieval stage and Line 5 corresponds to the training    entity recognition (NER)) in NLP. Inspired by the
+stage. Specifics are as folows.                         setup of CLIP (Radford et al., 2021), the text en-
+   Line 2 computes the global features zV for each      coder of VideoCLIP can serve as self-supervision
+video by averaging the embeddings of all of its         for videos during pre-training and as a hyper net-
+video-text clips. An ablation (in appendix) shows       work to provide hidden states of segment textual
+that this is better than using the starting clip of a   labels for a video token. As such, the hidden state
+video to infer the representative video embedding.      of each video token can have a distribution of sim-
+   Line 3 constructs the dense index2 for all videos    ilarity over segment labels. This task tests video
+to be used in our retrieval-based training.             token to text similarities.
+   Line 4 first finds |C| (corresponds to the num-         One challenge in action segmentation is that it
+ber of overall batches in the training set) random      contains an Outside label that does not exist in tran-
+videos, where each video V yields a video cluster       scription during pre-training. This Outside label
+c as follows. We sample |c| videos from k neigh-        is task-dependent because it means a token does
+boring videos of V . Instead of searching k nearest     not belong to any of the pre-defined labels. This
+videos directly (see ablation in Table 7), we sam-      is similar to open set recognition (Scheirer et al.,
+ple k videos from the 2k nearest videos. This is        2012) or out-of-domain intent detection (Lane et al.,
+because we want videos in a cluster to be mutu-         2006), where the rejection label is not presented
+ally closer to each other (not all close to video       during training but all new classes during inference
+V ). In this way, all video/text clips sampled from     (not shown in training) should be covered by the
+one video can serve as negative examples for clips      rejection label.
+sampled from another video.
+                                                           Let t ∈ L be one label in the set of all labels L
+  2
+    We  use   FAISS:  https://github.com/               excluding the Outside label. We apply the follow-
+facebookresearch/faiss.                                 ing conditions to each video token u to curate the
+prediction with the Outside label ŷu :                  (2019) to make sure there is no overlap between pre-
+(                                                        training and evaluation data. We have 3,305 test
+  arg maxt∈L (hu z t T ) if maxt∈L (hu z t T ) > γ,      clip-text pairs from 430 videos for zero-shot evalu-
+  Outside                otherwise,                      ation. MSR-VTT (Xu et al., 2016) is a well-known
+                                                 (6)     dataset for text-video retrieval, question answering
+                                                         etc. Following JSFusion (Yu et al., 2018; Miech
+where γ is a threshold. Note that in zero-shot trans-    et al., 2019), we randomly sampled 1K clip-text
+fer, there is no access to training or validation data   pairs as test data for evaluation of zero-shot transfer.
+to decide a threshold as a hyper-parameter. Thus,        DiDeMo (Anne Hendricks et al., 2017) has 10,000
+we estimate γ as the maximum of dot products of          videos annotated with 40,000 sentences on Flicker
+intra-labels: γ = max(zt ztT0 ), where t ∈ L, t0 ∈ L     videos. We evaluate video-paragraph retrieval on
+and t 6= t0 .                                            4021 available testing examples4 .
+Action Step Localization. In this task, each video
+is associated with a “task” with multiple steps S,       VideoQA. We further use the QA test data (Yu
+where each step t ∈ S is described as a short text.      et al., 2018) for MSR-VTT to evaluate multiple-
+Action step localization is to assign each video to-     choice VideoQA. Recall that this task can be for-
+ken to one or multiple steps in the associated task.     mulated as a video-text retrieval task except the
+This is similar to action segmentation except that       candidate textual answers are associated with each
+the label set is not pre-defined and does not contain    video and only one answer is correct (most rele-
+the Outside label. As such, we first obtain the hid-     vant). On average, VideoQA for MSR-VTT has 5
+den states for each video frame (or token) hu from       candidate answers per video.
+transformer. Then we separately forward text labels
+into the text backbone to obtain the hidden states       Action Segmentation. We use COIN (Tang
+of step labels zS . The distribution of each video       et al., 2019) to evaluate action segmentation. It has
+token over steps is predicted as Softmax(hu z S T ).     11,827 videos (476 hours) in total and the testing
+                                                         set has 2797 videos, where each video is labeled
+5       Experiments                                      with 3.91 segments per video on average. There are
+                                                         778 segment labels and we feed these textual labels
+5.1      VideoCLIP Pre-training
+                                                         into the text backbone to obtain their latent space.
+For pre-training, we use HowTo100M (Miech et al.,        As a reminder of Section 4, we do not model the
+2019) that contains instructional videos via search-     Outside label explicitly and determine an Outside
+ing keywords from wikihow3 in YouTube. We use            label only when all other 778 labels reject a video
+1.1M videos after filtering out videos which are not     token. Note that videos in COIN can last for sev-
+available or cannot be decoded. We randomly sam-         eral minutes, we apply a sliding window with a
+ple 4K videos as the validation set and use the rest     step size of 16 seconds and a window size of 32
+for pre-training. On average, the duration of each       seconds. During inference, we average the logits
+video is ∼6.5 minutes with ∼110 clip-text pairs. Af-     for overlapped tokens from multiple windows.
+ter removing repeated words from ASR, we end up
+with ∼7.7 GB of text transcriptions, with 2.4 tokens     Action Step Localization. We use CrossTask
+per second on average.                                   (Zhukov et al., 2019) to evaluate action localiza-
+                                                         tion. It contains 83 different tasks and 4.7K videos.
+5.2      End Task Setups
+                                                         Each task has a set of steps in the form of text
+Text→Video Retrieval. We use Youcook2,                   descriptions and each frame of video is annotated
+MSR-VTT and DiDeMo to evaluate zero-shot                 with one or multiple steps as a distribution. We use
+transfer to text-video retrieval. Youcook2 (Zhou         the testing data split via the official code5 , which
+et al., 2017) has 2K cooking videos with a total         contains 1690 annotated videos. We leave details
+duration of 176 hours and 5.26 minutes on aver-          of fine-tuning data to appendix.
+age per video. It shows about 89 recipes in 14K
+video clips. Each video clip is annotated with             4
+                                                             https://github.com/LisaAnne/
+one sentence. We follow the splits of Miech et al.       LocalizingMoments/blob/master/utils/
+                                                         eval.py
+    3                                                      5
+        www.wikihow.com                                      https://github.com/DmZhukov/CrossTask
+5.3   Implementation Details                              Youcook2 dataset                  R@1 ↑R@5 ↑R@10 ↑
+                                                          S UPERVISED
+Video Encoder. We use a S3D (Xie et al., 2018)            HGLMM(Klein et al., 2015)           4.6 14.3 21.6
+for video encoder fθCNN . It is pre-trained on            Coot(Ging et al., 2020)            16.7 40.2 52.3
+HowTo100M (Miech et al., 2020) to extract video           UniVL (FT-Joint)(Luo et al., 2020) 22.2 52.2 66.2
+tokens of dimension 512. We use 30fps and ex-             VideoCLIP (Fine-tuned)             32.2 62.6 75.0
+                                                          Z ERO - SHOT
+tract one video token per second. This can be pre-
+                                                          Random                              0.0  0.2 0.3
+computed for efficiency.                                  HowTo100M(Miech et al., 2019)       6.1 17.3 24.8
+                                                          MIL-NCE(Miech et al., 2020)        15.1 38.0 51.2
+Transformers. For the video and text Transform-           VideoCLIP (Zero-shot)              22.7 50.4 63.1
+ers, fθv and fθt , we initialize their weights with the
+pre-trained BERTBASE-uncased (Devlin et al., 2019).       MSR-VTT dataset                    R@1 ↑R@5 ↑R@10 ↑
+Using the same type of transformer further allows         S UPERVISED
+us to perform ablation study on sharing video and         UniVL (FT-Joint) (Luo et al., 2020) 20.6 49.1 62.9
+                                                          ClipBERT (Lei et al., 2021)         22.0 46.8 59.9
+text backbones (see Table 7). We only use the             MMT (Gabeur et al., 2020)           25.8 57.2 69.3
+first 6 Transformer layers for the video input and        Support Set(Patrick et al., 2021)   30.1 58.5 69.3
+all 12 layers for the text input. Please note that        VideoCLIP (Fine-tuned)              30.9 55.4 66.8
+the video/text encoders in VideoCLIP is generally         Z ERO - SHOT
+applicable to other pre-trained Transformers. We          Random                              0.1   0.5  1.0
+                                                          HowTo100M(Miech et al., 2019)        7.5 21.2 29.6
+use a single layer MLP fθMLP with GELU activa-
+                                                          MIL-NCE(Miech et al., 2020)          9.9 24.0 32.4
+tion (Hendrycks and Gimpel, 2016) to map the S3D          SupportSet(Patrick et al., 2021)     8.7 23.0 31.1
+outputs to the 768-dimensional inputs of the video        VideoCLIP (Zero-shot)               10.4 22.2 30.0
+Transformer.
+   We limit the maximum number of video tokens            Table 1: Text→video retrieval on Youcook2 and VTT.
+to be 32. For video transformer, its input sequence
+is 34 with [CLS] and [SEP] tokens. For text               DiDeMo is shown in Table 2.
+transformer, we have 61 text tokens plus [CLS]               On Youcook2 (Table 1, top), VideoCLIP shows
+and [SEP] tokens (63 in total). The number of text        impressive performance gains and has much bet-
+tokens roughly doubling in the number of video to-        ter accuracy than traditional supervised methods.
+kens because text comes at ∼2.4 tokens per second         The zero-shot transfer performance is even close to
+(on average) in the HowTo100M data, while our             the performance level of supervised baselines with
+video tokens are extracted at 1 token per second.         pre-training. With fine-tuning, VideoCLIP reaches
+A text clip has a random length between 8 and 61          state-of-the-art on Youcook2.
+tokens, whereas a video clip has 3 to 32 seconds.            On MSR-VTT (Table 1, bottom), VideoCLIP
+We sample 16 video/text pairs from each video and         shows solid improvements but with a larger zero-
+use k=32 videos to form batches of size |B|=512.          shot to supervised gap than on Youcook2. The ma-
+Training Details. We pre-train our model on 8             jor reason could be domain shift from HowTo100M
+NVIDIA Tesla V100 GPUs (each with 32 GB mem-              to MSR-VTT. The captions in MSR-VTT are more
+ory) for 25 epochs using fp16 precision for ∼1 day.       descriptive (e.g., “a basketball player is playing
+We use Adam (Kingma and Ba, 2014) as optimizer            basketball” and are less likely to appear in the
+with betas of (0.9, 0.98), an initial learning rate       transcriptions of HowTo100M). After fine-tuning,
+of 5e-5, 1000 steps of warm-up, and a polynomial          VideoCLIP reaches state-of-the-art R@1. Note that
+decay learning rate schedule. Gradients are clipped       this is achieved without using any supervised data
+at 2.0. The softmax temperature in objective (5) is       such as ImageNet or large-scale external data (i.e.,
+set to τ = 1.0.                                           65 million Instagram data) used by the second best
+                                                          method, Support Set (Patrick et al., 2021).
+5.4   Main Results                                           On DiDeMo (Table 2), VideoCLIP has better
+We evaluate VideoCLIP on various end tasks and            performance than most supervised methods. Note
+compare it with other zero-shot and supervised            that ClipBERT(Lei et al., 2021) has image pre-
+methods that use labels on the target datasets.           training before video+text fine-tuning.
+
+Text-video Retrieval. The results on Youcook2             Video Question Answering. In Table 3, zero-
+and MSR-VTT are shown in Table 1. The result on           shot VideoCLIP outperforms most supervised
+  DiDeMo dataset                 R@1 ↑R@5                 CrossTask dataset                Average Recall ↑
+  S UPERVISED                                             S UPERVISED
+                                                          Alayrac (Alayrac et al., 2016)        13.3
+  S2VT (Venugopalan et al., 2014) 11.9 33.6
+                                                          Zhukov (Zhukov et al., 2019)          22.4
+  FSE (Zhang et al., 2018)        13.9 44.5               Supervised (Zhukov et al., 2019)      31.6
+  CE (Liu et al., 2019a)          16.1 41.1               ActBERT (Zhu and Yang, 2020)          41.4
+  ClipBERT (Lei et al., 2021)     20.4 48.0               UniVL (Luo et al., 2020)              42.0
+  Z ERO - SHOT                                            VideoCLIP (Fine-tuned)                47.3
+  VideoCLIP (Zero-shot)           16.6 46.9               Z ERO - SHOT
+                                                          HowTo100M (Miech et al., 2019)        33.6
+     Table 2: Text→video retrieval on DiDeMo.             MIL-NCE (Miech et al., 2020)          40.5
+                                                          VideoCLIP (Zero-shot)                 33.9
+
+  MSR-VTT dataset                       Accuracy ↑           Table 5: Action step localization on CrossTask.
+  S UPERVISED
+  LSTM-fusion (Yu et al., 2018)             38.3
+  C+LSTM+SA-FC7 (Torabi et al., 2016)       60.2       Action Step Localization. Lastly, we report
+  SNUVL (Yu et al., 2016)                   65.4
+                                                       VideoCLIP’s performance on CrossTask in Ta-
+  EITanque (Kaufman et al., 2017)           65.5
+  CT-SAN (Yu et al., 2017)                  66.4       ble 5. It shows a small gap to supervised meth-
+  VSE-LSTM (Kiros et al., 2014)             67.3       ods when using zero-shot action step localization.
+  MLB (Kim et al., 2016)                    76.1       Fine-tuning leads to a ∼10% gain, outperforming
+  JSFusion(Yu et al., 2018)                 83.4       all prior work on this dataset.
+  ActBERT(Zhu and Yang, 2020)               85.7
+  ClipBERT(Lei et al., 2021)                88.2       5.5     Discussion on Work that Fine-tunes
+  VideoCLIP (Fine-tuned)                    92.1
+  Z ERO - SHOT
+                                                               CLIP Model
+  VideoCLIP (Zero-shot)                     73.9       There are concurrent works (Luo et al., 2021;
+                                                       Portillo-Quintero et al., 2021) about using im-
+          Table 3: VideoQA on MSR-VTT.
+                                                       age+text model (Radford et al., 2021) for
+                                                       video+text downstream tasks. Note that (Luo et al.,
+ COIN dataset                       Frame Accuracy ↑
+ S UPERVISED
+                                                       2021) and (Portillo-Quintero et al., 2021) use im-
+ NN-Viterbi (Richard et al., 2018)        21.2         age pre-training (no video pre-training) and transfer
+ VGG (Simonyan and Zisserman, 2014)       25.8         to videos, whereas our focus is about improving
+ TCFPN-ISBA (Ding and Xu, 2018)           34.3         video pre-training using a novel pre-training ob-
+ CBT (Sun et al., 2019a)                  53.9
+ ActBERT (Zhu and Yang, 2020)             57.0
+                                                       jective. Besides this conceptual difference (Luo
+ MIL-NCE (Miech et al., 2020)             61.0         et al., 2021; Portillo-Quintero et al., 2021) are us-
+ VideoCLIP (Fine-tuned)                   68.7         ing a pre-trained image CLIP(Radford et al., 2021)
+ Z ERO - SHOT                                          model from OpenAI which is trained on huge, semi-
+ VideoCLIP (Zero-shot)                    58.9
+                                                       curated web image+text pairs that provides ex-
+       Table 4: Action segmentation on COIN.           ceptional zero-shot performance on many datasets
+                                                       (e.g.ImageNet); however, the CLIP pre-training
+                                                       data is sourced from web-search engines (which
+methods but similarly suffers from domain shift        on their own use fully supervised neural networks
+from HowTo100M to MSR-VTT. After fine-tuning,          trained on ImageNet and other datasets); therefore,
+it reaches the best performance, indicating Video-     is not fair to compare to our approach which only
+CLIP also provides strong features for fine-tuning.    trains on HowTo100M instructional videos.
+
+                                                       5.6     Ablation Study
+Action Segmentation. We report the results of
+action segmentation on COIN in Table 4. Zero-          In Table 7, we perform an ablation study on zero-
+shot transfer of VideoCLIP to COIN outperforms         shot transfer for text→video retrieval on Youcook2
+all supervised methods, without using any labels       to quantify the the contribution of overlapping clips
+on this dataset. This indicates that VideoCLIP also    and retrieval augmented pre-training.
+learns good token-level video representations. Fine-      In the first group, we study the effectiveness
+tuning VideoCLIP further yields a ∼10% accuracy        of the two proposed methods. VideoCLIP with-
+gain, indicating potential room for improvement.       out retrieval augmented training significantly drops
+ Query Text                                Text of Top-1 video from VideoCLIP (Zero-shot)     Text of Top-1 video from VideoCLIP (Fine-tuned)
+                                           put chickpeas parsley chopped onion chili powder
+ pick the ends off the verdalago           ground cumin in food processor                     pick the ends off the verdalago
+ add the fried pita to the salad and mix   toss the salad                                     add the dressing and bread pieces the the salad
+ place chicken in hot oil
+ and fry until golden brown                fry the chicken in oil                             fry the chicken wings in deep oil
+ fry dark meats together and
+ white meats together                      add the mutton to the pan                          add the diced beef meat to it and roast it
+ rub salt and pepper onto the chicken      season them with salt and pepper                   rub salt and pepper onto the chicken
+
+                          Table 6: Qualitative error analysis of text→video retrieval on Youcook2.
+
+
+ Youcook2 dataset                 R@1 ↑ R@5 ↑ R@10 ↑                          token-level information and thus yields worse per-
+ VideoCLIP (Zero-shot)             22.7 50.4   63.1                           formance.
+ − w/o retrieval                   18.5 42.8   54.6
+ − w/o retrieval and w/o overlap 12.4 30.2     40.7                           5.7    Qualitative Analysis
+ − using MIL-NCE clips and loss 16.1 38.6      51.1
+ − shared video/text transformer 21.9 48.1     60.6                           We examine errors for text-video retrieval of
+ − retrieve k                      22.5 49.3   61.4                           Youcook2 in both zero-shot transfer and fine-tuning
+ − use first 32 sec for retrieval  20.1 46.3   58.7                           setting in Table 6. We observe that in zero-shot
+ − use [CLS]                       22.1 47.1   59.6                           transfer, VideoCLIP has no prior knowledge about
+Table 7: Ablation on text→video retrieval (Youcook2).                         a particular task/dataset on how long a text and
+                                                                              video clip should be paired together for the text-
+                                                                              retrieval task. Fine-tuning allows to correct this
+performance by over 4% in R@1 and addition-                                   type of error. Further, we observe that VideoCLIP
+ally using exact alignment positives, i.e., the same                          tends to mix objects of similar color/shape together.
+start/end timestamp for a pair of video and text                              We leave incorporating such type of knowledge
+clips, has another 4% drop in R@1. Therefore,                                 into pre-training to future work.
+both techniques combined lead to a ∼50% relative
+improvement in recall.                                                        6     Conclusion
+   Further, by using MIL-NCE clips and loss we
+evaluate the potential benefit of using the train-                            We have presented VideoCLIP, an approach to pre-
+ing objective from MIL-NCE (Miech et al., 2020)                               train a video-text model for zero-shot transfer to
+(which uses multiple temporally adjacent clips as                             end tasks that require fine-grained association be-
+positives) in our architecture. This ablation isolates                        tween video and language. VideoCLIP uses an
+the pre-training objective from model and data. We                            objective that contrasts temporally overlapping pos-
+observe that the MIL-NCE loss can improve the di-                             itives with hard negatives stemming from nearest
+rect alignment objective but performs significantly                           neighbor retrieval. In evaluation this approach out-
+worse than our objective (16.1 vs. 22.7 R@1).                                 performs prior work on a variety of tasks, without
+   In the second group, we further study the design                           any supervision on downstream datasets, and in
+choices of modeling. shared video/text transformer                            some cases VideoCLIP is competitive or better than
+indicates fθv is the same as fθt , which only de-                             prior work that uses full supervision; nevertheless,
+creases performance slightly. This suggests that                              we still observe gains for fine-tuning our model.
+using a joint backbone for video and text is effec-                           We hope that our code and model will foster future
+tive.                                                                         research in multi-modal video understanding.
+   retrieve k indicates direct searching k nearest
+neighbors instead of sampling k videos from 2k                                Code
+nearest neighbors (used by VideoCLIP) in Line 4                               Code and models are made available at
+of Algorithm 1. Sampling from nearest neighbors                               https://github.com/pytorch/fairseq/
+yields video clusters of better quality.                                      tree/main/examples/MMPT.
+   use starting 32 sec for retrieval indicates using
+the first 32 secs of a video as representation for
+                                                                              Acknowledgments
+video retrieval, which is an inferior representation
+of the whole video.                                                           We thank Licheng Yu for in-depth discussion and
+   Unlike employing Avgpool, using [CLS] to-                                  feedback, as well as Huaishao Luo and Mandela
+ken only prevents VideoCLIP from exploiting                                   Patrick for supporting baseline implementation.
+References                                                Valentin Gabeur, Chen Sun, Karteek Alahari, and
+                                                            Cordelia Schmid. 2020. Multi-modal transformer
+Jean-Baptiste Alayrac, Piotr Bojanowski, Nishant            for video retrieval. In European Conference on Com-
+   Agrawal, Josef Sivic, Ivan Laptev, and Simon             puter Vision (ECCV), volume 5. Springer.
+   Lacoste-Julien. 2016. Unsupervised learning from
+   narrated instruction videos. In Proceedings of the     Simon Ging, Mohammadreza Zolfaghari, Hamed Pir-
+   IEEE Conference on Computer Vision and Pattern           siavash, and Thomas Brox. 2020. Coot: Coopera-
+   Recognition, pages 4575–4583.                            tive hierarchical transformer for video-text represen-
+                                                            tation learning. arXiv preprint arXiv:2011.00597.
+Jean-Baptiste Alayrac, Adrià Recasens, Rosalia
+   Schneider, Relja Arandjelović, Jason Ramapuram,       Kelvin Guu, Kenton Lee, Zora Tung, Panupong Pasu-
+   Jeffrey De Fauw, Lucas Smaira, Sander Dieleman,          pat, and Ming-Wei Chang. 2020. Realm: Retrieval-
+   and Andrew Zisserman. 2020. Self-supervised              augmented language model pre-training. arXiv
+   multimodal versatile networks.      arXiv preprint       preprint arXiv:2002.08909.
+   arXiv:2006.16228.
+                                                          Kaiming He, Haoqi Fan, Yuxin Wu, Saining Xie, and
+Lisa Anne Hendricks, Oliver Wang, Eli Shechtman,            Ross Girshick. 2020. Momentum contrast for unsu-
+  Josef Sivic, Trevor Darrell, and Bryan Russell. 2017.     pervised visual representation learning. In Proceed-
+   Localizing moments in video with natural language.       ings of the IEEE/CVF Conference on Computer Vi-
+   In Proceedings of the IEEE international conference      sion and Pattern Recognition, pages 9729–9738.
+   on computer vision, pages 5803–5812.
+                                                          Dan Hendrycks and Kevin Gimpel. 2016. Gaus-
+Piotr Bojanowski, Edouard Grave, Armand Joulin, and         sian error linear units (GELUs). arXiv preprint
+  Tomas Mikolov. 2017. Enriching word vectors with          arXiv:1606.08415.
+   subword information. Transactions of the Associa-
+   tion for Computational Linguistics, 5:135–146.         Po-Yao Huang, Mandela Patrick, Junjie Hu, Graham
+                                                            Neubig, Florian Metze, and Alexander Hauptmann.
+Tom B Brown, Benjamin Mann, Nick Ryder, Melanie             2021. Multilingual multimodal pre-training for zero-
+  Subbiah, Jared Kaplan, Prafulla Dhariwal, Arvind          shot cross-lingual transfer of vision-language mod-
+  Neelakantan, Pranav Shyam, Girish Sastry, Amanda          els. In Meeting of the North American Chapter
+  Askell, et al. 2020. Language models are few-shot         of the Association for Computational Linguistics
+  learners. arXiv preprint arXiv:2005.14165.                (NAACL), Mexico City.
+Ting Chen, Simon Kornblith, Mohammad Norouzi,             Gautier Izacard and Edouard Grave. 2020. Lever-
+  and Geoffrey Hinton. 2020a. A simple framework            aging passage retrieval with generative models for
+  for contrastive learning of visual representations.       open domain question answering. arXiv preprint
+  arXiv preprint arXiv:2002.05709.                          arXiv:2007.01282.
+Yen-Chun Chen, Linjie Li, Licheng Yu, Ahmed               Vladimir Karpukhin, Barlas Oguz, Sewon Min, Patrick
+  El Kholy, Faisal Ahmed, Zhe Gan, Yu Cheng, and            Lewis, Ledell Wu, Sergey Edunov, Danqi Chen, and
+  Jingjing Liu. 2020b. Uniter: Universal image-text         Wen-tau Yih. 2020. Dense passage retrieval for
+  representation learning. In European Conference on        open-domain question answering. In Proceedings of
+  Computer Vision, pages 104–120. Springer.                 the 2020 Conference on Empirical Methods in Nat-
+                                                            ural Language Processing (EMNLP), pages 6769–
+Jacob Devlin, Ming-Wei Chang, Kenton Lee, and               6781.
+   Kristina Toutanova. 2019. BERT: Pre-training of
+   deep bidirectional transformers for language under-    Dotan Kaufman, Gil Levi, Tal Hassner, and Lior Wolf.
+   standing. In Proceedings of the 2019 Conference          2017. Temporal tessellation: A unified approach for
+   of the North American Chapter of the Association         video analysis. In Proceedings of the IEEE Inter-
+   for Computational Linguistics: Human Language            national Conference on Computer Vision, pages 94–
+  Technologies, Volume 1 (Long and Short Papers),           104.
+   pages 4171–4186, Minneapolis, Minnesota. Associ-
+   ation for Computational Linguistics.                   Urvashi Khandelwal, Omer Levy, Dan Jurafsky, Luke
+                                                            Zettlemoyer, and Mike Lewis. 2019. Generalization
+Li Ding and Chenliang Xu. 2018. Weakly-supervised           through memorization: Nearest neighbor language
+   action segmentation with iterative soft boundary as-     models. arXiv preprint arXiv:1911.00172.
+   signment. In Proceedings of the IEEE Conference
+   on Computer Vision and Pattern Recognition, pages      Jin-Hwa Kim, Kyoung-Woon On, Woosang Lim,
+   6508–6516.                                                Jeonghee Kim, Jung-Woo Ha, and Byoung-Tak
+                                                             Zhang. 2016. Hadamard product for low-rank bilin-
+Christoph Feichtenhofer, Haoqi Fan, Jitendra Malik,          ear pooling. arXiv preprint arXiv:1610.04325.
+  and Kaiming He. 2019. Slowfast networks for video
+  recognition. In Proceedings of the IEEE/CVF In-         Diederik P Kingma and Jimmy Ba. 2014. Adam: A
+  ternational Conference on Computer Vision, pages          method for stochastic optimization. arXiv preprint
+  6202–6211.                                                arXiv:1412.6980.
+Ryan Kiros, Ruslan Salakhutdinov, and Richard S            Huaishao Luo, Lei Ji, Botian Shi, Haoyang Huang, Nan
+  Zemel. 2014. Unifying visual-semantic embeddings           Duan, Tianrui Li, Xilin Chen, and Ming Zhou. 2020.
+  with multimodal neural language models. arXiv              Univilm: A unified video and language pre-training
+  preprint arXiv:1411.2539.                                  model for multimodal understanding and generation.
+                                                             arXiv preprint arXiv:2002.06353.
+Benjamin Klein, Guy Lev, Gil Sadeh, and Lior Wolf.
+  2015. Associating neural word embeddings with            Huaishao Luo, Lei Ji, Ming Zhong, Yang Chen, Wen
+  deep image representations using fisher vectors. In        Lei, Nan Duan, and Tianrui Li. 2021. Clip4clip: An
+  Proceedings of the IEEE Conference on Computer             empirical study of clip for end to end video clip re-
+  Vision and Pattern Recognition, pages 4437–4446.           trieval. arXiv preprint arXiv:2104.08860.
+
+Bruno Korbar, Fabio Petroni, Rohit Girdhar, and            Antoine Miech, Jean-Baptiste Alayrac, Lucas Smaira,
+  Lorenzo Torresani. 2020.    Video understand-              Ivan Laptev, Josef Sivic, and Andrew Zisserman.
+  ing as machine translation.    arXiv preprint              2020. End-to-end learning of visual representations
+  arXiv:2006.07203.                                          from uncurated instructional videos. In Proceedings
+                                                             of the IEEE/CVF Conference on Computer Vision
+Ian Lane, Tatsuya Kawahara, Tomoko Matsui, and               and Pattern Recognition, pages 9879–9889.
+   Satoshi Nakamura. 2006. Out-of-domain utterance
+   detection using classification confidences of multi-    Antoine Miech, Dimitri Zhukov, Jean-Baptiste Alayrac,
+   ple topics. IEEE Transactions on Audio, Speech,           Makarand Tapaswi, Ivan Laptev, and Josef Sivic.
+   and Language Processing, 15(1):150–161.                   2019. Howto100m: Learning a text-video embed-
+                                                             ding by watching hundred million narrated video
+Jie Lei, Linjie Li, Luowei Zhou, Zhe Gan, Tamara L.          clips. In Proceedings of the IEEE international con-
+   Berg, Mohit Bansal, and Jingjing Liu. 2021. Less is       ference on computer vision, pages 2630–2640.
+   more: Clipbert for video-and-language learningvia
+   sparse sampling. In CVPR.                               Tomas Mikolov, Ilya Sutskever, Kai Chen, Greg Cor-
+                                                             rado, and Jeffrey Dean. 2013. Distributed represen-
+Mike Lewis, Marjan Ghazvininejad, Gargi Ghosh, Ar-           tations of words and phrases and their composition-
+  men Aghajanyan, Sida Wang, and Luke Zettlemoyer.           ality. arXiv preprint arXiv:1310.4546.
+  2020a. Pre-training via paraphrasing. Advances in
+  Neural Information Processing Systems, 33.               Aaron van den Oord, Yazhe Li, and Oriol Vinyals.
+                                                             2018. Representation learning with contrastive pre-
+Mike Lewis, Yinhan Liu, Naman Goyal, Mar-                    dictive coding. arXiv preprint arXiv:1807.03748.
+  jan Ghazvininejad, Abdelrahman Mohamed, Omer
+                                                           Mandela Patrick, Po-Yao Huang, Yuki Asano, Florian
+  Levy, Veselin Stoyanov, and Luke Zettlemoyer.
+                                                            Metze, Alexander G Hauptmann, Joao F. Henriques,
+  2020b. BART: Denoising sequence-to-sequence
+                                                            and Andrea Vedaldi. 2021. Support-set bottlenecks
+  pre-training for natural language generation, trans-
+                                                            for video-text representation learning. In Interna-
+  lation, and comprehension. In Proceedings of the
+                                                            tional Conference on Learning Representations.
+  58th Annual Meeting of the Association for Compu-
+  tational Linguistics, pages 7871–7880, Online. As-       Matthew E Peters, Mark Neumann, Mohit Iyyer, Matt
+  sociation for Computational Linguistics.                  Gardner, Christopher Clark, Kenton Lee, and Luke
+                                                            Zettlemoyer. 2018. Deep contextualized word repre-
+Gen Li, Nan Duan, Yuejian Fang, Ming Gong, Daxin            sentations. arXiv preprint arXiv:1802.05365.
+  Jiang, and Ming Zhou. 2020a. Unicoder-vl: A uni-
+  versal encoder for vision and language by cross-         Jesús Andrés Portillo-Quintero, José Carlos Ortiz-
+  modal pre-training. In AAAI, pages 11336–11344.             Bayliss, and Hugo Terashima-Marín. 2021. A
+                                                              straightforward framework for video retrieval using
+Linjie Li, Yen-Chun Chen, Yu Cheng, Zhe Gan,                  clip. In Mexican Conference on Pattern Recognition,
+  Licheng Yu, and Jingjing Liu. 2020b. HERO:                  pages 3–12. Springer.
+  Hierarchical encoder for Video+Language omni-
+  representation pre-training. In Proceedings of the       Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya
+  2020 Conference on Empirical Methods in Natural            Ramesh, Gabriel Goh, Sandhini Agarwal, Girish
+  Language Processing (EMNLP), pages 2046–2065,              Sastry, Amanda Askell, Pamela Mishkin, Jack Clark,
+  Online. Association for Computational Linguistics.         et al. 2021. Learning transferable visual models
+                                                             from natural language supervision. arXiv preprint
+Yang Liu, Samuel Albanie, Arsha Nagrani, and An-             arXiv:2103.00020.
+  drew Zisserman. 2019a. Use what you have: Video
+  retrieval using representations from collaborative ex-   Alec Radford, Karthik Narasimhan, Tim Salimans, and
+  perts. arXiv preprint arXiv:1907.13487.                    Ilya Sutskever. 2018. Improving language under-
+                                                             standing by generative pre-training.
+Yinhan Liu, Myle Ott, Naman Goyal, Jingfei Du, Man-
+  dar Joshi, Danqi Chen, Omer Levy, Mike Lewis,            Alec Radford, Jeffrey Wu, Rewon Child, David Luan,
+  Luke Zettlemoyer, and Veselin Stoyanov. 2019b.             Dario Amodei, and Ilya Sutskever. 2019. Language
+  Roberta: A robustly optimized bert pretraining ap-         models are unsupervised multitask learners. OpenAI
+  proach. arXiv preprint arXiv:1907.11692.                   blog, 1(8):9.
+Aditya Ramesh, Mikhail Pavlov, Gabriel Goh, Scott            Conference on Computer Vision (ECCV), pages 305–
+  Gray, Chelsea Voss, Alec Radford, Mark Chen, and           321.
+  Ilya Sutskever. 2021. Zero-shot text-to-image gener-
+  ation. arXiv preprint arXiv:2102.12092.                  Hu Xu, Gargi Ghosh, Po-Yao Huang, Prahal Arora, Ma-
+                                                             soumeh Aminzadeh, Christoph Feichtenhofer, Flo-
+Alexander Richard, Hilde Kuehne, Ahsan Iqbal, and            rian Metze, and Luke Zettlemoyer. 2021. VLM:
+  Juergen Gall. 2018. Neuralnetwork-viterbi: A               Task-agnostic video-language model pre-training for
+  framework for weakly supervised video learning. In         video understanding. In Findings of the Association
+  Proceedings of the IEEE Conference on Computer             for Computational Linguistics: ACL-IJCNLP 2021,
+  Vision and Pattern Recognition, pages 7386–7395.           pages 4227–4239, Online. Association for Computa-
+                                                             tional Linguistics.
+Walter J Scheirer, Anderson de Rezende Rocha,
+ Archana Sapkota, and Terrance E Boult. 2012.
+ Toward open set recognition.        IEEE transac-         Jun Xu, Tao Mei, Ting Yao, and Yong Rui. 2016. Msr-
+  tions on pattern analysis and machine intelligence,        vtt: A large video description dataset for bridging
+  35(7):1757–1772.                                           video and language. In Proceedings of the IEEE con-
+                                                             ference on computer vision and pattern recognition,
+Karen Simonyan and Andrew Zisserman. 2014. Very              pages 5288–5296.
+  deep convolutional networks for large-scale image
+  recognition. arXiv preprint arXiv:1409.1556.             Zhilin Yang, Zihang Dai, Yiming Yang, Jaime Car-
+                                                             bonell, Russ R Salakhutdinov, and Quoc V Le. 2019.
+Weijie Su, Xizhou Zhu, Yue Cao, Bin Li, Lewei Lu,            Xlnet: Generalized autoregressive pretraining for
+  Furu Wei, and Jifeng Dai. 2020. Vl-bert: Pre-              language understanding. In Advances in Neural
+  training of generic visual-linguistic representations.     Information Processing Systems, volume 32, pages
+  In International Conference on Learning Represen-          5753–5763. Curran Associates, Inc.
+  tations.
+                                                           Youngjae Yu, Jongseok Kim, and Gunhee Kim. 2018.
+Chen Sun, Fabien Baradel, Kevin Murphy, and                  A joint sequence fusion model for video question
+  Cordelia Schmid. 2019a. Contrastive bidirectional          answering and retrieval. In Proceedings of the Eu-
+  transformer for temporal representation learning.          ropean Conference on Computer Vision (ECCV),
+  arXiv preprint arXiv:1906.05743, 3(5).                     pages 471–487.
+Chen Sun, Austin Myers, Carl Vondrick, Kevin Mur-
+  phy, and Cordelia Schmid. 2019b. Videobert: A            Youngjae Yu, Hyungjin Ko, Jongwook Choi, and Gun-
+  joint model for video and language representation          hee Kim. 2016. Video captioning and retrieval
+  learning. In Proceedings of the IEEE International         models with semantic attention. arXiv preprint
+  Conference on Computer Vision, pages 7464–7473.            arXiv:1610.02947, 6(7).
+
+Yansong Tang, Dajun Ding, Yongming Rao, Yu Zheng,          Youngjae Yu, Hyungjin Ko, Jongwook Choi, and Gun-
+  Danyang Zhang, Lili Zhao, Jiwen Lu, and Jie Zhou.          hee Kim. 2017. End-to-end concept word detection
+  2019. Coin: A large-scale dataset for comprehen-           for video captioning, retrieval, and question answer-
+  sive instructional video analysis. In Proceedings of       ing. In Proceedings of the IEEE Conference on Com-
+  the IEEE Conference on Computer Vision and Pat-            puter Vision and Pattern Recognition, pages 3165–
+  tern Recognition, pages 1207–1216.                         3173.
+
+Atousa Torabi, Niket Tandon, and Leonid Sigal. 2016.       Bowen Zhang, Hexiang Hu, and Fei Sha. 2018. Cross-
+  Learning language-visual embedding for movie un-           modal and hierarchical modeling of video and text.
+  derstanding with natural-language. arXiv preprint          In Proceedings of the European Conference on Com-
+  arXiv:1609.08124.                                          puter Vision (ECCV), pages 374–390.
+Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob           Luowei Zhou, Chenliang Xu, and Jason J Corso.
+  Uszkoreit, Llion Jones, Aidan N Gomez, Łukasz              2017. Towards automatic learning of procedures
+  Kaiser, and Illia Polosukhin. 2017. Attention is all       from web instructional videos. arXiv preprint
+  you need. In Advances in neural information pro-           arXiv:1703.09788.
+  cessing systems, pages 5998–6008.
+Subhashini Venugopalan, Huijuan Xu, Jeff Donahue,          Luowei Zhou, Yingbo Zhou, Jason J Corso, Richard
+  Marcus Rohrbach, Raymond Mooney, and Kate                  Socher, and Caiming Xiong. 2018. End-to-end
+  Saenko. 2014. Translating videos to natural lan-           dense video captioning with masked transformer. In
+  guage using deep recurrent neural networks. arXiv          Proceedings of the IEEE Conference on Computer
+  preprint arXiv:1412.4729.                                  Vision and Pattern Recognition, pages 8739–8748.
+
+Saining Xie, Chen Sun, Jonathan Huang, Zhuowen Tu,         Linchao Zhu and Yi Yang. 2020. Actbert: Learning
+  and Kevin Murphy. 2018. Rethinking spatiotempo-            global-local video-text representations. In Proceed-
+  ral feature learning: Speed-accuracy trade-offs in         ings of the IEEE/CVF Conference on Computer Vi-
+  video classification. In Proceedings of the European       sion and Pattern Recognition, pages 8746–8755.
+Dimitri Zhukov, Jean-Baptiste Alayrac, Ramazan Gok-      A     Supplementary Material for
+  berk Cinbis, David Fouhey, Ivan Laptev, and Josef            VideoCLIP
+  Sivic. 2019. Cross-task weakly supervised learn-
+  ing from instructional videos. In Proceedings of the   This supplementary material is organized as fol-
+  IEEE/CVF Conference on Computer Vision and Pat-
+  tern Recognition, pages 3537–3545.
+                                                         lows. First we provide additional experimental
+                                                         setups for each end task. Then we specify the
+                                                         hyper-parameters in our model and detail how we
+                                                         train VideoCLIP. Lastly, we provide extra ablations
+                                                         and analysis of various VideoCLIP configurations.
+
+                                                         A.1    End Task Setup Details
+                                                         Text-Video Retrieval. We use Youcook2 and
+                                                         MSR-VTT to evaluate text-video retrieval. We
+                                                         directly use our video and text Transformers to en-
+                                                         code the videos and the text queries and measure
+                                                         the text-to-video similarities for retrieval.
+                                                            Youcook2 (Zhou et al., 2017) is a collection of
+                                                         2K cooking videos with a total duration of 176
+                                                         hours and 5.26 minutes on average per video. It
+                                                         contains 89 recipes in 14K video clips where each
+                                                         clip is annotated with one descriptive sentence. We
+                                                         follow the splits defined in Miech et al. (2019) and
+                                                         make sure there is no overlap between pre-training
+                                                         and evaluation data. After filtering out unavailable
+                                                         ones, we obtain 9,473 training clip-text pairs from
+                                                         1222 videos and 3,305 test clip-text pairs from 430
+                                                         videos.
+                                                            MSR-VTT (Xu et al., 2016) is a widely-
+                                                         compared benchmark dataset for text-video re-
+                                                         trieval and video question answering. It contains
+                                                         open-domain videos where each video clips is
+                                                         around 10 seconds. Each training clip has 20 cap-
+                                                         tioning sentences labeled by a human. In total,
+                                                         there are 200K clip-text pairs from 10K videos.
+                                                         Following JSFusion (Yu et al., 2018; Miech et al.,
+                                                         2019), we sampled 1K clip-text pairs as the test
+                                                         data and the rest is used for training.
+                                                         Multiple-choice VideoQA. We use the testing
+                                                         split and data in (Yu et al., 2018) on MSR-VTT
+                                                         to evaluate multiple-choice VideoQA. On average,
+                                                         VideoQA for MSR-VTT has 5 candidate answers
+                                                         per video. Recall that this task can be formulated
+                                                         as a video-text retrieval task except the candidate
+                                                         textual answers are associated with each video and
+                                                         only one answer is correct (most relevant). In prac-
+                                                         tice, we find the answer with the maximum similar-
+                                                         ity in-between a video and all candidate answers.
+                                                         Action Segmentation. We use COIN (Tang et al.,
+                                                         2019) to evaluate action segmentation. COIN con-
+                                                         tains 11,827 videos (476 hours) in total and the
+                                                         testing set has 2797 videos, where each video is
+                                                         labeled with 3.91 segments per video on average.
+There are 778 segment labels and we feed these
+textual labels into the text backbone to obtain their
+latent space. We do not model the Outside label ex-
+plicitly and determine an Outside label only when
+all other 778 labels reject a video token. Note that
+videos in COIN can last for several minutes, we ap-
+ply a sliding window with a step size of 16 seconds
+and a window size of 32 seconds. During inference,
+we average the logits for overlapped tokens from
+multiple windows. For follow the original split of
+COIN for training and evaluation.
+Action Step Localization. CrossTask (Zhukov
+et al., 2019) is used to evaluate action localiza-
+tion. There are 83 different tasks and 4.7K videos
+where each task has a set of steps in the form of
+text descriptions and each frame of video is an-
+notated with one or multiple steps as a distribu-
+tion. We use the testing data split and the offi-
+cial codebase (https://github.com/DmZhukov/
+CrossTask) that contains 1.7K videos. We use
+540 annotated videos for supervised training. Re-
+call that action step localization testing the video’s
+token-level features and we use the representations
+hv of the last layer of BERT before average pool-
+ing. We compute the distribution of similarity for
+each token over the latent space of textual labels of
+steps.
+

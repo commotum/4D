@@ -1,0 +1,799 @@
+                                                            BLIP-2: Bootstrapping Language-Image Pre-training
+                                                          with Frozen Image Encoders and Large Language Models
+
+
+                                                                     Junnan Li Dongxu Li Silvio Savarese Steven Hoi
+                                                                                  Salesforce Research
+                                                         https://github.com/salesforce/LAVIS/tree/main/projects/blip2
+arXiv:2301.12597v3 [cs.CV] 15 Jun 2023
+
+
+
+
+                                                                 Abstract                                       Vision-and-Language                 Vision-to-Language
+                                                                                                               Representation Learning              Generative Learning
+                                              The cost of vision-and-language pre-training has
+                                              become increasingly prohibitive due to end-to-                                                    Large
+                                              end training of large-scale models. This paper                 Image         Q-Former           Language
+                                                                                                            Encoder    Querying Transformer     Model    Write a romantic message
+                                              proposes BLIP-2, a generic and efficient pre-                                                     (LLM)    that goes along this photo.
+
+                                              training strategy that bootstraps vision-language                                                          Love is like a sunset, it’s
+                                                                                                                          …
+                                                                                                                                    Text
+                                                                                                                                                         hard to see it coming but
+                                              pre-training from off-the-shelf frozen pre-trained                       Queries                           when it does it’s so beautiful.
+
+                                              image encoders and frozen large language mod-                  Bootstrapping Pre-trained           Bootstrapping Pre-trained
+                                                                                                                  Image Models                 Large Language Models (LLMs)
+                                              els. BLIP-2 bridges the modality gap with a
+                                              lightweight Querying Transformer, which is pre-             Figure 1. Overview of BLIP-2’s framework. We pre-train a
+                                              trained in two stages. The first stage boot-                lightweight Querying Transformer following a two-stage strat-
+                                              straps vision-language representation learning              egy to bridge the modality gap. The first stage bootstraps vision-
+                                              from a frozen image encoder. The second stage               language representation learning from a frozen image encoder. The
+                                              bootstraps vision-to-language generative learning           second stage bootstraps vision-to-language generative learning
+                                              from a frozen language model. BLIP-2 achieves               from a frozen LLM, which enables zero-shot instructed image-to-
+                                              state-of-the-art performance on various vision-             text generation (see Figure 4 for more examples).
+                                              language tasks, despite having significantly fewer
+                                              trainable parameters than existing methods. For             compute-efficient VLP method by bootstrapping from off-
+                                              example, our model outperforms Flamingo80B by               the-shelf pre-trained vision models and language models.
+                                              8.7% on zero-shot VQAv2 with 54x fewer train-               Pre-trained vision models offer high-quality visual represen-
+                                              able parameters. We also demonstrate the model’s            tation. Pre-trained language models, in particular large lan-
+                                              emerging capabilities of zero-shot image-to-text            guage models (LLMs), offer strong language generation and
+                                              generation that can follow natural language in-             zero-shot transfer abilities. To reduce computation cost and
+                                              structions.                                                 counteract the issue of catastrophic forgetting, the unimodal
+                                                                                                          pre-trained models remain frozen during the pre-training.
+                                                                                                          In order to leverage pre-trained unimodal models for VLP,
+                                         1. Introduction                                                  it is key to facilitate cross-modal alignment. However, since
+                                         Vision-language pre-training (VLP) research has witnessed        LLMs have not seen images during their unimodal pre-
+                                         a rapid advancement in the past few years, where pre-trained     training, freezing them makes vision-language alignment
+                                         models with increasingly larger scale have been developed        in particular challenging. In this regard, existing methods
+                                         to continuously push the state-of-the-art on various down-       (e.g. Frozen (Tsimpoukelli et al., 2021), Flamingo (Alayrac
+                                         stream tasks (Radford et al., 2021; Li et al., 2021; 2022;       et al., 2022)) resort to an image-to-text generation loss,
+                                         Wang et al., 2022a; Alayrac et al., 2022; Wang et al., 2022b).   which we show is insufficient to bridge the modality gap.
+                                         However, most state-of-the-art vision-language models in-
+                                                                                                          To achieve effective vision-language alignment with frozen
+                                         cur a high computation cost during pre-training, due to
+                                                                                                          unimodal models, we propose a Querying Transformer (Q-
+                                         end-to-end training using large-scale models and datasets.
+                                                                                                          Former) pre-trained with a new two-stage pre-training strat-
+                                         Vision-language research sits at the intersection between        egy. As shown in Figure 1, Q-Former is a lightweight trans-
+                                         vision and language, therefore it is naturally expected          former which employs a set of learnable query vectors to
+                                         that vision-language models can harvest from the readily-        extract visual features from the frozen image encoder. It
+                                         available unimodal models from the vision and natural lan-       acts as an information bottleneck between the frozen image
+                                         guage communities. In this paper, we propose a generic and       encoder and the frozen LLM, where it feeds the most useful
+       BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models
+
+visual feature for the LLM to output the desired text. In          Most VLP methods perform end-to-end pre-training using
+the first pre-training stage, we perform vision-language rep-      large-scale image-text pair datasets. As the model size keeps
+resentation learning which enforces the Q-Former to learn          increasing, the pre-training can incur an extremely high
+visual representation most relevant to the text. In the second     computation cost. Moreover, it is inflexible for end-to-end
+pre-training stage, we perform vision-to-language genera-          pre-trained models to leverage readily-available unimodal
+tive learning by connecting the output of the Q-Former to a        pre-trained models, such as LLMs (Brown et al., 2020;
+frozen LLM, and trains the Q-Former such that its output           Zhang et al., 2022; Chung et al., 2022).
+visual representation can be interpreted by the LLM.
+                                                                   2.2. Modular Vision-Language Pre-training
+We name our VLP framework as BLIP-2: Bootstrapping
+Language-Image Pre-training with frozen unimodal models.           More similar to us are methods that leverage off-the-shelf
+The key advantages of BLIP-2 include:                              pre-trained models and keep them frozen during VLP. Some
+                                                                   methods freeze the image encoder, including the early work
+• BLIP-2 effectively leverages both frozen pre-trained im-         which adopts a frozen object detector to extract visual fea-
+  age models and language models. We bridge the modality           tures (Chen et al., 2020; Li et al., 2020; Zhang et al., 2021),
+  gap using a Q-Former pre-trained in two-stages: repre-           and the recent LiT (Zhai et al., 2022) which uses a frozen
+  sentation learning stage and generative learning stage.          pre-trained image encoder for CLIP (Radford et al., 2021)
+  BLIP-2 achieves state-of-the-art performance on various          pre-training. Some methods freeze the language model
+  vision-language tasks including visual question answer-          to use the knowledge from LLMs for vision-to-language
+  ing, image captioning, and image-text retrieval.                 generation tasks (Tsimpoukelli et al., 2021; Alayrac et al.,
+• Powered by LLMs (e.g. OPT (Zhang et al., 2022),                  2022; Chen et al., 2022a; Mañas et al., 2023; Tiong et al.,
+  FlanT5 (Chung et al., 2022)), BLIP-2 can be prompted to          2022; Guo et al., 2022). The key challenge in using a frozen
+  perform zero-shot image-to-text generation that follows          LLM is to align visual features to the text space. To achieve
+  natural language instructions, which enables emerging            this, Frozen (Tsimpoukelli et al., 2021) finetunes an image
+  capabilities such as visual knowledge reasoning, visual          encoder whose outputs are directly used as soft prompts
+  conversation, etc. (see Figure 4 for examples).                  for the LLM. Flamingo (Alayrac et al., 2022) inserts new
+                                                                   cross-attention layers into the LLM to inject visual features,
+• Due to the use of frozen unimodal models and a                   and pre-trains the new layers on billions of image-text pairs.
+  lightweight Q-Former, BLIP-2 is more compute-efficient           Both methods adopt the language modeling loss, where the
+  than exisiting state-of-the-arts. For example, BLIP-2 out-       language model generates texts conditioned on the image.
+  performs Flamingo (Alayrac et al., 2022) by 8.7% on
+                                                                   Different from existing methods, BLIP-2 can effectively and
+  zero-shot VQAv2, while using 54× fewer trainable pa-
+                                                                   efficiently leverage both frozen image encoders and frozen
+  rameters. Furthermore, our results show that BLIP-2 is a
+                                                                   LLMs for various vision-language tasks, achieving stronger
+  generic method that can harvest more advanced unimodal
+                                                                   performance at a lower computation cost.
+  models for better VLP performance.
+                                                                   3. Method
+2. Related Work                                                    We propose BLIP-2, a new vision-language pre-training
+2.1. End-to-end Vision-Language Pre-training                       method that bootstraps from frozen pre-trained unimodal
+Vision-language pre-training aims to learn multimodal foun-        models. In order to bridge the modality gap, we propose a
+dation models with improved performance on various vision-         Querying Transformer (Q-Former) pre-trained in two stages:
+and-language tasks. Depending on the downstream task,              (1) vision-language representation learning stage with a
+different model architectures have been proposed, including        frozen image encoder and (2) vision-to-language genera-
+the dual-encoder architecture (Radford et al., 2021; Jia et al.,   tive learning stage with a frozen LLM. This section first
+2021), the fusion-encoder architecture (Tan & Bansal, 2019;        introduces the model architecture of Q-Former, and then
+Li et al., 2021), the encoder-decoder architecture (Cho et al.,    delineates the two-stage pre-training procedures.
+2021; Wang et al., 2021b; Chen et al., 2022b), and more
+recently, the unified transformer architecture (Li et al., 2022;   3.1. Model Architecture
+Wang et al., 2022b). Various pre-training objectives have          We propose Q-Former as the trainable module to bridge the
+also been proposed over the years, and have progressively          gap between a frozen image encoder and a frozen LLM. It
+converged to a few time-tested ones: image-text contrastive        extracts a fixed number of output features from the image
+learning (Radford et al., 2021; Yao et al., 2022; Li et al.,       encoder, independent of input image resolution. As shown
+2021; 2022), image-text matching (Li et al., 2021; 2022;           in Figure 2, Q-Former consists of two transformer submod-
+Wang et al., 2021a), and (masked) language modeling (Li            ules that share the same self-attention layers: (1) an image
+et al., 2021; 2022; Yu et al., 2022; Wang et al., 2022b).          transformer that interacts with the frozen image encoder
+        BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models
+
+                                                                                                       Q: query token positions; T: text token positions.
+                        Q-Former
+                                      Image-Text                              Image-Grounded              masked     unmasked
+                                       Matching          Image-Text            Text Generation
+ Input Image                                                                                                Q       T              Q       T                Q     T
+                                                         Contrastive
+                                                          Learning                                     Q
+                                    Feed Forward                                Feed Forward                                  Q                       Q
+                       for every
+                Image other block   Cross Attention
+               Encoder                                Attention Masking                                T                       T                       T
+                                                         bidirectional
+                             xN     Self Attention     mutlimodal causal        Self Attention    xN      Bi-directional      Multi-modal Causal            Uni-modal
+                                                      x   uni-modal    x
+                                                                                                       Self-Attention Mask    Self-Attention Mask      Self-Attention Mask
+                          Learned                                                                          Image-Text          Image-Grounded             Image-Text
+                          Queries
+                                          …
+                                                           Input Text      a cat wearing sunglasses
+                                                                                                            Matching            Text Generation       Contrastive Learning
+
+
+Figure 2. (Left) Model architecture of Q-Former and BLIP-2’s first-stage vision-language representation learning objectives. We jointly
+optimize three objectives which enforce the queries (a set of learnable embeddings) to extract visual representation most relevant to the
+text. (Right) The self-attention masking strategy for each objective to control query-text interaction.
+
+for visual feature extraction, (2) a text transformer that can                          t from the text transformer, where t is the output embed-
+function as both a text encoder and a text decoder. We create                           ding of the [CLS] token. Since Z contains multiple output
+a set number of learnable query embeddings as input to the                              embeddings (one from each query), we first compute the
+image transformer. The queries interact with each other                                 pairwise similarity between each query output and t, and
+through self-attention layers, and interact with frozen image                           then select the highest one as the image-text similarity. To
+features through cross-attention layers (inserted every other                           avoid information leak, we employ a unimodal self-attention
+transformer block). The queries can additionally interact                               mask, where the queries and text are not allowed to see each
+with the text through the same self-attention layers. Depend-                           other. Due to the use of a frozen image encoder, we can
+ing on the pre-training task, we apply different self-attention                         fit more samples per GPU compared to end-to-end meth-
+masks to control query-text interaction. We initialize Q-                               ods. Therefore, we use in-batch negatives instead of the
+Former with the pre-trained weights of BERTbase (Devlin                                 momentum queue in BLIP.
+et al., 2019), whereas the cross-attention layers are randomly
+                                                                                        Image-grounded Text Generation (ITG) loss trains the
+initialized. In total, Q-Former contains 188M parameters.
+                                                                                        Q-Former to generate texts, given input images as the con-
+Note that the queries are considered as model parameters.
+                                                                                        dition. Since the architecture of Q-Former does not allow
+In our experiments, we use 32 queries where each query                                  direct interactions between the frozen image encoder and
+has a dimension of 768 (same as the hidden dimension                                    the text tokens, the information required for generating the
+of the Q-Former). We use Z to denote the output query                                   text must be first extracted by the queries, and then passed
+representation. The size of Z (32 × 768) is much smaller                                to the text tokens via self-attention layers. Therefore, the
+than the size of frozen image features (e.g. 257 × 1024 for                             queries are forced to extract visual features that capture all
+ViT-L/14). This bottleneck architecture works together with                             the information about the text. We employ a multimodal
+our pre-training objectives into forcing the queries to extract                         causal self-attention mask to control query-text interaction,
+visual information that is most relevant to the text.                                   similar to the one used in UniLM (Dong et al., 2019). The
+                                                                                        queries can attend to each other but not the text tokens. Each
+3.2. Bootstrap Vision-Language Representation                                           text token can attend to all queries and its previous text to-
+     Learning from a Frozen Image Encoder                                               kens. We also replace the [CLS] token with a new [DEC]
+In the representation learning stage, we connect Q-Former to                            token as the first text token to signal the decoding task.
+a frozen image encoder and perform pre-training using                                   Image-Text Matching (ITM) aims to learn fine-grained
+image-text pairs. We aim to train the Q-Former such that the                            alignment between image and text representation. It is a
+queries can learn to extract visual representation that is most                         binary classification task where the model is asked to pre-
+informative of the text. Inspired by BLIP (Li et al., 2022),                            dict whether an image-text pair is positive (matched) or
+we jointly optimize three pre-training objectives that share                            negative (unmatched). We use a bi-directional self-attention
+the same input format and model parameters. Each objec-                                 mask where all queries and texts can attend to each other.
+tive employs a different attention masking strategy between                             The output query embeddings Z thus capture multimodal
+queries and text to control their interaction (see Figure 2).                           information. We feed each output query embedding into a
+Image-Text Contrastive Learning (ITC) learns to align                                   two-class linear classifier to obtain a logit, and average the
+image representation and text representation such that their                            logits across all queries as the output matching score. We
+mutual information is maximized. It achieves so by contrast-                            adopt the hard negative mining strategy from Li et al. (2021;
+ing the image-text similarity of a positive pair against those                          2022) to create informative negative pairs.
+of negative pairs. We align the output query representation
+Z from the image transformer with the text representation
+       BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models
+
+                                                                  …                          Output Text   a cat wearing sunglasses
+         Bootstrapping from a
+           Decoder-based                          Image                         Fully
+                                                               Q-Former                               LLM Decoder
+        Large Language Model                     Encoder                      Connected
+              (e.g. OPT)
+                                                                  …                          …
+
+
+                                Input Image                 Learned Queries
+
+
+                                                                   …                              Suﬃx Text      wearing sunglasses
+        Bootstrapping from an
+       Encoder-Decoder-based                      Image                         Fully
+        Large Language Model                                   Q-Former                     LLM Encoder             LLM Decoder
+                                                 Encoder                      Connected
+             (e.g. FlanT5)
+                                                                   …                         …
+                                                                                                      a cat
+                                Input Image                 Learned Queries                        Prefix Text
+
+Figure 3. BLIP-2’s second-stage vision-to-language generative pre-training, which bootstraps from frozen large language models (LLMs).
+(Top) Bootstrapping a decoder-based LLM (e.g. OPT). (Bottom) Bootstrapping an encoder-decoder-based LLM (e.g. FlanT5). The
+fully-connected layer adapts from the output dimension of the Q-Former to the input dimension of the chosen LLM.
+
+3.3. Bootstrap Vision-to-Language Generative Learning                  captions using the BLIPlarge captioning model, and rank the
+     from a Frozen LLM                                                 synthetic captions along with the original web caption based
+In the generative pre-training stage, we connect Q-                    on the image-text similarity produced by a CLIP ViT-L/14
+Former (with the frozen image encoder attached) to a frozen            model. We keep top-two captions per image as training data
+LLM to harvest the LLM’s generative language capability.               and randomly sample one at each pre-training step.
+As shown in Figure 3, we use a fully-connected (FC) layer              Pre-trained image encoder and LLM. For the frozen im-
+to linearly project the output query embeddings Z into the             age encoder, we explore two state-of-the-art pre-trained
+same dimension as the text embedding of the LLM. The                   vision transformer models: (1) ViT-L/14 from CLIP (Rad-
+projected query embeddings are then prepended to the input             ford et al., 2021) and (2) ViT-g/14 from EVA-CLIP (Fang
+text embeddings. They function as soft visual prompts that             et al., 2022). We remove the last layer of the ViT and
+condition the LLM on visual representation extracted by                uses the second last layer’s output features, which leads
+the Q-Former. Since the Q-Former has been pre-trained                  to slightly better performance. For the frozen language
+to extract language-informative visual representation, it ef-          model, we explore the unsupervised-trained OPT model
+fectively functions as an information bottleneck that feeds            family (Zhang et al., 2022) for decoder-based LLMs, and
+the most useful information to the LLM while removing                  the instruction-trained FlanT5 model family (Chung et al.,
+irrelevant visual information. This reduces the burden of the          2022) for encoder-decoder-based LLMs.
+LLM to learn vision-language alignment, thus mitigating
+the catastrophic forgetting problem.                                   Pre-training settings. We pre-train for 250k steps in the
+                                                                       first stage and 80k steps in the second stage. We use a batch
+We experiment with two types of LLMs: decoder-based                    size of 2320/1680 for ViT-L/ViT-g in the first stage and
+LLMs and encoder-decoder-based LLMs. For decoder-                      a batch size of 1920/1520 for OPT/FlanT5 in the second
+based LLMs, we pre-train with the language modeling loss,              stage. During pre-training, we convert the frozen ViTs’
+where the frozen LLM is tasked to generate the text con-               and LLMs’ parameters into FP16, except for FlanT5 where
+ditioned on the visual representation from Q-Former. For               we use BFloat16. We found no performance degradation
+encoder-decoder-based LLMs, we pre-train with the prefix               compared to using 32-bit models. Due to the use of frozen
+language modeling loss, where we split a text into two parts.          models, our pre-training is more computational friendly
+The prefix text is concatenated with the visual representation         than existing large-scale VLP methods. For example, using
+as input to the LLM’s encoder. The suffix text is used as the          a single 16-A100(40G) machine, our largest model with
+generation target for the LLM’s decoder.                               ViT-g and FlanT5-XXL requires less than 6 days for the first
+                                                                       stage and less than 3 days for the second stage.
+3.4. Model Pre-training
+                                                                       The same set of pre-training hyper-parameters are used for
+Pre-training data. We use the same pre-training dataset as             all models. We use the AdamW (Loshchilov & Hutter, 2017)
+BLIP with 129M images in total, including COCO (Lin                    optimizer with β1 = 0.9, β1 = 0.98, and a weight decay
+et al., 2014), Visual Genome (Krishna et al., 2017),                   of 0.05. We use a cosine learning rate decay with a peak
+CC3M (Sharma et al., 2018), CC12M (Changpinyo et al.,                  learning rate of 1e-4 and a linear warmup of 2k steps. The
+2021), SBU (Ordonez et al., 2011), and 115M images from                minimum learning rate at the second stage is 5e-5. We use
+the LAION400M dataset (Schuhmann et al., 2021). We                     images of size 224×224, augmented with random resized
+adopt the CapFilt method (Li et al., 2022) to create synthetic         cropping and horizontal flipping.
+captions for the web images. Specifically, we generate 10
+        BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models
+
+
+
+
+                  Explain the advantages of                                                                Write down the facts that you
+                                                              Tell me something about
+                  this product.                                                                            know about this flower.
+                                                              the history of this place.
+
+        The audi e-tron quattro concept is a                                                      It is a genus of flowering plants in the
+        plug-in hybrid electric sports car           The great wall of china was built in         orchid family, orchidaceae. It is
+        that has a range of 310 miles and            221 bc by emperor qin shihuang to            native to eastern asia and south east
+        can accelerate from 0 to 60 mph in           protect the emperor's capital from           asia. It is a perennial flowering plant
+        just 4 seconds.                              invaders from the north.                     that grows up to a height of 1 m.
+
+
+
+
+                                                                                                             What are the ingredients I
+                                                          What are shown in the photo?                       need to make this?
+                  Is this photo unusual?
+
+                                                     A man and a chicken.                         Pepperoni, mozzarella cheese, pizza
+        Yes, it's a house that looks like it's
+                                                                                                  sauce, olive oil, salt, pepper, basil.
+        upside down.
+                                                              What does the man feel
+                 How could someone get                        and why?                                       What is the first step?
+                 out of the house?
+                                                     He is scared of the chicken                  Place the pizza dough on a baking
+        It has a slide on the side of the                                                         sheet, brush with olive oil, sprinkle
+                                                     because it is flying at him.
+        house.                                                                                    with salt, pepper, and basil.
+
+
+
+
+                                                              What happened at the end
+                 Which city is this?                          of this movie?
+                                                                                                             What is in the photo?
+
+        Singapore.                                   The titanic sank.
+                                                                                                  A pizza that looks like a cat.
+
+                  Why do you think so?                        Did Leonardo Dicaprio's
+                                                              character survive?                             What is the nose made of?
+
+        The city has a statue of a merlion.          No, he drowned.                              A slice of pepperoni.
+
+
+
+
+                                                          Tell us about the photo you                      Write a conversation
+                  Write a romantic message                took for Darren and Jade.
+                  that goes along this photo.                                                              between the two animals.
+                                                     Darren and Jade are a couple who
+                                                     have a passion for horses, so we             cat: hey dog, can i ride on your back?
+        Love is like a sunset, it's hard to
+        see it coming but when it does it's          decided to take a photo of them              dog: sure, why not?
+        so beautiful.                                with a horse in the desert on their          cat: i'm tired of walking in the snow.
+                                                     wedding day.
+
+
+Figure 4. Selected examples of instructed zero-shot image-to-text generation using a BLIP-2 model w/ ViT-g and FlanT5XXL , where it
+shows a wide range of capabilities including visual conversation, visual knowledge reasoning, visual commensense reasoning, storytelling,
+personalized image-to-text generation, etc.
+        BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models
+
+                                                           Visual Question Answering Image Captioning Image-Text Retrieval
+                                   #Trainable   Open-
+ Models                                                         VQAv2 (test-dev)       NoCaps (val)       Flickr (test)
+                                   Params       sourced?
+                                                                   VQA acc.          CIDEr   SPICE    TR@1        IR@1
+ BLIP (Li et al., 2022)            583M         ✓                       -                   113.2      14.8       96.7       86.7
+ SimVLM (Wang et al., 2021b)       1.4B         ✗                       -                   112.2       -          -          -
+ BEIT-3 (Wang et al., 2022b)       1.9B         ✗                       -                     -         -         94.9       81.5
+ Flamingo (Alayrac et al., 2022)   10.2B        ✗                      56.3                   -         -          -          -
+ BLIP-2                            188M         ✓                      65.0                 121.6      15.8       97.6       89.7
+
+Table 1. Overview of BLIP-2 results on various zero-shot vision-language tasks. Compared with previous state-of-the-art models. BLIP-2
+achieves the highest zero-shot performance while requiring the least number of trainable parameters during vision-language pre-training.
+
+                                                       #Trainable   #Total           VQAv2          OK-VQA     GQA
+                  Models
+                                                       Params       Params     val     test-dev       test    test-dev
+                  VL-T5no-vqa                          224M         269M      13.5        -           5.8       6.3
+                  FewVLM (Jin et al., 2022)            740M         785M      47.7        -          16.5      29.3
+                  Frozen (Tsimpoukelli et al., 2021)   40M          7.1B      29.6        -           5.9        -
+                  VLKD (Dai et al., 2022)              406M         832M      42.6       44.5        13.3        -
+                  Flamingo3B (Alayrac et al., 2022)    1.4B         3.2B       -         49.2        41.2        -
+                  Flamingo9B (Alayrac et al., 2022)    1.8B         9.3B       -         51.8        44.7        -
+                  Flamingo80B (Alayrac et al., 2022)   10.2B        80B        -         56.3        50.6        -
+                  BLIP-2 ViT-L OPT2.7B                 104M         3.1B      50.1       49.7        30.2      33.9
+                  BLIP-2 ViT-g OPT2.7B                 107M         3.8B      53.5       52.3        31.7      34.6
+                  BLIP-2 ViT-g OPT6.7B                 108M         7.8B      54.3       52.6        36.4      36.4
+                  BLIP-2 ViT-L FlanT5XL                103M         3.4B      62.6       62.3        39.4      44.4
+                  BLIP-2 ViT-g FlanT5XL                107M         4.1B      63.1       63.0        40.7      44.2
+                  BLIP-2 ViT-g FlanT5XXL               108M         12.1B     65.2       65.0        45.9      44.7
+
+                      Table 2. Comparison with state-of-the-art methods on zero-shot visual question answering.
+
+4. Experiment                                                         As shown in Table 2. BLIP-2 achieves state-of-the-art result
+                                                                      on the VQAv2 (Goyal et al., 2017) and GQA (Hudson &
+Table 1 provides an overview of the performance of BLIP-2
+                                                                      Manning, 2019) datasets. It outperforms Flamingo80B by
+on various zero-shot vision-language tasks. Compared to
+                                                                      8.7% on VQAv2, despite having 54x fewer trainable parame-
+previous state-of-the-art models, BLIP-2 achieves improved
+                                                                      ters. On the OK-VQA (Marino et al., 2019) dataset, BLIP-2
+performance while requiring substantially fewer number of
+                                                                      comes secondary to Flamingo80B. We hypothesis that this is
+trainable parameters during vision-language pre-training.
+                                                                      because OK-VQA focuses more on open-world knowledge
+4.1. Instructed Zero-shot Image-to-Text Generation                    than visual understanding, and the 70B Chinchilla (Hoff-
+                                                                      mann et al., 2022) language model from Flamingo80B pos-
+BLIP-2 effectively enables a LLM to understand images                 sesses more knowledge than the 11B FlanT5XXL .
+while preserving its capability in following text prompts,
+which allows us to control image-to-text generation with              We make a promising observation from Table 2: a stronger
+instructions. We simply append the text prompt after the              image encoder or a stronger LLM both lead to better per-
+visual prompt as input to the LLM. Figure 4 shows exam-               formance. This observation is supported by several facts:
+ples to demonstrate a wide range of zero-shot image-to-text           (1) ViT-g outperforms ViT-L for both OPT and FlanT5. (2)
+capabilities including visual knowledge reasoning, visual             Within the same LLM family, larger models outperform
+commensense reasoning, visual conversation, personalized              smaller ones. (3) FlanT5, an instruction-tuned LLM, out-
+image-to-text generation, etc.                                        performs the unsupervised-trained OPT on VQA. This ob-
+                                                                      servation validates BLIP-2 as a generic vision-language
+Zero-shot VQA. We perform quantitative evaluation on the              pre-training method that can efficiently harvest the rapid
+zero-shot visual question answering task. For OPT models,             advances in vision and natural language communities.
+we use the prompt “Question: {} Answer:”. For FlanT5
+models, we use the prompt “Question: {} Short answer:”.               Effect of Vision-Language Representation Learning.
+During generation, we use beam search with a beam width               The first-stage representation learning pre-trains the Q-
+of 5. We also set the length-penalty to -1 which encourages           Former to learn visual features relevant to the text, which
+shorter answers that align better with human annotation.              reduces the burden of the LLM to learn vision-language
+                                                                      alignment. Without the representation learning stage, Q-
+                                  BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models
+
+                                                                                                                                          NoCaps Zero-shot (validation set)                    COCO Fine-tuned
+                                                                                                #Trainable
+            Models                                                                                                    in-domain             near-domain    out-domain        overall            Karpathy test
+                                                                                                Params
+                                                                                                                       C      S              C      S        C       S      C        S         B@4       C
+            OSCAR (Li et al., 2020)                                                             345M                  -            -            -      -       -       -       80.9     11.3    37.4        127.8
+            VinVL (Zhang et al., 2021)                                                          345M                103.1         14.2        96.1    13.8   88.3     12.1    95.5      13.5    38.2        129.3
+            BLIP (Li et al., 2022)                                                              446M                114.9         15.2        112.1   14.9   115.3    14.4    113.2     14.8    40.4        136.7
+            OFA (Wang et al., 2022a)                                                            930M                  -            -            -      -       -       -        -        -      43.9        145.3
+            Flamingo (Alayrac et al., 2022)                                                     10.6B                 -            -            -      -       -       -        -        -       -          138.1
+            SimVLM (Wang et al., 2021b)                                                         ∼1.4B               113.7          -          110.9    -     115.2     -      112.2      -      40.6        143.3
+            BLIP-2 ViT-g OPT2.7B                                                                1.1B                123.0         15.8        117.8   15.4   123.4    15.1    119.7     15.4    43.7        145.8
+            BLIP-2 ViT-g OPT6.7B                                                                1.1B                123.7         15.8        119.2   15.3   124.4    14.8    121.0     15.3    43.5        145.2
+            BLIP-2 ViT-g FlanT5XL                                                               1.1B                123.7         16.3        120.2   15.9   124.8    15.1    121.6     15.8    42.4        144.5
+
+Table 3. Comparison with state-of-the-art image captioning methods on NoCaps and COCO Caption. All methods optimize the cross-
+entropy loss during finetuning. C: CIDEr, S: SPICE, B@4: BLEU@4.
+
+
+                       60
+                                   BLIP2 ViT-G OPT6.7B                                         70
+                                                                                                          BLIP2 ViT-G FlanT5-XL                                                        #Trainable      VQAv2
+                                                                                                                                                  Models
+                                                                                                                                                                                       Params     test-dev test-std
+                       50                                                                      60                                                  Open-ended generation models
+zero-shot VQAv2 acc.
+
+
+
+
+                                                                        zero-shot VQAv2 acc.
+
+
+
+
+                       40                                                                                                                         ALBEF (Li et al., 2021)              314M         75.84     76.04
+                                                                                               50
+                                                                                                                                                  BLIP (Li et al., 2022)               385M         78.25     78.32
+                       30
+                                                                                                                                                  OFA (Wang et al., 2022a)             930M         82.00     82.00
+                                                                                               40
+                       20                                                                                                                         Flamingo80B (Alayrac et al., 2022)   10.6B        82.00     82.10
+                                                                                               30                                                 BLIP-2 ViT-g FlanT5XL                1.2B         81.55     81.66
+                       10           w/ representation learning                                            w/ representation learning              BLIP-2 ViT-g OPT2.7B                 1.2B         81.59     81.74
+                                    w/o representation learning                                           w/o representation learning
+                       0                                                                       20                                                 BLIP-2 ViT-g OPT6.7B                 1.2B         82.19     82.30
+                            16k      32k      48k     64k         80k                               16k    32k      48k     64k         80k
+                                           iterations                                                            iterations                        Closed-ended classification models
+                                                                                                                                                  VinVL                               345M          76.52     76.60
+Figure 5. Effect of vision-language representation learning on
+                                                                                                                                                  SimVLM (Wang et al., 2021b)         ∼1.4B         80.03     80.34
+vision-to-language generative learning. Without representation
+                                                                                                                                                  CoCa (Yu et al., 2022)              2.1B          82.30     82.30
+learning, the Q-Former fails the bridge the modality gap, leading                                                                                 BEIT-3 (Wang et al., 2022b)         1.9B          84.19     84.03
+to significantly lower performance on zero-shot VQA.
+                                                                                                                                                 Table 4. Comparison with state-of-the-art models fine-tuned for
+                                                                                                                                                 visual question answering.
+ Former relies solely on the vision-to-language generative
+ learning to bridge the modality gap, which is similar to the
+ Perceiver Resampler in Flamingo. Figure 5 shows the effect                                                                                      of-the-art performance with significant improvement on
+ of representation learning on generative learning. Without                                                                                      NoCaps over existing methods, demonstrating strong gener-
+ representation learning, both types of LLMs give substan-                                                                                       alization ability to out-domain images.
+ tially lower performance on zero-shot VQA. In particular,
+ OPT suffers from catastrophic forgetting where performance                                                                                      4.3. Visual Question Answering
+ drastically degrades as training proceeds.
+                                                                                                                                                 Given annotated VQA data, we finetune the parameters of
+                                                                                                                                                 the Q-Former and the image encoder while keeping the LLM
+ 4.2. Image Captioning
+                                                                                                                                                 frozen. We finetune with the open-ended answer generation
+We finetune BLIP-2 models for the image captioning task,                                                                                         loss, where the LLM receives Q-Former’s output and the
+which asks the model to generate a text description for the                                                                                      question as input, and is asked to generate the answer. In
+image’s visual content. We use the prompt “a photo of” as an                                                                                     order to extract image features that are more relevant to
+initial input to the LLM and trains the model to generate the                                                                                    the question, we additionally condition Q-Former on the
+caption with the language modeling loss. We keep the LLM                                                                                         question. Specifically, the question tokens are given as
+frozen during finetuning, and updates the parameters of the                                                                                      input to the Q-Former and interact with the queries via the
+Q-Former together with the image encoder. We experiment                                                                                          self-attention layers, which can guide the Q-Former’s cross-
+with ViT-g and various LLMs. Detailed hyperparameters                                                                                            attention layers to focus on more informative image regions.
+can be found in the appendix. We perform finetuning on
+                                                                                                                                                 Following BLIP, our VQA data includes the training and
+COCO, and evaluate on both COCO test set and zero-shot
+                                                                                                                                                 validation splits from VQAv2, as well as training samples
+transfer to NoCaps (Agrawal et al., 2019) validation set.
+                                                                                                                                                 from Visual Genome. Table 4 demonstrates the state-of-the-
+The results are shown in Table 3. BLIP-2 achieves state-                                                                                         art results of BLIP-2 among open-ended generation models.
+         BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models
+
+                                                   Flickr30K Zero-shot (1K test set)    COCO Fine-tuned (5K test set)
+                                #Trainable
+ Model                                           Image → Text          Text → Image  Image → Text        Text → Image
+                                Params
+                                               R@1 R@5 R@10 R@1 R@5 R@10 R@1 R@5 R@10 R@1 R@5 R@10
+  Dual-encoder models
+ CLIP (Radford et al., 2021)    428M           88.0    98.7     99.4   68.7   90.6   95.2    -      -      -      -      -      -
+ ALIGN (Jia et al., 2021)       820M           88.6    98.7     99.7   75.7   93.8   96.8   77.0   93.5   96.9   59.9   83.3   89.8
+ FILIP (Yao et al., 2022)       417M           89.8    99.2     99.8   75.0   93.4   96.3   78.9   94.4   97.4   61.2   84.3   90.6
+ Florence (Yuan et al., 2021)   893M           90.9    99.1      -     76.7   93.6    -     81.8   95.2    -     63.2   85.7    -
+ BEIT-3(Wang et al., 2022b)     1.9B           94.9    99.9    100.0   81.5   95.6   97.8   84.8   96.5   98.3   67.2   87.7   92.8
+  Fusion-encoder models
+ UNITER (Chen et al., 2020) 303M               83.6    95.7    97.7    68.7   89.2   93.9   65.7   88.6   93.8   52.9   79.9   88.0
+ OSCAR (Li et al., 2020)    345M                -       -       -       -      -      -     70.0   91.1   95.5   54.0   80.8   88.5
+ VinVL (Zhang et al., 2021) 345M                -       -       -       -      -      -     75.4   92.9   96.2   58.8   83.5   90.3
+  Dual encoder + Fusion encoder reranking
+ ALBEF (Li et al., 2021)    233M               94.1    99.5     99.7   82.8   96.3   98.1   77.6   94.3   97.2   60.7   84.3   90.5
+ BLIP (Li et al., 2022)     446M               96.7   100.0    100.0   86.7   97.3   98.7   82.4   95.4   97.9   65.1   86.3   91.8
+ BLIP-2 ViT-L               474M               96.9   100.0    100.0   88.6   97.6   98.9   83.5   96.0   98.0   66.3   86.5   91.8
+ BLIP-2 ViT-g               1.2B               97.6   100.0    100.0   89.7   98.1   98.9   85.4   97.0   98.5   68.3   87.7   92.6
+
+ Table 5. Comparison with state-of-the-art image-text retrieval methods, finetuned on COCO and zero-shot transferred to Flickr30K.
+
+
+    COCO finetuning        Image → Text       Text → Image              5. Limitation
+    objectives             R@1 R@5            R@1 R@5
+                                                                        Recent LLMs can perform in-context learning given few-
+    ITC + ITM               84.5     96.2     67.2      87.1            shot examples. However, our experiments with BLIP-2
+    ITC + ITM + ITG         85.4     97.0     68.3      87.7            do not observe an improved VQA performance when pro-
+Table 6. The image-grounded text generation (ITG) loss improves
+                                                                        viding the LLM with in-context VQA examples. We at-
+image-text retrieval performance by enforcing the queries to extract    tribute the lack of in-context learning capability to our pre-
+language-relevant visual features.                                      training dataset, which only contains a single image-text
+                                                                        pair per sample. The LLMs cannot learn from it the correla-
+                                                                        tion among multiple image-text pairs in a single sequence.
+4.4. Image-Text Retrieval                                               The same observation is also reported in the Flamingo pa-
+Since image-text retrieval does not involve language gener-             per, which uses a close-sourced interleaved image and text
+ation, we directly finetune the first-stage-pretrained model            dataset (M3W) with multiple image-text pairs per sequence.
+w/o LLM. Specifically, we finetune the image encoder to-                We aim to create a similar dataset in future work.
+gether with Q-Former on COCO using the same objectives                  BLIP-2’s image-to-text generation could have unsatisfactory
+(i.e. ITC, ITM, and ITG) as pre-training. We then evaluate              results due to various reasons including inaccurate knowl-
+the model for both image-to-text retrieval and text-to-image            edge from the LLM, activating the incorrect reasoning path,
+retrieval on COCO and Flickr30K (Plummer et al., 2015)                  or not having up-to-date information about new image con-
+datasets. During inference, we follow Li et al. (2021; 2022)            tent (see Figure 7). Furthermore, due to the use of frozen
+which first select k = 128 candidates based on the image-               models, BLIP-2 inherits the risks of LLMs, such as out-
+text feature similarity, followed by a re-ranking based on              putting offensive language, propagating social bias, or leak-
+pairwise ITM scores. We experiment with both ViT-L and                  ing private information. Remediation approaches include
+ViT-g as the image encoder. Detailed hyperparameters can                using instructions to guide model’s generation or training
+be found in the appendix.                                               on a filtered dataset with harmful content removed.
+The results are shown in Table 5. BLIP-2 achieves state-
+of-the-art performance with significant improvement over                6. Conclusion
+existing methods on zero-shot image-text retrieval.                     We propose BLIP-2, a generic and compute-efficient method
+The ITC and ITM losses are essential for image-text retrieval           for vision-language pre-training that leverages frozen pre-
+as they directly learn image-text similarity. In Table 6, we            trained image encoders and LLMs. BLIP-2 achieves state-
+show that the ITG (image-grounded text generation) loss is              of-the-art performance on various vision-language tasks
+also beneficial for image-text retrieval. This result supports          while having a small amount of trainable parameters during
+our intuition in designing the representation learning objec-           pre-training. BLIP-2 also demonstrates emerging capabil-
+tives: the ITG loss enforces the queries to extract visual              ities in zero-shot instructed image-to-text generation. We
+features most relevant to the text, thus improving vision-              consider BLIP-2 as an important step towards building a
+language alignment.                                                     multimodal conversational AI agent.
+       BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models
+
+References                                                         Webson, A., Gu, S. S., Dai, Z., Suzgun, M., Chen, X.,
+                                                                   Chowdhery, A., Narang, S., Mishra, G., Yu, A., Zhao,
+Agrawal, H., Anderson, P., Desai, K., Wang, Y., Chen, X.,
+                                                                   V. Y., Huang, Y., Dai, A. M., Yu, H., Petrov, S., Chi, E. H.,
+ Jain, R., Johnson, M., Batra, D., Parikh, D., and Lee, S.
+                                                                   Dean, J., Devlin, J., Roberts, A., Zhou, D., Le, Q. V., and
+  nocaps: novel object captioning at scale. In ICCV, pp.
+                                                                   Wei, J. Scaling instruction-finetuned language models.
+  8947–8956, 2019.
+                                                                   arXiv preprint arXiv:2210.11416, 2022.
+Alayrac, J., Donahue, J., Luc, P., Miech, A., Barr, I., Has-
+  son, Y., Lenc, K., Mensch, A., Millican, K., Reynolds,         Dai, W., Hou, L., Shang, L., Jiang, X., Liu, Q., and Fung,
+  M., Ring, R., Rutherford, E., Cabi, S., Han, T., Gong, Z.,       P. Enabling multimodal generation on CLIP via vision-
+  Samangooei, S., Monteiro, M., Menick, J., Borgeaud, S.,          language knowledge distillation. In Muresan, S., Nakov,
+  Brock, A., Nematzadeh, A., Sharifzadeh, S., Binkowski,           P., and Villavicencio, A. (eds.), ACL Findings, pp. 2383–
+  M., Barreira, R., Vinyals, O., Zisserman, A., and Si-            2395, 2022.
+  monyan, K. Flamingo: a visual language model for few-          Devlin, J., Chang, M., Lee, K., and Toutanova, K. BERT:
+  shot learning. arXiv preprint arXiv:2204.14198, 2022.            pre-training of deep bidirectional transformers for lan-
+Brown, T. B., Mann, B., Ryder, N., Subbiah, M., Kaplan,            guage understanding. In Burstein, J., Doran, C., and
+  J., Dhariwal, P., Neelakantan, A., Shyam, P., Sastry, G.,        Solorio, T. (eds.), NAACL, pp. 4171–4186, 2019.
+  Askell, A., Agarwal, S., Herbert-Voss, A., Krueger, G.,
+                                                                 Dong, L., Yang, N., Wang, W., Wei, F., Liu, X., Wang, Y.,
+  Henighan, T., Child, R., Ramesh, A., Ziegler, D. M., Wu,
+                                                                   Gao, J., Zhou, M., and Hon, H. Unified language model
+  J., Winter, C., Hesse, C., Chen, M., Sigler, E., Litwin, M.,
+                                                                   pre-training for natural language understanding and gen-
+  Gray, S., Chess, B., Clark, J., Berner, C., McCandlish,
+                                                                   eration. In Wallach, H. M., Larochelle, H., Beygelzimer,
+  S., Radford, A., Sutskever, I., and Amodei, D. Language
+                                                                  A., d’Alché-Buc, F., Fox, E. B., and Garnett, R. (eds.),
+  models are few-shot learners. In Larochelle, H., Ranzato,
+                                                                  NeurIPS, pp. 13042–13054, 2019.
+  M., Hadsell, R., Balcan, M., and Lin, H. (eds.), NeurIPS,
+  2020.                                                          Fang, Y., Wang, W., Xie, B., Sun, Q., Wu, L., Wang, X.,
+                                                                   Huang, T., Wang, X., and Cao, Y. Eva: Exploring the
+Changpinyo, S., Sharma, P., Ding, N., and Soricut, R. Con-
+                                                                   limits of masked visual representation learning at scale.
+  ceptual 12M: Pushing web-scale image-text pre-training
+                                                                   arXiv preprint arXiv:2211.07636, 2022.
+  to recognize long-tail visual concepts. In CVPR, 2021.
+
+Chen, J., Guo, H., Yi, K., Li, B., and Elhoseiny, M. Visu-       Goyal, Y., Khot, T., Summers-Stay, D., Batra, D., and
+  algpt: Data-efficient adaptation of pretrained language          Parikh, D. Making the V in VQA matter: Elevating the
+  models for image captioning. In CVPR, pp. 18009–18019,           role of image understanding in visual question answering.
+  2022a.                                                           In CVPR, pp. 6325–6334, 2017.
+
+Chen, X., Wang, X., Changpinyo, S., Piergiovanni, A. J.,         Guo, J., Li, J., Li, D., Tiong, A. M. H., Li, B., Tao, D., and
+  Padlewski, P., Salz, D., Goodman, S., Grycner, A.,               Hoi, S. C. H. From images to textual prompts: Zero-shot
+  Mustafa, B., Beyer, L., Kolesnikov, A., Puigcerver, J.,         VQA with frozen large language models. In CVPR, 2022.
+  Ding, N., Rong, K., Akbari, H., Mishra, G., Xue, L.,
+                                                                 Hoffmann, J., Borgeaud, S., Mensch, A., Buchatskaya, E.,
+  Thapliyal, A., Bradbury, J., Kuo, W., Seyedhosseini,
+                                                                   Cai, T., Rutherford, E., Casas, D. d. L., Hendricks, L. A.,
+  M., Jia, C., Ayan, B. K., Riquelme, C., Steiner, A., An-
+                                                                  Welbl, J., Clark, A., Hennigan, T., Noland, E., Millican,
+  gelova, A., Zhai, X., Houlsby, N., and Soricut, R. Pali: A
+                                                                   K., Driessche, G. v. d., Damoc, B., Guy, A., Osindero,
+  jointly-scaled multilingual language-image model. arXiv
+                                                                   S., Simonyan, K., Elsen, E., Rae, J. W., Vinyals, O.,
+  preprint arXiv:2209.06794, 2022b.
+                                                                   and Sifre, L. Training compute-optimal large language
+Chen, Y., Li, L., Yu, L., Kholy, A. E., Ahmed, F., Gan, Z.,        models. arXiv preprint arXiv:2203.15556, 2022.
+  Cheng, Y., and Liu, J. UNITER: universal image-text
+  representation learning. In ECCV, volume 12375, pp.            Hudson, D. A. and Manning, C. D. GQA: A new dataset for
+ 104–120, 2020.                                                    real-world visual reasoning and compositional question
+                                                                   answering. In CVPR, pp. 6700–6709, 2019.
+Cho, J., Lei, J., Tan, H., and Bansal, M. Unifying vision-
+  and-language tasks via text generation. arXiv preprint         Jia, C., Yang, Y., Xia, Y., Chen, Y.-T., Parekh, Z., Pham,
+  arXiv:2102.02779, 2021.                                           H., Le, Q. V., Sung, Y., Li, Z., and Duerig, T. Scaling up
+                                                                    visual and vision-language representation learning with
+Chung, H. W., Hou, L., Longpre, S., Zoph, B., Tay, Y.,              noisy text supervision. arXiv preprint arXiv:2102.05918,
+  Fedus, W., Li, E., Wang, X., Dehghani, M., Brahma, S.,            2021.
+       BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models
+
+Jin, W., Cheng, Y., Shen, Y., Chen, W., and Ren, X. A good       Radford, A., Kim, J. W., Hallacy, C., Ramesh, A., Goh, G.,
+   prompt is worth millions of parameters: Low-resource            Agarwal, S., Sastry, G., Askell, A., Mishkin, P., Clark, J.,
+   prompt-based learning for vision-language models. In            et al. Learning transferable visual models from natural
+   Muresan, S., Nakov, P., and Villavicencio, A. (eds.), ACL,      language supervision. arXiv preprint arXiv:2103.00020,
+   pp. 2763–2775, 2022.                                            2021.
+
+Krishna, R., Zhu, Y., Groth, O., Johnson, J., Hata, K.,          Schuhmann, C., Vencu, R., Beaumont, R., Kaczmarczyk,
+  Kravitz, J., Chen, S., Kalantidis, Y., Li, L., Shamma,           R., Mullis, C., Katta, A., Coombes, T., Jitsev, J., and
+  D. A., Bernstein, M. S., and Fei-Fei, L. Visual genome:          Komatsuzaki, A. Laion-400m: Open dataset of clip-
+  Connecting language and vision using crowdsourced                filtered 400 million image-text pairs. arXiv preprint
+  dense image annotations. IJCV, 123(1):32–73, 2017.               arXiv:2111.02114, 2021.
+
+Li, J., Selvaraju, R. R., Gotmare, A. D., Joty, S., Xiong,       Sharma, P., Ding, N., Goodman, S., and Soricut, R. Con-
+  C., and Hoi, S. Align before fuse: Vision and language           ceptual captions: A cleaned, hypernymed, image alt-text
+  representation learning with momentum distillation. In           dataset for automatic image captioning. In Gurevych, I.
+  NeurIPS, 2021.                                                   and Miyao, Y. (eds.), ACL, pp. 2556–2565, 2018.
+                                                                 Tan, H. and Bansal, M. LXMERT: learning cross-modality
+Li, J., Li, D., Xiong, C., and Hoi, S. C. H. BLIP: boot-           encoder representations from transformers. In Inui, K.,
+  strapping language-image pre-training for unified vision-        Jiang, J., Ng, V., and Wan, X. (eds.), EMNLP, pp. 5099–
+  language understanding and generation. In ICML, pp.              5110, 2019.
+  12888–12900, 2022.
+                                                                 Tiong, A. M. H., Li, J., Li, B., Savarese, S., and Hoi, S.
+Li, X., Yin, X., Li, C., Zhang, P., Hu, X., Zhang, L., Wang,       C. H. Plug-and-play VQA: zero-shot VQA by conjoining
+  L., Hu, H., Dong, L., Wei, F., Choi, Y., and Gao, J. Oscar:      large pretrained models with zero training. In EMNLP
+  Object-semantics aligned pre-training for vision-language        Findings, 2022.
+  tasks. In ECCV, pp. 121–137, 2020.
+                                                                 Tsimpoukelli, M., Menick, J., Cabi, S., Eslami, S. M. A.,
+Lin, T., Maire, M., Belongie, S. J., Hays, J., Perona, P.,         Vinyals, O., and Hill, F. Multimodal few-shot learning
+  Ramanan, D., Dollár, P., and Zitnick, C. L. Microsoft           with frozen language models. In Ranzato, M., Beygelz-
+  COCO: common objects in context. In Fleet, D. J., Pajdla,        imer, A., Dauphin, Y. N., Liang, P., and Vaughan, J. W.
+  T., Schiele, B., and Tuytelaars, T. (eds.), ECCV, volume         (eds.), NeurIPS, pp. 200–212, 2021.
+  8693, pp. 740–755, 2014.
+                                                                 Wang, P., Yang, A., Men, R., Lin, J., Bai, S., Li, Z., Ma, J.,
+Loshchilov, I. and Hutter, F. Decoupled weight decay regu-        Zhou, C., Zhou, J., and Yang, H. OFA: unifying architec-
+  larization. arXiv preprint arXiv:1711.05101, 2017.              tures, tasks, and modalities through a simple sequence-to-
+                                                                  sequence learning framework. In Chaudhuri, K., Jegelka,
+Mañas, O., Rodrı́guez, P., Ahmadi, S., Nematzadeh, A.,           S., Song, L., Szepesvári, C., Niu, G., and Sabato, S. (eds.),
+ Goyal, Y., and Agrawal, A. MAPL: parameter-efficient             ICML, pp. 23318–23340, 2022a.
+ adaptation of unimodal pre-trained models for vision-
+ language few-shot prompting. In EACL, 2023.                     Wang, W., Bao, H., Dong, L., and Wei, F. Vlmo: Unified
+                                                                  vision-language pre-training with mixture-of-modality-
+Marino, K., Rastegari, M., Farhadi, A., and Mottaghi, R. Ok-      experts. arXiv preprint arXiv:2111.02358, 2021a.
+ vqa: A visual question answering benchmark requiring            Wang, W., Bao, H., Dong, L., Bjorck, J., Peng, Z., Liu, Q.,
+ external knowledge. In CVPR, 2019.                               Aggarwal, K., Mohammed, O. K., Singhal, S., Som, S.,
+                                                                  and Wei, F. Image as a foreign language: Beit pretraining
+Ordonez, V., Kulkarni, G., and Berg, T. L. Im2text: Describ-
+                                                                  for all vision and vision-language tasks. arXiv preprint
+  ing images using 1 million captioned photographs. In
+                                                                  arXiv:2208.10442, 2022b.
+  Shawe-Taylor, J., Zemel, R. S., Bartlett, P. L., Pereira, F.
+  C. N., and Weinberger, K. Q. (eds.), NIPS, pp. 1143–1151,      Wang, Z., Yu, J., Yu, A. W., Dai, Z., Tsvetkov, Y., and Cao,
+  2011.                                                           Y. Simvlm: Simple visual language model pretraining
+                                                                  with weak supervision. arXiv preprint arXiv:2108.10904,
+Plummer, B. A., Wang, L., Cervantes, C. M., Caicedo, J. C.,       2021b.
+  Hockenmaier, J., and Lazebnik, S. Flickr30k entities:
+  Collecting region-to-phrase correspondences for richer         Yao, L., Huang, R., Hou, L., Lu, G., Niu, M., Xu, H., Liang,
+  image-to-sentence models. In ICCV, pp. 2641–2649,                X., Li, Z., Jiang, X., and Xu, C. FILIP: fine-grained
+  2015.                                                            interactive language-image pre-training. In ICLR, 2022.
+       BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models
+
+Yu, J., Wang, Z., Vasudevan, V., Yeung, L., Seyedhosseini,
+  M., and Wu, Y. Coca: Contrastive captioners are image-
+  text foundation models. arXiv preprint arXiv:2205.01917,
+  2022.
+Yuan, L., Chen, D., Chen, Y., Codella, N., Dai, X., Gao,
+  J., Hu, H., Huang, X., Li, B., Li, C., Liu, C., Liu, M.,
+  Liu, Z., Lu, Y., Shi, Y., Wang, L., Wang, J., Xiao, B.,
+  Xiao, Z., Yang, J., Zeng, M., Zhou, L., and Zhang, P.
+  Florence: A new foundation model for computer vision.
+  arXiv preprint arXiv:2111.11432, 2021.
+Zhai, X., Wang, X., Mustafa, B., Steiner, A., Keysers, D.,
+  Kolesnikov, A., and Beyer, L. Lit: Zero-shot transfer with
+  locked-image text tuning. In CVPR, pp. 18102–18112,
+  2022.
+Zhang, P., Li, X., Hu, X., Yang, J., Zhang, L., Wang, L.,
+  Choi, Y., and Gao, J. Vinvl: Making visual representa-
+  tions matter in vision-language models. arXiv preprint
+  arXiv:2101.00529, 2021.
+Zhang, S., Roller, S., Goyal, N., Artetxe, M., Chen, M.,
+  Chen, S., Dewan, C., Diab, M. T., Li, X., Lin, X. V.,
+  Mihaylov, T., Ott, M., Shleifer, S., Shuster, K., Simig,
+  D., Koura, P. S., Sridhar, A., Wang, T., and Zettlemoyer,
+  L. OPT: open pre-trained transformer language models.
+  arXiv preprint arXiv:2205.01068, 2022.
+       BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models
+
+
+                                    LLM                                             FlanT5XL          OPT2.7B      OPT6.7B
+                                    Fine-tuning epochs                                                    5
+                                    Warmup steps                                                        1000
+                                    Learning rate                                                       1e-5
+                                    Batch size                                                           256
+                                    AdamW β                                                          (0.9,0.999)
+                                    Weight decay                                                        0.05
+                                    Drop path                                                             0
+                                    Image resolution                                                     364
+                                    Prompt                                                          “a photo of”
+                                    Inference beam size                                                   5
+                                    Layer-wise learning rate decay for ViT                1                1        0.95
+
+                             Table 7. Hyperparameters for fine-tuning BLIP-2 with ViT-g on COCO captioning.
+
+                                    LLM                                             FlanT5XL          OPT2.7B      OPT6.7B
+                                    Fine-tuning epochs                                              5
+                                    Warmup steps                                                  1000
+                                    Learning rate                                                 1e-5
+                                    Batch size                                                     128
+                                    AdamW β                                                    (0.9,0.999)
+                                    Weight decay                                                  0.05
+                                    Drop path                                                       0
+                                    Image resolution                                               490
+                                    Prompt                                               “Question: {} Answer:”
+                                    Inference beam size                                             5
+                                    Layer-wise learning rate decay for ViT              0.95       0.95      0.9
+
+                                      Table 8. Hyperparameters for fine-tuning BLIP-2 with ViT-g on VQA.
+
+                                         Image Encoder                                    ViT-L/14          ViT-g/14
+                                         Fine-tuning epochs                                              5
+                                         Warmup steps                                                  1000
+                                         Learning rate                                        5e-6       1e-5
+                                         Batch size                                                 224
+                                         AdamW β                                          (0.9,0.98) (0.9,0.999)
+                                         Weight decay                                               0.05
+                                         Drop path                                                    0
+                                         Image resolution                                           364
+                                         Layer-wise learning rate decay for ViT                1         0.95
+
+                               Table 9. Hyperparameters for fine-tuning BLIP-2 on COCO image-text retrieval.
+
+
+
+
+                Write a famous quote said                           Can I wear this for my trip
+                by this person.                                     to Canada in December?                                 Please write the specifics of
+                                                                                                                           this product.
+       albert einstein - the world is a book,              yes, it's a nice shirt and shorts, but
+       and those who do not travel read                    it's a little too casual for a trip to                   apple iphone 11 128gb space gray
+       only one page.                                      Canada.
+
+
+           Inaccurate knowledge                                Incorrect reasoning path                                Information not up-to-date
+       (quote is from a different person)                   (should have considered weather)                                 (this is iphone 14)
+
+
+Figure 6. Incorrect output examples for instructed zero-shot image-to-text generation using a BLIP-2 model w/ ViT-g and FlanT5XXL .
+        BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models
+
+
+
+
+ Input Image                     Queries             Question
+                                    …        What is the cat wearing?
+
+                   Image
+                  Encoder                    Q-Former
+
+                                    …
+
+
+
+                                  Fully
+                                Connected
+                                                     Question
+                                    …
+                                             What is the cat wearing?
+
+                                               LLM
+
+                                           Answer    sunglasses
+
+
+Figure 7. Model architecture for VQA finetuning, where the LLM
+receives Q-Former’s output and the question as input, then predicts
+answers. We also provide the question as a condition to Q-Former,
+such that the extracted image features are more relevant to the
+question.
+

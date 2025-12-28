@@ -1,0 +1,908 @@
+                                                            Learning Iterative Reasoning through Energy Diffusion
+
+
+                                                                            Yilun Du 1 * Jiayuan Mao 1 * Joshua Tenenbaum 1
+
+
+                                                                  Abstract                                                             Diverse Training Tasks
+
+                                              We introduce iterative reasoning through en-
+                                                                                                                     ?  ⋯ 1.0
+                                              ergy diffusion (IRED), a novel framework for                          0.3 ⋯ ?
+arXiv:2406.11179v1 [cs.LG] 17 Jun 2024
+
+
+
+
+                                              learning to reason for a variety of tasks by for-                      ⋮  ⋱  ⋮
+                                                                                                                   0.82 ⋯ ?
+                                              mulating reasoning and decision-making prob-
+                                              lems with energy-based optimization. IRED
+                                                                                                                  Matrix Completion           Sudoku            Path Finding (Red-Green)
+                                              learns energy functions to represent the con-
+                                              straints between input conditions and desired
+                                              outputs. After training, IRED adapts the num-                          Learned Annealed Energy Functions 𝐸!" (𝑥, 𝑦)
+                                              ber of optimization steps during inference based
+                                              on problem difficulty, enabling it to solve prob-
+                                              lems outside its training distribution — such                        1.5 ⋯ −1.3
+                                              as more complex Sudoku puzzles, matrix com-                          3.1 ⋯  ?
+                                                                                                                    ⋮  ⋱  ⋮
+                                              pletion with large value magnitudes, and path                         ? ⋯   ?
+                                              finding in larger graphs. Key to our method’s
+                                              success is two novel techniques: learning a se-                     (Large Magnitude)    (Few Given Numbers)             (Larger Graphs)
+                                              quence of annealed energy landscapes for eas-                                       Generalization to harder instances
+                                              ier inference and a combination of score func-                   Figure 1. Reasoning as Energy Diffusion – IRED formulates rea-
+                                              tion and energy landscape supervision for faster                 soning problem with inputs x and output y, as an energy mini-
+                                              and more stable training. Our experiments                        mization problem over a learned energy function. It can be trained
+                                              show that IRED outperforms existing methods                      stably for a wide variety of reasoning tasks and achieves strong
+                                              in continuous-space reasoning, discrete-space rea-               generalization to harder problem instances, through adaptive com-
+                                              soning, and planning tasks, particularly in more                 putation in the optimization process.
+                                              challenging scenarios. Code and visualizations                   require users or experts to encode rules in domain-specific
+                                              are at https://energy-based-model.                               languages (such as axioms used in mathematical provers
+                                              github.io/ired.                                                  or domain theories in planning). Furthermore, it is usually
+                                                                                                               hard for these systems to learn from experience to improve
+                                                                                                               their performance on familiar tasks. A large body of work
+                                         1. Introduction                                                       has been trying to address these limitations by incorporating
+                                                                                                               machine learning in order to handle sensory inputs and learn
+                                         Being able to solve complex reasoning tasks such as logic in-         to formulate and solve problems. Typical ideas include uti-
+                                         ference, mathematical proofs, and decision-making is one of           lizing these domain-specific solvers as a submodule in a
+                                         the hallmarks of artificial intelligence. Researchers in vari-        deep neural network (e.g., SAT solvers; Wang et al., 2019)
+                                         ous fields have been working on domain-specific algorithms            or building structured neural networks that can realize algo-
+                                         for solving these tasks, typically utilizing various forms of         rithms (e.g., dynamic programming; Xu et al., 2019).
+                                         search or optimization in iterative manners (e.g., dynamic
+                                         programming and gradient descent). These domain-specific              Illustrated in Figure 1, we take a different approach to ad-
+                                         algorithms are usually highly efficient and effective, but they       dress the aforementioned challenges by formulating vari-
+                                         usually can not directly handle sensory data and typically            ous kinds of reasoning and decision-making problems as
+                                                                                                               an optimization problem. In particular, we consider the
+                                           *
+                                             Equal contribution 1 MIT. Correspondence to: Yilun Du             learning-to-reason problem as learning an energy function
+                                         <yilundu@mit.edu>, Jiayuan Mao <jiayuanm@mit.edu>.                    Eθ (x, y) over input conditions x and desired output y. For
+                                         Proceedings of the 41 st International Conference on Machine          example, logical deduction can be cast as finding possible
+                                         Learning, Vienna, Austria. PMLR 235, 2024. Copyright 2024 by          assignments to variables that satisfy all logical constraints;
+                                         the author(s).                                                        theorem proving can be cast as finding a sequence of valid
+
+                                                                                                           1
+                                         Iterative Reasoning through Energy Diffusion
+
+deduction steps that entails the goal; planning can be cast           version), discrete-space reasoning (e.g., Sodoku solving,
+as finding a sequence of actions that respect the transition          graph connectivity prediction), and planning (e.g., finding
+model of the environment and achieve the goal. This formu-            paths on graphs). Compared with various domain-specific
+lation directly allows us to learn the underlying constraints         and domain-independent learning-to-reason baselines, in-
+for a given task automatically from input-output data, with-          cluding recurrent adaptive computation (Palm et al., 2018),
+out additional task-specific knowledge. Therefore, we can             EBM (Du et al., 2022) and diffusion-based models (Ho
+solve a wide variety of tasks across different domains using          et al., 2020), IRED outperforms all of them, especially on
+the same underlying training and inference paradigm, by               test instances that are of higher difficulty levels, such as on
+only swapping out the neural network encoder for differ-              matrices with larger value magnitudes, sudoku of higher dif-
+ent data formats of x and y. Another important feature of             ficulty levels, and larger graphs. Ablation studies show that
+this optimization-based formulation is that during inference          the proposed optimization paradigm enables stable training
+time, we can choose to apply a different amount of computa-           and better generalization.
+tion depending on the hardness of the problem by inspecting
+the value of the function Eθ (x, y).                                  2. Related Work
+In particular, in this paper, we propose iterative reasoning
+                                                                      Learning to reason with optimization. A wide variety
+through energy diffusion (IRED), a general framework for
+                                                                      of reasoning problems can be formulated as an optimiza-
+learning to reason. IRED is trained on a dataset of paired
+                                                                      tion problem, including constraint satisfaction problems
+(x, y) data, and can recover the underlying energy function
+                                                                      (CSPs), mathematical programs, discrete-space (Kautz et al.,
+describing the objective function and constraints. During
+                                                                      2006) and continuous-space (i.e., trajectory optimization,
+inference, because we are explicitly solving an optimiza-
+                                                                      see Bryson, 2018, for a survey) optimization problems, and
+tion problem of finding the y ∗ that maximizes the energy
+                                                                      even algorithmic reasoning tasks (Brockett, 1991). The high-
+function Eθ , we can run an adaptive number of optimiza-
+                                                                      level idea is to cast these inference and decision-making
+tion steps depending on the hardness of the problem. This
+                                                                      problems as finding a set of variables that minimizes an
+enables us to solve problems that are beyond the training
+                                                                      objective function subject to constraints. Recently, there
+distribution, for example, Sudoku puzzles with a harder dif-
+                                                                      has been a growing interest in learning the objective and
+ficulty level, matrix manipulation under worse condition
+                                                                      constraint functions instead of manually specifying them,
+numbers, and sorting arrays with a larger size.
+                                                                      which would be useful for domains where people do not
+Our paper is not the first one to propose the use of energy-          have expert knowledge or simply the functions are too hard
+based models (EBMs) as a general framework for learning               to be specified (e.g., over high-dimensional sensory inputs).
+and reasoning (see, for example, Du et al., 2022). Although
+                                                                      Along this line, the first group of papers has explored us-
+being a general framework for learning and reasoning,
+                                                                      ing domain-specific optimization solvers as a computation
+existing work falls short in its training speed, stability, and
+                                                                      block in neural networks. For example, Amos & Kolter
+inference-time optimization hardness. These issues are crit-
+                                                                      (2017); Donti et al. (2017) integrates quadratic program
+ical and fundamentally hard because the learning of EBMs
+                                                                      solvers, Djolonga & Krause (2017); Wilder et al. (2019)
+typically involves back-propagation through the entire
+                                                                      studies submodular programs solvers, Wang et al. (2019)
+iterative optimization process, and in general, the function
+                                                                      uses differentiable Max-SAT solvers, Yang et al. (2020)
+landscape of Eθ can be complex with a large number of
+                                                                      considers answer-set programming (ASP) solvers, Man-
+local optima. In this paper, we propose two important tech-
+                                                                      haeve et al. (2018) considers probabilistic logic program-
+niques to address these two challenges. Drawing inspiration
+                                                                      ming solvers, and Rocktäschel & Riedel (2017) integrates
+from diffusion models and their relations to energy-based
+                                                                      symbolic theorem-proving solvers. However, due to the
+models (Ho et al., 2020; Du et al., 2023), instead of learning
+                                                                      dependence on a particular problem formulation language,
+a single energy landscape, we instead learn a sequence of
+                                                                      these frameworks are usually limited to solving problems
+annealed energy landscapes, where smoother landscapes
+                                                                      of a particular kind.
+are being first optimized before optimizing for sharper
+ones afterward. Furthermore, in contrast to earlier work              The second group of papers has explored using a generic
+on EBM learning, IRED uses a combination of denoising                 optimization framework as the underlying formulation. For
+supervision and direct supervision through negative sample            example, Bai et al. (2019); Anil et al. (2022) utilizes equilib-
+mining. Both techniques can be implemented without the                rium energy minimization inside a neural network to save
+need to backpropagate through the optimization process,               memory, Rubanova et al. (2022); Comas et al. (2023) uti-
+thereby making our learning algorithm both stable and fast.           lizes energy minimization to simulate physical dynamics
+                                                                      by using neural networks to parameterize an energy func-
+We show the effectiveness of IRED on three groups of tasks:
+                                                                      tion. Our paper falls into this group as well. Similar to our
+continuous-space reasoning (e.g., matrix completion, in-
+                                                                      work, Du et al. (2022) uses energy-based models for learn-
+
+                                                                  2
+                                         Iterative Reasoning through Energy Diffusion
+
+ (a) Learned Energy Landscapes                                                              (b) Score Function Supervision
+
+                                                                                                           ℒ = ∇& 𝐸!$ 𝒙, 𝒚 + 𝝐 − 𝝐
+
+                                         ......                                             (c) Energy Landscape Supervision
+                                                                                                                               !
+                                                                                                                          𝑒 %'
+   𝐸!" (𝒙, 𝒚)          𝐸!# (𝒙, 𝒚)                        𝐸!$%" (𝒙, 𝒚)          𝐸!$ (𝒙, 𝒚)                   ℒ = − log( %' !        ")
+                                                                                                                      𝑒     + 𝑒 %'
+
+Figure 2. IRED Learns a Sequence of Energy Landscapes. During inference time, we optimize for y ∗ that minimizes the energy
+function, and we gradually increase the complexity of the energy optimization problem. The energy functions are trained with a
+combination of score function supervision and energy landscape supervision.
+ing to reason. In contrast to it, this paper proposes to use a        EBMs have focused on learning probabilistic models over
+combination of denoising diffusion and supervised energy              data (Xie et al., 2016; 2018; Du & Mordatch, 2019; Grath-
+landscape training. This gives us stable training and strong          wohl et al., 2020; Du et al., 2021; Arbel et al., 2021; Xiao
+performance. A concurrent work from Sun & Yang (2023)                 et al., 2020) but most similar to our work (Du et al., 2022)
+also considers using diffusion models for solving combina-            focuses on using energy minimization to solve reasoning
+torial optimization problems. However, their formulation is           tasks. Our work leverages the connection of energy based
+developed specifically for combinatorial optimization prob-           models and diffusion models (Du et al., 2023) to more
+lems on graphs, but our diffusion formulation with energy             effectively learn energy landscapes for solving reasoning
+parameterizations, landscape supervision, and substep op-             problems.
+timizations can be generally applied to many optimization
+                                                                      An important difference between our proposed approach and
+and decision-making domains.
+                                                                      standard diffusion models is that diffusion models usually
+Learning to reason with iterative neural computation.                 focus on learning a particular sampling path transitioning
+Another popular line of research studies using neural net-            from Gaussian noise to a target solution, where individual
+works with iterative computation for reasoning. They draw             transition kernels across timesteps are learned. However,
+motivation from the fact that many domain-specific con-               when obtaining a solution using these transition kernels,
+straint solvers are indeed iterative optimization algorithms          errors often accumulate across sampling timesteps, prevent-
+(e.g., gradient descent). At a high level, there are two              ing a diffusion model from obtaining a precise answer to
+groups of work: leveraging explicit program representa-               a reasoning problem. By contrast, we formulate predict-
+tions (Graves et al., 2014; Neelakantan et al., 2015; Reed            ing solutions as optimizing an annealed sequence of energy
+& De Freitas, 2016; Cai et al., 2017; Chen et al., 2020b;             landscapes. In this setting, multiple steps of optimization
+Banino et al., 2021, ; typically with external memories) and          are run at each energy landscape to ensure that we are at an
+using recurrent neural networks (Graves, 2016; Kaiser &               energy minima at every landscape. These multiple steps of
+Sutskever, 2016; Chung et al., 2017; Bolukbasi et al., 2017;          optimization prevent the accumulation of errors from using
+Yang et al., 2017; Dong et al., 2019; Dehghani et al., 2019;          transition kernels in diffusion models, as they project the
+Schwarzschild et al., 2021; Yang et al., 2023a). One of the           sample to an energy minima, which is likely “in distribution”
+key challenges in both types of approaches is when to halt            to what has been seen during training.
+the computation. Researchers have been tackling this prob-
+lem through reinforcement learning (Chen et al., 2020a;               3. Learning Iterative Reasoning through
+Chung et al., 2017), leveraging hierarchical decomposition
+of programs (Cai et al., 2017), heuristic policies (Bolukbasi
+                                                                         Energy Optimization
+et al., 2017), and variational inference (Banino et al., 2021).       Let D = {X, Y } be a dataset for a reasoning task consisting
+However, these approaches are usually unstable, and many              of inputs x ∈ RO and corresponding solutions y ∈ RM .
+of them require manual hyper-parameter tuning (Banino                 We aim to learn a neural network-based prediction model
+et al., 2021) or additional human annotations (Cai et al.,            NNθ (·) which can generalize execution NNθ (x′ ) to a test
+                                                                                           ′
+2017). In this paper, we focus on an orthogonal approach by           distribution x′ ∈ RO , where x′ can be significantly larger
+solving a broad set of reasoning problems by casting them             and more challenging than the training data x ∈ X (e.g., of
+as an optimization on learned energy landscapes. During               higher dimensions, or with larger number magnitudes), by
+optimization, the energy function of the landscapes naturally         leveraging a possibly increased computational budget.
+acts as a termination criterion.
+                                                                      We formulate this adaptive model as an iterative energy opti-
+Energy-based models and diffusion models. Our work                    mization in Section 3.1. Our overall framework is illustrated
+is related to past work formulating prediction using Energy-          in Figure 2. In particular, we construct an annealed sequence
+Based Models (EBMs) (LeCun et al., 2006). Most recent                 of energy functions to improve optimization. To involve
+
+
+                                                                  3
+                                           Iterative Reasoning through Energy Diffusion
+
+training stability, speed, and performance, we propose to               3.2. Learning Sequence of Annealed Energy Landscapes
+shape the energy landscape to correctly assign minimal en-
+                                                                        Our key idea to mitigate the hard optimization problem of
+ergy to ground truth solutions. We provide full pseudocode
+                                                                        Equation 2 is to use simulated annealing — where smoother
+for training our approach in Section 3.4 with training fol-
+                                                                        energy landscapes are first optimized before optimizing
+lowing Algorithm 1 and inference following Algorithm 2.
+                                                                        sharper ones afterward, as illustrated in Figure 2.
+3.1. Reasoning as Annealed Energy Minimization                          Similar to diffusion models (Sohl-Dickstein et al., 2015;
+                                                                        Ho et al., 2020), we propose to optimize and learn an an-
+A wide variety of reasoning and decision making problems                nealed sequence of energy landscapes, with earlier energy
+can be formulated as an optimization problem. Traditionally,            landscapes being smoother to optimize and the latter ones
+researchers have been focused on designing various domain-              more difficult. Given a ground truth label y, we learn a
+specific algorithms for solving different problems, typically           sequence of K energy functions2 Eθk (x, y) over the ground
+with search, gradient-based optimization, or other forms of             truth label distribution p(y ∗ |x), where each energy function
+iterative computation, and also integrating machine learning            is learned to represent an EBM distribution
+to help. In this work, we take a different approach of for-                               Z                    q
+mulating various kinds of reasoning and decision-making                    e −Eθk (x,y)
+                                                                                        ∝     p(y ∗ |x) · N (y; 1 − σk2 y ∗ , σk2 I) (4)
+problems as an optimization process over a learned energy-                                 y∗
+based model (EBM): Eθ (x, y) : RO × RM → R. Under
+                                                                        over a sequence of noise scales σk . Here, N (·|µ, σ) is the
+this formulation, the final prediction problem can be cast as
+                                                                        Gaussian density function. Larger values of σk correspond
+finding the solution y according to:
+                                                                        to smoother energy landscapes while smaller values lead to
+                   y = arg min Eθ (x, y).                    (1)        sharper landscapes, p
+                                                                                            with the energy minima of landscape
+                            y
+                                                                        k corresponding to 1 − σk2 y ∗ (which can be scaled by
+One can use gradient descent to find such solutions:                    √ 1 2 to obtain the ground truth prediction y ∗ ).
+                                                                          1−σk
+              y t = y t−1 − λ∇y Eθ (x, y t−1 ),              (2)
+                                                                        We can directly learn each energy landscape by supervising
+where λ is the step size for optimization and the initial               the gradient of energy function to denoise the corrupted
+prediction y 0 is initialized from a fixed noise distribution           ground truth label y ∗ from the dataset
+(i.e., Gaussian throughout the paper). The final output of                                        q
+y T is obtained after T steps of optimization.                            LMSE (θ) = ∥∇y Eθ (x, 1 − σk2 y ∗ + σk ϵ; k) − ϵ∥2 , (5)
+In earlier work using a similar formulation Du et al. (2022),           where ϵ ∼ N (0, 1). Given a set of K different learned
+such EBM Eθ (x, y) is trained by differentiating through                energy landscapes, we can initialize a data sample from
+the T steps of optimization and minimizing the MSE with                 Gaussian noise and sequentially run T steps of optimization
+the ground truth label y LOpt (θ) = ∥yiT − yi ∥2 . This ap-             following Equation 2 over each energy landscape k (starting
+proach requires the forward and backward computation of                 with high noise levels and progressing to lower noise levels).
+K steps of optimization at training, which makes it slow and            The optimization result in the previous energy landscape is
+unstable. Furthermore, because the EBM Eθ may have a                    used to initialize optimization in the next√landscape, after
+complex optimization landscape1 , robustly finding solutions                                                               2
+                                                                                                                        1−σk
+to Equation 2 is fundamentally hard.                                    scaled by the appropriate scaling factor √        2
+                                                                                                                                .
+                                                                                                                       1−σk−1
+
+As a general solution to stable training and better test-time
+optimization, instead of directly learning Eθ (x, y), at a              3.3. Shaping the Energy Landscape
+high-level, we propose to learn a sequence of annealed                  In the denoising training objective Equation 5, while the
+energy functions Eθk (k = 0, 1, · · · , K), and supervise the           gradient of the energy landscape is locally trained to re-
+EBM learning with the gradient of the energy function:                  store the ground truth label y, it is not necessarily the case
+                                                                        that the overall global energy minima arg miny Eθ (x, y, k)
+ LMSE (θ) = ∥∇y Eθ (x, y + ϵ) − ϵ∥2 ,        ϵ ∼ N (0, 1). (3)                                                  p
+                                                                        corresponds to the ground truth label 1 − σk2 y ∗ .
+During training time, we obtain the ground truth for y by
+                                                                        To enforce that the global energy minima of each of the
+generating a noise-corrupted label y + ϵ, following a sched-
+                                                                        k energy landscapes corresponds to the ground truth en-
+ule of noise corruptions. By supervising on the gradient,
+                                                                        ergy minima, we further propose a contrastive loss, where
+our approach is substantially faster and more stable than
+earlier works using plain EBMs (Du et al., 2022) as it only                2
+                                                                             Empirically, in our experiments, we found that setting K = 10
+supervises training of a single step of the optimization.               was sufficient across all the domains we considered. With a to-
+                                                                        tal of 10 energy landscapes, we can smoothly transition from a
+    1
+      For example, the 3-SAT problem exhibits steep energy minima       Gaussian-like landscape (with K = 10) to a sharp and discontinu-
+surrounded by flat energy landscapes.                                   ous landscape (with K = 1).
+
+                                                                    4
+                                         Iterative Reasoning through Energy Diffusion
+
+
+Algorithm 1 IRED Training                                Algorithm 2 IRED prediction algorithm
+  Input: Problem Dist pD (x, y), EBM Eθ (·), Noise Sched- Input: Input task xi , Step Sizes λk , Number of Land-
+  ules {σk }, Corruption Function c(·), Landscapes k.      scapes K, EBM Eθ (·), Optimization Steps T .
+  while not converged do                                   ỹi ∼ N (0, 1)
+     ▷ Supervise the Energy Landscape through Denoising: for each landscape k = 1 to K do
+             ∼ pD , ϵ ∼ N (0, 1), k ∼ {1, . . . , K}
+     xi , yi p                                                for run T steps of optimization t = 1 to T do
+                     2
+     ỹi ← 1 − σk yi + σk ϵ                                     ▷ Optimize candidate solution ỹi with gradient:
+     LMSE ← ∥∇y Eθ (xi , ỹi , k) − ϵ∥ 2                        ỹi′ ← ỹi − λk ∇y Eθ (xi , ỹi , k)
+     ▷ Shape the Energy Landscape Contrastively:                           ▷ Check if the gradient descent step decreases energy:
+     yi− ← c(y
+            p i)
+                                                                           if Eθ (xi , ỹi , k) > Eθ (xi , ỹi′ , k) then
+     ỹi − ← 1 − σk2 yi− + σk ϵ                                               yi ← yi′
+     Ei+ ← Eθ (xi , ỹi ,k); Ei− ← Eθ(xi , ỹi− , k)                    end if
+                                 +
+                              e−Ei
+                                                                        end for
+     LContrast ← − log       +     −
+                          e−Ei +e−Ei                                    ▷ Scale √optimized candidate solution:
+                                                                                     2
+                                                                                  1−σk
+    ▷ Optimize objective LMSE + LContrast wrt θ:                        ỹi ← √      2
+                                                                                           ỹi
+                                                                                  1−σk−1
+    ∆θ ← ∇θ (LMSE + LContrast )                                       end for
+    Update θ based on ∆θ using Adam optimizer
+  end while                                                           return y = ỹi
+
+we construct a set of negative label y − (formed by noise             rithmic reasoning, discrete-space reasoning, and planning.
+corrupting thepground truth label y ∗ ). Given an energy              As we will break down in the following sections, the main
+E + = Eθ (x, 1 − σk2 y ∗ + σk ϵ; k)    pof the ground truth la-       advantages of IRED are twofold. First, compared with
+bel y ∗ and an energy E− = Eθ (x, 1 − σk2 y − +σk ϵ; k) of            energy-based models (IREM), it is faster to train since it
+                                                    −E +              does not require backpropagation through the optimization
+                                                            
+the negative label y − , LContrast (θ) = − log e−Ee+ +e−E− .
+                                                                      process. Second, in terms of task performance, our focus is
+To reduce the variance of the contrastive loss, we use the            on generalization to “harder” problems, particularly leverag-
+same sampled noise value ϵ for both y and y − .                       ing the contrastive energy supervision and runtime iterative
+                                                                      refinements. The idea is that after learning a correct energy
+3.4. Combined Training and Inference Paradigms                        landscape, the model can adaptively use more computa-
+We provide the overall pseudocode for training IRED in                tion at test time to directly generalize to harder problems:
+Algorithm 1 and executing algorithmic reasoning with IRED             we will focus on evaluating this generalization across all
+in Algorithm 2. We use a cosine beta schedule to train                domains.
+annealed energy landscapes and use a total of 10 energy
+landscapes (we empirically found that more landscapes did             4.1. Continuous Algorithmic Reasoning
+not lead to improved performance). At inference time, we
+can vary the number of optimization steps T for each energy           Setup.     We first evaluate IRED on a set of continuous
+landscape to make trade-offs between performances and                 algorithmic reasoning tasks from Du et al. (2022). We
+inference speed.                                                      consider three matrix operations on 20 × 20 matrices, which
+                                                                      are encoded 400-dimensional vectors:
+In principle, when the solution is not well-defined, it is
+possible to use IRED to model multi-modal distributions,                1. Addition: We first evaluate neural networks in their
+similar to how diffusion models have been proven effective                 ability to add matrices together (element-wise). We
+in modeling multi-modal image distributions. Depending                     also evaluate neural network on harder variants of the
+on the particular use case, one may also add additional                    addition problems at test time by feeding input vectors
+inference-time constraints (e.g., by composing the learned                 with larger magnitudes.
+IRED energy function with other energy functions) to select             2. Matrix Completion: Next, we evaluate neural networks
+favorable solutions.                                                       on their ability to do low-rank matrix completion. We
+                                                                           mask out 50% of the entries of a low-rank input ma-
+4. Experiments                                                             trix constructed two separate rank 10 matrices U and
+                                                                           V , and train networks to reconstruct the original in-
+We compare IRED with both domain-specific and domain-                      put matrix. We construct harder variants of the matrix
+independent baselines on three domains: continuous algo-                   completion problem at test time by increasing the mag-
+                                                                           nitude of values in U and V .
+
+                                                                  5
+                                              Iterative Reasoning through Energy Diffusion
+
+                                         Same          Harder
+    Task              Method            Difficulty    Difficulty
+                      Feedforward         0.0448        0.7029
+                      Recurrent           0.3610        2.6133
+    Addition          Programmatic        0.0111        0.3446                   Error Map              Error Map           Error Map           Error Map
+                      Diffusion           0.0071        0.5931                 (Landscape 2)          (Landscape 3)       (Landscape 5)       (Landscape 10)
+                      IREM                0.0003        0.0021               Figure 3. Optimized Solutions Across Landscapes – Error maps
+                      IRED (ours)         0.0002        0.0020
+                                                                             of intermediate optimized solutions. Optimized solutions at earlier
+                      Feedforward         0.0203        0.2720               landscapes are less accurate than later ones.
+                      Recurrent           0.0266        0.3285
+     Matrix
+                      Programmatic        0.0203        0.2637
+     Completion
+                      Diffusion           0.0219        0.2142
+                      IREM                0.0183        0.2074
+                      IRED (Ours)         0.0174        0.2054
+                      Feedforward         0.0112        0.2150                   Energy Landscape 1             Energy Landscape 5        Energy Landscape 10
+                      Recurrent           0.0109        0.2123
+     Matrix
+                      Programmatic        0.0124        0.2209               Figure 4. Energy Landscape – Predicted energy values for y and
+     Inverse
+                      Diffusion           0.0115        0.2132               the corresponding MSE distance of y from the problem solution
+                      IREM                0.0108        0.2083               across different landscapes on the matrix inverse task. The earlier
+                      IRED (Ours)         0.0095        0.2063
+                                                                             energy landscapes are smoother than the later ones.
+Table 1. Continuous Algorithmic Reasoning. Test evaluation
+                                                                             IRED outperforms IREM and also generalizes better to
+performance on continuous algorithmic tasks. Inputs and outputs
+                                                                             harder problems. Furthermore, our approach substantially
+are 20 by 20 matrices. Error is reported using elementwise mean
+square error. Models are evaluated on test problems drawn from the           outperforms directly using a diffusion process to predict
+training distribution (same difficulty) and a harder test distribution       solutions, which lacks the iterative energy minimization
+(harder difficulty). IRED outperforms comparisons.                           procedure that explicitly learns the task constraints.
+                                                                             Qualitative Visualization. We provide a qualitative vi-
+  3. Matrix Inverse: Finally, we evaluate neural networks                    sualization of the error map of the optimized solution on
+     on their ability to compute matrix inverses. We con-                    the matrix inverse task at each different learned energy land-
+     struct harder matrix inverse problems by considering                    scape in Figure 3. The error of optimized solutions at differ-
+     less well-conditioned input matrices.                                   ent energy landscapes decreases over time.
+We report the underlying mean-squared error (MSE) be-                        Energy Landscape.          We visualize the learned energy
+tween the predictions and the associated ground truth out-                   landscape in Figure 4 as a function of the distance of an input
+puts on test problem instances. To more effectively gen-                     label from the ground truth label. In early energy landscapes,
+erate negative samples for IRED in this domain, we first                     the difference between energy values of solutions close and
+noise-corrupt ground truth labels and then run two steps                     far from the ground truth solution is low, and therefore the
+of gradient optimization on the energy landscape to form                     energy landscape is relatively flat. At later landscapes, the
+negative samples. Details can be found in Appendix A.                        energy value increases substantially as the input solution
+                                                                             deviates from the ground truth solution.
+Baselines. We compare our approach to a set of iterative
+reasoning baselines found in (Du et al., 2022): (Feedfor-                    Performance with Increased Computation. We analyze
+ward): an iterative reasoning approach where the same MLP                    the performance on the matrix inverse task as a factor of an
+is repeatedly applied, (Recurrent): an iterative reasoning                   increased number of computational steps in Table 2. We
+approach where the recurrent network is repeatedly applied,                  find that running additional steps of optimization slightly
+and (Programmatic): an iterative reasoning approach which                    improves performance on in-distribution tasks and substan-
+repeatedly applies a learned programmatic module (Banino                     tially improves performance on harder problems.
+et al., 2021). We further compare with the IREM method
+                                                                             Ablation. We ablate each component of IRED in Table 3.
+(Du et al., 2022), as well as using a denoising diffusion
+                                                                             In the first two rows of Table 3, we compare our gradient-
+model directly to solve continuous tasks. All methods use
+                                                                             descent-based optimization with a noisy optimization pro-
+identical architectures (with small differences due to recur-
+                                                                             cedure corresponding to the diffusion reverse process for
+rent layers or timestep conditioning).
+                                                                             each energy landscape. In the third row, we compare the
+Quantitative Results. We compare IRED with baselines                         difference between running multiple steps of optimization
+across settings in Table 1. Similar to IREM, IRED is able                    as opposed to a single energy optimization step. Finally, We
+to nearly perfectly solve the task of the addition, as well                  then consider the effect of contrastively shaping the energy
+as generalize to larger addition matrices. On other tasks,                   landscape. All components lead to improved performance.
+
+                                                                         6
+                                            Iterative Reasoning through Energy Diffusion
+
+      Opt. Steps    Same Difficulty     Harder Difficulty                       Task               Method              Test       Harder
+                                                                                                                      Dataset     Dataset
+      10                 0.0096               0.2110
+      20                 0.0096               0.2100                                               IREM               93.5%        24.6%
+      30                 0.0096               0.2090                                               Diffusion          66.1%        10.3%
+                                                                                Sudoku
+      40                 0.0095               0.2063                                               SAT-Net            98.3%         3.2%
+                                                                                                   RRN                99.8%        28.6%
+Table 2. Continuous-Space Reasoning Performance vs Reason-                                         IRED (ours)        99.4%        62.1%
+ing Steps. More reasoning steps in IRED at inference time sub-
+                                                                                                   SAT-Net            63.2%         0.0%
+stantially improve generalization to harder difficulty tasks on the             Visual Sudoku
+                                                                                                   RRN                99.8%        28.6%
+matrix inverse task. IRED is trained with 10 energy landscapes.                                    IRED (ours)        98.3%        46.6%
+   Gradient Optimization Contrastive Same     Harder                                               IREM               94.3%        89.8%
+   Descent Refinement     Shaping Difficulty Difficulty                         Connectivity       Diffusion          61.6%        61.3%
+     No            No             No       0.0158      0.2223                                      IRED (ours)        99.1%        93.8%
+     Yes           No             No       0.0097      0.2135
+     Yes           Yes            No       0.0097      0.2113             Table 4. Discrete Reasoning Performance. We evaluate models
+     Yes           Yes            Yes      0.0095      0.2063             on the Sudoku task and the connectivity task. Sudoku:” the harder
+                                                                          dataset has between 17 to 34 entries given, while models are trained
+Table 3. Continuous Ablations – Ablations of proposed compo-              with 31 to 42 entries given. Connectivity: the harder graphs have
+nents of IRED on performance on the matrix inverse task. Leverag-         at most 18 nodes while the training graphs have only 12.
+ing gradient descent to optimize energy functions, using multiple
+steps of optimization at each energy landscape and contrastively
+shaping the energy landscape with ground truth labels all improve
+the performance on the Inverse task.
+
+4.2. Discrete-Space Reasoning
+Setup.     The second group of tasks evaluates IRED on
+                                                                              Energy Minima           Energy Minima             Energy Minima
+its reasoning in discrete spaces (i.e., values are all binary                 (Landscape 1)           (Landscape 3)             (Landscape 10)
+or one-hot categorical). We run evaluations on two tasks:                 Figure 5. Optimized Boards Across Landscapes – Plot of the
+Sudoku solving and graph connectivity reasoning.                          minimal energy board across energy landscapes, given the same
+  1. Sudoku: In the Sudoku game, the model is given a                     initial board. Later energy landscapes lead to more accurate boards.
+     partially filled Sudoku board, with 0’s filled-in entries            We highlight inconsistent entries in red.
+     that are currently unknown. The task is to predict a                      we do not limit the path lengths between nodes (in
+     valid solution that jointly satisfies the Sodoku rules                    contrast to Dong et al. (2019)), on the training set, the
+     and that is consistent with the given numbers. We                         maximum distance between two connected nodes is 9,
+     use the dataset from SAT-Net (Wang et al., 2019) as                       and in the harder test set, the maximum distance is 16.
+     the training and standard test dataset. In SAT-Net,
+     the number of given numbers is within the range of                   Quantitative Results.        We compare IRED with both
+     [31, 42]. Our harder dataset is from RRN (Palm et al.,               IREM and diffusion baselines. On the Sudoku task, we fur-
+     2018), which is a different Sudoku dataset where the                 ther compare with the domain-specific SAT-Net method. In
+     number of given numbers is within [17, 34]. We will                  Table 4, we find that our approach substantially outperforms
+     show that our system, being trained on simpler Sudoku                all baselines across both evaluated discrete-space reasoning
+     games with fewer blank entries, generalizes to harder                settings. In Sudoku, our approach generalizes substantially
+     instances.                                                           better than the SAT-Net model and the RRN model to the
+                                                                          harder dataset consisting of fewer given Sudoku elements
+  2. Connectivity: In the graph connectivity task, the model
+                                                                          and is capable of obtaining an accuracy of roughly 62.1%
+     is given the adjacency matrix of a graph (1 if there is
+                                                                          compared to an accuracy of 3.2% obtained by SAT-Net and
+     an edge directly connecting two nodes). The task is to
+                                                                          28.6% by RRN. For cases in which our approach fails, we
+     predict the connectivity matrix of the graph (1 if there
+                                                                          found that our approach sometimes erroneously assigns low
+     is a path connecting two nodes). In literature (Dong
+                                                                          energy to partially accurate answers. For example, there
+     et al., 2019), this task is an example that requires a
+                                                                          can be a Sudoku board that is not fully valid, but the model
+     dynamic number of reasoning “steps” (depending on
+                                                                          assigns lower energy to it than to the ground truth board.
+     the treewidth of the graph). Therefore, prior papers
+     primarily focus on computing connectivity between                    Qualitative Results.      We qualitatively visualize inter-
+     nodes within k-steps away. Our training and standard                 mediate optimized samples across energy landscapes on
+     test sets contain graphs with at most 12 nodes and our               Sudoku in Figure 6. Optimized boards are increasingly
+     harder dataset contains graphs with 18 nodes. Since                  accurate in later landscapes.
+
+                                                                      7
+                                                                   Iterative Reasoning through Energy Diffusion
+
+                                Sudoku Performance vs Optimization Steps                           Task               Method          Test       Harder
+                          100
+                                                                                                                                     Dataset     Dataset
+                          90
+     Sudoku Performance
+                                                                                                                      IREM           90.4%       88.4%
+                          80                                                                       Shortest Path      Diffusion      45.2%       46.9%
+                                                                                                                      IRED (ours)    92.6%       91.9%
+                          70
+                          60                                                                 Table 6. Planning Performance. Test evaluation performance on
+                                                                                             the shortest path task. The harder tasks consists of graphs of size
+                          50                                   Test Dataset
+                                                               Harder Dataset                25 while models are trained on graphs of size 15.
+                          40
+                                        5           10          15          20
+                                      Optimization Steps Per Landscape                          Gradient Optimization Contrastive Same     Harder
+                                                                                                Descent Refinement     Shaping Difficulty Difficulty
+Figure 6. Sudoku Performance with Optimization Steps – Gen-
+eralization to harder Sudoku problems significantly improves with                                  No           No             No        80.8%      80.4%
+a larger number of optimization steps in Sudoku.                                                   Yes          No             No        80.7%      79.1%
+                                                                                                   Yes          Yes            No        88.6%      87.9%
+                                                                                                   Yes          Yes            Yes       92.6%      91.9%
+   Gradient Optimization Contrastive Same     Harder
+   Descent Refinement     Shaping Difficulty Difficulty                                      Table 7. Path Planning Ablations – Ablations of proposed com-
+       No                             No              No           97.0%         35.0%       ponents of IRED on performance on the path planning task. Using
+       Yes                            No              No           98.8%         45.1%       multiple steps of optimization at each energy landscape and con-
+       Yes                            Yes             No           99.3%         59.7%       trastively shaping the energy landscape with ground truth labels
+       Yes                            Yes             Yes          99.4%         62.1%       both improve path planning performance.
+
+Table 5. Discrete Reasoning Ablations – Ablations of proposed                                substantially improved on the harder generalization dataset
+components of IRED on performance on the Sudoku task. Leverag-
+                                                                                             with each added component.
+ing gradient descent to optimize energy functions, using multiple
+steps of optimization at each energy landscape and contrastively
+shaping the energy landscape with ground truth labels all improve                            4.3. Planning
+the performance.
+                                                                                             Setup.       In this section, we evaluate IRED on a basic
+                                                                                             decision-making problem of finding the shortest path in a
+Performance with Computation. In Figure 6, we assess
+                                                                                             graph. In this task, the input to the model is the adjacency
+the impact of the number of optimization steps at each en-
+                                                                                             matrix of a directed graph, together with two additional
+ergy landscape on the performance in Sudoku on both the
+                                                                                             node embeddings indicating the start and the goal node of
+test and harder datasets. We find that performance substan-
+                                                                                             the path-finding problem. The task is to predict a sequence
+tially improves on the harder dataset with an increased num-
+                                                                                             of actions corresponding to the plan. Concretely, the output
+ber of optimization steps with more modest improvement
+                                                                                             is a matrix of size [T, N ], where T is the number of planning
+on the test datasets. By formulating reasoning as energy
+                                                                                             steps and N is the number of nodes in the graph. Each entry
+optimization, we can adaptively change the number of opti-
+                                                                                             (t, i) has a value of 1 if the t-th step of the shortest path is
+mization steps dependent on difficulty of task, enabling us
+                                                                                             at node i and has a value of 0 otherwise. For all models,
+to generalize substantially better on harder tasks.
+                                                                                             including ours, we use a spatial-temporal graph convolution
+Extension to Visual Sudoku. IRED can also be extended                                        network (STGCN; Yan et al., 2018) to encode the adjacency
+to deal with other input formats, such as images. To illus-                                  matrix and the prediction and predict energy function values
+trate this, we conducte a new experiment on the Visual                                       or score functions. In short, the STGCN has multiple layers.
+Sudoku dataset (Wang et al., 2019), where the board is not                                   At each layer, for each node, it fuses all features of nodes
+represented by one-hot vectors but now consists of MNIST                                     that are connected to it in the graph and from the current
+digits written on a grid. We use a CNN to encode the image                                   timestep or adjacent timesteps. Just like standard graph
+and fuse the image embeddings with the noisy answer to                                       convolutional networks, it uses a sum-pooling mechanism
+predict energy values. Shown in Table 4, we observed a                                       to aggregate all embeddings from adjacent nodes. Since, in
+similar performance advantage of our model compared to                                       practice, such planning models are generally evaluated with
+the baseline.                                                                                closed-loop execution, here we only evaluate the success
+                                                                                             rate that the first action produced by the model shortens the
+Ablation. In Table 5, we ablate each component of IRED
+                                                                                             distance between the current node and the goal node. This
+on the Sudoku task. Similar to the continuous setting, we
+                                                                                             is the same planning and execution strategy as DiffusionPol-
+find that each component of IRED, gradient based opti-
+                                                                                             icy (Chi et al., 2023).
+mization, multiple steps of optimization, and contrastive
+energy shaping all lead to improved performance. While                                       Quantitative Results. We compare IRED with all base-
+performance is modestly improved on the test dataset, it is                                  lines across settings in Table 6. IRED outperforms both
+
+                                                                                         8
+                                           Iterative Reasoning through Energy Diffusion
+
+                                                                         IRED can still be improved because currently, it requires
+                                                                         many steps of gradient descent to find an energy minima.
+                                                                         For tasks with known specifications (e.g., shortest path),
+                                                                         IRED will conceivably run slower than the algorithms de-
+                                                                         signed specifically for them (e.g., polynomial algorithms
+                                                                         for pathfinding), although it is worth noting that IRED is a
+    Energy Minima          Energy Minima          Energy Minima
+    (Landscape 1)          (Landscape 3)          (Landscape 10)         general machine learning algorithm that does not assume
+                                                                         a given task specification and can automatically learn the
+Figure 7. Optimized Plans Across Landscapes – Plot of next               underlying task constraints from data. On the other hand,
+action prediction in plans across energy landscapes. In each vi-         it would be interesting to explore how an amortized neural
+sualization, the green/red nodes indicate start/goal nodes with          network generator for generating initial solutions or guided
+connections between nodes indicated with arrows. The darkness            optimizers can speed up this procedure. Second, our se-
+of a node indicates the score for selecting the corresponding node       quence of annealed energy landscapes is defined through a
+as the next node to move to in the predicted plan. As landscapes
+                                                                         sequence of added Gaussian noise increments — it would
+are sequentially optimized, the correct next action is selected.
+                                                                         be further interesting to learn the sequence of energy land-
+                                                                         scapes to enable adaptive optimization. Another current
+baselines, especially the diffusion model, by a large margin.            limitation of IRED is that out of the box, IRED in its current
+Both methods based on energy based formulation (IREM                     form does not leverage any additional memory. Therefore,
+and IRED) perform well on this task, validating the hypoth-              for tasks that would benefit from explicitly using additional
+esis that learning energy functions is an effective method for           memory to store intermediate results (analogous to chain-
+encoding planning problems such as the edge constraints                  of-thought reasoning tasks in language or visual reasoning),
+in the path-finding task. Finally, since all methods uses the            IRED might not be as effective as other approaches.
+same STGCN encoder, there is no significant performance
+drop on generalization to the harder dataset.                            So far we have been applying IRED in continuous and
+                                                                         discrete reasoning tasks, and planning on discrete spaces
+Qualitative Results.       Similarly to other tasks, we can              (graphs). Other potential applications of IRED include gen-
+also visualize the generated solutions by the model across               eral mathematical reasoning (Amini et al., 2019; Lu et al.,
+different landscapes. Figure 7 visualizes the prediction                 2021) and decision-making in hybrid discrete-continuous
+of the first node to move to by the planning model. We                   spaces (Garrett et al., 2021; Yang et al., 2023b; Fang et al.,
+normalize the prediction scores to 0 to 1. The darker the                2023). For example, IRED can serve directly as a policy
+color, the higher the score. As can be seen in the figure, our           model. In our experiments, we have supervised the energy
+IRED model is capable of gradually finding the immediate                 functions using IID samples from a fixed dataset (as positive
+next action to take: at step 3 it excluded node 7, and the               examples). However, the energy function can also be su-
+score gradually concentrates on node 8.                                  pervised with reward signals by modeling a distribution of
+Ablations.      We ablate each component of IRED in Ta-                  actions that favor actions yielding high discounted returns
+ble 7. We found that running multiple steps of optimization              (similar to REINFORCE).
+and shaping the energy landscape both lead to improved per-
+formance on both the same-difficulty test cases and harder               Acknowledgements
+difficulty ones.
+                                                                         We gratefully acknowledge support from NSF grant
+                                                                         2214177; from AFOSR grant FA9550-22-1-0249; from
+5. Conclusion and Discussions                                            ONR MURI grant N00014-22-1-2740; and from ARO grant
+                                                                         W911NF-23-1-0034; from MIT Quest for Intelligence; from
+In this paper, we present IRED, a new approach to solving
+                                                                         the MIT-IBM Watson AI Lab; from ONR Science of AI;
+complex reasoning tasks by formulating it as an energy
+                                                                         and from Simons Center for the Social Brain. Yilun Du is
+minimization process on a sequence of energy landscapes.
+                                                                         supported by a NSF Graduate Fellowship. Any opinions,
+We illustrate, on both continuous, discrete, and planning
+                                                                         findings, and conclusions or recommendations expressed in
+domains, how iterative computation utilizing IRED enables
+                                                                         this material are those of the authors and do not necessarily
+better algorithmic performance and generalization to more
+                                                                         reflect the views of our sponsors.
+complex instances of problems. We further illustrate how
+the underlying algorithmic computation learned by IRED
+may be nested to implement more complex algorithmic                      Impact Statement
+computations.                                                            No immediate negative social impacts can be derived from
+Our current reasoning approach with IRED has several limi-               the proposed approach in its current form as our evaluation
+tations. First, the inference time optimization procedure in             is carried out on relatively standard simple datasets.
+
+                                                                     9
+                                         Iterative Reasoning through Energy Diffusion
+
+References                                                             Djolonga, J. and Krause, A. Differentiable Learning of
+                                                                         Submodular Models. In NeurIPS, 2017.
+Amini, A., Gabriel, S., Lin, S., Koncel-Kedziorski, R., Choi,
+ Y., and Hajishirzi, H. MathQA: Towards Interpretable                  Dong, H., Mao, J., Lin, T., Wang, C., Li, L., and Zhou, D.
+ Math Word Problem Solving with Operation-Based For-                     Neural Logic Machines. In ICLR, 2019.
+ malisms. In NAACL, 2019.
+                                                                       Donti, P. L., Amos, B., and Kolter, J. Z. Task-based End-
+Amos, B. and Kolter, J. Z. Optnet: Differentiable Optimiza-
+                                                                         to-End Model Learning in Stochastic Optimization. In
+ tion as a Layer in Neural Networks. In ICML, 2017.
+                                                                        NeurIPS, 2017.
+Anil, C., Pokle, A., Liang, K., Treutlein, J., Wu, Y., Bai, S.,
+                                                                       Du, Y. and Mordatch, I. Implicit generation and modeling
+  Kolter, J. Z., and Grosse, R. B. Path Independent Equilib-
+                                                                        with energy based models. Advances in Neural Informa-
+  rium Models Can Better Exploit Test-Time Computation.
+                                                                         tion Processing Systems, 32, 2019.
+  In NeurIPS, 2022.
+Arbel, M., Zhou, L., and Gretton, A. Generalized Energy                Du, Y., Li, S., Tenenbaum, B. J., and Mordatch, I. Improved
+  Based Models. In ICLR, 2021.                                           Contrastive Divergence Training of Energy Based Models.
+                                                                         In ICML, 2021.
+Bai, S., Kolter, J. Z., and Koltun, V. Deep Equilibrium
+  Models. In NeurIPS, 2019.                                            Du, Y., Li, S., Tenenbaum, J., and Mordatch, I. Learning
+                                                                         Iterative Reasoning through Energy Minimization. In
+Banino, A., Balaguer, J., and Blundell, C. Pondernet: Learn-            ICML, 2022.
+  ing to Ponder. In ICML Workshop on Automated Machine
+  Learning, 2021.                                                      Du, Y., Durkan, C., Strudel, R., Tenenbaum, J. B., Diele-
+                                                                         man, S., Fergus, R., Sohl-Dickstein, J., Doucet, A., and
+Bolukbasi, T., Wang, J., Dekel, O., and Saligrama, V. Adap-              Grathwohl, W. S. Reduce, Reuse, Recycle: Composi-
+  tive Neural Networks for Efficient Inference. In ICML,                 tional Generation with Energy-Based Diffusion Models
+  2017.                                                                  and MCMC. In ICML, 2023.
+Brockett, R. W. Dynamical Systems That Sort Lists, Diag-
+                                                                       Fang, X., Garrett, C. R., Eppner, C., Lozano-Pérez, T., Kael-
+  onalize Matrices, and Solve Linear Programming Prob-
+                                                                         bling, L. P., and Fox, D. DiMSam: Diffusion Models
+  lems. Linear Algebra and Its Applications, 146:79–91,
+                                                                         as Samplers for Task and Motion Planning under Partial
+  1991.
+                                                                         Observability. arXiv:2306.13196, 2023.
+Bryson, A. E. Applied Optimal Control: Optimization,
+  Estimation and Control. Routledge, 2018.                             Garrett, C. R., Chitnis, R., Holladay, R., Kim, B., Silver,
+                                                                         T., Kaelbling, L. P., and Lozano-Pérez, T. Integrated
+Cai, J., Shin, R., and Song, D. Making Neural Programming                Task and Motion Planning. Annual Review of Control,
+  Architectures Generalize via Recursion. In ICLR, 2017.                 Robotics, and Autonomous Systems, 4(1):265–293, 2021.
+
+Chen, X., Dai, H., Li, Y., Gao, X., and Song, L. Learning to           Grathwohl, W., Wang, K.-C., Jacobsen, J.-H., Duvenaud,
+  Stop while Learning to Predict. In ICML, 2020a.                        D., and Zemel, R. Cutting Out the Middle-Man: Training
+                                                                         and Evaluating Energy-Based Models Without Sampling.
+Chen, X., Liang, C., Yu, A. W., Song, D., and Zhou, D.
+                                                                         In ICML, 2020.
+  Compositional Generalization via Neural-Symbolic Stack
+  Machines. In NeurIPS, 2020b.                                         Graves, A. Adaptive Computation Time for Recurrent Neu-
+                                                                         ral Networks. arXiv:1603.08983, 2016.
+Chi, C., Feng, S., Du, Y., Xu, Z., Cousineau, E., Burchfiel,
+  B., and Song, S. Diffusion Policy: Visuomotor Policy                 Graves, A., Wayne, G., and Danihelka, I. Neural Turing
+  Learning via Action Diffusion. In RSS, 2023.                           Machines. arXiv:1410.5401, 2014.
+Chung, J., Ahn, S., and Bengio, Y. Hierarchical Multiscale
+                                                                       Graves, A., Wayne, G., Reynolds, M., Harley, T., Dani-
+  Recurrent Neural Networks. In ICLR, 2017.
+                                                                         helka, I., Grabska-Barwińska, A., Colmenarejo, S. G.,
+Comas, A., Du, Y., Lopez, C. F., Ghimire, S., Sznaier, M.,               Grefenstette, E., Ramalho, T., Agapiou, J., et al. Hy-
+  Tenenbaum, J. B., and Camps, O. Inferring Relational                   brid Computing Using a Neural Network with Dynamic
+  Potentials in Interacting Systems. In ICML, 2023.                      External Memory. Nature, 538(7626):471–476, 2016.
+
+Dehghani, M., Gouws, S., Vinyals, O., Uszkoreit, J., and               He, K., Zhang, X., Ren, S., and Sun, J. Deep Residual
+  Kaiser, Ł. Universal Transformers. In ICLR, 2019.                      Learning for Image Recognition. In CVPR, 2016.
+
+                                                                  10
+                                         Iterative Reasoning through Energy Diffusion
+
+Ho, J., Jain, A., and Abbeel, P. Denoising Diffusion Proba-            Xiao, Z., Kreis, K., Kautz, J., and Vahdat, A. VAEBM:
+  bilistic Models. In NeurIPS, 2020.                                     A Symbiosis Between Variational Autoencoders and
+                                                                         Energy-based Models. In ICLR, 2020.
+Kaiser, Ł. and Sutskever, I. Neural GPUs Learn Algorithms.
+  In ICLR, 2016.                                                       Xie, J., Lu, Y., Zhu, S.-C., and Wu, Y. A Theory of Genera-
+                                                                         tive Convnet. In ICML. PMLR, 2016.
+Kautz, H., Selman, B., and Hoffmann, J. SATPlan: Planning
+  as Satisfiability. In IPC, 2006.                                     Xie, J., Lu, Y., Gao, R., Zhu, S.-C., and Wu, Y. N. Co-
+                                                                         operative training of descriptor and generator networks.
+LeCun, Y., Chopra, S., and Hadsell, R. A Tutorial on Energy-             T-PAMI, 42(1):27–45, 2018.
+  based Learning, 2006.
+                                                                       Xu, K., Li, J., Zhang, M., Du, S. S., Kawarabayashi, K.-
+Lu, P., Gong, R., Jiang, S., Qiu, L., Huang, S., Liang, X., and          i., and Jegelka, S. What Can Neural Networks Reason
+  Zhu, S.-C. Inter-GPS: Interpretable Geometry Problem                  About? In ICLR, 2019.
+  Solving with Formal Language and Symbolic Reasoning.
+  In ACL, 2021.                                                        Yan, S., Xiong, Y., and Lin, D. Spatial Temporal Graph Con-
+                                                                         volutional Networks for Skeleton-Based Action Recogni-
+Manhaeve, R., Dumancic, S., Kimmig, A., Demeester, T.,                   tion. In AAAI, 2018.
+ and De Raedt, L. Deepproblog: Neural Probabilistic
+                                                                       Yang, F., Yang, Z., and Cohen, W. W. Differentiable Learn-
+ Logic Programming. In NeurIPS, 2018.
+                                                                         ing of Logical Rules for Knowledge Base Reasoning. In
+Neelakantan, A., Le, Q. V., and Sutskever, I. Neural Pro-                NeurIPS, 2017.
+  grammer: Inducing Latent Programs with Gradient De-
+                                                                       Yang, Z., Ishay, A., and Lee, J. NeurASP: Embracing Neural
+  scent. In ICLR, 2015.
+                                                                         Networks into Answer Set Programming. In IJCAI, 2020.
+Palm, R., Paquet, U., and Winther, O. Recurrent Relational             Yang, Z., Ishay, A., and Lee, J. Learning to Solve Constraint
+  Networks. In NeurIPS, 2018.                                            Satisfaction Problems with Recurrent Transformer. In
+Reed, S. and De Freitas, N. Neural Programmer-Interpreters.              ICLR, 2023a.
+  In ICLR, 2016.                                                       Yang, Z., Mao, J., Du, Y., Wu, J., Tenenbaum, J. B., Lozano-
+                                                                         Pérez, T., and Kaelbling, L. P. Compositional Diffusion-
+Rocktäschel, T. and Riedel, S. End-to-End Differentiable
+                                                                         Based Continuous Constraint Solvers. In CoRL, 2023b.
+  Proving. In NeurIPS, 2017.
+
+Rubanova, Y., Sanchez-Gonzalez, A., Pfaff, T., and
+  Battaglia, P. Constraint-Based Graph Network Simulator.
+  In ICML, 2022.
+
+Schwarzschild, A., Borgnia, E., Gupta, A., Huang, F.,
+  Vishkin, U., Goldblum, M., and Goldstein, T. Can You
+  Learn an Algorithm? Generalizing from Easy to Hard
+  Problems with Recurrent Networks. In NeurIPS, 2021.
+
+Sohl-Dickstein, J., Weiss, E. A., Maheswaranathan, N., and
+  Ganguli, S. Deep Unsupervised Learning Using Nonequi-
+  librium Thermodynamics. In ICML, 2015.
+
+Sun, Z. and Yang, Y. Difusco: Graph-Based Diffusion
+  Solvers for Combinatorial Optimization. In NeurIPS,
+  2023.
+
+Wang, P.-W., Donti, P., Wilder, B., and Kolter, Z. SATNet:
+ Bridging Deep Learning and Logical Reasoning using a
+ Differentiable Satisfiability Solver. In ICML, 2019.
+
+Wilder, B., Dilkina, B., and Tambe, M. Melding the Data-
+ Decisions Pipeline: Decision-Focused Learning for Com-
+ binatorial Optimization. In AAAI, 2019.
+
+                                                                  11
+                                        Iterative Reasoning through Energy Diffusion
+
+
+
+   Supplementary Material for Iterative Reasoning through Energy Diffusion
+
+In this appendix we provide additional details on IRED. We           B. Model Architectures
+first provide experimental details on our evaluated tasks in
+Appendix A. Next, we discuss individual model architec-              Continuous Task.        For continuous tasks, we use the
+tures used in Appendix B.                                            architecture in Table 8 to train both IRED and the IREM
+                                                                     baseline. We use the architecture in Table 9 to parameterize
+                                                                     the diffusion model baseline.
+A. Experimental Details
+                                                                     Discrete Task. For Sudoku, we use the architecture in
+Continuous Tasks We use dataset setups from (Du et al.,              Table 10. It encodes the Sudoku board with a convolu-
+2022) for continuous tasks. Models were trained in approxi-          tional neural network with the residual connection design,
+mately 2 hours on a single Nvidia RTX 2080 using a training          borrowed from He et al. (2016).
+batch size of 2048 and the Adam optimizer with learning
+rate 1e-4. Models was trained for approximately 50,000               For Connectivity, we use the architecture adapted from
+iterations and evaluated on 20000 test problems.                     Dong et al. (2019), as detailed in Table 11. It uses a re-
+                                                                     lational neural network to fuse the connectivity information
+Discrete Tasks For Sudoku, we train models for 50000                 from neighboring nodes.
+iterations using a single Nvidia RTX 2080 using a training
+batch size of 64 with the Adam optimizer with learning rate          Planning Task. For planning tasks, we use the architec-
+1e-4 and are evaluated on the full test datasets provided in         ture the same architecture as the connectivity task, as de-
+(Wang et al., 2019; Palm et al., 2018).                              tailed in Table 12. To encode temporal information, at each
+                                                                     layer, we stack the node embedding from the previous time
+For Connectivity tasks, we generate random graphs using              step, the current step, and the next step to implement tempo-
+algorithms from Graves et al. (2016). Essentially, it first          ral convolution. This is equivalent to the spatial-temporal
+generates a set of random points on a 2D plane uniformly             graph convolution networks (STGCN; Yan et al., 2018).
+inside a unit square. Next, it samples the out-degree k (the
+number of out-going edges) for each node based on a uni-             We have also attached the code to reproduce all experiments
+form distribution. Finally, it connects each node to its k           in the supplementary material.
+closest neighbors. The advantage of this generation process
+is that the generated graph will be close to a planar graph
+so that it can be easily visualized, and more importantly,
+it allows for fine-grained control of the connectivity of the
+graph by setting the out-degree range. In practice, we uni-
+formly sample the out-degrees from [1, n/2], where n is
+the number of nodes in the graph. Based on the sampled
+adjacency matrix, we use the floyd-warshall algorithm to
+compute its connectivity matrix. Note that there are no
+distances associated with the edges (i.e., all edges are of
+unit length). We train models for 100000 iterations using a
+single Nvidia RTX 2080 with batch size 512 with the Adam
+optimizer.
+Planning Task For planning, we use the same procedure
+as in the connectivity tasks to generate graphs. To create
+graphs with a large enough treewidth, we set the out-degree
+sample range to be [1, n/5], where n is the number of nodes.
+All edges are of unit length. We use the floyd-warshall
+algorithm to compute the pairwise shortest distance. This
+enables us to evaluate whether the first action predicted by
+the model shortens the distance between the current node
+and the goal. We train models for 100000 iterations using a
+single Nvidia RTX 2080 with batch size 512 with the Adam
+optimizer.
+
+
+                                                                12
+                                            Iterative Reasoning through Energy Diffusion
+
+                           Linear 512                                                     NLM Arity=2, Hideen=64
+                           Linear 512                                                     NLM Arity=2, Hideen=64
+                           Linear 512                                               Max-Pooling over All Node Features
+                           Linear → 1                                                              Linear, 1
+
+Table 8. The model architecture for IRED on continuous-space            Table 12. The model architecture for IRED and diffusion base-
+algorithmic reasoning tasks                                             lines on the shortest-path task. For the diffusion baseline, we
+                                                                        simply remove the pooling layer and apply the same linear layer
+                                                                        on all node embedding to predict the noise value for each entry.
+
+
+
+                           Linear 512
+                           Linear 512
+                           Linear 512
+                      Linear → Output Dim
+
+Table 9. The model architecture for diffusion baselines on
+continuous-space algorithmic reasoning tasks.
+
+
+
+
+                      3x3 Conv2D, 384
+                        Resblock 384
+                        Resblock 384
+                        Resblock 384
+                        Resblock 384
+                        Resblock 384
+                        Resblock 384
+                        3x3 Conv2D, 9
+
+Table 10. The model architecture for IRED and diffusion base-
+lines on the Sudoku task. The energy value is computed using
+the L2 norm of the final predicted output similar to (Du et al.,
+2023), while the output is directly used as noise prediction for
+the diffusion baseline.
+
+
+
+
+                  NLM Arity=3, Hidden=64
+                  NLM Arity=3, Hidden=64
+             Max-Pooling over All Edge Features
+                           Linear, 1
+
+Table 11. The model architecture for IRED and diffusion base-
+lines on the connectivity task. For the diffusion baseline, we
+simply remove the pooling layer and apply the same linear
+layer on all edge embeddings to predict the noise value for each
+entry.
+
+                                                                   13
+

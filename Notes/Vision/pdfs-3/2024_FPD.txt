@@ -1,0 +1,713 @@
+                               This CVPR paper is the Open Access version, provided by the Computer Vision Foundation.
+                                            Except for this watermark, it is identical to the accepted version;
+                                      the final published version of the proceedings is available on IEEE Xplore.
+
+
+
+
+                                                  Fixed Point Diffusion Models
+
+                                        Xingjian Bai *                                 Luke Melas-Kyriazi *†
+                                     University of Oxford                              University of Oxford
+                                   xingjianbai@gmail.com                            lukemk@robots.ox.ac.uk
+
+
+
+          Diffusion Transformer (DiT): 674M Parameters                                Fixed Point Diffusion Model (FPDM): 85M Parameters
+
+
+
+
+Figure 1. Fixed Point Diffusion Model (FPDM) is a novel and highly efficient approach to image generation with diffusion models. FPDM integrates an
+implicit fixed point layer into a denoising diffusion model, converting the sampling process into a sequence of fixed point equations. Our model significantly
+decreases model size and memory usage while improving performance in settings with limited sampling time or computation. We compare our model, trained
+at a 256 ⇥ 256 resolution against the state-of-the-art DiT [38] on four datasets (FFHQ, CelebA-HQ, LSUN-Church, ImageNet) using compute equivalent to
+20 DiT sampling steps. FPDM (right) demonstrates enhanced image quality with 87% fewer parameters and 60% less memory during training.
+
+
+
+                              Abstract                                            quality in situations where sampling computation or time is
+                                                                                  limited. Our code and pretrained models are available at
+    We introduce the Fixed Point Diffusion Model (FPDM),                          https://lukemelas.github.io/fixed-point-diffusion-models/.
+a novel approach to image generation that integrates the
+concept of fixed point solving into the framework of diffusion-                   1. Introduction
+based generative modeling. Our approach embeds an im-
+                                                                                  The field of image generation has experienced significant
+plicit fixed point solving layer into the denoising network
+                                                                                  recent advancements driven by the development of large-
+of a diffusion model, transforming the diffusion process
+                                                                                  scale diffusion models [23, 37, 38, 41, 47, 48]. Key to these
+into a sequence of closely-related fixed point problems.
+                                                                                  advancements have been increased model size, computa-
+Combined with a new stochastic training method, this ap-
+                                                                                  tional power, and the collection of extensive datasets [4, 12,
+proach significantly reduces model size, reduces memory
+                                                                                  16, 25, 45, 46, 54], collectively contributing to a marked
+usage, and accelerates training. Moreover, it enables the
+                                                                                  improvement in generation performance.
+development of two new techniques to improve sampling
+efficiency: reallocating computation across timesteps and                            Despite these strides, the core principles of diffusion net-
+reusing fixed point solutions between timesteps. We con-                          works have remained largely unchanged since their develop-
+duct extensive experiments with state-of-the-art models on                        ment [23]. They typically consist of a fixed series of neural
+ImageNet, FFHQ, CelebA-HQ, and LSUN-Church, demon-                                network layers, either with a UNet architecture [42] or, more
+strating substantial improvements in performance and effi-                        recently, a vision transformer architecture [14, 51]. However,
+ciency. Compared to the state-of-the-art DiT model [38],                          as diffusion models are increasingly deployed in production,
+FPDM contains 87% fewer parameters, consumes 60% less                             especially on mobile and edge devices, their large size and
+memory during training, and improves image generation                             computational costs pose significant challenges.
+                                                                                     This paper introduces the Fixed Point Diffusion Model
+   * Equal Contribution.                                                          (FPDM), which integrates an implicit fixed point solving
+   † Corresponding author.                                                        layer into the denoising network of a diffusion model. In
+
+                                                                              19430
+contrast to traditional networks with a fixed number of layers,                      Diffusion Transformer (DiT)                         Fixed Point Diffusion Model (FPDM)
+
+                                                                                 .
+FPDM is able to utilize a variable amount of computation
+                                                                                                    …
+at each timestep, with the amount of computation directly                Noise
+                                                                                      f1      f2           fL
+                                                                                                                                 Noise       fpre       fﬁxed-
+                                                                                                                                                          point    fpost
+influencing the accuracy of the resulting solutions. This fixed           xT                                                      xT                    ..
+                                                                                                    …
+point network is then applied sequentially, as in standard                                                 t=T.                                          ×N
+                                                                                                                                                                    t=T.
+diffusion models, to progressively denoise a data sample
+from pure Gaussian noise.                                                                           …
+                                                                                                                                                        fﬁxed-                ...
+    FPDM offers efficiency gains at two levels of granularity:                        f1      f2           fL        ...                     fpre
+                                                                                                                                                        ..
+                                                                                                                                                          point    fpost
+                                                                                                    …
+that of individual timesteps and that of the entire diffusion                                                              Sample x0                                                Sample x0
+
+
+process. First, at the timestep level, it provides:
+                                                                                                                                                         ×N
+                                                                                                         t = T-1 .                                                t = T-1.
+
+1. A substantial reduction in parameter count compared to
+                                                                        Figure 2. The architecture of FPDM compared with DiT. FPDM keeps
+    previous networks (87% compared to DiT [38]).                       the first and last transformer block as pre and post processing layers and
+2. Reduced memory usage during both training and sam-                   replaces the explicit layers in-between with an implicit fixed point layer.
+    pling (60% compared to DiT [38]).                                   The diffusion sampling process involves solving many of these fixed point
+                                                                        layers in sequence, which enables the development of new techniques such
+Second, at the diffusion process level, it provides:
+                                                                        as timestep smoothing (Sec. 3.3) and solution reuse (Sec. 3.3).
+1. The ability to smoothly distribute or reallocate computa-
+    tion among timesteps. This contrasts with all previous
+                                                                        ods [34, 47, 53] and applied conditional control from multi-
+    diffusion models, which must perform a full forward pass
+                                                                        ple modalities [13, 36, 49]. Recently, DMs with transformer-
+    at every sampling timestep.
+                                                                        based architectures (DiTs) were shown to be highly effec-
+2. The capacity to reuse solutions from one fixed-point layer
+                                                                        tive [38]; FPDM builds upon the DiT architecture.
+    as an initialization for the layer in the subsequent timestep,
+    further improving efficiency.                                          The heavy memory and computation requirements of
+Our fixed-point network thereby delivers immediate benefits,            DMs scale up quadratically with the image resolution and
+in the form of reduced size and memory (Sec. 3.2), and                  linearly with the number of sampling timesteps. To reduce
+further benefits when integrated into the diffusion process, in         training cost, LDM [41] proposes to downsample images
+the form of increased flexibility during sampling (Sec. 3.3).           with a pre-trained Variational Autoencoder [29] and perform
+    To realize these benefits, it is imperative to train our mod-       denoising in latent space. However, the inference cost of
+els using an efficient differentiable fixed-point solver. Al-           DMs is still considered their primary drawback.
+though several implicit training methods exist in the liter-
+ature [5, 15, 18], we find them to be unstable or underper-             Implicit Networks and Deep Equilibrium Models.
+formant in our setting. Hence, we develop a new training                Whereas traditional neural networks calculate outputs by
+procedure named Stochastic Jacobian-Free Backpropagation                performing a pass through a stack of layers, implicit neural
+(S-JFB) (Sec. 3.4), inspired by Jacobian-Free Backpropaga-              networks define their outputs by the solutions of dynamic sys-
+tion (JFB) [15]. This procedure is stable, highly memory-               tems. Specifically, Deep Equilibrium Models (DEQs) [5, 17]
+efficient, and surpasses standard JFB in performance.                   define their output by the fixed point of an equilibrium layer
+    We demonstrate the efficacy of our method through exten-            f✓ . The equilibrium state of DEQs, z ⇤ , is equivalent to the
+sive experiments (Sec. 4) on four popular image generation              output of an infinite-depth, weight-sharing explicit neural
+datasets: LSUN-Church [54], CelebA-HQ [25], FFHQ [4],                   network: limk!1 f✓ (z k ) = f✓ (z ⇤ ) = z ⇤ . In its forward
+and ImageNet [12]. FPDM excels over standard diffu-                     pass, the equilibrium state z ⇤ can be computed by apply-
+sion models when computational resources during sampling                ing solvers like Broyden’s method [9] or Anderson’s ac-
+are limited. Finally, detailed analysis and ablation studies            celeration [3]. In the backward pass, one can implicitly
+(Sec. 5) demonstrate the efficacy of our proposed network,              differentiate through the equilibrium state z ⇤ , or use one of
+sampling techniques, and training methods.                              the recently-proposed accelerated training methods [15, 18].
+                                                                        Applications of DEQs include optical flow [7], image seg-
+2. Related Work                                                         mentation [6] and inverse imaging problems [20].
+Diffusion Models (DMs). Diffusion models [2, 23], or
+score-based generative models [48, 49], are the source of               Recent Work Combining Diffusion and DEQs. In the
+tremendous recent progress in image generation. They learn              past year, two works have merged DMs and DEQs. Differ-
+to reverse a Markovian noising process using a denoiser                 ently from our proposal, these approaches tried to convert
+parametrized by a neural network, traditionally a U-Net [42].           the entire diffusion process into a single fixed point equa-
+The denoising paradigm can be seen as the discretization of a           tion. [39] considers the entire diffusion trajectory as a single
+stochastic differential equation in a continuous domain [50].           sample and solves for the fixed point of the trajectory, con-
+Later work equipped DMs with different sampling meth-                   verting the sequential diffusion process into a parallel one.
+
+
+                                                                     29431
+[19] distills a pretrained diffusion model into a single-step        3.2. Fixed Point Denoising Networks
+DEQ. These works are exciting but come with their own
+                                                                     Our proposed fixed-point denoising network (Fig. 2) inte-
+drawbacks: the former is an inference-time technique that
+                                                                     grates an implicit fixed-point layer into a diffusion trans-
+consumes significantly more memory than standard ances-
+                                                                     former. The network consists of three stages: 1) explicit
+tral sampling, while the latter requires a pretrained diffusion                                                    (1:l)
+model and has not scaled to datasets larger than CIFAR-10.           timestep-independent preprocessing layers fpre : X ! X,
+                                                                     2) a implicit timestep-conditioned fixed-point layer ffp :
+                                                                     X ⇥ X ⇥ T ! X, and 3) explicit timestep-independent
+3. Methods                                                                                    (1:l)
+                                                                     postprocessing layers fpost : X ! X. The function ffp
+3.1. Preliminaries                                                   takes as input both the current fixed-point solution x and
+                                                                     a value x̃ called the input injection, which is the projected
+Implicit Neural Networks. The neural network layer is                output of the preceding explicit layers. One can think of ffp
+the foundational building block of deep learning. While                          (x̃,t)
+                                                                     as a map ffp : X ! X conditional on the input injection
+early neural networks used only a few layers [30, 32], mod-          and timestep, for which we aim to find a fixed point. The
+ern networks such as large-scale transformers [14, 51] often                                        (t)
+                                                                     network processes an input xinput as follows:
+consist of dozens of layers connected by residual blocks.
+Typically, these layers share a similar internal structure and                                    (t)
+dimensionality, with each having distinct set of parameters.               x(t)    (1:l)
+                                                                            pre = fpre (xinput )                                      (1)
+In essence, most networks are defined explicitly: their opera-             x̃   (t)
+                                                                                      = projection(x(t)          input injection      (2)
+                                                                                                    pre )
+tions are precisely defined by their layer weights. Running a
+forward pass always entails processing inputs with the entire             x⇤(t) = ffp (x⇤(t) , x̃(t) , t)   via fixed point solving   (3)
+set of layers.                                                             (t)     (1:l)
+                                                                          xpost = fpost (x⇤(t) )                                      (4)
+   On the other hand, implicit models define the function
+or procedure to be computed by the network, rather than                                  (t)
+                                                                     The output xpost is used to compute the loss (during training)
+the exact sequence of operations. This category includes                                  (t 1)
+                                                                     or the input xinput to the next timestep (during sampling).
+models that integrate differential equation solvers (Neural
+                                                                        Whereas explicit networks consume a fixed amount of
+ODE/CDE/SDEs; [10, 27, 28]), as well as models incorporat-
+                                                                     computation, this implicit network can adapt based on the
+ing fixed point solvers (fixed point networks or DEQs; [5]).
+                                                                     desired level of accuracy or even on the difficulty of the input.
+Our proposed FPDM belongs to this latter group.
+                                                                     In this way, it unlocks a new tradeoff between computation
+                                                                     and accuracy. Moreover, since the implicit layer replaces a
+Differentiable Fixed Point Solving. Given a function f               large number of explicit layers, it significantly decreases its
+on X, a fixed point of f is x⇤ 2 X such that f (x⇤ ) = x⇤ .          size and memory consumption.
+The computation of fixed points has been the subject of                 Finally, note that our denoising network operates in latent
+centuries of mathematical study [52], with the existence and         space rather than pixel space. That is, we apply a Variational
+uniqueness of a system’s fixed points often proved with the          Autoencoder [29, 41] to encode the input image into latent
+Banach fixed-point theorem and its variants [1, 21, 24].             space and perform all processing in latent space.
+    In our case, f = f✓ is a differentiable function
+                                                                     3.3. Fixed Point Diffusion Models (FPDM)
+parametrized by ✓, and we are interested in both solving for
+the fixed point and backpropagating through it. The simplest         FPDM incorporates the fixed point denoising network pro-
+solving method is fixed point iteration, which iteratively ap-       posed above into a denoising diffusion process.
+plies f✓ until convergence to x⇤ . Under suitable assumptions,          We assume the reader is already familiar with the basics
+iteration converges linearly to the unique fixed point of an         of diffusion models and provide only a brief summary; if
+equilibrium system (Thrm 2.1 in [15]). Alternative methods           not, we provide an overview in the Supplementary Mate-
+found throughout the literature include Newton’s method,             rial. Diffusion models learn to reverse a Markovian nois-
+quasi-Newton methods such as Broyden’s method, and An-               ing process in which a sample X0 ⇠ q(X0 ) from a target
+derson’s acceleration. In these cases, one can analytically          data distribution q(X0 ) is noised over a series of timesteps
+backpropagate through x⇤ via implicit differentiation [15].          t 2 [0, T ]. The size of each step of this process is gov-
+However, these methods can come with significant memory              erned byp a variance schedule { t }t=0 as q(Xt |Xt 1 ) =
+                                                                                                          T
+
+and computational costs. Recently, a new iterative solving           N (Xt ; 1       t Xt 1 , t I). where each q(Xt |Xt 1 ) is a
+method denoted Jacobian-Free Backpropagation (JFB) was               Gaussian distribution. We learn the distribution q(Xt 1 |Xt )
+introduced to circumvent the need for complex and costly             using a network s✓ (Xt 1 |Xt ) ⇡ q(Xt 1 |Xt ), which in our
+implicit differentiation; we discuss and extend upon this            case is a fixed point denoising network. The generative
+method in Sec. 3.4.                                                  process then begins with a sample from the noise distribu-
+
+
+                                                                  39432
+                                                                                  Reallocating Computation Across Timesteps Beyond
+                                                                                  smoothing out computation over timesteps, FPDM enables
+                                                                                  one to vary the number of forward passes at each timestep,
+                                                                                  thereby dynamically controlling the solving accuracy at dif-
+                                                                                  ferent stages of the denoising process. This capability en-
+                                                                                  ables the implementation of diverse heuristics. For example,
+                                                                                  we can allocate a greater number of iterations at the start
+                                                                                  (“decreasing”) or the end (“increasing”) of the diffusion pro-
+                                                                                  cess (see Fig. 3). Additionally, FPDM supports adaptive
+Figure 3. Illustration of Transformer Block Forward Pass Allocation               allocations of forward passes; further discussions can be
+in FPDM and DiT. Since DiT has to perform full forward passes at each
+timestep, under limited compute, it can only denoise at a few timesteps
+                                                                                  found in the supplementary material (D,E).
+with large gaps. FPDM achieves a more balanced distribution through
+smoothing, thereby reducing the discretization error. Additionally, FPDM
+offers the flexibility to adjust forward pass allocation per timestep with        Reusing Solutions. The convergence speed of fixed point
+heuristics like Increasing and Decreasing. Refer to Section 3.3 for details.      solving meaningfully depends on the initial solution pro-
+                                                                                  vided as input. A poor guess of the initial solution would
+tion q(XT ) and denoises it over a series of steps to obtain a                    make the convergence slower. Considering each timestep
+sample from the target distribution q(X0 ).                                       independently, the usual approach would be to initialize the
+    The primary drawback of diffusion models as a class of                        fixed-point iteration of each timestep using the output of
+generative models is that they are relatively slow to sample.                     the (explicit) layers. However, considering sequential fixed
+As a result, during sampling, it is very common to only use                       point problems in the diffusion process, we can reuse the
+a small subset of all diffusion timesteps and take correspond-                    solution from the fixed point layer at the previous timestep
+ingly larger sampling steps; for example, one might train                         as the initial solution for the next timestep. Formally, we
+with 1000 timesteps and then sample images with as few as                         can initialize the iteration in Eq. (3) with x⇤(t 1) rather than
+                                                                                         (t)
+N = 5, 10, or 20 timesteps.                                                       with xpre .
+    Naturally, one could replace the explicit denoising net-                         The intuition for this idea is that adjacent timesteps of
+work inside a standard diffusion model with a fixed point                         the diffusion process only differ by a small amount of noise,
+denoising network, and make no other changes; this would                          so their fixed point problems should be similar. Hence, the
+immediately reduce model size and memory usage, as dis-                           solutions of these problems should be close, and the solution
+cussed previously. However, we can further improve effi-                          of the previous timestep would be a good initialization for
+ciency during sampling by exploiting the fact that we are                         the current timestep. A similar idea was explored in [8],
+solving a sequence of related fixed point problems across all                     which used fixed point networks for optical flow estimation.
+timesteps, instead of a single one. We present two opportu-
+nities for improvement: smoothing/reallocating computation                        3.4. Stochastic Jacobian-Free Backpropagation
+across timesteps and reusing solutions.                                           The final unresolved aspect of our method is how to train
+                                                                                  the network, i.e. how to effectively backpropagate through
+                                                                                  the fixed point solving layer. While early work on DEQs
+Smoothing Computation Across Timesteps. The flexi-
+                                                                                  used expensive (Jacobian-based) implicit differentiation tech-
+bility afforded by fixed-point solving enables us to allocate
+                                                                                  niques [5], recent work has found more success using ap-
+computation between timesteps in a way that is not possible
+                                                                                  proximate and inexpensive (Jacobian-free) gradients [15].
+with traditional diffusion models. For a given computational
+                                                                                     Concretely, this consists of first computing an approxi-
+budget for sampling, we can reduce the the number of for-
+                                                                                  mate fixed point (either via iteration or Broyden’s method)
+ward passes (i.e. number of fixed point iterations) used per
+                                                                                  without storing any intermediate results for backpropaga-
+timestep in order to use more timesteps over the sampling
+                                                                                  tion, and then taking a single additional fixed point step
+process (see Fig. 3). In other words, our implicit model
+                                                                                  while storing intermediate results for backpropagation in the
+can effectively “smooth out” the computation over more
+                                                                                  standard way. During the backward pass, the gradient is
+timesteps. By contrast, with explicit models such as DiT,
+                                                                                  only computed for the final step, and so it is referred to as a
+the amount of computation directly determines the number
+                                                                                  “1-step gradient” or Jacobian-Free Backpropagation (JFB). 1
+of timesteps, since a full forward pass is needed at each
+timestep. Indeed, we find that when the amount of compute                            Formally, this approximates the gradient of the loss L
+is relatively limited, it is highly beneficial to smooth out the                  with respect to the parameters ✓ of the implicit layer ffp with
+compute among more timesteps than would be done with a                               1We note that this process has been referred to in the literature by many
+traditional model. The effectiveness of smoothing is shown                        names, including the 1-step gradient, phantom gradient, inexact gradient,
+empirically in section Sec. 5.1.                                                  and Jacobian-Free backpropagation.
+
+
+                                                                               49433
+fixed point x⇤(t) by                                                            XL/2 [38], which serves as a strong baseline in our experi-
+               ✓                             ◆                                  ments. Adhering to the architecture in [38], we operate in
+@L       @L          @ffp (x⇤(t) , x̃(t) , t) @ffp (x⇤(t) , x̃(t) , t)          latent space using the Variational Autoencoder from [29, 41].
+     =           I
+ @✓    @x⇤(t)              @x⇤(t)                     @✓                        In addition, we have equipped both the baseline DiT and our
+          @L @ffp (x⇤(t) , x̃(t) , t)                                           FPDM with two advances from the recent diffusion literature:
+     ⇡                                                                          (1) training to predict velocity rather than noise [44], and
+         @x⇤(t)      @✓
+                                                                                (2) modifying the denoising schedule to have zero terminal
+The equality above is a consequence of the Implicit Func-
+                                                                                signal-to-noise ratio [33]. We include these changes to show
+tion Theorem [43] and the approximation simply drops the
+                                                                                that our improvements are orthogonal to other improvements
+inverse Jacobian term. This simplification is rigorously justi-
+                                                                                made in the diffusion literature.
+fied by Theorem 3.1 in [15] under appropriate assumptions.
+                                                                                    Our network consists of three sets of layers: pre-layers,
+   Despite the simplicity of the 1-step gradient, we found
+                                                                                an implicit fixed point layer, and post-layers. All layers
+that it performed poorly in large-scale experiments. To im-
+                                                                                have the same structure and 24M parameters, except the
+prove performance without sacrificing efficiency, we use a
+                                                                                implicit layer has an additional projection for input injection.
+new stochastic approach to compute approximate gradients.
+                                                                                Through empirical analysis, we find that a single pre/post
+   Our approach (Algorithm 1) samples random variables
+                                                                                layer can achieve strong results (see Sec. 5.3). Consequently,
+n ⇠ U [0, N ] and m ⇠ U [1, M ] at each training step. Dur-
+                                                                                the number of parameters in our full network is only 86M,
+ing the forward pass, we perform n fixed point iterations
+                                                                                markedly lower than 674M parameters in the standard DiT
+without gradient to obtain an approximate solution,2 , and
+                                                                                XL/2 model, which has 28 explicit layers.
+then we perform m additional iterations with gradient. Dur-
+ing the backward pass, we backpropagate by unrolling only
+through the last m iterations. The constants N and M are                        Training We perform experiments on four diverse and
+hyperparameters that refer to the maximum number of train-                      popular datasets: Imagenet, CelebA-HQ, LSUN Church, and
+ing iterations without and with gradient, respectively. When                    FFHQ. All experiments are performed at resolution 256. The
+sampling, the number of iterations used at each timestep is                     ImageNet experiments are class-conditional, whereas those
+flexible and can be chosen independently of N or M . Com-                       on other datasets are unconditional. For a fair comparison,
+                                                                                we train our models and baseline DiT models for the same
+Algorithm 1 Stochastic Jacobian-Free Backpropagation                            amount of time using the same computational resources. All
+    Input hidden states x, timestep t                                           models are trained on 8 NVIDIA V100 GPUs; the models
+ 1: function FORWARD (x)                                                        for the primary experiments on ImageNet are trained for four
+ 2:    x̃    P ROJ(x) # input injection                                         days (equivalent to 400,000 DiT training steps), while those
+ 3:    for n iterations drawn uniformly from 0 to N do                          for the other datasets and for the ablation experiments are
+ 4:        x     F ORWARD PASS W ITHOUT G RAD(x, x̃, t)                         trained for one day (equivalent to 100,000 DiT steps). We
+                                                                                train using Stochastic JFB with M = N = 12 and provide
+ 5:    for m iterations drawn uniformly from 1 to M do
+                                                                                an analysis of this setup in Sec. 5.4.
+ 6:        x     F ORWARD PASS W ITH G RAD(x, x̃, t)
+                                                                                   The ImageNet experiments are class-conditional, whereas
+ 7:    BACKPROP(loss, x)                                                        those on other datasets are unconditional. For ImageNet,
+ 8:    return x                                                                 following DiT, we train using class dropout of 0.1, but we
+pared to the 1-step gradient, our method consumes more                          compute quantitative results without classifier-free guidance.
+memory and compute because it backpropagates through                            We train with a total batch size of 512 and learning rate
+multiple unrolled iterations rather than a single iteration.                    1e 4. We use a linear diffusion noise schedule with start =
+However, it is still drastically more efficient than either im-                 0.0001 and end = 0.02, modified to have zero terminal
+plicit differentiation or using traditional explicit networks,                  SNR [33]. We use v-prediction as also recommended by
+and it significantly outperforms the 1-step gradient in our                     [33]. Following DiT [38], we learn the variance along
+experiments (Tab. 5).                                                           with the velocity v.
+                                                                                   Finally, with regard to the evaluations, all evaluations
+4. Experiments                                                                  were performed using 50000 images (FID-50K) except those
+                                                                                in Tab. 7 and Fig. 6, which were computed using 1000 im-
+4.1. Experimental Setup                                                         ages due to computational constraints.
+Model The architecture of FPDM is based on the cur-
+                                                                                4.2. Sampling Quality and Cost Evaluation
+rent state-of-the-art in generative image modeling, DiT-
+   2 By “without gradient”, we mean that these iterations do not store          To measure image quality, we employ the widely-used
+any intermediate results for backpropagation, and they are not included in      Frechet Inception Distance (FID) 50K metric [22]. To mea-
+gradient computation during the backward pass.                                  sure the computational cost of sampling, previous studies
+
+
+                                                                             59434
+   Blocks     Model        FID          FID        Params.      Training
+                         (DDPM)       (DDIM)                    Memory
+
+              DiT          148.0          110.0     674M       25.2 GB
+   140
+              FPDM         85.8           33.9      85M        10.2 GB
+              DiT          80.9           35.2      674M       25.2 GB
+   280
+              FPDM         43.3           22.4      85M        10.2 GB
+              DiT          37.9           16.5      674M       25.2 GB
+   560
+              FPDM         26.1           19.6      85M        10.2 GB
+
+Table 1. Quantitative Results on ImageNet. Despite having 87% fewer
+parameters and using 60% less memory during training, FPDM outperforms             Figure 4. Timestep smoothing significantly improves performance.
+DiT [38] at 140 and 280 transformer block forward passes and achieves              Given the same amount of sampling compute (280 transformer blocks),
+comparable performance at 560 passes.                                              FPDM enables us to allocate computation among more or fewer diffusion
+                                                                                   timesteps, creating a tradeoff between the number of fixed-point solving
+                                                                                   iterations per timestep and the number of timesteps in the diffusion process
+on diffusion model sampling have counted the number of                             (See Sec. 3.3). Here we explore the performance of our model on ImageNet
+function evaluations (NFE) [26, 35, 55]. However, given the                        with fixed point iterations ranging from 1 iteration (across 93 timesteps) to
+implicit nature of our model, a more granular approach is                          68 iterations (across 4 timesteps). Each timestep also has 1 pre- and post-
+                                                                                   layer, so sampling with k iterations utilizes k + 2 blocks of compute per
+required. In our experiments, both implicit and explicit net-
+                                                                                   timestep. The circle and dashed lines show the performance of the baseline
+works consist of transformer blocks with identical size and                        DiT-XL/2 model with 28 layers, which in our formulation corresponds to
+structure, so the computational cost of each sampling step                         smoothing over 26 iterations. Although our model is slightly worse than
+is directly proportional to the number of transformer block                        DiT at 26 iterations, it significantly outperforms DiT when smoothed across
+                                                                                   more timesteps, demonstrating the effectiveness of timestep smoothing.
+forward passes executed; the total cost of sampling is the
+product of this amount and the total number of timesteps.3
+As a result, we quantify the sampling cost in terms of total                                    Model                    Num. Params        FID
+transformer block forward passes. 4                                                             DiT-XL/2 (3 layers)           86M          350.6
+                                                                                                DiT-B/2 (11 layers)          130M           55.9
+                                                                                                FPDM-XL/2                     86M           31.5
+  Dataset             Model        FID      Dataset      Model       FID
+                                                                                   Table 3. Comparison of models with similar parameter counts. All
+  CelebA-HQ           DiT          65.2     FFHQ         DiT         58.1          models use approximately the same amount of inference-time compute,
+                      FPDM         11.1                  FPDM        18.2          equivalent to 280 blocks of a DiT-XL/2-sized transformer.
+  LSUN-Church         DiT          65.6     ImageNet     DiT         80.9
+                      FPDM         22.7                  FPDM        43.3          given the most limited compute. Our method’s improve-
+                                                                                   ments are orthogonal to those gained from using better sam-
+Table 2. Quantitative Results Across Four Datasets. FPDM consistently              plers; our model effectively lowers the FID score with both
+outperforms DiT [38] on CelebA-HQ, FFHQ, LSUN-Church, and Imagenet                 DDIM and DDPM. At 560 forward passes, our method out-
+with 280 transformer block forward passes. All models are trained and              performs DiT with DDPM but not DDIM, and for more
+evaluated at resolution 256px using the same amount of compute and
+identical hyperparameters.
+                                                                                   than 560 it is outperformed by DiT. Note that the number of
+                                                                                   parameters in FPDM is only 12.9% of that in DiT, and it con-
+                                                                                   sumes 60% less memory during training (reducing memory
+4.3. Results                                                                       from 25.2 GB to only 10.2 GB at a batch size of 64).
+In Tab. 1, we first present a quantitative comparison of our                           Tab. 2 extends the comparison between FPDM and DiT
+proposed FPDM against the baseline DiT, under different                            to three additional image datasets: FFHQ, CelebA-HQ, and
+amounts of sampling compute. Notably, given 140 and 280                            LSUN-Church. Our findings are consistent across these
+transformer block forward passes, our best model signifi-                          datasets, with FPDM markedly improving the FID score
+cantly outperforms DiT, with the widest performance gap                            despite being nearly one-tenth the size of DiT.
+                                                                                       Table 3 compares the results of our method to DiT mod-
+    3 To be predise the implicit layer includes an extra projection for input
+                                                                                   els with similar parameter counts, rather than much larger
+injection, but this difference is negligible.                                      models. We significantly outperform these models.
+    4 For example, sampling from a FPDM with one pre/post-layer and
+
+26 fixed point iterations across S timesteps requires the same amount of               Fig. 1 shows qualitative results of our model compared to
+compute/time as a FPDM with two pre/post layers and 10 iterations using            DiT. All images are computed using the same random seeds
+2S timesteps; this computation cost is also the same as that of a traditional      and classes using a classifier-free guidance scale 4.0 and 560
+DiT with 28 layers across S timesteps. Formally, the sampling cost of
+FPDM is calculated by (npre + niters + npost ) · S where npre and npost
+                                                                                   transformer block forward passes (20 timesteps for DiT).
+are the number of pre- and post-layers, niters the number of fixed point           FPDM uses 8 fixed point iterations per block with timestep
+iterations, and S the number of sampling steps.                                    smoothing. Our model produces sharper images with more
+
+
+                                                                                69435
+Baseline (DiT)   1 Iter.   2 Iters.    3 Iters.      5 Iters.        6 Iters.     8 Iters.     12 Iters.   18 Iters.   26 Iters.   33 Iters.   38 Iters.   54 Iters.   68 Iters.
+
+
+
+
+Figure 5. Qualitative Results for Smoothing Computation Across Timesteps. We show visual results of FPDM using different numbers of fixed point
+solving iterations, while keeping the total amount of sampling compute fixed (560 transformer blocks). Our method demonstrates similar performance
+compared to the baseline with 20 to 30 iterations per timestep and superior generation quality with 4 to 8 iterations, as reflected quantitatively in Fig. 4.
+
+
+
+          Train Iters. (M , N )          3          6           12          24                     Results show that balancing iterations and timesteps is
+                                                                                                crucial to achieving high performance. Intuitively, when
+          FID                         43.0        43.2    61.5         567.6
+                                                                                                using very few iterations per timestep, the model fails to
+Table 4. Performance For Varying Numbers of Fixed Point Iterations                              converge adequately at each step, and the resulting error
+in Training. This table compares various choices of M and N values in                           compounds. Conversely, allocating many iterations to a
+Algorithm 1. They represent a tradeoff between training speed and fixed                         few timesteps results in unnecessary computation on already
+point convergence accuracy. Results indicate that the optimal values for M                      converged solving iterations, resulting in large discretization
+and N range from 3 to 6.
+                                                                                                errors arising from larger gaps between timesteps. An ideal
+                                                                                                strategy uses just enough fixed-point iterations to achieve
+      Train iters without grad (N )                      Method             FID
+                                                                                                satisfactory solutions, thereby maximizing the number of
+                                         JFB (1-Step Grad)                567.6                 timesteps. For instance, with 280 transformer block forward
+      6                                    Multi-Step JFB                  48.2                 passes, using 4 and 8 iterations per timestep is optimal.
+                                            Stochastic JFB                 43.2
+                                         JFB (1-Step Grad)                567.6
+                                                                                                5.2. Reusing Solutions
+      12                                   Multi-Step JFB                  79.9                 As described in Sec. 3.3, we explore reusing the fixed point
+                                            Stochastic JFB                 61.5                 solution from each timestep to initialize the subsequent step.
+                                                                                                In Fig. 6a, we see that reusing makes a big difference when
+Table 5. Performance of Stochastic Jacobian-Free Backpropagation (S-                            performing a small number of iterations per timestep and a
+JFB) compared to JFB (1-step gradient). We find that 1-step gradient, the
+most common method for training DEQ [5] models, struggles to optimize
+                                                                                                negligible difference when performing many iterations per
+models on the large-scale ImageNet dataset, whereas a multi-step version                        timestep. Intuitively, reusing solutions reduces the number
+of it performs well and our stochastic multi-step version performs (S-JFB)                      of iterations needed at each timestep, so it improves the per-
+even better. The 1-step gradient always unrolls with gradient through a                         formance when the number of iterations is severely limited.
+single iteration (M = 1) of fixed point solving, whereas the stochastic
+version unrolls though m ⇠ U (1, M ) iterations for M = 12.                                     Fig. 6b and Fig. 6c illustrate the functionality of reusing by
+                                                                                                examining at the individual timestep level. For each timestep
+detail, likely due to its ability to spread the computation                                     t, we use the difference between the last two fixed point
+among timesteps, as discussed in Sec. 5.1.                                                      iterations, t , as an indicator for convergence. Reusing de-
+                                                                                                creases t for all timesteps except a few noisiest steps, and
+5. Analysis and Ablation Studies                                                                reusing is most effective at less noisy timesteps. This ob-
+                                                                                                servation aligns with our intuition: Adjacent timesteps with
+5.1. Smoothing Computation Across Timesteps                                                     less noise tend to have highly similar corresponding fixed
+In Fig. 4 and 5, we examine the effect of smoothing de-                                         point systems, where reusing is more effective.
+scribed in Sec. 3.3. We sample across a range of iterations
+                                                                                                5.3. Pre/Post Layers
+and timesteps, keeping the total cost (i.e. the number of
+transformer block forward passes) constant. This explores                                       One of the many ways FPDM differs from prior work on
+the trade-off between the fixed point solving at each timestep                                  DEQs is that we include explicit layers before and after the
+and the discretization of the entire diffusion process.                                         implicit fixed point layer. In Fig. 7, we conduct an ablation
+
+
+                                                                                             79436
+                                                                                 With Reuse
+       150                                                                       Without Reuse
+FID
+
+
+
+
+       100
+
+
+
+
+        50
+
+
+             1     2    3     5      6     8     12    18     26    33      38    54     68
+
+                            Number of Fixed Point Iterations per Timestep
+
+  (a) Performance improvement from reusing solutions across timesteps.
+                                                                                                    Figure 7. Performance of Different Number of Pre/Post Layers. We
+                                                                                                    find that using at least one pre/post layer is always better than none; fewer
+                                                                                                    explicit layers perform better on small compute budgets, whereas more
+                                                                                                    explicit layers can better leverage large budgets.
+
+                                                                                                    between speed and fixed point convergence. As M and
+                                                                                                    N increase, each training step contains more transformer
+                                                                                                    block forward and backward passes on average; the fixed
+                                                                                                    point approximations become more accurate, but each step
+                                                                                                    consumes more time and memory. We find the optimal
+                                                                                                    values of M and N are quite low: 3 or 6. Using too many
+         (b) F.p. convergence for nine timesteps, with and without reuse.                           iterations (e.g. 24) is detrimental as it slow down training.
+                                                                                                        In Tab. 5, we compare to JFB (also called 1-step gradient),
+                                                                                                    which has been used in prior work on DEQs [15], and a
+                                                                                                    multi-step variant of it. We find that training with multiple
+                                                                                                    steps is essential to obtaining good results, and that using a
+                                                                                                    stochastic number of steps delivers further improvements.
+
+                                                                                                    5.5. Limitations
+                                                                                                    The primary limitation of our model is that it performs worse
+                                                                                                    than the fully-explicit DiT model when sampling computa-
+                                                                                                    tion and time are not constrained. The performance gains
+                                                                                                    from our model in resource-constrained settings stem largely
+      (c) Convergence at iteration across timesteps, with and without reuse.                        from smoothing and reusing, but in scenarios with saturated
+      Figure 6. The Impact of Reuse on Fixed Point Accuracy. In (a), we                             timesteps and iterations, the efficacy of these techniques
+      examine sampling performance with and without reusing solutions for
+      different numbers of iterations per timestep; reusing considerably helps                      is reduced. In such cases, our network resembles a trans-
+      when using a few iterations per timestep. In (b) and (c), we examine                          former with weight sharing [31, 40], which underperform
+      the convergence of individual timesteps. Reuse delivers particularly large                    vanilla transformers. Hence, we do not expect to match the
+      benefits for smaller (less-noisy) timesteps. Note that these plots contain 10
+                                                                                                    performance of DiT, which has 8⇥ more parameters, when
+      lines as they are plotted for 10 random batches of 32 images from ImageNet.
+                                                                                                    sampling with an unlimited amount of resources.
+      analysis, training networks with 0, 1, 2, and 4 pre/post layers.
+      We see that using at least 1 explicit pre/post layer is always                                6. Conclusions
+      better than 0. For small compute budgets it is optimal to use 1                               We introduce FPDM, a pioneering diffusion model
+      pre/post layer, and for larger budgets it is optimal to use 2 or                              characterized by fixed point implicit layers. Compared
+      4. Broadly, we observe that using more explicit layers limits                                 to traditional Diffusion Transformers (DiT), FPDM
+      flexibility thereby reducing performance at lower compute                                     significantly reduces model size and memory usage.
+      budgets, but improves performance at higher budgets.                                          In the context of diffusion sampling, FPDM enables
+                                                                                                    us to develop new techniques such as solution reusing
+      5.4. Training Method                                                                          and timestep smoothing, which give FPDM enhanced
+                                                                                                    flexibility in computational allocation during inference.
+      In Tab. 4, we compare versions of Stochastic Jacobian-Free                                    This flexibility makes it particularly effective in scenarios
+      Backpropagation with different values of M and N , the                                        where computational resources are constrained. Future work
+      upper bounds on the number of training iterations with and                                    could explore new ways of leveraging this flexibility as
+      without gradient. M and N reflect a training-time tradeoff                                    well as scaling to larger datasets such as LAION-5B [46].
+
+
+                                                                                                 89437
+                                                                               ers for image recognition at scale. In International Conference
+                                                                               on Learning Representations, 2020. 1, 3
+References                                                                [15] Samy Wu Fung, Howard Heaton, Qiuwei Li, Daniel McKen-
+                                                                               zie, Stanley J. Osher, and Wotao Yin. JFB: jacobian-free back-
+ [1] Ravi P Agarwal, Maria Meehan, and Donal O’regan. Fixed                    propagation for implicit networks. In Thirty-Sixth AAAI Con-
+     point theory and applications. Cambridge university press,                ference on Artificial Intelligence, AAAI 2022, Thirty-Fourth
+     2001. 3                                                                   Conference on Innovative Applications of Artificial Intelli-
+ [2] Namrata Anand and Tudor Achim. Protein structure and se-                  gence, IAAI 2022, The Twelveth Symposium on Educational
+     quence generation with equivariant denoising diffusion prob-              Advances in Artificial Intelligence, EAAI 2022 Virtual Event,
+     abilistic models. arXiv preprint arXiv:2205.15019, 2022.                  February 22 - March 1, 2022, pages 6648–6656. AAAI Press,
+     2                                                                         2022. 2, 3, 4, 5, 8
+ [3] Donald G. Anderson. Iterative procedures for nonlinear inte-         [16] Samir Yitzhak Gadre, Gabriel Ilharco, Alex Fang, Jonathan
+     gral equations. J. ACM, 12(4):547–560, 1965. 2                            Hayase, Georgios Smyrnis, Thao Nguyen, Ryan Marten,
+ [4] Haoran Bai, Di Kang, Haoxian Zhang, Jin-shan Pan, and                     Mitchell Wortsman, Dhruba Ghosh, Jieyu Zhang, Eyal Or-
+     Linchao Bao. Ffhq-uv: Normalized facial uv-texture dataset                gad, Rahim Entezari, Giannis Daras, Sarah M. Pratt, Vivek
+     for 3d face reconstruction. ArXiv, abs/2211.13874, 2022. 1, 2             Ramanujan, Yonatan Bitton, Kalyani Marathe, Stephen
+ [5] Shaojie Bai, J. Zico Kolter, and Vladlen Koltun. Deep equilib-            Mussmann, Richard Vencu, Mehdi Cherti, Ranjay Krishna,
+     rium models. In Advances in Neural Information Processing                 Pang Wei Koh, Olga Saukh, Alexander Ratner, Shuran
+     Systems 32: Annual Conference on Neural Information Pro-                  Song, Hannaneh Hajishirzi, Ali Farhadi, Romain Beaumont,
+     cessing Systems 2019, NeurIPS 2019, December 8-14, 2019,                  Sewoong Oh, Alex Dimakis, Jenia Jitsev, Yair Carmon,
+     Vancouver, BC, Canada, pages 688–699, 2019. 2, 3, 4, 7                    Vaishaal Shankar, and Ludwig Schmidt. Datacomp: In
+ [6] Shaojie Bai, Vladlen Koltun, and J Zico Kolter. Multiscale                search of the next generation of multimodal datasets. CoRR,
+     deep equilibrium models. Advances in Neural Information                   abs/2304.14108, 2023. 1
+     Processing Systems, 33:5238–5250, 2020. 2                            [17] Zhengyang Geng and J. Zico Kolter. Torchdeq: A library
+                                                                               for deep equilibrium models. https://github.com/
+ [7] Shaojie Bai, Zhengyang Geng, Yash Savani, and J Zico Kolter.
+                                                                               locuslab/torchdeq, 2023. 2
+     Deep equilibrium optical flow estimation. In Proceedings of
+                                                                          [18] Zhengyang Geng, Xin-Yu Zhang, Shaojie Bai, Yisen Wang,
+     the IEEE/CVF Conference on Computer Vision and Pattern
+                                                                               and Zhouchen Lin. On training implicit models. In Ad-
+     Recognition, pages 620–630, 2022. 2
+                                                                               vances in Neural Information Processing Systems 34: Annual
+ [8] Shaojie Bai, Zhengyang Geng, Yash Savani, and J. Zico
+                                                                               Conference on Neural Information Processing Systems 2021,
+     Kolter. Deep equilibrium optical flow estimation. In
+                                                                               NeurIPS 2021, December 6-14, 2021, virtual, pages 24247–
+     IEEE/CVF Conference on Computer Vision and Pattern
+                                                                               24260, 2021. 2
+     Recognition, CVPR 2022, New Orleans, LA, USA, June 18-24,
+                                                                          [19] Zhengyang Geng, Ashwini Pokle, and J Zico Kolter. One-
+     2022, pages 610–620. IEEE, 2022. 4
+                                                                               step diffusion distillation via deep equilibrium models. In
+ [9] C. G. Broyden. A class of methods for solving nonlinear                   Thirty-seventh Conference on Neural Information Processing
+     simultaneous equations. Mathematics of Computation, 19                    Systems, 2023. 3
+     (92):577–593, 1965. 2                                                [20] Davis Gilton, Gregory Ongie, and Rebecca Willett. Deep
+[10] Ricky T. Q. Chen, Brandon Amos, and Maximilian Nickel.                    equilibrium architectures for inverse problems in imaging.
+     Learning neural event functions for ordinary differential equa-           IEEE Transactions on Computational Imaging, 7:1123–1133,
+     tions. In 9th International Conference on Learning Represen-              2021. 2
+     tations, ICLR 2021, Virtual Event, Austria, May 3-7, 2021.           [21] Andrzej Granas and James Dugundji. Fixed point theory.
+     OpenReview.net, 2021. 3                                                   Springer, 2003. 3
+[11] Katherine Crowson, Stefan Andreas Baumann, Alex Birch,               [22] Martin Heusel, Hubert Ramsauer, Thomas Unterthiner, Bern-
+     Tanishq Mathew Abraham, Daniel Z Kaplan, and Enrico                       hard Nessler, and Sepp Hochreiter. Gans trained by a two
+     Shippole. Scalable high-resolution pixel-space image syn-                 time-scale update rule converge to a local nash equilibrium.
+     thesis with hourglass diffusion transformers. arXiv preprint              In Advances in Neural Information Processing Systems 30:
+     arXiv:2401.11605, 2024. 1                                                 Annual Conference on Neural Information Processing Sys-
+[12] Jia Deng, Wei Dong, Richard Socher, Li-Jia Li, Kai Li, and Li             tems 2017, December 4-9, 2017, Long Beach, CA, USA, pages
+     Fei-Fei. Imagenet: A large-scale hierarchical image database.             6626–6637, 2017. 5
+     In IEEE Conference on Computer Vision and Pattern Recog-             [23] Jonathan Ho, Ajay Jain, and Pieter Abbeel. Denoising diffu-
+     nition, pages 248–255, 2009. 1, 2                                         sion probabilistic models. In Advances in Neural Information
+[13] Prafulla Dhariwal and Alexander Nichol. Diffusion mod-                    Processing Systems, pages 6840–6851, 2020. 1, 2
+     els beat gans on image synthesis. In Advances in Neural              [24] V.I. Istratescu. Fixed Point Theory: An Introduction. Springer
+     Information Processing Systems, pages 8780–8794, 2021. 2                  Dordrecht, Dordrecht, 1 edition, 1981. eBook Packages
+[14] Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov,                    Springer Book Archive. 3
+     Dirk Weissenborn, Xiaohua Zhai, Thomas Unterthiner,                  [25] Tero Karras, Timo Aila, Samuli Laine, and Jaakko Lehtinen.
+     Mostafa Dehghani, Matthias Minderer, Georg Heigold, Syl-                  Progressive growing of gans for improved quality, stability,
+     vain Gelly, et al. An image is worth 16x16 words: Transform-              and variation. ArXiv, abs/1710.10196, 2017. 1, 2
+
+
+                                                                       99438
+[26] Tero Karras, Miika Aittala, Timo Aila, and Samuli Laine.            [39] Ashwini Pokle, Zhengyang Geng, and J Zico Kolter. Deep
+     Elucidating the design space of diffusion-based generative               equilibrium approaches to diffusion models. Advances in
+     models. arXiv preprint arXiv:2206.00364, 2022. 6                         Neural Information Processing Systems, 35:37975–37990,
+[27] Patrick Kidger, James Morrill, James Foster, and Terry J.                2022. 2
+     Lyons. Neural controlled differential equations for irregular       [40] Machel Reid, Edison Marrese-Taylor, and Yutaka Matsuo.
+     time series. In Advances in Neural Information Processing                Subformer: Exploring weight sharing for parameter efficiency
+     Systems 33: Annual Conference on Neural Information Pro-                 in generative transformers. In Findings of the Association for
+     cessing Systems 2020, NeurIPS 2020, December 6-12, 2020,                 Computational Linguistics: EMNLP 2021, pages 4081–4090,
+     virtual, 2020. 3                                                         2021. 8
+[28] Patrick Kidger, James Foster, Xuechen Li, and Terry J. Lyons.       [41] Robin Rombach, Andreas Blattmann, Dominik Lorenz,
+     Neural sdes as infinite-dimensional gans. In Proceedings                 Patrick Esser, and Björn Ommer. High-resolution image
+     of the 38th International Conference on Machine Learning,                synthesis with latent diffusion models. In IEEE Conference
+     ICML 2021, 18-24 July 2021, Virtual Event, pages 5453–5463.              on Computer Vision and Pattern Recognition, pages 10684–
+     PMLR, 2021. 3                                                            10695, 2022. 1, 2, 3, 5
+[29] Diederik P. Kingma and Max Welling. Auto-encoding varia-            [42] Olaf Ronneberger, Philipp Fischer, and Thomas Brox. U-net:
+     tional bayes. In 2nd International Conference on Learning                Convolutional networks for biomedical image segmentation.
+     Representations, ICLR 2014, Banff, AB, Canada, April 14-16,              In Medical Image Computing and Computer-Assisted Inter-
+     2014, Conference Track Proceedings, 2014. 2, 3, 5                        vention - MICCAI 2015 - 18th International Conference Mu-
+[30] Alex Krizhevsky, Ilya Sutskever, and Geoffrey E. Hinton. Im-             nich, Germany, October 5 - 9, 2015, Proceedings, Part III,
+     agenet classification with deep convolutional neural networks.           2015. 1, 2
+     In Advances in Neural Information Processing Systems 25:            [43] W. Rudin. Principles of Mathematical Analysis. McGraw-
+     26th Annual Conference on Neural Information Processing                  Hill, 3 edition, 1976. 5
+     Systems 2012. Proceedings of a meeting held December 3-6,           [44] Tim Salimans and Jonathan Ho. Progressive distillation for
+     2012, Lake Tahoe, Nevada, United States, pages 1106–1114,                fast sampling of diffusion models. In International Confer-
+     2012. 3                                                                  ence on Learning Representations, 2021. 5
+[31] Zhenzhong Lan, Mingda Chen, Sebastian Goodman, Kevin                [45] Christoph Schuhmann, Richard Vencu, Romain Beaumont,
+     Gimpel, Piyush Sharma, and Radu Soricut. Albert: A lite bert             Robert Kaczmarczyk, Clayton Mullis, Aarush Katta, Theo
+     for self-supervised learning of language representations. In             Coombes, Jenia Jitsev, and Aran Komatsuzaki. LAION-
+     International Conference on Learning Representations, 2019.              400M: open dataset of clip-filtered 400 million image-text
+     8                                                                        pairs. CoRR, abs/2111.02114, 2021. 1
+[32] Yann LeCun, Léon Bottou, Yoshua Bengio, and Patrick                [46] Christoph Schuhmann, Romain Beaumont, Richard Vencu,
+     Haffner. Gradient-based learning applied to document recog-              Cade Gordon, Ross Wightman, Mehdi Cherti, Theo Coombes,
+     nition. Proc. IEEE, 86(11):2278–2324, 1998. 3                            Aarush Katta, Clayton Mullis, Mitchell Wortsman, Patrick
+[33] Shanchuan Lin, Bingchen Liu, Jiashi Li, and Xiao Yang. Com-              Schramowski, Srivatsa Kundurthy, Katherine Crowson, Lud-
+     mon diffusion noise schedules and sample steps are flawed.               wig Schmidt, Robert Kaczmarczyk, and Jenia Jitsev. LAION-
+     CoRR, abs/2305.08891, 2023. 5                                            5B: an open large-scale dataset for training next generation
+[34] Luping Liu, Yi Ren, Zhijie Lin, and Zhou Zhao. Pseudo                    image-text models. In NeurIPS, 2022. 1, 8
+     numerical methods for diffusion models on manifolds. In             [47] Jiaming Song, Chenlin Meng, and Stefano Ermon. Denoising
+     International Conference on Learning Representations, 2021.              diffusion implicit models. In International Conference on
+     2                                                                        Learning Representations, 2020. 1, 2
+[35] Cheng Lu, Yuhao Zhou, Fan Bao, Jianfei Chen, Chongxuan              [48] Yang Song and Stefano Ermon. Generative modeling by
+     Li, and Jun Zhu. Dpm-solver: A fast ode solver for diffu-                estimating gradients of the data distribution. Proc. NeurIPS,
+     sion probabilistic model sampling in around 10 steps. arXiv              32, 2019. 1, 2
+     preprint arXiv:2206.00927, 2022. 6                                  [49] Yang Song and Stefano Ermon. Improved techniques for
+[36] Alex Nichol, Prafulla Dhariwal, Aditya Ramesh, Pranav                    training score-based generative models. Proc. NeurIPS, 33:
+     Shyam, Pamela Mishkin, Bob McGrew, Ilya Sutskever, and                   12438–12448, 2020. 2
+     Mark Chen. Glide: Towards photorealistic image generation           [50] Yang Song, Jascha Sohl-Dickstein, Diederik P Kingma, Ab-
+     and editing with text-guided diffusion models. arXiv preprint            hishek Kumar, Stefano Ermon, and Ben Poole. Score-based
+     arXiv:2112.10741, 2021. 2                                                generative modeling through stochastic differential equations.
+[37] Alexander Quinn Nichol, Prafulla Dhariwal, Aditya Ramesh,                In International Conference on Learning Representations,
+     Pranav Shyam, Pamela Mishkin, Bob Mcgrew, Ilya Sutskever,                2021. 2
+     and Mark Chen. GLIDE: Towards photorealistic image gen-             [51] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkor-
+     eration and editing with text-guided diffusion models. In                eit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, and Illia
+     International Conference on Machine Learning, pages 16784–               Polosukhin. Attention is all you need. In Advances in Neural
+     16804, 2022. 1                                                           Information Processing Systems 30: Annual Conference on
+[38] William Peebles and Saining Xie. Scalable diffusion models               Neural Information Processing Systems 2017, December 4-9,
+     with transformers. CoRR, abs/2212.09748, 2022. 1, 2, 5, 6                2017, Long Beach, CA, USA, pages 5998–6008, 2017. 1, 3
+
+
+                                                                      10
+                                                                       9439
+[52] J. Wallis. A Treatise of Algebra, Both Historical and Practical.
+     John Playford, 1685. 3
+[53] Daniel Watson, William Chan, Jonathan Ho, and Moham-
+     mad Norouzi. Learning fast samplers for diffusion models
+     by differentiating through sample quality. In International
+     Conference on Learning Representations, 2021. 2
+[54] Fisher Yu, Yinda Zhang, Shuran Song, Ari Seff, and Jianx-
+     iong Xiao. Lsun: Construction of a large-scale image
+     dataset using deep learning with humans in the loop. ArXiv,
+     abs/1506.03365, 2015. 1, 2
+[55] Qinsheng Zhang and Yongxin Chen. Fast sampling of dif-
+     fusion models with exponential integrator. arXiv preprint
+     arXiv:2204.13902, 2022. 6
+
+
+
+
+                                                                        11
+                                                                         9440
+

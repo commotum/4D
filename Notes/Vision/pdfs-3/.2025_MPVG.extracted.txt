@@ -1,0 +1,762 @@
+                                    The Thirty-Ninth AAAI Conference on Artificial Intelligence (AAAI-25)
+
+
+
+
+                  Maximizing the Position Embedding for Vision Transformers
+                                 with Global Average Pooling
+                                         Wonjun Lee1,2 , Bumsub Ham1 , Suhyun Kim2 *
+                                                    1
+                                                 Yonsei University, Republic of Korea
+                                     2
+                                     Korea Institute of Science and Technology, Republic of Korea
+                                  {velpegor, bumsub.ham}@yonsei.ac.kr, dr.suhyun.kim@gmail.com
+
+
+                             Abstract
+  In vision transformers, position embedding (PE) plays a cru-
+  cial role in capturing the order of tokens. However, in vi-
+  sion transformer structures, there is a limitation in the expres-
+  siveness of PE due to the structure where position embed-
+  ding is simply added to the token embedding. A layer-wise
+  method that delivers PE to each layer and applies indepen-
+  dent Layer Normalizations for token embedding and PE has
+  been adopted to overcome this limitation. In this paper, we
+  identify the conflicting result that occurs in a layer-wise struc-
+  ture when using the global average pooling (GAP) method
+  instead of the class token. To overcome this problem, we pro-
+  pose MPVG, which maximizes the effectiveness of PE in a
+  layer-wise structure with GAP. Specifically, we identify that                                               Then,
+  PE counterbalances token embedding values at each layer in                                Original          Layer-wise + GAP ?        Layer-wise
+                                                                                     (Class token -> GAP)                          (Class token -> GAP)
+  a layer-wise structure. Furthermore, we recognize that the                               +0.26%                                        -0.16%
+  counterbalancing role of PE is insufficient in the layer-wise
+                                                                                                                                             +0.73%
+  structure, and we address this by maximizing the effective-
+                                                                                                                                   Proposed Method
+  ness of PE through MPVG. Through experiments, we demon-                            Original -> Layer-wise
+                                                                                                                                       Layer-wise
+                                                                                          (Class token)
+  strate that PE performs a counterbalancing role and that main-                           +0.80%                                    (GAP + MPVG)
+  taining this counterbalancing directionality significantly im-
+  pacts vision transformers. As a result, the experimental re-
+  sults show that MPVG outperforms existing methods across                     Figure 1: The conflicting result between the GAP method
+  vision transformers on various tasks.                                        and the Layer-wise method. In DeiT-Ti, using the GAP
+                                                                               method and the Layer-wise method separately results in per-
+                                                                               formance improvements, but combining these two methods
+                         Introduction                                          leads to a decrease in performance. As a result, MPVG re-
+Recently, vision transformers have become essential archi-                     solves this phenomenon between the GAP and Layer-wise
+tecture in the field of computer vision due to their superior                  structure, maximizing the effect of PE.
+performance, surpassing CNNs in various tasks such as im-
+age classification, object detection, and semantic segmenta-
+tion. This superiority has led to extensive research into nu-
+merous elements of vision transformer architecture, starting                   method has been widely adopted in vision transformers (Liu
+with ViT (Dosovitskiy et al. 2020).                                            et al. 2021; Chu et al. 2021a; Chang et al. 2023; Zhai et al.
+   Among the research on vision transformers, image repre-                     2022).
+sentation methods for class prediction have been studied. In                      Another research topic in vision transformers is position
+ViT, the class token is used to perform image representation,                  embedding (PE). PE plays a crucial role in providing po-
+and the output of this token is then used to make class predic-                sitional information of tokens in the vision transformer, as
+tions via Multi-Layer Perceptron (MLP) (Dosovitskiy et al.                     the self-attention mechanism has an inherent deficiency in
+2020). However, in several vision transformers, global aver-                   capturing the ordering of input tokens (Wu et al. 2021; Xu
+age pooling (GAP) has been preferred over the class token                      et al. 2024). In the original vision transformer, the expres-
+method due to its translation-invariant characteristics and su-                siveness of the PE is limited due to its structure, where PE
+perior performance (Chu et al. 2021b). As a result, the GAP                    is simply added to the token embedding before being input
+    * Corresponding author.                                                    into the first layer. To address this problem, each layer has
+Copyright © 2025, Association for the Advancement of Artificial                independent Layer Normalizations (LNs) for the token em-
+Intelligence (www.aaai.org). All rights reserved.                              bedding and PE, with PE being gradually delivered across
+
+
+                                                                       18154
+all the layers (Yu et al. 2023). We refer to this method as                     effective for vision transformers on various tasks such as
+”Layer-wise”. The Layer-wise structure resolves the exist-                      image classification, semantic segmentation, and object
+ing limitations and enhances the expressiveness of PE.                          detection.
+   Interestingly, as shown in Fig 1, we observed results
+that differed from our expectations between the class to-                                         Related Work
+ken and GAP methods with PE delivered in the Layer-wise
+structure. On image classification, the GAP method demon-                    Vision Transformers
+strates superior performance compared to the class token                     The vision transformer design is adapted from Trans-
+method (Chu et al. 2021b). Additionally, the Layer-wise                      former (Vaswani et al. 2017), which was designed for nat-
+structure also improves the performance of vision transform-                 ural language processing (NLP). This adaptation makes it
+ers by enhancing the expressiveness of PE (Yu et al. 2023).                  suitable for computer vision tasks such as image classifica-
+However, we observed a conflicting result where perfor-                      tion (Dosovitskiy et al. 2020; Touvron et al. 2021; Liu et al.
+mance decreased when the GAP and Layer-wise structure                        2021), object detection (Carion et al. 2020; Zhu et al. 2020),
+were applied together. Therefore, to overcome the conflict-                  and semantic segmentation (Zheng et al. 2021; Wang et al.
+ing results, we propose a method to maximize the effective-                  2021; Strudel et al. 2021).
+ness of PE in the GAP approach.
+                                                                             Class Token & Global Average Pooling ViT (Dosovit-
+   We observe that PE exhibits distinct characteristics at
+                                                                             skiy et al. 2020) conducts ablation studies comparing the
+each layer in the Layer-wise structure, which are not seen in
+                                                                             class token and GAP. Additionally, there are other studies
+the original vision transformer. As shown in Fig 2, we find
+                                                                             on the use of GAP and class tokens in vision transform-
+that PE tends to counterbalance the values of token embed-
+                                                                             ers (Raghu et al. 2021; Chu et al. 2021b). Studies such as
+ding passing through the layers in the Layer-wise structure.
+                                                                             CeiT (Yuan et al. 2021a) and T2T-ViT (Yuan et al. 2021b)
+Additionally, we observe that this tendency becomes more
+                                                                             use class token, while others like Swin Transformer (Liu
+pronounced as the layers deepen. We also discover that in
+                                                                             et al. 2021) and CPVT (Chu et al. 2021b) adapt GAP.
+the Layer-wise structure, while the token embedding values
+                                                                             CPVT achieves performance improvements by using GAP
+maintain the counterbalanced effect by PE as they progress
+                                                                             instead of the class token. Although the class token is not
+through the layers, as shown in Fig 2-(b), the directional bal-
+                                                                             inherently translation-invariant, it can become so through
+ance of the token embedding is not adequately compensated
+                                                                             training. By adopting GAP, which is inherently translation-
+by PE after passing through the last layer, even though it
+                                                                             invariant, better improvements in image classification tasks
+is still maintained. Through this observation, we establish
+                                                                             are achieved (Chu et al. 2021b). Furthermore, GAP results
+two hypotheses: (1) in the Layer-wise structure, PE initially
+                                                                             in even less computational complexity because it eliminates
+provides position information, but as the layers deepen, PE
+                                                                             the need to compute the attention interaction between the
+plays a role in counterbalancing the values of token embed-
+                                                                             class token and the image patches.
+ding; (2) after the last layer, it is beneficial for vision trans-
+formers to maintain the directional balance by counterbal-                   Position Embeddings in Vision Transformers
+ancing the token embedding values with PE.
+   To validate these hypotheses, we simply add PE to the                     Absolute Position Embedding In the transformer, abso-
+Layer Normalization (LN) that exists outside the layers and                  lute position embedding is generated through a sinusoidal
+before the MLP head. We call this LN as ”Last LN”. We                        function and added to the input token embedding (Vaswani
+refer to the method that uses an improved Layer-wise struc-                  et al. 2017). The sinusoidal functions are designed to give
+ture, different from the conventional Layer-wise structure,                  the position embedding locally consistent similarity, which
+and does not deliver PE to the Last LN as PVG. Additionally,                 helps vision transformers focus more effectively on tokens
+we refer to the method that maximizes the role of PE by de-                  that are close to each other in the input sequence. This local
+livering it to the Last LN as MPVG. By comparing PVG and                     consistency enhances the model’s ability to capture spatial
+MPVG, we demonstrate that MPVG effectively maximizes                         relationships and patterns (Vaswani et al. 2017).
+PE and that maintaining the counterbalancing directionality                     Besides sinusoidal positional embedding, position em-
+of PE is beneficial for vision transformers. Our experiments                 bedding can also be learnable. Learnable position embed-
+validate our hypothesis and demonstrate that MPVG outper-                    ding is created through training parameters, which are ini-
+forms other methods. The results demonstrate that MPVG                       tialized with a fixed-dimensional tensor and updated along
+consistently performs well for vision transformers.                          with the model’s parameters during training. Recently,
+   In this paper, our contributions are as follows:                          many models have adopted absolute position embedding
+                                                                             due to their effectiveness in encoding positional informa-
+1. We propose a simple yet effective method called MPVG,                     tion (Dosovitskiy et al. 2020; Touvron et al. 2021; Liu et al.
+   which maximizes the effect of PE in the GAP method.                       2021).
+   We show that MPVG leads to better performance in vi-
+   sion transformers.                                                        Relative Position Embedding In addition to absolute po-
+                                                                             sition embedding, there is also relative position embed-
+2. We provide an analysis of the phenomenon observed in                      ding (Shaw, Uszkoreit, and Vaswani 2018). Relative PE en-
+   PE when using the Layer-wise structure and offer in-                      codes the relative position information between tokens. The
+   sights into the role of PE.                                               first to propose relative PE in computer vision was (Shaw,
+3. Through experiments, we verify that MPVG is generally                     Uszkoreit, and Vaswani 2018). Furthermore, (Bello et al.
+
+
+                                                                     18155
+                                                                                 Layer 𝑁
+
+                                                                   …                                    …
+
+
+
+
+                                                         Layer 1
+
+
+
+
+                                                                                                                                Last LN
+                                 +
+
+
+
+
+                                                                                MSA
+
+
+
+
+                                                                                                                                                  Head
+                                                                                                                 Layer
+                                                                                                MLP
+
+
+
+
+                                                                                                                                                  MLP
+                                                                         LN
+
+
+
+
+                                                                                         LN
+                         Position   Token
+                                                                              Visualization              Visualization
+                        Embedding Embedding
+                                                                                                                                                         After Last Layer
+            Layer 1              Layer 4                           Layer 7                    Layer 9                    Layer 11
+                                                                                                                                                                            T
+                                                                                                                                                                            o
+                                                                                                                                                                            k
+                                                                                                                                                                            e
+                                                                                                                                                                            n
+
+                                                                                                                                                           Dimension
+                                                                                      (a) Original
+
+                                                                                 Layer 𝑁
+                                                                                                                                                           After Last Layer
+                                                       Layer 1     …                                    …
+
+
+
+
+                                                                                                                              Last LN
+                                                                                MSA
+
+
+
+
+                                                                                                                                                  Head
+                                                                                                                Layer
+                                                                                                MLP
+
+
+
+
+                                                                                                                                                  MLP
+                                                                        LN
+
+
+
+
+                                                                                        LN
+                                                                                                                                                                w/o PE
+
+                          Position   Token
+                         Embedding Embedding
+                                                                             Visualization              Visualization
+
+                      Layer 1              Layer 4                           Layer 7                  Layer 9                   Layer 11
+
+       Token
+     Embedding
+
+
+                        +                       +                               +                       +                                 +                     with PE
+
+      Position
+     Embedding
+
+     𝐂𝐨𝐫𝐫𝐞𝐥𝐚𝐭𝐢𝐨𝐧       -0.37                   -0.67                          -0.82                   -0.85                               -0.95
+
+
+
+
+                                                  (b) Layer-wise, with PE / without PE in Last LN
+
+Figure 2: The heatmaps depict the characteristics of each layer in both the original structure and the Layer-wise structure with
+the GAP method. For the Layer-wise structure, the heatmaps illustrate cases both with and without PE in the Last LN. For each
+heatmap based on DeiT-Ti, the x-axis represents the dimension of DeiT-Ti (256), and the y-axis represents the number of tokens
+(196). In both (a) and the top row (token embedding) of (b), the heatmaps represent the average value of token embedding in
+each layer, while the bottom row of (b) shows the heatmap of PE. The correlation in (b) refers to the correlation coefficient
+between token embedding and position embedding.
+
+
+2019) proposed a 2-D relative position encoding for image                                        effectively leverages the characteristics of PE in the Layer-
+classification that showed superior performance compared                                         wise structure.
+to traditional 2-D sinusoidal embedding. This relative en-
+coding captures spatial relationships between tokens more                                        Preliminary: Absolute Position Embedding
+effectively. In related research, iRPE (Wu et al. 2021) im-
+                                                                                                 The method of absolute position embedding used in vision
+proves relative PE by incorporating query interactions and
+                                                                                                 transformers is as follows. As shown in Fig 3-(a), PE is
+relative distance modeling in self-attention. RoPE (Heo et al.
+                                                                                                 added to the token embedding before they are input into the
+2024) introduces flexible sequence lengths, decaying inter-
+                                                                                                 layer. This can be expressed as follows:
+token dependency, and relative position encoding in linear
+self-attention.                                                                                                     x0 = [xcls ; p1 ; p2 ; . . . pN ; ] + pos,                  (1)
+
+                        Methodology                                                              where p and pos represent the patch and position embed-
+                                                                                                 ding, respectively. N represents the number of patches, cal-
+In this section, we first explain the absolute position em-                                      culated as HW/P 2 , where H and W are the height and
+bedding and then provide a detailed overview of the Layer-                                       width of the image, and P × P is the resolution of each
+wise structure (Yu et al. 2023). Next, we introduce PVG, an                                      patch. The combined token embedding and PE, denoted as
+improved Layer-wise structure, along with MPVG, which                                            x , can be expressed in a layer as follows:
+
+
+                                                                                       18156
+                  Head                              Head                                            Head                                       Head
+                  Class                              Class
+                  Token                                                                              GAP                                        GAP
+                                                     Token
+
+             𝐋𝐍(𝒙𝑳+𝟏 )                         𝐋𝐍(𝒙𝑳+𝟏 )                                                                                     𝐋𝐍 𝒙𝑳+𝟏
+                                                                                                  𝐋𝐍(𝒙𝑳+𝟏 )
+                                                                                                                                            +𝐋𝐍 ′ (𝒑𝒐𝒔𝟎 )
+
+             Layer 𝑳                               Layer 𝑳                  𝑝𝑜𝑠𝑙                   Layer 𝑳                  𝑝𝑜𝑠𝑙−1            Layer 𝑳              𝑝𝑜𝑠𝑙−1
+                    ...
+
+
+
+
+                                                                                                       ...
+
+
+
+
+                                                                                                                                                  ...
+                                                       ...
+
+
+
+
+                                                                                                                               ...
+
+
+
+
+                                                                                                                                                                    ...
+                                                                             ...
+             Layer 1
+                                                   Layer 1
+                     𝒙𝟏                                                                              MLP                                        MLP
+                                                       𝒙𝟏                                          𝐋𝐍𝟏′′ (𝒙′𝟏 )                               𝐋𝐍𝟏′′ (𝒙′𝟏 )
+                                                                                                                              𝑝𝑜𝑠1                                  𝑝𝑜𝑠1
+                   MLP                                                                                       Layer 1                                    Layer 1
+                                                     MLP                    𝑝𝑜𝑠1
+                 𝐋𝐍𝟎′ (𝒙′𝟎 )                                                                         MSA                                        MSA
+                                                   𝐋𝐍𝟎′′ (𝒙′𝟎 )
+                                 Layer 0                          Layer 0                          𝐋𝐍𝟏 𝒙𝟏                                     𝐋𝐍𝟏 𝒙𝟏
+                                                                                                 + 𝐋𝐍𝟏′ (𝒑𝒐𝒔𝟎 )                             + 𝐋𝐍𝟏′ (𝒑𝒐𝒔𝟎 )
+                   MSA
+                                                     MSA
+                 𝐋𝐍𝟎 (𝒙𝟎 )
+                                                                                                       𝒙𝟏                                        𝒙𝟏
+                                                𝐋𝐍𝟎 𝒙𝟎
+                                              + 𝐋𝐍𝟎′ (𝒑𝒐𝒔𝟎 )
+                    𝒙𝟎                                                                             Layer 0                                    Layer 0
+                                                       𝒙𝟎                   𝑝𝑜𝑠0                                              𝑝𝑜𝑠0
+                                                                                                                                                                    𝑝𝑜𝑠0
+       Token                    Position        Token                 Position              Token                  Position                Token              Position
+     Embedding                 Embedding      Embedding              Embedding            Embedding               Embedding              Embedding           Embedding
+             (a) ViT                                         (b) LaPE                                       (c) PVG                                   (d) MPVG
+
+Figure 3: The overview of the various methods. (a) ViT. (b) LaPE (Yu et al. 2023). (c) PVG, an improved Layer-wise structure.
+Specifically, we adopt a structure where the token embedding and PE are added before entering layer 0 and a hierarchical
+structure for delivering PE, excluding layer 0. (d) MPVG. The main difference from PVG is whether the initial PE is delivered
+to the Last LN.
+
+
+                                                                                                                  (
+         x′l = MSA(LNl (xl )) + xl                 (l = 0 . . . L),              (2)                                  pos0 = pos
+                                                                                                                                 ′                                          (7)
+                                      ′
+                                                                                                                      posl = LNl−1 (posl−1 )         (l = 1 . . . L)
+       xl+1 = MLP(LNl (x′l )) + x′l                  (l = 0 . . . L),            (3)
+                                                                                               Maximizing the Position Embedding with GAP
+                                   y = LN(xL+1 )                                 (4)           In this section, we propose two methods, MPVG and PVG,
+where LN, LN’, and LN” represent different Layer Normal-                                       to validate our hypothesis. In Fig 2-(b), we observed that,
+izations, Multi-head Self-Attention is denoted as MSA, and                                     in Layer-wise structure, the effect of PE in counterbalanc-
+Multi-Layer Perceptron is denoted as MLP. xL+1 refers to                                       ing the values of token embedding(x ) becomes more pro-
+the value after passing through the last layer L.                                              nounced as the layers deepen, as evidenced by the corre-
+                                                                                               lation between the two. However, in Layer-wise structure,
+Preliminary: Layer-wise Structure                                                              although the directionality of the token embedding is main-
+                                                                                               tained outside the layer, there is no PE to counterbalance that
+LaPE (Yu et al. 2023) points out problems with the join-                                       value. Therefore, we validate our hypothesis by comparing
+ing method that position embedding and token embedding                                         MPVG, which delivers PE to the Last LN, with PVG, which
+in the vision transformers. As shown in Eq. (1), when PE                                       does not.
+is added to the token embedding before the first layer, and
+                                                                                                  We remove the class token as we adapt the Global Aver-
+the same LN is applied to both the token embedding and PE
+                                                                                               age Pooling (GAP) method. Although we use the Layer-wise
+as in Eq. (2), they share the same affine parameters in LN.
+                                                                                               structure, we modify specific details. Specifically, we com-
+This method limits the expressiveness of PE. Therefore, the
+                                                                                               bine two structural approaches: (1) adding token embedding
+Layer-wise structure is used to resolve these problems. This
+                                                                                               and PE before inputting the layer. (2) delivering PE to each
+can be expressed as follows:
+                                                                                               layer except the 0th layer. We call this method as PVG. In
+                                                                                               PVG method, as shown in Figure 3-(c), is as follows:
+                     x0 = [xcls ; p1 ; p2 ; . . . pN ; ],                        (5)
+                                               ′                                                                        x0 = [p1 ; p2 ; . . . pN ; ] + pos,                 (8)
+          x′l = MSA(LNl (xl ) + LNl (posl )) + xl                                (6)
+Eq. (1) is modified to Eq. (5) and Eq. (2) to Eq. (6). In                                               
+Eq. (6), the Layer-wise structure uses independent LN for                                                MSA(LN0 (x0 )) + x0                                      if l = 0
+                                                                                               x′l =
+token embedding(x ) and PE. PE is delivered in each layer as                                             MSA(LNl (xl ) + LN′l (posl−1 )) + xl                     if 1 ≤ l ≤ L
+follows :                                                                                                                                                                   (9)
+
+
+                                                                                       18157
+                                                                                                                             Top-1
+           (                                                                       Model            Method    #Params (M)
+               pos0 = pos                                                                                                   Acc (%)
+                         ′                                (10)
+               posl = LNl (posl−1 )   (l = 1 . . . L)                                               Default      5.717       72.14
+                                                                                  DeiT-Ti            LaPE        5.721       72.94
+The subsequent process is the same as in Eq. (3) and Eq. (4).
+In MPVG, we modify Eq. (4) as follows after going through                   (Touvron et al. 2021)    PVG         5.721       73.17
+the process of PVG:                                                                                 MPVG         5.721       73.51
+                                                                                                    Default     22.050       79.81
+                                       ′
+                 y = LN(xL+1 ) + LN (pos0 )               (11)                    DeiT-S             LaPE       22.059       80.39
+   To verify whether maintaining the counterbalance effect                  (Touvron et al. 2021)    PVG        22.058       80.38
+of PE is beneficial, we deliver PE to the Last LN in PVG,                                           MPVG        22.059       80.61
+as shown in Eq. (11). We refer to this method as MPVG. In                                           Default     86.567       81.85
+the next section, we verify the superiority of MPVG by com-                       DeiT-B             LaPE       86.586       82.15
+paring the two methods. Also, we show that MPVG outper-                     (Touvron et al. 2021)    PVG        86.583       82.21
+forms previous approaches through experiments across var-                                           MPVG        86.584       82.42
+ious vision transformers and datasets.
+                                                                                                    Default     28.589       81.37
+                                                                                  Swin-Ti            LaPE       28.599       81.48
+                        Experiment
+                                                                              (Liu et al. 2021)      PVG        28.598       81.52
+Training Settings All experiments are conducted on
+                                                                                                    MPVG        28.599       81.64
+an RTX 4090 with 4 GPUs using AdamW opti-
+mizer (Loshchilov and Hutter 2019), while DeiT-B is trained                                         Default      6.356       76.62
+on an RTX 4090 with 8 GPUs.                                                       CeiT-Ti            LaPE        6.361       76.89
+                                                                             (Yuan et al. 2021a)     PVG         6.361       77.14
+Image Classification                                                                                MPVG         6.361       77.20
+We evaluate the performance of our methods on ImageNet-                                             Default      4.310       71.76
+1K (Deng et al. 2009) and CIFAR-100 (Krizhevsky, Hin-                            T2T-ViT-7           LaPE        4.313       72.01
+ton et al. 2009). On ImageNet-1K, we conduct experiments                     (Yuan et al. 2021b)     PVG         4.312       71.91
+with DeiT (Touvron et al. 2021), Swin (Liu et al. 2021),                                            MPVG         4.313       72.28
+CeiT (Yuan et al. 2021a), and T2T-ViT (Yuan et al. 2021b).
+In the case of Swin, due to its staged architecture that gener-           Table 1: Top-1 accuracy comparison with various methods,
+ates hierarchical representations with the same feature map               using DeiT-T, DeiT-S, DeiT-B, Swin-Ti, CeiT-Ti, T2T-ViT-7
+resolution as convolutional networks, both PVG and MPVG                   on ImageNet-1K.
+exceptionally include layer 0. All vision transformers are
+trained on 224×224 resolution images for 300 epochs, ex-
+                                                                                                                             Top-1
+cept T2T-ViT-7, which is trained for 310 epochs.                                   Model            Method    #Param (M)
+                                                                                                                            Acc (%)
+   On CIFAR-100, we conduct experiments using ViT-
+Lite (Hassani et al. 2022) and T2T-ViT-7 (Yuan et al. 2021b).                                       Default      3.740       74.90
+ViT-Lite was trained for 310 epochs on 32×32 resolution im-                      ViT-Lite            LaPE        3.744       75.52
+                                                                            (Hassani et al. 2022)    PVG         3.742       76.67
+ages with a batch size of 128. In the case of T2T-ViT-7, we
+                                                                                                    MPVG         3.743       76.87
+transfer our pretrained T2T-ViT to downstream datasets such
+                                                                                                    Default      4.078       83.22
+as CIFAR-100 and finetune the pretrained T2T-ViT-7 for 60
+                                                                                T2T-ViT-7            LaPE        4.082       83.41
+epochs with a batch size of 128.                                            (Yuan et al. 2021b)      PVG         4.081       83.39
+   As shown in Table 1, For MPVG, the performance on                                                MPVG         4.081       83.51
+DeiT-Ti improved from 72.14% to 73.51%, representing
+an increase of approximately 1.37%. For DeiT-S, the per-                  Table 2: Top-1 accuracy comparison with various methods,
+formance improved from 79.81% to 80.61%, an increase                      using ViT-Lite and T2T-ViT-7 on CIFAR-100. In the case of
+of approximately 0.80%. Additionally, there were perfor-                  T2T-ViT, the results are based on fine-tuning the pretrained
+mance improvements of 0.57% in DeiT-B, 0.27% in Swin-                     model on the downstream dataset, CIFAR-100.
+Ti, 0.58% in CeiT, and 0.52% in T2T-ViT. Overall, MPVG
+outperforms the existing methods in all cases. Moreover, we
+confirm that MPVG consistently demonstrates superior per-
+                                                                          shows a 0.2% and 0.12% improvement over PVG for ViT-
+formance compared to PVG across various vision transform-
+                                                                          Lite and T2T-ViT-7, respectively. Overall, MPVG outper-
+ers.
+                                                                          forms existing methods across all cases on CIFAR-100.
+   As shown in Table 2, MVPG achieves overall perfor-
+mance improvements on CIFAR-100. Specifically, MPVG
+improves the performance of ViT-Lite by 1.97%, from                       Object Detection
+74.90% to 76.87%, and enhances the performance of T2T-                    On object detection, we evaluate our methods on COCO
+ViT-7 by 0.29% over the default. Additionally, MPVG                       2017 (Lin et al. 2014). To demonstrate the effectiveness of
+
+
+                                                                  18158
+      Model         Pre-trained    Method    APbox / APmask
+                                   Default    45.9 / 41.0                                         0.9
+                                    LaPE      46.2 / 41.2
+
+
+
+
+                                                                        Correlation Coefficient
+  ViT-Adapter-Ti      DeiT-Ti
+                                    PVG       46.1 / 41.2                                         0.8
+                                   MPVG       46.5 / 41.4
+                                                                                                  0.7
+Table 3: Performance comparison of Object Detection on
+COCO2017. For comparison, DeiT-Ti model pretrained on
+ImageNet-1K with each method is used.                                                             0.6                                                                             DeiT-Ti
+                                                                                                                                                                                  DeiT-S
+         Model          Pre-trained    Method    mIoU                                             0.5                                                                             CeiT-Ti
+                                       Default   40.55                                                                                                                            T2T-ViT-7
+                                        LaPE     41.42                                                    2       3             4             5   6        7    8     9      10     11     12
+     ViT-Adapter-Ti      DeiT-Ti                                                                                                                  Layer Index
+                                        PVG      41.07
+                                       MPVG      41.69
+                                                                           Figure 4: Correlation coefficient between token embedding
+Table 4: Performance comparison of Semantic Segmentation                   and position embedding in Layer-wise. Each token embed-
+on ADE20K. For comparison, DeiT-Ti model pretrained on                     ding and position embedding is based on the values after
+ImageNet-1K with each method is used.                                      applying LN. DeiT-Ti, DeiT-S, and CeiT-Ti each have a to-
+                                                                           tal of 12 layers, but T2T-ViT-7 has 7 layers.
+
+our method on object detection tasks, we select the ViT-
+                                                                                                Token
+Adapter-Ti (Chen et al. 2022) model based on Mask R-
+
+
+
+
+                                                                                                                      Layer 0
+
+
+                                                                                                                                    Layer 1
+                                                                                              Embedding
+
+
+
+
+                                                                                                                                                                      Head
+                                                                                                                                                                      MLP
+                                                                                                                                              …
+
+
+
+
+                                                                                                                                                                GAP
+                                                                                                                                                   Layer
+                                                                                                                                                                                  72.40%
+
+
+
+
+                                                                                                                                                           LN
+                                                                                                              ⊕
+CNN (He et al. 2017) in MMDetection framework (Chen                                            Position
+et al. 2019). Additionally, we use the default settings and                                   Embedding
+
+train it for 36 epochs using the 3x+MS(multi-scale training)                                                                                  (a) DeiT-Ti + GAP                      -0.26%
+schedule. As shown in Table 3, MPVG achieves improve-
+ments of +0.6 in box AP and +0.5 in mask AP compared
+                                                                                                Token
+to the default setting. MPVG, in particular, demonstrates su-
+                                                                                                                  Layer 0
+
+
+                                                                                                                                    Layer 1
+                                                                                              Embedding
+
+
+
+
+                                                                                                                                                                      Head
+                                                                                                                                                                      MLP
+                                                                                                                                              …
+
+
+
+
+                                                                                                                                                                GAP
+                                                                                                                                                   Layer
+                                                                                                                                                                                  72.14%
+
+
+
+
+                                                                                                                                                           LN
+                                                                                                              ⊕
+perior performance with an increase of +0.5 in box AP and                                      Position
++0.4 in mask AP over PVG.                                                                     Embedding
+
+
+                                                                                                                                (b) DeiT-Ti + GAP + Last LN(𝑝𝑜𝑠0 )
+Semantic Segmentation
+On semantic segmentation, we evaluate our methods on                       Figure 5: Comparison of two methods on DeiT-Ti. (a) Struc-
+ADE20K (Zhou et al. 2019). We select the ViT-Adapter-                      ture with only GAP applied, showing 72.40% performance;
+Ti (Chen et al. 2022) model based on UperNet (Xiao et al.                  and (b) Structure with GAP and position embedding added
+2018) in MMsegmentation framework (Contributors 2020)                      to the Last LN in a non-Layer-wise structure, also showing
+and train it using the default settings. As shown in Ta-                   72.14% performance.
+ble 4, MPVG achieves an improvement of +1.14 mIoU com-
+pared to the default. Furthermore, MPVG outperforms PVG,
+achieving a performance improvement of +0.62 mIoU.                         formance of vision transformers.
+                                                                              In conclusion, several key points can be identified: (1)
+Analysis                                                                   In the initial layers, PE primarily provides positional infor-
+Through experiments on image classification, object detec-                 mation, enabling the model to understand the spatial rela-
+tion, and semantic segmentation, we demonstrate the effec-                 tionships between tokens. However, as the layers deepen,
+tiveness of MPVG. In all tasks, MPVG not only outperforms                  PE plays a role in counterbalancing the token embedding.
+the baseline but also achieves the best performance among                  (2) This counterbalancing effect of PE has a significant im-
+all methods. This validates our hypothesis and proves that                 pact on the performance of vision transformers. Therefore,
+our method is an effective approach to maximizing PE in                    MPVG demonstrates that maintaining this direction is bene-
+the GAP method. Fig 4 shows that in Layer-wise structure,                  ficial for vision transformers and proves that PE can perform
+token embedding and position embedding exhibit increas-                    additional roles to sustain this effect.
+ingly opposing directions as the layers deepen. This suggests
+that PE not only provides positional information in the ini-               Effect of PE in Last LN
+tial layers but also may play a counterbalancing role that                 We conduct additional experiments to validate our hypoth-
+becomes more pronounced in deeper layers. To further ex-                   esis. Specifically, we aim to confirm that adding PE to the
+plore this, we compare PVG and MPVG to confirm that PE                     Last LN effectively maintains the counterbalancing role of
+has a counterbalancing effect. This comparison proves that                 PE in Layer-wise structure. We compare the method using
+maintaining the counterbalancing role of PE impacts the per-               only GAP with the method that adds PE to the Last LN in
+
+
+                                                                18159
+  Model      PE Method     Last LN     Top-1 Accuracy (%)                                         Structure                  Top-1
+                                                                           Model
+                            pos11            73.30                                    Layer 0    Hierarchical    (x +PE)    Acc (%)
+                            pos8             73.38                                      ✗             ✓             ✓        73.31
+  DeiT-Ti      MPVG
+                            pos5             73.39                                      ✓             ✗             ✓        73.48
+                            pos0             73.51                         MPVG
+                                                                                        ✓             ✓              ✗       73.28
+                                                                                        ✓             ✓             ✓        73.51
+Table 5: Comparison of the value of PE added to the Last
+LN in MPVG. pos0 refers to the initial position embedding,               Table 6: Structural Differences in MPVG. ”Layer 0” de-
+and pos11 represents the position embedding after applying               notes whether layer 0 is included when delivering PE to lay-
+                                  ′                                                                                     ′
+LN in the last layer. posN (=LNN (posN −1 )) indicates the               ers. “Hierarchical” denotes whether pos l is LNl (pos l−1 ) or
+PE input for the (N + 1 )th layer.                                           ′
+                                                                         LNl (pos 0 ). ”(x +PE)” denotes whether PE is added to the
+                                                                         token embedding(x ) before entering layer 0 or not.
+a non-Layer-wise structure while using GAP. We perform
+these experiments with DeiT-Ti on ImageNet-1K.
+   In Fig 5, we compare (a), where only GAP is applied, with                Specifically, we conduct comparative experiments on
+(b), where PE is delivered to the Last LN in a non-Layer-                three structural differences: (1) Our methods exclude layer
+wise structure with GAP. Fig 5-(a) shows a 72.40% per-                   0 when delivering PE. Through our experiments, we find
+formance, while Fig 5-(b) shows a decreased performance                  that delivering PE to layer 0, which was previously included,
+of 72.14%. This indicates that adding PE to the Last LN                  is not only unnecessary but also improves the performance
+is only effective in Layer-wise structure where PE is deliv-             of vision transformers when excluded. (2) We add PE to
+ered to each layer. In other words, these experimental results           the token embedding before it enters layer 0. Unlike LaPE
+prove that in Layer-wise structure, the token embedding con-             where token embedding x and PE are separated before en-
+tains values that are counterbalanced by PE. Specifically, in            tering the first layer, our methods add PE to x before enter-
+Fig 5-(b) structure, the token embedding that passes through             ing layer 0. This structure does not limit the expressiveness
+the layers does not contain the directional values, which is             of PE because independent LN is applied to both the token
+counterbalanced by PE. Thus, adding PE to the Last LN not                embedding and PE in each layer, and PE is delivered in a
+only has no effect but actually leads to a decrease in per-              Layer-wise structure. Moreover, the (x +PE) structure boosts
+formance. As a result, as shown in Fig 2-(b), in Layer-wise              performance by approximately 0.23%. (3) We observe that
+structure, the token embedding progresses while retaining                the performance is similar between hierarchical and non-
+values that are meant to be counterbalanced by PE, but af-               hierarchical structures. However, in non-hierarchical struc-
+ter passing through the final layer, this directional value is           tures, performance often declines in small or large vision
+not adequately compensated by PE. This proves that PE is                 transformers due to overfitting (Yu et al. 2023). Through Ta-
+necessary to perform this additional counterbalancing role               ble 6, we demonstrate that our methods represent the optimal
+in the Last LN.                                                          structure in the Layer-wise structure.
+
+Ablation Study
+The impact of PE values delivered to the Last LN We                                             Conclusion
+conduct experiments to investigate the impact of varying the
+PE values passed to the Last LN in MPVG. In Table 5, pos N               We reveal that position embedding can play additional roles
+                            ′
+represents the value of LNN (pos N −1 ). Since MPVG does                 in vision transformers using the GAP method. Specifically,
+not deliver PE to layer 0, N ranges from 1 to L − 1, where L             in a Layer-wise structure, PE has a counterbalancing effect
+is the number of layers. Experiments show that MPVG con-                 on the values of token embedding, and maintaining this di-
+sistently outperforms PVG, which achieves a performance                  rectional balance by PE is beneficial for vision transform-
+of 73.17%, regardless of the PE values passed to the Last                ers. Based on these observations, we propose a simple yet
+LN. This suggests that delivering PE in the Last LN has                  effective method, MPVG. MPVG utilizes the characteris-
+a significant positive impact on the performance of vision               tics of PE observed in the Layer-wise structure to maximize
+transformers. Furthermore, it demonstrates that maintaining              the PE. Through extensive experiments, we demonstrate that
+the role of PE in the Last LN is generally effective. MPVG               MPVG is generally effective on vision transformers, outper-
+adopts pos 0 , which shows the best performance by compar-               forming previous methods. However, MPVG has a poten-
+ing various PE values delivered to the Last LN.                          tial limitation in that it is incompatible with the class token
+                                                                         method. Through these limitations, we will further explore
+Structural differences in MPVG We also experiment                        the broader applicability of MPVG and the effects of PE’s
+by varying the architecture structure in MPVG. Table 6                   counterbalancing as part of our future work. In this paper,
+presents the ablations for the differences in architecture               we demonstrate that MPVG effectively addresses the issues
+within MPVG. The experiments are conducted on DeiT-Ti                    arising in GAP and Layer-wise structures, providing a sig-
+using the ImageNet-1K. Through this experiment, we adopt                 nificantly more meaningful approach. Through this, we look
+an improved Layer-wise structure that differs from the con-              forward to MPVG offering a broader perspective on position
+ventional Layer-wise structure.                                          embedding.
+
+
+                                                                 18160
+                  Acknowledgments                                        Hassani, A.; Walton, S.; Shah, N.; Abuduweili, A.; Li, J.;
+This research was supported by the MSIT(Ministry of Sci-                 and Shi, H. 2022. Escaping the Big Data Paradigm with
+ence and ICT), Korea, under the ITRC(Information Tech-                   Compact Transformers. arXiv:2104.05704.
+nology Research Center) support program(IITP-2024-RS-                    He, K.; Gkioxari, G.; Dollár, P.; and Girshick, R. 2017. Mask
+2023-00258649, 80%) supervised by the IITP(Institute for                 r-cnn. In Proceedings of the IEEE international conference
+Information & Communications Technology Planning &                       on computer vision, 2961–2969.
+Evaluation) and was partly supported by the IITP grant                   Heo, B.; Park, S.; Han, D.; and Yun, S. 2024. Rotary po-
+funded by the Korea government (MSIT) (No.RS-2022-                       sition embedding for vision transformer. arXiv preprint
+00143524, Development of Fundamental Technology and                      arXiv:2403.13298.
+Integrated Solution for Next-Generation Automatic Artifi-                Krizhevsky, A.; Hinton, G.; et al. 2009. Learning multiple
+cial Intelligence System) and (No.RS2023-00225630, De-                   layers of features from tiny images.
+velopment of Artificial Intelligence for Text-based 3D                   Lin, T.-Y.; Maire, M.; Belongie, S.; Hays, J.; Perona, P.; Ra-
+Movie Generation).                                                       manan, D.; Dollár, P.; and Zitnick, C. L. 2014. Microsoft
+                                                                         coco: Common objects in context. In Computer Vision–
+                       References                                        ECCV 2014: 13th European Conference, Zurich, Switzer-
+Bello, I.; Zoph, B.; Vaswani, A.; Shlens, J.; and Le, Q. V.              land, September 6-12, 2014, Proceedings, Part V 13, 740–
+2019. Attention augmented convolutional networks. In Pro-                755. Springer.
+ceedings of the IEEE/CVF international conference on com-                Liu, Z.; Lin, Y.; Cao, Y.; Hu, H.; Wei, Y.; Zhang, Z.; Lin,
+puter vision, 3286–3295.                                                 S.; and Guo, B. 2021. Swin transformer: Hierarchical vi-
+Carion, N.; Massa, F.; Synnaeve, G.; Usunier, N.; Kirillov,              sion transformer using shifted windows. In Proceedings of
+A.; and Zagoruyko, S. 2020. End-to-end object detection                  the IEEE/CVF international conference on computer vision,
+with transformers. In European conference on computer vi-                10012–10022.
+sion, 213–229. Springer.                                                 Loshchilov, I.; and Hutter, F. 2019. Decoupled Weight De-
+Chang, S.; Wang, P.; Lin, M.; Wang, F.; Zhang, D. J.; Jin,               cay Regularization. In International Conference on Learn-
+R.; and Shou, M. Z. 2023. Making vision transformers ef-                 ing Representations.
+ficient from a token sparsification view. In Proceedings of              Raghu, M.; Unterthiner, T.; Kornblith, S.; Zhang, C.; and
+the IEEE/CVF Conference on Computer Vision and Pattern                   Dosovitskiy, A. 2021. Do vision transformers see like con-
+Recognition, 6195–6205.                                                  volutional neural networks? Advances in neural information
+                                                                         processing systems, 34: 12116–12128.
+Chen, K.; Wang, J.; Pang, J.; Cao, Y.; Xiong, Y.; Li, X.; Sun,
+S.; Feng, W.; Liu, Z.; Xu, J.; Zhang, Z.; Cheng, D.; Zhu, C.;            Shaw, P.; Uszkoreit, J.; and Vaswani, A. 2018. Self-
+Cheng, T.; Zhao, Q.; Li, B.; Lu, X.; Zhu, R.; Wu, Y.; Dai,               attention with relative position representations.         arXiv
+J.; Wang, J.; Shi, J.; Ouyang, W.; Loy, C. C.; and Lin, D.               preprint arXiv:1803.02155.
+2019. MMDetection: Open MMLab Detection Toolbox and                      Strudel, R.; Garcia, R.; Laptev, I.; and Schmid, C. 2021.
+Benchmark. arXiv preprint arXiv:1906.07155.                              Segmenter: Transformer for semantic segmentation. In Pro-
+Chen, Z.; Duan, Y.; Wang, W.; He, J.; Lu, T.; Dai, J.; and               ceedings of the IEEE/CVF international conference on com-
+Qiao, Y. 2022. Vision transformer adapter for dense predic-              puter vision, 7262–7272.
+tions. arXiv preprint arXiv:2205.08534.                                  Touvron, H.; Cord, M.; Douze, M.; Massa, F.; Sablayrolles,
+                                                                         A.; and Jégou, H. 2021. Training data-efficient image trans-
+Chu, X.; Tian, Z.; Wang, Y.; Zhang, B.; Ren, H.; Wei, X.;                formers & distillation through attention. In International
+Xia, H.; and Shen, C. 2021a. Twins: Revisiting the design of             conference on machine learning, 10347–10357. PMLR.
+spatial attention in vision transformers. Advances in neural
+information processing systems, 34: 9355–9366.                           Vaswani, A.; Shazeer, N.; Parmar, N.; Uszkoreit, J.; Jones,
+                                                                         L.; Gomez, A. N.; Kaiser, Ł.; and Polosukhin, I. 2017. At-
+Chu, X.; Tian, Z.; Zhang, B.; Wang, X.; and Shen, C. 2021b.              tention is all you need. Advances in neural information pro-
+Conditional positional encodings for vision transformers.                cessing systems, 30.
+arXiv preprint arXiv:2102.10882.
+                                                                         Wang, Y.; Xu, Z.; Wang, X.; Shen, C.; Cheng, B.; Shen, H.;
+Contributors, M. 2020. MMSegmentation: OpenMMLab                         and Xia, H. 2021. End-to-end video instance segmentation
+Semantic Segmentation Toolbox and Benchmark. https:                      with transformers. In Proceedings of the IEEE/CVF con-
+//github.com/open-mmlab/mmsegmentation.                                  ference on computer vision and pattern recognition, 8741–
+Deng, J.; Dong, W.; Socher, R.; Li, L.-J.; Li, K.; and Fei-              8750.
+Fei, L. 2009. Imagenet: A large-scale hierarchical image                 Wu, K.; Peng, H.; Chen, M.; Fu, J.; and Chao, H. 2021. Re-
+database. In 2009 IEEE conference on computer vision and                 thinking and improving relative position encoding for vision
+pattern recognition, 248–255. Ieee.                                      transformer. In Proceedings of the IEEE/CVF International
+Dosovitskiy, A.; Beyer, L.; Kolesnikov, A.; Weissenborn,                 Conference on Computer Vision, 10033–10041.
+D.; Zhai, X.; Unterthiner, T.; Dehghani, M.; Minderer, M.;               Xiao, T.; Liu, Y.; Zhou, B.; Jiang, Y.; and Sun, J. 2018. Uni-
+Heigold, G.; Gelly, S.; et al. 2020. An image is worth 16x16             fied perceptual parsing for scene understanding. In Pro-
+words: Transformers for image recognition at scale. arXiv                ceedings of the European conference on computer vision
+preprint arXiv:2010.11929.                                               (ECCV), 418–434.
+
+
+                                                                 18161
+Xu, H.; Xiang, L.; Ye, H.; Yao, D.; Chu, P.; and Li, B. 2024.
+Permutation Equivariance of Transformers and Its Applica-
+tions. In Proceedings of the IEEE/CVF Conference on Com-
+puter Vision and Pattern Recognition, 5987–5996.
+Yu, R.; Wang, Z.; Wang, Y.; Li, K.; Liu, C.; Duan, H.; Ji,
+X.; and Chen, J. 2023. LaPE: Layer-adaptive position em-
+bedding for vision transformers with independent layer nor-
+malization. In Proceedings of the IEEE/CVF International
+Conference on Computer Vision, 5886–5896.
+Yuan, K.; Guo, S.; Liu, Z.; Zhou, A.; Yu, F.; and Wu, W.
+2021a. Incorporating convolution designs into visual trans-
+formers. In Proceedings of the IEEE/CVF international con-
+ference on computer vision, 579–588.
+Yuan, L.; Chen, Y.; Wang, T.; Yu, W.; Shi, Y.; Jiang, Z.-H.;
+Tay, F. E.; Feng, J.; and Yan, S. 2021b. Tokens-to-token vit:
+Training vision transformers from scratch on imagenet. In
+Proceedings of the IEEE/CVF international conference on
+computer vision, 558–567.
+Zhai, X.; Kolesnikov, A.; Houlsby, N.; and Beyer, L.
+2022. Scaling vision transformers. In Proceedings of
+the IEEE/CVF conference on computer vision and pattern
+recognition, 12104–12113.
+Zheng, S.; Lu, J.; Zhao, H.; Zhu, X.; Luo, Z.; Wang, Y.; Fu,
+Y.; Feng, J.; Xiang, T.; Torr, P. H.; et al. 2021. Rethinking se-
+mantic segmentation from a sequence-to-sequence perspec-
+tive with transformers. In Proceedings of the IEEE/CVF
+conference on computer vision and pattern recognition,
+6881–6890.
+Zhou, B.; Zhao, H.; Puig, X.; Xiao, T.; Fidler, S.; Barriuso,
+A.; and Torralba, A. 2019. Semantic understanding of scenes
+through the ade20k dataset. International Journal of Com-
+puter Vision, 127: 302–321.
+Zhu, X.; Su, W.; Lu, L.; Li, B.; Wang, X.; and Dai, J. 2020.
+Deformable detr: Deformable transformers for end-to-end
+object detection. arXiv preprint arXiv:2010.04159.
+
+
+
+
+                                                                    18162
+

@@ -1,0 +1,834 @@
+                               A Length-Extrapolatable Transformer
+
+                Yutao Sun1∗, Li Dong2 , Barun Patra2 , Shuming Ma2 , Shaohan Huang2
+                    Alon Benhaim2 , Vishrav Chaudhary2 , Xia Song2 , Furu Wei2
+                                         Tsinghua University1
+                                              Microsoft2
+                            https://github.com/microsoft/torchscale
+
+
+                         Abstract
+    Position modeling plays a critical role in Trans-
+    formers. In this paper, we focus on length ex-
+    trapolation, i.e., training on short texts while
+    evaluating longer sequences. We define at-
+    tention resolution as an indicator of extrapo-
+    lation. Then we propose two designs to im-
+    prove the above metric of Transformers. Specif-
+    ically, we introduce a relative position embed-
+    ding to explicitly maximize attention resolu-
+    tion. Moreover, we use blockwise causal at-
+    tention during inference for better efficiency.
+    The proposed architecture is named Length-
+    Extrapolatable (L E X) Transformer. We evalu-
+    ate different Transformer variants on language
+                                                                 Figure 1: The perplexity of different Transformer de-
+    modeling. Experimental results show that our
+                                                                 signs with various input lengths.
+    model achieves better performance in both in-
+    terpolation and extrapolation settings. The
+    code will be available at https://aka.ms/
+    LeX-Transformer.                                             makes it hard to encode position effectively. First,
+                                                                 Vaswani et al. (2017) proposes absolute sinusoidal
+1   Introduction                                                 position embedding, and Devlin et al. (2019) ad-
+                                                                 justs it to a learnable one. The absolute design is
+Transformer (Vaswani et al., 2017) has shown                     computation-efficient, but not comparable with sub-
+strong performance in NLP and become a de-facto                  sequent relative ones (Shaw et al., 2018; Su et al.,
+backbone (Dosovitskiy et al., 2020; Radford et al.,              2021; Press et al., 2021). Among many relative po-
+2021; Wang et al., 2022). However, most of them                  sition embeddings, RO PE (Su et al., 2021) shows
+have a crucial shortcoming: they can only deal                   better performance and is used to many PLMs such
+with the in-distribution size of inputs. Figure 1                as PaLM (Chowdhery et al., 2022). However, it
+shows that the perplexity of previous Transform-                 can’t deal with sequences with exceeding length.
+ers increases rapidly when the input sequence is                 Alibi (Press et al., 2021) mitigates the extrapolation
+getting longer. It is usually infeasible to train a              problem but sacrifices the general performance.
+model with all possible input lengths. Therefore, a
+                                                                    Since different strategies concentrate on some
+length-extrapolatable Transformer is essential for
+                                                                 part of the position feature, it is essential to build a
+wider usage.
+                                                                 comprehensive view and guide the Transformer’s
+   In sequence modeling, position information                    design systematically. First, a Transformer should
+plays a crucial role in building the correct repre-              be sensitive to order. Otherwise, it will degener-
+sentation and understanding of the latent mean-                  ate into a bag-of-word model which confuses the
+ing. For Recurrent Neural Networks such as                       whole meaning. Then, position translation can’t
+LSTM (Hochreiter and Schmidhuber, 1997), the                     hurt the representation, especially, when a prefix
+calculation is done along the sequence order in                  is added to the target sentence, the representation
+O(N) time. However, the parallel attention module                should stay the same with an attention mask on the
+    ∗
+        Work done during internship at Microsoft Research.       prefix. After that, a good sequence model needs to
+                                                             14590
+                    Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics
+                                          Volume 1: Long Papers, pages 14590–14604
+                              July 9-14, 2023 ©2023 Association for Computational Linguistics
+            Models                         Translation Invariance         Length Extrapolation
+             Absolute Position Modeling
+            Transformer (Sinusoidal)                    ✘                            ✘✘
+            GPT-2 (Learnable)                           ✘                            ✘✘
+             Relative Position Modeling
+            PaLM / Roformer (RO PE)                     ✔                             ✘
+            T5                                          ✔                             ✘
+            BLOOM / Alibi                               ✔                            ✔
+            L E X Transformer (Ours)                    ✔                            ✔✔
+
+            Table 1: Position modeling capabilities of Transformer variants for language modeling.
+
+
+deal with any input length. As illustrated before,              • We define attention resolution to indicate a
+the length problem is not universal but special for               Transformer’s capability on encoding posi-
+Transformer. Especially, when a Transformer is                    tion.
+pre-trained under a maximal length, it is not afford-
+able to re-train for applying to tasks with longer              • We propose an extrapolatable position embed-
+sequences. Finally, when a Transformer satisfies                  ding and use blockwise causal attention to
+the principles above, we evaluate its performance,                improve length extrapolation.
+which requires thorough experiments and empirical
+                                                                • We conduct experiments on language model-
+analysis.
+                                                                  ing and show that the proposed L E X Trans-
+   Considering all the properties above, we propose
+                                                                  former achieves strong performance on both
+Extrapolatable Position Embedding (X P OS), which
+                                                                  short and long texts.
+is a universal-good design for Transformers. Based
+on RO PE’s design, we propose attention resolu-             2     Design Principles of Transformers for
+tion as a metric to measure position monotonicity.                Position Modeling
+Then, we generalize its mathematical form, where
+an exponential decay is added to the rotation ma-           2.1    Order Variance
+trix. X P OS preserves the advantage of RO PE, and       A transformer without position information is actu-
+behaves stably at long-term dependency. Besides,         ally a bag-of-word model. Although bag-of-words
+inspired by sparse attention methods (Child et al.,      models can achieve comparable performance for
+2019; Beltagy et al., 2020; Zaheer et al., 2020;         some tasks (Wang et al., 2020a), position infor-
+Xiong et al., 2021), we choose blockwise causal          mation is essential for sequence modeling. Most
+attention to increase attention resolution, which im-    of the existing position modeling satisfies this
+proves the performance of length extrapolation for       goal (Vaswani et al., 2017; Devlin et al., 2019;
+language modeling.                                       Shaw et al., 2018; Wang et al., 2020a; Raffel et al.,
+   We train different Transformers from scratch.         2020; Su et al., 2021). With effective position in-
+We evaluate models on PG22 and QMSum (Zhong              formation, Transformer models should be variant
+et al., 2021) with various input lengths. On the in-     with permuting the order (Dufter et al., 2022). Give
+terpolation experiments, L E X Transformer reaches       a permutation function Pπ (X) : [x1 , x2 , ..., xn ] →
+minimal perplexity. In the extrapolation experi-         [xπ1 , xπ2 , ..., xπn ], where [π1 , π2 , ..., πn ] is a ran-
+ments, our methods can continue decreasing the           dom order, a Transformer model f (input) should
+perplexity while other methods either can’t extrap-      satisfy:
+olate (i.e., perplexity increases) when the input                         f (Pπ (X)) ̸= Pπ (f (X))                 (1)
+length is very long. Figure 1 shows clearly that
+L E X Transformer has an opposite tendency com-             2.2    Translation Invariance
+pared with others.
+                                                         The representation of a sequence should be ro-
+   We summarize our contributions as follows:
+                                                         bust with the translation of its positions. For
+   • We summarize the design principles of Trans-        instance, a sentence’s meaning is invariant with
+     formers for position modeling.                      padding before or after the whole sentence. Similar
+                                                   14591
+to (Wang et al., 2020a), we give a general form            3     A Length-Extrapolatable Transformer
+for translation invariance: given a Transformer
+model f (input, mask), any input sequence X =              We define attention resolution as the indicator of
+[x0 , x1 , ..., xn ] with mask M = [m0 , m1 , ..., mn ],   the Transformer’s capability on encoding position
+the output should be same with the padding ones:           in Section 3.1. Then we propose two ways to maxi-
+                                                           mize the resolution metric, i.e., improve the length
+                                                           interpolation and extrapolation of Transformers.
+            Xpad = [0]i ⊕ X ⊕ [0]j
+                                                           First, we introduce a relative position encoding
+           Mpad = [0]i ⊕ M ⊕ [0]j                   (2)    method (Section 3.2) to explicitly maximize atten-
+       f (X, M ) = f (Xpad , Mpad )[i : i + n]             tion resolution. Second, we propose to use block-
+                                                           wise causal masking (Section 3.3) during extrapo-
+   Relative positions (Shaw et al., 2018; Raffel           lation inference for improved resolution.
+et al., 2020; Wang et al., 2020a; Su et al., 2021)            In the following section, we denote d as the hid-
+satisfy this condition, while most of the absolute         den dimension and l as the input length. For each
+positions do not (Vaswani et al., 2017; Devlin et al.,     attention layer, query, key, and value are calculated
+2019). Although sinusoidal embedding has a simi-           by input x: q = WQ x, k = WK x, v = WV x.
+lar property (Vaswani et al., 2017): P Epos+k can
+                                                           3.1    Attention Resolution
+be represented as a linear function of P Epos , the
+addition operation in the initial word embedding           The monotonicity of attention scores is essential
+messes the attention weight, where the spread form         to represent distance in language models. In an
+of QK T has 4 components whose geometric con-              attention layer of the vanilla Transformer, we mea-
+nection with position is unclear.                          sure the attention score expectation as s[n] when
+                                                           the distance of two tokens is n:
+2.3 Length Extrapolation
+                                                                                          qi+n kiT
+                                                                         s[n] =     E   (   √ )              (3)
+As the cost of pre-training is getting bigger due to                              0≤i≤N       d
+the larger model size and corpus, it is infeasible to
+retrain a model for a longer context. A Transformer           We define attention resolution R(s) as a metric
+model with a suitable design should be capable of          to evaluate attention’s ability to recognize position:
+dealing with any input length.
+                                                                           XN
+   First, learnable absolute position embedding (De-                           es[i] (es[i] − es[i+1] )
+                                                                    R(s) =           P                       (4)
+vlin et al., 2019) is not able to extrapolate because                      i=0     ( N  i=0 e
+                                                                                              s[i] )2
+
+it does not have any pre-defined position knowl-
+edge. With the evaluation of perplexity on dif-               First, s[i] > s[i + 1] is preferred to ensure mono-
+ferent lengths (Press et al., 2021), almost every          tonicity. Besides, we implement softmax opera-
+position embedding’s performance drops signifi-            tion on s[n] to simulate the attention probability. To
+cantly (Vaswani et al., 2017; Raffel et al., 2020;         mitigate the influence of long-tail distribution, the
+Su et al., 2021). Alibi (Press et al., 2021) solves        factor es[i] is multiplied. We can estimate s[n] and
+this problem by adding an exponential decay on the         R(s) quantitatively when we design Transformers.
+attention matrix, which lower the influence of out-
+of-distribution position like a soft sliding window.       3.2    Improve Resolution by Position Encoding
+However, the absence of long-term dependency               Su et al. (2021) propose that by adding absolute
+contributes to a performance drop compared with            position embedding on query and key, the attention
+other relative strategies. Table 2 shows that Alibi’s      matrix is actually encoded with relative position
+perplexity is larger than RO PE by about 0.3.              information. RO PE shows a strong performance in
+   However, the extrapolation ability needs a sys-         interpolation tasks, but its s[n] oscillates dramati-
+tematic design where position embedding is a cru-          cally in Figure 2, which harms the resolution.
+cial but not only component. With the proper atten-           We use a similar but generalized strategy to im-
+tion mask, the relative position can deal with long        prove resolution. First,
+                                                                                P a pseudo inner product is
+text. The ideal situation is to use the long context       defined as ⟨x, y⟩ = Re(xi · yi∗ ), which is consis-
+in the right way, in that case, the perplexity should      tent with the exact inner product’s definition when
+decrease as the input length increases.                    we map Cd/2 → Rd . Before calculating attention,
+                                                      14592
+the query and key are encoded with position in-          models where E(∠q) ≤ E(∠k); 2) the inequality
+formation. Generally, the attention function is as       scaling of (Su et al., 2021) is too strong to lose
+follows:                                                 generality. We calculate expectation instead of the
+                    ⟨fq (qi , i), fk (kj , j)⟩           upper bound.
+              aij =            √                            Now we define a function to represent the prop-
+                                  d
+                     i                            (5)    erty of relative position:
+                    X         eaij
+               oi =      Pi            v
+                                    aij j                                         d/2
+                    j=0      j=0 e                                                X
+                                                                       gζ [n] =         cos nθi ζin      (10)
+  Formally, the encoding must satisfy:                                            i=0
+
+ ⟨fq (q, n+r), fk (k, n)⟩ = ⟨fq (q, r), fk (k, 0)⟩ (6)      g[n] simplifies Equation 9 by defining ζi = eξi .
+  A simple solution is as follows:                       Stabilizing the g[n] curve is intuitive. Although
+                                                         attention bias can achieve this goal, we try to avoid
+                 fq (q, n) = Aq qeλn                     additional position calculations. Instead, we can
+                                                  (7)
+                 fk (k, n) = Ak ke−λ n
+                                        ∗
+                                                         accomplish this goal using a good ζ to maximize
+                                                         R(gζ ).
+  The scaling factor Aq , Ak is unnecessary be-             Obviously, the oscillation mainly comes from
+cause q, k is obtained by a linear transformation.       large θi . Manually setting ζ can achieve this goal:
+Since λ ∈ Cd/2 , it can be represented as λ = ξ +iθ
+where ξ, θ ∈ Rd/2 :                                                        i/(d/2) + γ
+                                                                     ζei =             ∈ [0, 1]          (11)
+                 fq (q, n) = qeξn+iθn                                         1+γ
+                                                  (8)
+                fk (k, n) = ke−ξn+iθn                    where ζei becomes smaller when θi is larger. In this
+   If ξ = 0, the form is the same as RO PE (Su           way, we punish the oscillation of unstable dimen-
+et al., 2021). Geometrically, the transformation         sions and keep the distribution of stable ones.
+provides a rotation on vectors. If the relative an-         Numerical optimization methods are tried to find
+gle between q and k is larger, the inner product is      optimal values for ζ. However, the results rely on
+smaller. However, the cosine function is not mono-       the initial value and lack control when the hidden
+tonic if the rotating angle is large than π, which       dimension changes. Besides, the numerical preci-
+causes an unstable phenomenon in that the expec-         sion should be considered because of fp16’s range.
+tation of the inner product oscillates dramatically      Finally, we find a sub-optimal solution by manually
+with the growth of relative distance. Following the      setting γ to both satisfy the resolution is recogniz-
+parameters (Vaswani et al., 2017; Su et al., 2021)       able (R(gζ ) is partially optimized) and ζin can be
+θ = {θi = 10000−2i/d , i ∈ [0, 1, ..., d/2]}, we         represented by fp16 when n is big (8192 in our
+will calculate the expectation as follows. For gen-      setting). Besides, in implementation, the position
+erative models, we assume E(∠q) ≤ E(∠k) to               is re-scaled with base B in the exponential calcula-
+ensure the monotonicity:                                 tion to avoid overflow and underflow (eξn → eξn/B
+                                                         in Equation (8)). We use γ = 0.4 and B = 512 as
+     E[⟨qemξ+imθ , ke−nξ+inθ ⟩]                          the final implementation in L E X Transformer.
+       d/2
+       X                                                    The curves of ζ = 1, ζ̂ are shown in Figure 2.
+   =         E[Re(qx kx e(m−n)ξx +i(m−n)θx )]            The default rotary embedding contributes to a dra-
+       x=0                                               matic oscillation, especially in the large relative
+       d/2
+       X                                          (9)    distance, which causes bad extrapolation perfor-
+   ≤         Re(E[|qx kx |]e(m−n)ξx +i(m−n)θx )          mance and restricts the model’s convergence speed.
+       x=0                                               After adding a decay, the curve is almost stable, es-
+       d/2
+       X                                                 pecially on long-term dependency. What’s more, it
+   ∝         cos(m − n)θx e(m−n)ξx                       does not hurt pure rotation’s fitting ability because
+       x=0                                               ζin ≈ 1 when i is large or n is small. In that way,
+   The inference here is different from (Su et al.,      short-term and long-term dependencies are divided
+2021) because of two reasons: 1) there is an addi-       continuously.
+tional assumption brought by generative language            Finally, we have Extrapolatable Position Embed-
+                                                    14593
+                        1.0                                     RoPE
+                        0.8                                     xPos (Ours)
+Attention Expectation
+
+
+                        0.6
+                        0.4
+                        0.2
+                        0.0
+                        0.2                                                         Training Phase                Inference Phase
+                              0         1000 2000 3000                   4000      Figure 3: Our language model is trained on shorter texts
+                                           Relative Distance                       in the same way as vanilla Transformers, i.e., using
+     Figure 2: The long dependency curve of attention ex-                          causal masking. During inference, we use blockwise
+     pectation. RO PE’s dramatic oscillation confuses the                          causal attention for longer sequences, which recurrently
+     attention resolution at long distances. In contrast, X P OS                   reuses the overlapped parts (i.e., key and value vectors).
+     provides stable and accurate position modeling.
+                                                                                   tention matrix and doesn’t require gradients, the
+           Algorithm 1: Attention with X P OS                                      cost is almost the same with RO PE and bigger than
+            def rot(x):                                                            Absolute Position with 6% additional time.
+              return [−x1 , x0 , −x3 , x2 , ...]
+            Initialization:                                                        3.3    Blockwise Causal Attention
+            θi = 1/100002⌊i/2⌋/d , θ ∈ Rd                                          To deal with length extrapolation, a simple way
+            ζ̂i = (2⌊i/2⌋/d + γ)/(1 + γ), ζ̂ ∈ Rd                                  to improve attention resolution (Section 3.1) is us-
+            Input: Q, K, V ∈ Rh×l×d , M ∈ Rd×d                                     ing windowed attention. During inference, we use
+            Cmn = cos mθn , C ∈ Rl×d                                               blockwise masking (Dai et al., 2019; Zaheer et al.,
+            Smn = sin mθn , S ∈ Rl×d                                               2020; Xiong et al., 2021) for self-attention. Notice
+            Tmn = ζ̂nm , T ∈ Rl×d                                                  that other window strategies, such as sliding win-
+            Q = Q ⊙ (C ⊙ T ) + rot(Q) ⊙ (S ⊙ T )                                   dow (Child et al., 2019), also work. We use block-
+            K = K ⊙ (C ⊙ T −1 ) + rot(K) ⊙ (S ⊙ T −1 )                             wise causal attention because it is cache-friendly
+                                      T
+            output = softmax( QK   √
+                                     d
+                                        · M )V                                     and easy to implement.
+            return output                                                             As shown in Figure 3, if the pre-training length
+                                                                                   is l, we divide the query as blocks with l/2 length,
+                                                                                   and each query interacts with its own block and
+     ding (X P OS):                                                                the last block. In this way, the context information
+                                  n/B
+                      q1 cos nθ1 ζ̂1
+                                                       n/B
+                                        − q2 sin nθ1 ζ̂1
+                                                                                  can be delivered by the reuse of key and value.
+                   q2 cos nθ1 ζ̂ n/B + q1 sin nθ1 ζ̂ n/B                         The window constraint helps models encode longer
+                                  1                   1      
+                  
+      fq (q, n) = 
+                                         ..                   
+                                                                                  input with improved resolution.
+                                         .                   
+                                    n/B                  n/B                        Different from training a long-sequence model
+                  qn−1 cos nθd/2 ζ̂d/2 − qn sin nθd/2 ζ̂d/2 
+                                                n/B                     n/B        with a stop gradient, we use vanilla attention in
+                                  qn cos nθd/2 ζ̂d/2 + qn−1 sin nθd/2 ζ̂d/2
+                                −n/B                 −n/B                        the training phase, because the pre-training corpus
+                     k1 cosnθ1 ζ̂1     − k2 sin nθ1 ζ̂1                            is not very long on average. However, during the
+                  k2 cos nθ1 ζ̂  −n/B
+                                       + k1 sin nθ1 ζ̂1
+                                                       −n/B    
+                 
+                 
+                                 1
+                                        .
+                                                               
+                                                                                  inference phase, when dealing with long sequences,
+     fk (k, n) =                       ..                     
+                 
+                 
+                                                                                  we directly implement BCA to help the model to
+                                   −n/B                   −n/B 
+                 kn−1 cos nθd/2 ζ̂d/2 − kn sin nθd/2 ζ̂d/2                       be more position-recognizable.
+                                                −n/B                      −n/B
+                                  kn cos nθd/2 ζ̂d/2   + kn−1 sin nθd/2 ζ̂d/2
+                                                    (12)                           4     Experiments
+        In the implementation, the transformation for
+     key and value can be easily calculated by paral-                              4.1    Pre-training
+     lel addition and multiplication as shown in Algo-                             To fairly evaluate different Transformer variants,
+     rithm 1. Since position embedding’s size C, S, T ∈                            we pre-train the Transformer from scratch. We use
+     Rl×d is much smaller than batched multi-head at-                              1024 hidden dimensions, 16 heads, and 24 layers,
+                                                                                14594
+i.e., comparable to medium-size GPT-3 (Brown              and perplexity. When the length is larger than 4096,
+et al., 2020). The training corpus includes a             Alibi’s perplexity increases gradually. However,
+subset of the Pile (Gao et al., 2020): Books3,            L E X’s perplexity decreases continuously when the
+OpenWebText2, Stack Exchange, PubMed Ab-                  length extends to 8192.
+stracts, Wikipedia, Gutenberg (PG-19), BookCor-              The experiment shows that X P OS gets better per-
+pus2, NIH ExPorter, and Pile-CC datasets. The             formance on language modeling. With the stable
+training procedure is performed on 16×V100                advantage of any length, users can input any sen-
+GPUs. We use the tokenizer from GPT2 (Radford             tence freely without the concern of position. Be-
+et al., 2019). The maximal length is 1024 for saving      sides, results also indicate that is not essential to
+memory and extrapolation evaluation. The learning         build an explicit decay on the attention matrix, In-
+rate is 3×10−4 and polynomial decay is used to ad-        stead, a proper design for an attention mask is actu-
+just the learning rate. The global batch size is 512      ally better to deal with long-context tasks.
+to follow GPT-3 (Brown et al., 2020), i.e., 0.5M
+token size. We use Adam (Kingma and Ba, 2015)             4.3   Measuring Resolution
+optimizer with β1 = 0.9, β2 = 0.98, ϵ = 10−6 .            We empirically evaluate the resolution of different
+The code is based on TorchScale (Ma et al., 2022a).       Transformer variants. In the previous section, we
+                                                          define attention resolution as a quality indicator of
+4.2 Language Modeling                                     position modeling in Transformers. The expecta-
+                                                          tion of s[n] is computed as:
+We measure perplexity on long document datasets,
+                                                                                           N −1
+which can show the model’s ability for long-                                      1     X
+dependency modeling. We use books from Project                      E[s[n]] =        E[   ai(i−n) ]            (13)
+                                                                                N −n
+                                                                                            i=n
+Gutenberg whose years are later than 2019 to en-
+sure no overlap with PG19, and we name it as              where aij has the same meaning in Equation 5.
+PG22. Besides, we pick QMSum (Zhong et al.,                  Then the attention resolution can be calculated
+2021) from SCROLLS (Shaham et al., 2022) with             by combining Equation (4) and Equation (13). The
+above 9k length on average. We care about the per-        final expectation is averaged over input texts and
+formance on different input lengths to evaluate the       different layers.
+model’s interpolation and extrapolation capability.          Table 3 reports the average resolution of various
+For experiment results in Table 2, we divide the          Transformer variants. The results show that X P OS
+same input into the target length to fairly compare       makes the position more recognizable in both 1024
+the perplexity of different lengths.                      (i.e., training length) and 2048 (i.e., length extrap-
+   For interpolation capability, we analyze the re-       olation). For Alibi (Press et al., 2021), the stable
+sults where the length is no more than 1024. Since        resolution comes from explicit decay, but it pre-
+the validation distribution is very similar to training   vents the model from learning position dependency
+data, all Transformers’ generalization capabilities       itself. In addition, we ablate BCA in 1024 and 2048.
+are also close. X P OS have a stable advantage on         The results support that BCA helps the model dis-
+others with a 0.09 perplexity drop on PG22, and           tinguish positions better, achieving higher attention
+0.27 on QMSum, which proves that X P OS increases         resolution.
+the interpolation ability.                                4.4   Ablation Studies
+   For extrapolation lengths, we do not use BCA
+                                                          4.4.1 Rotation Computation
+in other Transformers, and the following ablation
+study will discuss the performance with that. Press       As shown in Table 4, we discuss the necessity of
+et al. (2021)’s experiment shows that most of the po-     the combination of vector rotation and exponential
+sition strategies can’t deal with input length longer     decay. X P OS without rotation means Equation (12)
+than pre-training directly. X P OS shows a stable de-     degenerates to θi = 0:
+crease when the sequence length increases, which                                                                 
+                                                                          q1 ζ̂1n                      k1 ζ̂1−n
+satisfies the assumption that a longer context makes                   q ζ̂ n                      k ζ̂ −n 
+                                                                       2 1                         2 1 
+the prediction better. While others’ perplexity in-                         .                           ..       
+                                                          fq (q, n) = 
+                                                           ˙                 .
+                                                                             .         fk (k, n) = 
+                                                                                         ˙                  .       
+creases when the input length is 4096.                                                                           
+                                                                      q       ζ̂ n                k        ζ̂ −n 
+   To illustrate the tendency of perplexities, Fig-                     n−1      d/2                n−1      d/2 
+                                                                               n                              −n
+ure 1 visualizes the relation between input length                       qn ζ̂d/2                     kn ζ̂d/2
+                                                     14595
+                                            256        512    1024       2048      4096        8192
+           Length
+                                                  Interpolation                  Extrapolation
+                                                        PG22
+           Transformer                      38.1      33.5    30.54     132.46     1446.95     12747.41
+           Alibi                           34.25     30.01    27.34     26.01       28.46         32.8
+           Roformer                        33.27      29.2    26.68     68.86      235.71       458.83
+           L E X Transformer (Ours)        33.18     29.11    26.59     25.53       25.07        24.89
+                                                       QMSum
+           Transformer                     24.25     18.81    16.05     86.56      1196.92     10781.38
+           Alibi                           22.85     17.74    15.17     13.97       15.36        18.37
+           Roformer                        22.66     17.65    15.12     36.54      146.61       331.56
+           L E X Transformer (Ours)        22.01     17.24    14.85     13.92       13.56        13.48
+
+Table 2: Results of perplexity with different lengths. The language models are trained with a length of 1024 and
+then evaluated on various lengths. L E X obtains better performance not only on shorter texts (i.e., interpolation) but
+also on longer texts (i.e., extrapolation). The red color indicates that the perplexity begins increasing compared with
+the shorter length. L E X is the only method that has lower perplexity along with increased evaluation length.
+
+
+                        1024              2048                                     1024              8192
+   Length                                                       Methods
+                    Interpolation     Extrapolation                                Interpolation     Extrapolation
+   Transformer           0.87              0.28                 LEX                26.59             24.89
+   Alibi                 0.81              0.88                  w/o Rotation      37.11             34.5
+   Roformer              0.91              0.08                  ζ=0               26.68             26.16
+   L E X (Ours)          0.98              1.08                  Scalar ζ          26.85             25.1
+     − BCA               0.98              0.54
+                                                             Table 4: Ablation results on the PG22 set show that
+Table 3: Results of resolution with different Transformer    rotation of X P OS is necessary for strong performance.
+variants. Higher resolution indicates that the architec-
+ture tends to better distinguish context tokens. “BCA”
+is short for blockwise causal attention.                     causal attention.
+                                                                First, Blockwise Causal Attention works for
+                                                             RO PE whose perplexity will explode without that.
+   Moreover, the setting of ζ = 0 is RoPE (Su et al.,        Alibi performs well without windowed attention
+2021), which can be viewed as a special case of our          because its “soft window” is broader than a hard
+method. Besides, we discuss the situation when               block window. However, when the sequence length
+ζ is a scalar instead of a vector, where we choose           increases to 8192, windowed attention outperforms
+ζ = γ/(1 + γ) as the value.                                  vanilla attention again (also shown in Figure 1).
+   After pre-training on 1024, we evaluate the per-          X P OS’s perplexity without BCA increases by about
+plexity of PG22 with 1024 and 8192 lengths. Ta-              1.5 in 2048, and 40 in 8192. However, with its
+ble 4 shows that simple scaling operation can-               high resolution, X P OS can recognize position with
+not match the performance of L E X. The vector               BCA’s constraint.
+ζ also performs better than ζ = 0 and γ/(1 + γ).                Besides, we compare BCA with Sliding Atten-
+Therefore, the combination of rotation and decay             tion (Child et al., 2019). In this experiment, we set
+means the combination of in-distribution and out-            the window size as 1024 to align with pre-training.
+of-distribution capability in terms of length.               Sliding Attention performs better as shown in the
+                                                             last row of Table 5 because its interaction range is
+4.4.2 Blockwise Causal Attention                             broader than Block Causal Attention. The reason
+As shown in Table 5, we run the evaluation using             to use block windows instead of sliding windows
+different position embeddings (i.e., Absolute, Al-           is efficiency. According to (Xiong et al., 2021),
+ibi, RO PE, and X P OS) with or without blockwise            the training speed of Blockwise Attention is 1.5x
+                                                        14596
+                                2048    8192               compared with previous work. Moreover, the per-
+    Methods                                                formance on regular length is perfectly retained,
+                                  Extrapolation
+                                                           without trade-offs for long-sequence modeling.
+    Absolute                    132.46     12747.41
+    Absolute + BCA              322.73     28787.01        5.2    Position Modeling
+    RO PE                       68.86      458.83          5.2.1 Absolute Position Embedding
+    RO PE + BCA                 26.37      26.16           Absolute sinusoidal position embedding is pro-
+    Alibi                       26.01      32.8            posed by Vaswani et al. (2017), which is the ini-
+    Alibi + BCA                 27.53      31.82           tial design of the Transformer. For each dimen-
+                                                           sion, different frequencies are encoded from 2π to
+    X P OS                      27.29      63.99           10000 × 2π:
+    X P OS + BCA                25.53      24.89
+    X P OS + Sliding Window     25.33      24.61                   PE(pos,2i) = cos(pos/100002i/dmodel )
+                                                                                                           (14)
+                                                                 PE(pos,2i+1) = sin(pos/100002i/dmodel )
+Table 5: Results of perplexity on PG22 dataset. “BCA”
+is short for blockwise causal attention.                   where PEpos+k is represented as a linear function
+                                                           of PEpos to restore a relative-position property.
+faster than using sliding windows. Therefore, L E X        5.2.2 Relative Position Embedding
+makes a trade-off and uses BCA in our implemen-            Shaw et al. (2018) propose relative position em-
+tation. Without losing generality, our method is           bedding as an alternative approach. Denote aij as
+also compatible with Sliding Attention and other           attention weight, αij = softmax(aij ), oi as output,
+local attention variants.                                  we have:
+5     Related Work                                                      qi · kj    qi · (kj + pK ij )
+                                                                   aij = √      =⇒        √
+5.1 Long-Sequence Transformers                                              d                d             (15)
+                                                                       X           X
+Long-sequence Transformers aim to solve two key                  oi =    αij vj =⇒      αij (vj + pVij )
+                                                                         j             j
+problems. First, the computation or memory con-
+sumption is not efficient enough for long sequences.       where pK  ij = ωmin(i−j,k) , pij = ωmin(i−j,k) , and
+                                                                             K           V      V
+Second, there is a trade-off between performance
+                                                           ω K and ω V are learnable parameters. The clipping
+and efficiency.
+                                                           strategy helps length generalization but cannot dis-
+   One popular solution (Wang et al., 2020b;
+                                                           tinguish the positions that are larger than k. Yang
+Katharopoulos et al., 2020; Choromanski et al.,
+                                                           et al. (2019) and He et al. (2020) further reparam-
+2020) is linear attention, i.e., using a kernel-based
+                                                           eterize the relative position vectors for better per-
+or low-rank approximation to replace vanilla atten-
+                                                           formance. T5 (Raffel et al., 2020) uses a simpler
+tion. The methods typically target efficiency while
+                                                           strategy to encode relative position:
+underperforming vanilla Transformers for regular
+length. Another strand is sparse attention (Child                                qi · kj
+et al., 2019; Beltagy et al., 2020; Zaheer et al., 2020;                 aij =    √ + pbucket(i−j)         (16)
+                                                                                     d
+Xiong et al., 2021), which usually leverages struc-
+tured sparsity to reduce computation. For causal se-       where log-bucket scalars are added to attention
+quence modeling, the recurrent-style designs (Dai          scores. Recently, pre-defined position embedding
+et al., 2019; Hutchins et al., 2022; Ma et al., 2022b)     is brought back by RO PE (Su et al., 2021). Al-
+are also competitive.                                      ibi (Press et al., 2021) proposes to explicitly build
+   In comparison, we focus on length extrapola-            an exponential decay on the attention matrix, which
+tion (Press et al., 2021) for language modeling, i.e.,     contributes to length extrapolation:
+training on short texts while evaluating long texts.                     qi · kj
+The training process is kept the same as vanilla                 aij =    √ − m(i − j),       m(·) > 0     (17)
+                                                                             d
+Transformers. The capability of long-sequence
+modeling is given for free during inference. So            where the values of m(·) are manually defined.
+training efficiency (which is typically expensive          However, Alibi (Press et al., 2021)’s performance
+for large-scale language models) is not affected           tends to be inferior to RO PE for the context whose
+                                                      14597
+length is shorter than the pre-training length. In this   Ta-Chung Chi, Ting-Han Fan, and Alexander I Rud-
+work, we propose a theoretically derived relative           nicky. 2022b. Receptive field alignment enables
+                                                            transformer length extrapolation. arXiv preprint
+position embedding X P OS that optimizes the atten-
+                                                            arXiv:2212.10356.
+tion resolution between tokens. The X P OS method
+not only has the nice property of length extrapola-       Rewon Child, Scott Gray, Alec Radford, and
+tion but also achieves strong performance.                  Ilya Sutskever. 2019.        Generating long se-
+                                                            quences with sparse transformers.            URL
+                                                            https://openai.com/blog/sparse-transformers.
+6   Conclusion
+                                                          Krzysztof Choromanski, Valerii Likhosherstov, David
+We propose L E X Transformer to accurately capture          Dohan, Xingyou Song, Andreea Gane, Tamas Sar-
+position information for Transformers. We define            los, Peter Hawkins, Jared Davis, Afroz Mohiuddin,
+attention resolution as the metric of length extrapo-       Lukasz Kaiser, et al. 2020. Rethinking attention with
+lation and design a solution to improve the model-          performers. arXiv preprint arXiv:2009.14794.
+ing. Extensive experiments on language modeling
+                                                          Aakanksha Chowdhery, Sharan Narang, Jacob Devlin,
+show that our method achieves lower perplexity              Maarten Bosma, Gaurav Mishra, Adam Roberts, Paul
+on longer sequences while training on short texts.          Barham, Hyung Won Chung, Charles Sutton, Sebas-
+The simplicity also makes the method a go-to aug-           tian Gehrmann, Parker Schuh, Kensen Shi, Sasha
+mentation for Transformer-based language models.            Tsvyashchenko, Joshua Maynez, Abhishek B Rao,
+                                                            Parker Barnes, Yi Tay, Noam M. Shazeer, Vinodku-
+In addition, attention resolution provides a more           mar Prabhakaran, Emily Reif, Nan Du, Benton C.
+principled view for position modeling, which sheds          Hutchinson, Reiner Pope, James Bradbury, Jacob
+light on future architecture design.                        Austin, Michael Isard, Guy Gur-Ari, Pengcheng Yin,
+                                                            Toju Duke, Anselm Levskaya, Sanjay Ghemawat,
+Limitations                                                 Sunipa Dev, Henryk Michalewski, Xavier García,
+                                                            Vedant Misra, Kevin Robinson, Liam Fedus, Denny
+In this work, we focus on causal language mod-              Zhou, Daphne Ippolito, David Luan, Hyeontaek Lim,
+                                                            Barret Zoph, Alexander Spiridonov, Ryan Sepassi,
+eling. It needs additional efforts to integrate the         David Dohan, Shivani Agrawal, Mark Omernick, An-
+proposed methods into bidirectional attention, such         drew M. Dai, Thanumalayan Sankaranarayana Pillai,
+as masked language modeling (Devlin et al., 2019).          Marie Pellat, Aitor Lewkowycz, Erica Oliveira Mor-
+Moreover, X P OS introduces about 6% inference              eira, Rewon Child, Oleksandr Polozov, Katherine
+                                                            Lee, Zongwei Zhou, Xuezhi Wang, Brennan Saeta,
+cost compared with absolute position embeddings,            Mark Díaz, Orhan Firat, Michele Catasta, Jason
+although it accelerates training convergence.               Wei, Kathleen S. Meier-Hellstern, Douglas Eck, Jeff
+                                                            Dean, Slav Petrov, and Noah Fiedel. 2022. PaLM:
+                                                            Scaling language modeling with pathways. ArXiv,
+References                                                  abs/2204.02311.
+
+Iz Beltagy, Matthew E Peters, and Arman Cohan. 2020.      Zihang Dai, Zhilin Yang, Yiming Yang, Jaime Car-
+   Longformer: The long-document transformer. arXiv         bonell, Quoc V Le, and Ruslan Salakhutdinov.
+   preprint arXiv:2004.05150.                               2019. Transformer-xl: Attentive language mod-
+                                                            els beyond a fixed-length context. arXiv preprint
+Tom Brown, Benjamin Mann, Nick Ryder, Melanie               arXiv:1901.02860.
+  Subbiah, Jared D Kaplan, Prafulla Dhariwal, Arvind
+  Neelakantan, Pranav Shyam, Girish Sastry, Amanda        Jacob Devlin, Ming-Wei Chang, Kenton Lee, and
+  Askell, Sandhini Agarwal, Ariel Herbert-Voss,              Kristina Toutanova. 2019. BERT: Pre-training of
+  Gretchen Krueger, Tom Henighan, Rewon Child,               deep bidirectional transformers for language under-
+  Aditya Ramesh, Daniel Ziegler, Jeffrey Wu, Clemens         standing. In Proceedings of the 2019 Conference of
+  Winter, Chris Hesse, Mark Chen, Eric Sigler, Ma-           the North American Chapter of the Association for
+  teusz Litwin, Scott Gray, Benjamin Chess, Jack            Computational Linguistics: Human Language Tech-
+  Clark, Christopher Berner, Sam McCandlish, Alec            nologies, Volume 1 (Long and Short Papers), pages
+  Radford, Ilya Sutskever, and Dario Amodei. 2020.          4171–4186, Minneapolis, Minnesota. Association for
+  Language models are few-shot learners. In Ad-              Computational Linguistics.
+  vances in Neural Information Processing Systems,
+  volume 33, pages 1877–1901. Curran Associates,          Alexey Dosovitskiy, Lucas Beyer, Alexander
+  Inc.                                                      Kolesnikov, Dirk Weissenborn, Xiaohua Zhai,
+                                                            Thomas Unterthiner, Mostafa Dehghani, Matthias
+Ta-Chung Chi, Ting-Han Fan, Peter J Ramadge, and            Minderer, Georg Heigold, Sylvain Gelly, et al. 2020.
+  Alexander I Rudnicky. 2022a. Kerple: Kernelized           An image is worth 16x16 words: Transformers
+  relative positional embedding for length extrapola-       for image recognition at scale. arXiv preprint
+  tion. arXiv preprint arXiv:2205.09921.                    arXiv:2010.11929.
+
+                                                     14598
+Philipp Dufter, Martin Schmitt, and Hinrich Schütze.     Alec Radford, Jeff Wu, Rewon Child, David Luan,
+  2022. Position information in transformers: An           Dario Amodei, and Ilya Sutskever. 2019. Language
+  overview. Computational Linguistics, 48(3):733–          models are unsupervised multitask learners.
+  763.
+                                                         Colin Raffel, Noam Shazeer, Adam Roberts, Kather-
+Leo Gao, Stella Biderman, Sid Black, Laurence Gold-        ine Lee, Sharan Narang, Michael Matena, Yanqi
+  ing, Travis Hoppe, Charles Foster, Jason Phang, Ho-      Zhou, Wei Li, and Peter J. Liu. 2020. Exploring the
+  race He, Anish Thite, Noa Nabeshima, et al. 2020.        limits of transfer learning with a unified text-to-text
+  The pile: An 800gb dataset of diverse text for lan-      transformer. Journal of Machine Learning Research,
+  guage modeling. arXiv preprint arXiv:2101.00027.         21(140):1–67.
+Pengcheng He, Xiaodong Liu, Jianfeng Gao, and
+  Weizhu Chen. 2020. Deberta: Decoding-enhanced          Uri Shaham, Elad Segal, Maor Ivgi, Avia Efrat, Ori
+  bert with disentangled attention. arXiv preprint         Yoran, Adi Haviv, Ankit Gupta, Wenhan Xiong, Mor
+  arXiv:2006.03654.                                        Geva, Jonathan Berant, et al. 2022. Scrolls: Stan-
+                                                           dardized comparison over long language sequences.
+Sepp Hochreiter and Jürgen Schmidhuber. 1997. Long         arXiv preprint arXiv:2201.03533.
+  short-term memory. Neural Computation, 9:1735–
+  1780.                                                  Peter Shaw, Jakob Uszkoreit, and Ashish Vaswani. 2018.
+                                                           Self-attention with relative position representations.
+DeLesley Hutchins, Imanol Schlag, Yuhuai Wu, Ethan         arXiv preprint arXiv:1803.02155.
+  Dyer, and Behnam Neyshabur. 2022. Block-recurrent
+  Transformers. In Advances in Neural Information        Jianlin Su, Yu Lu, Shengfeng Pan, Bo Wen, and Yun-
+  Processing Systems.                                       feng Liu. 2021. Roformer: Enhanced transformer
+                                                            with rotary position embedding. arXiv preprint
+Angelos Katharopoulos, Apoorv Vyas, Nikolaos Pap-           arXiv:2104.09864.
+  pas, and François Fleuret. 2020. Transformers are
+  rnns: Fast autoregressive transformers with linear     Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob
+  attention. In International Conference on Machine        Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz
+  Learning, pages 5156–5165. PMLR.                         Kaiser, and Illia Polosukhin. 2017. Attention is all
+Diederik P. Kingma and Jimmy Ba. 2015. Adam: A             you need. In Advances in Neural Information Pro-
+  method for stochastic optimization. In 3rd Interna-      cessing Systems 30: Annual Conference on Neural
+  tional Conference on Learning Representations, San       Information Processing Systems 2017, 4-9 December
+  Diego, CA.                                               2017, Long Beach, CA, USA, pages 6000–6010.
+
+Tomáš Kočiskỳ, Jonathan Schwarz, Phil Blunsom, Chris   Benyou Wang, Lifeng Shang, Christina Lioma, Xin
+  Dyer, Karl Moritz Hermann, Gábor Melis, and Ed-          Jiang, Hao Yang, Qun Liu, and Jakob Grue Simon-
+  ward Grefenstette. 2018. The narrativeqa reading         sen. 2020a. On position embeddings in bert. In
+  comprehension challenge. Transactions of the Asso-       International Conference on Learning Representa-
+  ciation for Computational Linguistics, 6:317–328.        tions.
+
+Shuming Ma, Hongyu Wang, Shaohan Huang, Wenhui           Sinong Wang, Belinda Z Li, Madian Khabsa, Han Fang,
+  Wang, Zewen Chi, Li Dong, Alon Benhaim, Barun             and Hao Ma. 2020b. Linformer: Self-attention with
+  Patra, Vishrav Chaudhary, Xia Song, and Furu Wei.         linear complexity. arXiv preprint arXiv:2006.04768.
+  2022a. TorchScale: Transformers at scale. CoRR,
+  abs/2211.13184.                                        Wenhui Wang, Hangbo Bao, Li Dong, Johan
+                                                          Bjorck, Zhiliang Peng, Qiang Liu, Kriti Aggarwal,
+Xuezhe Ma, Chunting Zhou, Xiang Kong, Junxian             Owais Khan Mohammed, Saksham Singhal, Subhojit
+  He, Liangke Gui, Graham Neubig, Jonathan May,           Som, et al. 2022. Image as a foreign language: BEiT
+  and Luke Zettlemoyer. 2022b. Mega: Moving               pretraining for all vision and vision-language tasks.
+  average equipped gated attention. arXiv preprint        arXiv preprint arXiv:2208.10442.
+  arXiv:2209.10655.
+Ofir Press, Noah A Smith, and Mike Lewis. 2021.          Wenhan Xiong, Barlas Oğuz, Anchit Gupta, Xilun
+  Train short, test long: Attention with linear biases    Chen, Diana Liskovich, Omer Levy, Wen-tau Yih,
+  enables input length extrapolation. arXiv preprint      and Yashar Mehdad. 2021. Simple local attentions
+  arXiv:2108.12409.                                       remain competitive for long-context tasks. arXiv
+                                                          preprint arXiv:2112.07210.
+Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya
+  Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sas-     Zhilin Yang, Zihang Dai, Yiming Yang, Jaime Car-
+  try, Amanda Askell, Pamela Mishkin, Jack Clark,          bonell, Russ R Salakhutdinov, and Quoc V Le. 2019.
+  et al. 2021. Learning transferable visual models         XLNet: Generalized autoregressive pretraining for
+  from natural language supervision. In International      language understanding. In Advances in Neural In-
+  Conference on Machine Learning, pages 8748–8763.         formation Processing Systems, volume 32. Curran
+  PMLR.                                                    Associates, Inc.
+
+                                                    14599
+Manzil Zaheer, Guru Guruganesh, Kumar Avinava
+ Dubey, Joshua Ainslie, Chris Alberti, Santiago On-
+ tanon, Philip Pham, Anirudh Ravula, Qifan Wang,
+ Li Yang, et al. 2020. Big bird: Transformers for
+ longer sequences. Advances in Neural Information
+ Processing Systems, 33:17283–17297.
+Ming Zhong, Da Yin, Tao Yu, Ahmad Zaidi, Mutethia
+  Mutuma, Rahul Jha, Ahmed Hassan Awadallah, Asli
+  Celikyilmaz, Yang Liu, Xipeng Qiu, et al. 2021.
+  Qmsum: A new benchmark for query-based multi-
+  domain meeting summarization. arXiv preprint
+  arXiv:2104.05938.
+
+
+
+
+                                                 14600
+A   Additional Experiments
+Besides the experiments in Section 4, we run lan-
+guage modeling evaluation on Arxiv and Narra-
+tiveQA (Kočiskỳ et al., 2018). The results are
+shown in Table 6. These datasets have their short-
+comings. The article length of Arxiv is usually less
+than 8192, and part of NarrativeQA’s corpus is sam-
+pled from PG19, which is in the training dataset.
+Therefore, we show them in the appendix instead
+of the main content.
+
+B   Hyperparameters for Pre-Training
+As shown in Table 7, we present the hyper-
+parameters for pre-training. The setting keeps
+the same among all Transformer variants. We
+follow medium-size GPT3 (Brown et al., 2020),
+24 layers, 1024 hidden size, 4096 FFN inner hid-
+den size, and 16 attention heads. The number
+of batch tokens is 0.5M, for pre-training 1024,
+and the number of batch sentences is 512. We
+use Adam (Kingma and Ba, 2015) optimizer with
+β1 = 0.9, β2 = 0.98, ϵ = 10−6 . The warmup steps
+are 20k, and we use 50k checkpoints for evaluation.
+
+
+
+
+                                                  14601
+                                                   256        512    1024       2048     4096
+                  Length
+                                                         Interpolation           Extrapolation
+                                                         arXiv
+                  Transformer                     29.74      23.6    19.59    102.09     1240.77
+                  Alibi                           26.53     21.07    17.53    15.38       16.88
+                  Roformer                        25.89      20.6    17.24    49.29      199.25
+                  L E X Transformer (Ours)        25.73     20.48    17.14    15.81       15.19
+                                                    NarrativeQA
+                  Transformer                     16.74     14.42    13.02     58.95      574.91
+                  Alibi                           15.58     13.45    12.15     11.4       12.09
+                  Roformer                        15.21     13.16    11.93     20.72       35.14
+                  L E X Transformer (Ours)        14.82     12.86    11.67     11.14       10.93
+
+Table 6: Results of perplexity with different lengths. The language models are trained with a length of 1024 and
+then evaluated on various lengths. L E X obtains better performance not only on shorter texts (i.e., interpolation) but
+also on longer texts (i.e., extrapolation). The red color indicates that the perplexity begins increasing compared with
+the shorter length. L E X is the only method that has lower perplexity along with increased evaluation length.
+
+
+
+
+        Hyperparameters                   Value
+        Layers                           24
+        Hidden size                   1024
+        FFN inner hidden size         4096
+        Attention heads                  16
+        Training steps                 50K
+        Batch tokens per task         0.5M
+        Adam ϵ                         1e-6
+        Adam β                  (0.9, 0.98)
+        Learning rate                  3e-4
+        Learning rate schedule Polynomial
+        Warmup steps                20,000
+        Gradient clipping               2.0
+        Weight decay                   0.01
+
+Table 7: Hyperparameters used for language model pre-
+training.
+
+
+
+
+                                                         14602
+    ACL 2023 Responsible NLP Checklist
+A For every submission:
+    3 A1. Did you describe the limitations of your work?
+    
+      In the final part after conclusion
+
+     A2. Did you discuss any potential risks of your work?
+      Not applicable. It is fundamental research and not tied to particular applications.
+    3 A3. Do the abstract and introduction summarize the paper’s main claims?
+    
+      Abstract and Section 1
+
+    
+    7 A4. Have you used AI writing assistants when working on this paper?
+      Left blank.
+  3 Did you use or create scientific artifacts?
+B 
+    Section 4
+    3 B1. Did you cite the creators of artifacts you used?
+    
+      Section 4
+
+     B2. Did you discuss the license or terms for use and / or distribution of any artifacts?
+      Not applicable. These tools and models are publicly available and free of use for research purposes.
+    3 B3. Did you discuss if your use of existing artifact(s) was consistent with their intended use, provided
+    
+      that it was specified? For the artifacts you create, do you specify intended use and whether that is
+      compatible with the original access conditions (in particular, derivatives of data accessed for research
+      purposes should not be used outside of research contexts)?
+      The use is consistent with their intended use.
+    3 B4. Did you discuss the steps taken to check whether the data that was collected / used contains any
+    
+      information that names or uniquely identifies individual people or offensive content, and the steps
+      taken to protect / anonymize it?
+      Section 4
+    3 B5. Did you provide documentation of the artifacts, e.g., coverage of domains, languages, and
+    
+      linguistic phenomena, demographic groups represented, etc.?
+      Section 4
+    3 B6. Did you report relevant statistics like the number of examples, details of train / test / dev splits,
+    
+      etc. for the data that you used / created? Even for commonly-used benchmark datasets, include the
+      number of examples in train / validation / test splits, as these provide necessary context for a reader
+      to understand experimental results. For example, small differences in accuracy on large test sets may
+      be significant, while on small test sets they may not be.
+      Section 4
+
+C     3 Did you run computational experiments?
+      
+    Section 4
+    3 C1. Did you report the number of parameters in the models used, the total computational budget
+    
+      (e.g., GPU hours), and computing infrastructure used?
+      Section4.1 and Appendix B
+The Responsible NLP Checklist used at ACL 2023 is adopted from NAACL 2022, with the addition of a question on AI writing
+assistance.
+
+
+
+                                                        14603
+    3 C2. Did you discuss the experimental setup, including hyperparameter search and best-found
+    
+      hyperparameter values?
+      Section4.1 and Appendix B
+    3 C3. Did you report descriptive statistics about your results (e.g., error bars around results, summary
+    
+      statistics from sets of experiments), and is it transparent whether you are reporting the max, mean,
+      etc. or just a single run?
+      Section 4
+    3 C4. If you used existing packages (e.g., for preprocessing, for normalization, or for evaluation), did
+    
+      you report the implementation, model, and parameter settings used (e.g., NLTK, Spacy, ROUGE,
+      etc.)?
+      Section 4.1
+
+D     
+      7 Did you use human annotators (e.g., crowdworkers) or research with human participants?
+    Left blank.
+
+     D1. Did you report the full text of instructions given to participants, including e.g., screenshots,
+      disclaimers of any risks to participants or annotators, etc.?
+      No response.
+
+     D2. Did you report information about how you recruited (e.g., crowdsourcing platform, students)
+      and paid participants, and discuss if such payment is adequate given the participants’ demographic
+      (e.g., country of residence)?
+      No response.
+
+     D3. Did you discuss whether and how consent was obtained from people whose data you’re
+      using/curating? For example, if you collected data via crowdsourcing, did your instructions to
+      crowdworkers explain how the data would be used?
+      No response.
+
+     D4. Was the data collection protocol approved (or determined exempt) by an ethics review board?
+      No response.
+
+     D5. Did you report the basic demographic and geographic characteristics of the annotator population
+      that is the source of the data?
+      No response.
+
+
+
+
+                                                   14604
+

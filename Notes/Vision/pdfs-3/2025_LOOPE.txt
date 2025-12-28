@@ -1,0 +1,651 @@
+                                           LOOPE: Learnable Optimal Patch Order in Positional Embeddings for Vision
+                                                                       Transformers
+
+                                                          Md Abtahi Majeed Chowdhury Md Rifat Ur Rahman Akil Ahmad Taki
+                                                          Bangladesh University of Engineering and Technology, Dhaka, Bangladesh
+                                                                            {1806106, 1806033, 1806139}@eee.buet.ac.bd
+arXiv:2504.14386v1 [cs.CV] 19 Apr 2025
+
+
+
+
+                                                                  Abstract
+
+                                         Positional embeddings (PE) play a crucial role in Vision
+                                         Transformers (ViTs) by providing spatial information oth-
+                                         erwise lost due to the permutation-invariant nature of self-
+                                         attention. While absolute positional embeddings (APE)
+                                         have shown theoretical advantages over relative positional
+                                         embeddings (RPE), particularly due to the ability of sinu-
+                                         soidal functions to preserve spatial inductive biases like
+                                         monotonicity and shift invariance, a fundamental challenge
+                                         arises when mapping a 2D grid to a 1D sequence. Exist-
+                                         ing methods have mostly overlooked or never explored the              Figure 1. Comparison of various PEs on Three-cell Benchmark
+                                         impact of patch ordering in positional embeddings. To ad-
+                                         dress this, we propose LOOPE, a learnable patch-ordering
+                                                                                                                  Traditional PE approaches, including sinusoidal encod-
+                                         method that optimizes spatial representation for a given set
+                                                                                                              ings [1], learned embeddings[1], and relative positional
+                                         of frequencies, providing a principled approach to patch or-
+                                                                                                              encodings[20], result in fixed spatial biases or excessive pa-
+                                         der optimization. Empirical results show that our PE sig-
+                                                                                                              rameters that hinder generalizability. Conditional positional
+                                         nificantly improves classification accuracy across various
+                                                                                                              encodings (CPE) [6] create distinguished embeddings de-
+                                         ViT architectures. To rigorously evaluate the effectiveness
+                                                                                                              pending on local neighborhoods,helping to further gener-
+                                         of positional embeddings, we introduce the ”Three-Cell Ex-
+                                                                                                              alization but introducing additional computational burden.
+                                         periment”, a novel benchmarking framework that assesses
+                                                                                                              Extensive prior works have also explored the effects of fre-
+                                         the ability of PEs to retain relative and absolute positional
+                                                                                                              quencies learned in detail [24][18], with the goal of repre-
+                                         information across different ViT architectures. Unlike stan-
+                                                                                                              senting various spatial information in a single zigzag order
+                                         dard evaluations, which typically report a performance gap
+                                                                                                              efficiently. However, to the best of our knowledge, no re-
+                                         of 4-6% between models with and without PE, our method
+                                                                                                              search has studied how to flatten a 2D grid into a 1D se-
+                                         reveals a striking 30-35% difference, offering a more sen-
+                                                                                                              quence for a given set of frequency sin-cos pairs systemati-
+                                         sitive diagnostic tool to measure the efficacy of PEs. Our
+                                                                                                              cally.
+                                         experimental analysis confirms that the proposed LOOPE
+                                         demonstrates enhanced effectiveness in retaining both rela-                 sinusoidal P E = sin(XW T )|cos(XW T )             (1)
+                                         tive and absolute positional information.
+                                                                                                              Sinusoidal PE has shown effectiveness owing to the peri-
+                                         1. Introduction                                                      odicity property, which facilitates getting the relative posi-
+                                                                                                              tion with simple multiplication and is inherently performed
+                                         Transformers dominate computer vision tasks, from object             in self-attention. Moreover, implicit non-periodic learnable
+                                         detection to image synthesis, but lack an explicit spatial or-       embeddings are very sensitive to training hyperparameters
+                                         der. Positional encoding (PE) is crucial for learning spa-           with weak theoretical justification, which makes them in-
+                                         tial relationships, essential in applications like autonomous        consistent between different tasks.
+                                         driving, medical imaging, and scene understanding. While                Thus, through our analysis we conclude that any periodic
+                                         PE strategies have advanced, modeling spatial structures,            PE should consider three basic factors: context, order, and
+                                         especially in 2D, remains limited.                                   frequencies. Although efforts for non-periodic contextual
+
+
+                                                                                                          1
+PEs [14], and learned frequency-based approaches [31]have            sition information, leading to suboptimal spatial represen-
+appeared, the role of context and order in image representa-         tations [1]. Their inability to capture fine-grained details,
+tion remains relatively unexplored for a fixed, optimal fre-         particularly in object localization, limits their effectiveness
+quency set. Our work addresses this gap by systematically            [21], and their computational overhead often outweighs
+examining these factors and their impact on model perfor-            their advantages [29]. Extending RPEs to 2D grids further
+mance.                                                               complicates spatial reasoning due to the lack of explicit di-
+   In this paper, we address the optimal 2D spatial position         rectional encoding [5].
+encoding and propose a framework to systematically study                 Given the limitations of APEs and RPEs, hybrid PE
+positional order and its influence on model performance.             strategies aim to balance efficiency and generalization. CP-
+Our work contributes in three significant ways:                      RPE encodes horizontal and vertical distances separately to
+• LOOPE: We propose a novel method to determine opti-                enhance directional awareness but struggles with optimal
+  mal patch ordering, X, for spatial position embeddings,            spatial mapping [29]. CPE dynamically generates embed-
+  ensuring minimal loss of positional information while              dings based on local context, improving translation invari-
+  maintaining computational efficiency.                              ance, though it remains highly sensitive to hyperparame-
+• Three Cell Experiment: We introduce a controlled ex-               ters and lacks a structured framework for optimal positional
+  periment using minimal pixel configurations to analyze             order [6]. RoPE introduces rotationally invariant encod-
+  the behavior of different PEs, providing empirical insights        ings that effectively preserve relative positioning but fails to
+  into their effectiveness. In this experiment, we analyzed          model spatial hierarchies for structured 2D reasoning [22].
+  critical cases that allow us to evaluate ViT-PE pairs’ rela-           More recent hybrid approaches, such as APE, MSF-
+  tive and absolute positional information retainability.            PE, and LFF, further refine spatial representations. APE
+• Positional Embeddings Structural Integrity (PESI)                  adapts encodings dynamically for better generalization but
+  metrics: We propose Undirected Monotonicity, Directed              at increased computational complexity. MSF-PE extends
+  Monotonicity and Undirected Asymmetry to assess the                Fourier-based encodings across multiple spatial scales, cap-
+  quality of any PE method, offering a principled approach           turing richer hierarchical features while not directly ad-
+  to compare different strategies beyond empirical bench-            dressing optimal positional ordering [13] [32]. LFF for-
+  marks.                                                             mulates PE as a learned Fourier transformation, providing
+   Through extensive experiments, we show that our ap-               a data-driven spatial representation but remaining heavily
+proach consistently outperforms previous PE methods on               architecture-dependent [24]. Frequency-based hybrid meth-
+vision tasks. We demonstrate that our methods open up                ods integrating low- and high-frequency components fur-
+future directions in the realm of spatial encoding in deep           ther enhance spatial representations [12][2], though they
+learning models both from a theoretical standpoint and a             still lack a principled mechanism for optimizing positional
+practical standpoint.                                                order.
+                                                                         Recent work highlights the importance of monotonic-
+2. Related Work                                                      ity, translation invariance, and symmetry in PE design [8].
+                                                                     Monotonicity ensures that increasing spatial distances cor-
+Positional encoding (PE) is crucial for vision transformers          respond to decreasing similarity in embedded representa-
+as self-attention lacks inherent spatial awareness. Absolute         tions, preserving geometric consistency. Translation invari-
+positional encodings (APEs) were first introduced in NLP             ance maintains fixed relative distances across varying input
+[1] and later adapted to vision tasks, where images are to-          sizes, aiding generalization. Symmetry enforces that simi-
+kenized into patches [1]. Models like ViT [1] and DeiT               larity depends only on relative distance, though breaking it
+[25] employ either fixed sinusoidal functions or learnable           can be beneficial in tasks requiring directional sensitivity.
+embeddings. While APEs introduce positional awareness,               While existing PEs partially adhere to these properties, they
+they suffer from fixed-size constraints, limiting adaptabil-         are not explicitly optimized, leaving room for improvement
+ity to varying input resolutions [6][16], and fail to capture        in structured spatial encoding. Despite significant advance-
+relative spatial relationships, necessitating additional mech-       ments, the challenge remains in defining an optimal posi-
+anisms [15] [29].                                                    tional encoding that balances efficiency, spatial structure,
+    Relative positional encodings (RPEs) address these lim-          and fundamental mathematical properties. While absolute,
+itations by encoding pairwise relationships instead of ab-           relative, and hybrid encodings each offer advantages, their
+solute locations [20]. RPEs generalize across different se-          trade-offs between generalization, computational cost, and
+quence lengths, making them appealing for both NLP [7]               interpretability highlight gaps in existing methodologies.
+and vision tasks, with axial attention [27] and 2D-aware             Recent research suggests that structured frequency encod-
+encodings [19] being notable examples. However, RPEs                 ing and learned spatial priors can enhance robustness, yet
+exhibit performance degradation by discarding absolute po-           further theoretical and empirical validation is needed. Our
+
+                                                                 2
+work builds on these insights by systematically investigat-         sure continuity. (4) Traversal – Three recursive calls are
+ing positional ordering and its direct impact on model per-         merged to maintain order. (5) Output – The final result,XG ,
+formance, addressing critical gaps in current approaches.           is an index array that maps cells to the visit order. This ex-
+                                                                    tends space-filling curves to irregular grid shapes efficiently.
+3. Methodology                                                      Complete details of Gilbert Algorithm is provided in (Supp.
+                                                                    A.1)
+Mapping an N-dimensional grid to a 1D sequence while                Context Bias: Our experiments demonstrate that learn-
+preserving specific properties is a key challenge in compu-         ing positional order directly from image context is highly
+tational science. This can be framed as finding the opti-           inefficient and unstable. As observed in contextual space-
+mal Hamiltonian path on an 8/4-neighbor grid graph, where           filling curve (SFC) algorithms, directly propagating gradi-
+                                                                    ents from the Vision Transformer (ViT) to the edge weight
+each node (cell) is connected to its neighbors, aiming to
+                                                                    generator is impractical. To leverage contextual informa-
+minimize metrics like autocorrelation distance and code-            tion for patch ordering, we propose a controlled mechanism
+length values. Fractal Space-filling curves (SFCs) like the         that locally manipulates the static Gilbert order, XG .
+Hilbert[11], Peano[17], Onion-curves[30] are effective in           Context bias,XC introduces two key properties: (1) non-
+image processing. Recent approaches explore dynamic                 integer position and (2) dynamic ordering. Previously,
+SFCs[28][4] that adapt to local structures. However, they           we assumed discrete integer-valued patch positions, con-
+mostly rely on discrete algorithms (e.g., Minimum Span-             strained as 0 ≤ XGi < N (before scaling). However, with
+ning Tree(MST)), making differentiable loss functions dif-          the freedom of fractional position, the encoder can adjust
+ficult to define. Emerging methods use GNNs to estimate             relative distances between patches, bringing them closer or
+grid graph edge weights on Dual-graphs[28] and use MSTs             pushing them further apart. By selecting tanh() as the fi-
+to generate Hamiltonian circuits. However, extending this           nal activation function, the positional values are mapped to
+                                                                    −1 < XCi < 1, enabling even the potential swapping of
+to Hamiltonian paths—where the start and end nodes need
+                                                                    adjacent cells.
+not be adjacent—is unstable. Paths lack a closed-loop con-          Following is the complete architecture for Context
+straint, and handling 8-neighbor grids-graph adds further           Bias,XC , generator. Here, input image,I03×H×W x coor-
+complexity, making traditional methods inefficient espe-            dinates, x1×H×W , where xij = i similarly, yij = j.
+cially for positional embeddings.
+We are proposing a Learnable patch ordering method which
+                                                                       Concat:{x1×H×W |y 1×H×W |I0 } = Ic5×H×W                   (2)
+generates stable yet dynamic order, X, combining with XG
+and XC , X = XG + XC where, XG is fractal curve order                  Conv1 : Act(Ic × W15×32×P ×P + B11×32 ) = I132×h×w        (3)
+and XC is context bias.                                                Conv2 : Act(I1 × W232×16×5×5 + B21×16 ) = I216×h×w        (4)
+                                                                       Conv3 : Act(I2 × W316×8×5×5 + B31×8 ) = I38×h×w           (5)
+                                                                       Conv4 : Act(I3 × W48×4×5×5 + B41×4 ) = I44×h×w            (6)
+                                                                       Conv5 : Act(I4 × W54×1×5×5 + B51×1 ) = I51×h×w            (7)
+                                                                       BN+F: I51×h×w −
+                                                                                     → If1×N                                     (8)
+                                                                       Mlp: If × WLN ×N + BL
+                                                                                           1×N
+                                                                                               = IL1×N                           (9)
+                                                                                              1×N
+                                                                       Tanh: tanh(IL ) = XC         ;   −1 ≤ Xci ≤ 1           (10)
+                  (a)                     (b)
+                                                                    Finally we add static order with context bias to get final
+   Figure 2. (a) Conventional zigzag order, (b) Hilbert Order
+
+
+3.1. Proposed Method
+Static Patch Order: The Hilbert curve maps a 2n × 2n
+grid to a 1D sequence while preserving spatial locality but
+cannot handle arbitrary rectangular grids. To generate patch
+order for arbitrary image shape, we used generalized Hilbert
+order, also known as Gilbert Order[33], which generates             Figure 3. Example of local order manipulation based on context
+SFC for arbitrary 2D dimensions by recursively dividing the
+grid while maintaining locality.
+(1) Base Case – For 1D strips, it returns a linear sequence.        patch order.
+(2) Recursive Step – The region is split along the longer
+axis, or along the shorter axis for square-like regions. (3)           E(X) = E(XG + XC ) = sin(XWT )|cos(XWT )
+Adjustments – Odd dimensions are slightly shifted to en-                                                     (11)
+
+
+                                                                3
+                (a)                               (b)                              (c)                                (d)
+
+Figure 4. Four cases of three-cell experiment: (a) compare distance dRB , dRG (b) RGB orientation (clockwise/counter-clockwise) (c)
+compare area RGG′ R′ , RBB ′ R′ (d)vector sum of OR, OB, OG
+
+
+3.2. Three Cell Experiment                                              orientation is determined by computing the determinant:
+
+                                                                              xr         yr   1
+Positional encoding (PE) is vital for Vision Transformers                 ∆ = xg         yg   1
+(ViTs), yet no established method evaluates its compatibil-                   xb         yb   1                                   (12)
+ity with specific architectures. The extent to which a ViT
+retains positional information remains unclear, particularly               = (xg − xr )(yb − yr ) − (yg − yr )(xb − xr ) ̸= 0
+in distinguishing absolute from relative encoding. Tradi-               • If ∆ > 0, the points are in counterclockwise order.
+tional evaluations show only a marginal 4–6% performance                • If ∆ < 0, the points are in clockwise order.
+gain from PE, as natural image patches exhibit statistical
+                                                                        This case is interesting not only to determine the orienta-
+continuity, allowing transformers to infer positional aware-
+                                                                        tion of 3 cells, but also enables the architecture determine,
+ness without explicit encoding. To mitigate this confound-
+                                                                        if two cells, B, B ′ are in same/opposite side of RG line.
+ing factor, we construct a synthetic dataset of 224 × 224
+                                                                        This property has very high practical value.
+RGB images, ensuring that no two neighboring 16 × 16
+                                                                        This two cases are strong candidates of relative information.
+patches share common color information. This prevents the
+                                                                        Most of the natural vision tasks, relies on relative positional
+model from leveraging inter-patch correlations for implicit
+                                                                        bias and can be extracted from the difference between cells’
+positional awareness. Formally, each synthetic image Is is
+                                                                        embeddings. After thorough investigation, we concluded
+partitioned into a 14 × 14 grid, where three independent,
+                                                                        that, RPE fails miserably in any sort of addition operation
+non-overlapping cells are randomly assigned R, G, B. The
+                                                                        as it is mathematically impossible to find summation val-
+coordinates (xr , yr ), (xg , yg ), (xb , yb ) ∈ N2 , constrained
+                                                                        ues from difference equations. To highlight this strength of
+by 0 ≤ xi , yi ≤ 13. In this setup, we have investigated
+                                                                        APE, we proposes two cases here.
+4 critical cases of positional information.
+                                                                        Shadow area comparison: To compare the shadow ar-
+Undirected distance comparison: The Euclidean dis-
+                                                                        eas under the RG and RB lines, architecture should com-
+tances between randomly chosen R, G, and B cells are de-
+                                                                        pute the absolute trapezium areas formed by the projections
+fined as drg = ∥pr − pg ∥2 and drb = ∥pr − pb ∥2 , where
+                                                                        of R, G, B onto the x-axis. The projections are defined as
+pr , pg , pb ∈ N2 represent their respective position vectors.
+                                                                        R′ = (xr , 0), G′ = (xg , 0), and B ′ = (xb , 0). The trapez-
+We compare the cases drg > drb and drb > drg , formulated
+                                                                        ium areas corresponding to RGG′ R′ and RBB ′ R′ are:
+as ∥pr −pg ∥2 > ∥pr −pb ∥2 and ∥pr −pb ∥2 > ∥pr −pg ∥2 .
+pr , pg , pb are selected in such a way (trial & error) that                                      1
+{drg > drb , drb > drg , drg == drb } are all equiprobable                               ARG =      |(yr + yg )(xg − xr )|
+                                                                                                  2
+cases. The unequal cases emphasize on translation invari-
+ance and monotonicity of positional embeddings. For equal                                     1
+                                                                                         ARB =  |(yr + yb )(xb − xr )|
+case, undirected symmetry is crucial.                                                         2
+Cells’ orientation: To determine whether the R, G, and B                   We compare ARG and ARB . Since R, G, B are ran-
+cells form a clockwise or counterclockwise (anticlockwise)              domly generated such that the cases ARG > ARB , ARG <
+orientation, the architecture needs to be able to compute the           ARB , and ARG = ARB are equiprobable, we have:
+signed area of the triangle formed by their position vectors.           P (ARG > ARB ) = P (ARG < ARB ) = P (ARG =
+Since the cells are generated such that they are not colinear,          ARB ) = 13 . Trapezium area computation involves addition
+we always have ∆ ̸= 0, ensuring a valid orientation. The                operation which is a strong case to differentiate between
+
+
+                                                                    4
+RPEs and APEs.                                                           where atan2(y, x) returns the angle in (−π, π]. Assign the
+Vector sum: We define coordinates of R,G,B as position                   cell to bucket
+vectors relative to the origin (O) of a 14 × 14 grid. Given                                
+                                                                                             θ(x,y) (i, j)
+                                                                                                           
+that, pr , pg , pb ∈ N2 and 0 ≤ xi , yi ≤ 13. We compute                                k=                   mod N.            (19)
+                                                                                                  δ
+the vector sum: ps = pr + pg + pb = (xs , ys ) where
+xs = xr + xg + xb , ys = yr + yg + yb . We then check if                 Within each bucket k, order the cells by radial distance and
+ps is out of the grid by verifying: xs > 13 and ys > 13.                 compute Spearman’s rank correlation
+   This architecture needs to determine if the resultant sum                                             6 r d2r
+                                                                                                           P
+vector ps lies outside the grid boundary for which it should                          ρk(x,y) = 1 −                              (20)
+                                                                                                    |Rk |(|Rk |2 − 1)
+implicitly performs addition operation. To evaluate all those
+case, a simple 6-class image classification task is enough.              where dr is the rank difference between the radius r and the
+                                                                                                     k
+Six class defined as:                                                    corresponding similarity S(x,y) (r), and |Rk | is the number
+                                                                         of elements in bucket k. The mean correlation per cell is
+ drg > drb | drb > drg | ∆RGB > 0 | ARG > ARB |                          then
+                 X                              (13)                                                    N −1
+ ARB > ARG |         Pi − (13, 13) > 0                                                                1 X k
+                                                                                           ρ̄(x,y) =         ρ(x,y) ,            (21)
+                                                                                                     N
+                                                                                                                     k=0
+Complete Algorithm has been included in (Supp. A.2).
+                                                                         and the global directed monotonicity measure is defined as
+3.3. Positional Embeddings Structural Integrity                                                             h        w
+     (PESI) Metrics                                                                                    1 XX                  
+                                                                                          MD =                   1 − ρ̄(x,y)                       (22)
+                                                                                                      hw x=0 y=0
+PESI metrics mainly focuses on how well positional en-
+coders maintain monotonicity and what each PE com-                       With varying N, δ, we can exactly investigate how pre-
+pensates(radial symmetry) to achieve higher monotony                     cisely the encoder can maintain monotonicity at each di-
+(radial or precise). Given a positional embedding tensor                 rection. Figure. 6 shows how MD changes with N and
+P ∈ Rh×w×D , define the cosine similarity matrix centered                f or N → 1, MD → MU . A higher MD indicates stronger
+at (x, y):                                                               directional monotonicity. Ideally it should be 2.
+                                                                            Undirected Asymmetry: For each center (x, y), let Br
+                                   P(x,y) · P(i,j)                       be the set of cells at radius r from (x, y). We define standard
+              E(x,y) (i, j) =                                 (14)
+                                  ∥P(x,y) ∥∥P(i,j) ∥                     deviation of the cosine similarity values as
+Undirected monotonicity: The radial average similarity
+                                                                                          s
+                                                                                               1        X                                     2
+                                                                           σ(x,y) (r) =                          E(x,y) (i, j) − µ(x,y) (r)        (23)
+function is:                                                                                  |Br |
+                                                                                                      (i,j)∈Br
+
+                           1        X
+                                                                          where µ is defined in Eq.15. The coefficient of variation at
+           µ(x,y) (r) =                      A(x,y) (i, j),   (15)
+                          |Br |                                          radius r is then given by
+                                  (i,j)∈Br
+                                                                                                                         σ(x,y) (r)
+where Br is the set of positions at radius r.We compute                                        CV(x,y) (r) =                        .
+Spearman’s rank correlation:                                                                                             µ(x,y) (r)
+                                                                         Averaging over all radial distances r ∈ R yields the undi-
+                               6 r d2r
+                                P
+              ρ(x,y) = 1 −                         (16)                  rected symmetry measure at (x, y):
+                            |R|(|R|2 − 1)
+                                                                                                     1 X
+where dr is the rank difference between level(r) and                                A′SU (x, y) =           CV(x,y) (r)        (24)
+                                                                                                    |R|
+                                                                                                                     r∈R
+µ(x,y) (r), and |R| is the total radial levels. The undirected
+monotonicity score is:                                                   Finally, the global undirected asymmetry is defined as
+                                                                                                                 H       W
+                           h−1 w−1                                                                     1 XX ′
+                    1 XX                                                                 ASU =                 A (x, y)                           (25)
+              Mu =            1 − ρ(x,y)                      (17)                                    HW x=1 y=1 SU
+                   hw x=0 y=0
+where a higher MU indicates stronger undirected mono-                    For complete symmetry, |ASU | → 0. To be noted, there
+tonicity across the grid. Ideally, it should be 2.                       is no ideal value of undirected asymmetry as most of the
+   Directed Monotonicity: We quantize 2π into N = 2π                     positional encoder compensates ASU for better(precise)
+                                                       δ
+directional buckets (with quantization angle δ). For each                directed monotonicity MD . if ASU = 0, there will be no
+cell (i, j) relative to (x, y), compute                                  directional information in the embedding vector. Detailed
+                                                                         algorithms have been mentioned in (Supp. A.3.1, A.3.2,
+            θ(x,y) (i, j) = atan2(j − y, i − x)               (18)       A.3.3).
+
+
+                                                                     5
+4. Experiments
+
+
+
+
+                                                                                                                                                                LOOPE(Ours)
+                                                                                                                          Learnable
+4.1. Experimental Setup
+
+
+
+
+                                                                                                                                      Sinusoid
+                                                                                                            Zero PE
+                                                                         Dataset
+
+
+
+
+                                                                                                                                                     Hilbert
+We trained all models using the Adam optimizer with a
+cosine scheduler, a max LR of 0.001, and a min LR of                                      Model
+0.000025 for 150 epochs. Batch sizes were 96 for Oxford-                                ViT-Base [9] 83.6% 84.6% 85.3% 84.2% 88.1%
+
+
+
+
+                                                                         Oxford-IIIT
+IIIT, and 64 for CIFAR-100 and our novel Three cell dataset                            DeiT-Base [25] 88.9% 89.4% 86.3% 89.0% 89.8%
+. For resolution comparison experiment we used batch                                   DeiT-Small [25] 83.8% 83.8% 83.7% 80.6% 84.5%
+size 32 for Oxford-IIIT (384×384). Our base model was                                     CaiT [26]    87.4% 89.0% 90.0% 89.6% 90.5%
+DeiT-Base and for other experiments we used base mod-                                   Cross-ViT [3] 88.3% 90.9% 88.0% 89.3% 91.0%
+els as mentiond in the article. All models were used with                               ViT-Base [9] 79.8% 83.0% 85.2% 87.6% 88.3%
+
+
+
+
+                                                                         CIFAR-100
+ImageNet-1K pretrained weights for a baseline comparison                               DeiT-Base [25] 82.1% 86.3% 86.6% 86.9% 87.1%
+with the other experiments. In case of CrossViT, we used                               DeiT-Small [25] 68.6% 81.6% 71.9% 77.7% 82.0%
+240×240 images with mixed patch sizes (12×12, 16×16).                                     CaiT [26]    77.3% 82.5% 82.3% 82.5% 83.1%
+We employed an 80-10-10 train-validation-test split and ap-                             Cross-ViT [3] 80.5% 84.6% 86.3% 85.3% 86.8%
+plied data augmentations including flips, rotations, bright-
+ness adjustments, and elastic transformations.                         Table 1. Comparison of different Vision Transformer models with
+                                                                       various positional encodings across Oxford-IIIT and CIFAR-100
+4.2. Comparison with 1-D Positional Embeddings                         datasets.
+
+We evaluate the effectiveness of different positional encod-
+ings on Vision Transformer architectures using the Oxford-                                   Models                   Oxford-IIIT                CIFAR-100
+IIIT and CIFAR-100 datasets. The tested models include                                      CPVT [6]                    83.9%                     79.1%
+ViT-Base, DeiT-Base, DeiT-Small, CaiT, and Cross-ViT,                                       RPE [29]                    80.5%                     79.2%
+each trained with five positional encoding methods: Zero                                   Fourier [15]                 90.5%                     89.1%
+PE, Learnable PE, Sinusoidal PE, Hilbert PE, and our pro-                                2D Sinusoid [15]               80.1%                     86.3%
+posed Learnable Hilbert PE.                                                                Hilbert [11]                 89.0%                     86.9%
+                                                                                          LOOPE (Ours)                  89.8%                     87.1%
+    From Table. 1, LOOPE consistently outperforms other
+embeddings across all models and datasets, demonstrat-
+                                                                       Table 2. Comparison of advanced models across Oxford-IIIT and
+ing its ability to improve feature representation. For
+                                                                       CIFAR-100 datasets.
+Oxford-IIIT, it achieves the highest accuracy in Cross-ViT
+(91.0%) and CaiT (90.5%), suggesting that it enhances fine-
+grained feature learning. In CIFAR-100, which has greater
+                                                                       LOOPE outperforms every possible encoder except Fourier.
+inter-class variation, our method also performs the best
+                                                                       CPVT exhibit slightly lower accuracy, because it works
+for all models, notably ViT-Base (88.3%) and DeiT-Small
+                                                                       with transformed positions instead of actual position as it
+(82.0%), indicating its adaptability to complex datasets.
+                                                                       passes through one layer of encoder. RPE performs even
+    Several patterns emerge from the results: Zero PE con-
+                                                                       worse because it relies on a learned relative positional bias,
+sistently underperforms, confirming the necessity of ex-
+                                                                       which struggles to capture fine-grained spatial dependen-
+plicit positional encoding. Hilbert PE performs better than
+                                                                       cies. These results validate the superiority of Fourier PE
+Sinusoidal PE, due to its ability to preserve spatial locality
+                                                                       while demonstrating that LOOPE remains a strong alterna-
+more effectively. Learnable PE improves upon fixed em-
+                                                                       tive for vision tasks.
+beddings by allowing the model to optimize position repre-
+sentations, but LOOPE further enhances accuracy, because
+it integrates spatial locality with learnable flexibility, lead-              Resolution            Models                    Sinusoid                   Ours
+ing to a more effective representation of positional depen-                                      ViT-Base [9]                     85.3%           88.1%(+2.8%)
+dencies.                                                                           224x224      ViT-Small [9]                     81.6%           83.8%(+2.2%)
+    These findings demonstrate that our Learnable Hilbert                                       DeiT-Base [25]                    86.3%           89.8%(+3.5%)
+PE successfully balances structured spatial encoding with                                        ViT-Base [9]                     89.1%           92.2%(+3.1%)
+learnable adaptability, making it particularly effective in en-                    384x384      ViT-Small [9]                     83.0%           86.1%(+3.1%)
+hancing ViT performance across diverse datasets.                                                DeiT-Base [25]                    88.5%           92.4%(+3.9%)
+    Table. 2 compares the performance of various ad-
+vanced positional encoding in Oxford-IIIT and CIFAR-                   Table 3. Comparison of different Vision Transformer models with
+100. Fourier PE achieves the highest accuracy (90.5%,                  Sinusoid and LOOPE positional encodings for different Image
+89.1%), due to its rich frequency encoding properties.                 Resolution on Oxford-IIIT .
+
+
+                                                                   6
+    Table. 3 presents the performance of different Vi-                                       (92.4%), 1D Sinusoidal (91.3%), and our encoder (93.3%)
+sion Transformer models with Sinusoid and LOOPE po-                                          excel by integrating both absolute and relative cues. Hilbert
+sitional encodings across two resolutions. Our method                                        (93.8%) benefits from its locality-preserving nature. Our
+shows higher improvement in accuracy with bigger reso-                                       encoder, essentially a learnable Hilbert, dynamically opti-
+lution. At 224x224 gains range from +2.8% to +3.5%.                                          mizes the spatial path, outperforming other methods. Fi-
+The highest improvement occurs in ViT-Base (224x224,                                         nally vector sum, which measures an encoder’s ability to re-
++2.8%). At 384x384, performance gains improves signif-                                       tain absolute positional information, 1D Sinusoidal (95.3%)
+icantly, particularly in DeiT-Base(+3.9%), demonstrating                                     performs best due to its explicit encoding of absolute po-
+LOOPE’s greater improvement for bigger resolution. The                                       sitions. Our encoder (94.6%) closely follows, leveraging
+results validate LOOPE as a superior alternative to sinu-                                    learned patch ordering. Fourier (93.9%) remains strong,
+soidal encoding in transformer-based vision tasks.                                           benefiting from its ability to encode absolute positions
+                                                                                             through frequency decomposition.
+4.3. Analysis of Positional Encoding Performance
+                                                                                                 Overall, Fourier (94.0%), our encoder (93.7%), and
+      in the Three-Cell Experiment
+                                                                                             1D Sinusoidal (93.1%) are the most effective encoders.
+                                                                                             Our learnable Hilbert-based approach outperforms CPVT
+      Models                     RPE                        APE                              (70.9%) and RPE (70.1%), demonstrating that absolute en-
+                                                                                             coding is superior to purely relative methods in structured
+                                                                  Vector Sum
+                                       Orientation
+                      Distance
+
+
+
+
+                                                                                             spatial tasks.
+                                                     Area
+
+
+
+
+                                                                               Average       4.4. Positional Embedding Structural Integrity
+   ResNet-50[10] 90.8% 85.6% 89.7% 92.9%                                       89.4%              (PESI) Metrics
+  Inception-V3[23] 92.8% 96.1% 93.7% 95.3%                                     94.5%
+       No PE         61.9% 53.1% 60.1% 62.6% 59.4%                                                 Models          Undirected   Directed    Undirected
+    Learnable [1]    85.6% 89.3% 84.0% 92.2% 87.8%                                                                Monotonicity Monotonicity Asymmetry
+   1D Sinusoid [1]   90.9% 94.9% 91.3% 95.3% 93.1%                                                                   MU           MD           ASU
+      CPVT [6]       72.8% 63.2% 72.6% 75.0% 70.9%
+      RPE [29]       73.7% 62.6% 71.0% 73.9% 70.1%                                            LPE (Learned) [1]     1.7493         1.2003       -0.7272
+    Fourier [15]     93.1% 96.7% 92.4% 93.9% 94.0%                                            1D Sinusoid [15]      1.9567         1.4905        0.1243
+  2D Sinusoid [15]   83.6% 60.0% 72.6% 92.3% 77.1%                                            Learn. Freq. [15]     1.9623         1.5230        0.2683
+     Hilbert [11]    88.8% 95.0% 89.9% 93.8% 91.9%                                              Hilbert [11]        1.9670         1.2897        0.0945
+   LOOPE (Ours)      91.5% 95.8% 93.3% 94.6% 93.7%                                             LOOPE (ours)         1.9674         1.2900        0.0939
+
+
+Table 4. Comparison of various positional embeddings on 3 Cell                               Table 5. Comparison of models in terms of Undirected Mono-
+Experiment .                                                                                 tonicity, Directed Monotonicity, and Undirected Asymmetry.
+
+
+    We evaluate positional encoders on four metrics: Dis-                                       Table. 5 presents the positional fidelity indices for vari-
+tance, Orientation, Area, and Vector Sum. Distance and                                       ous Absolute Positional Encodings (APEs). For calculating
+Orientation capture relative positioning, while Vector Sum                                   directed monotonicity, the number of buckets, N is set to 60
+and Area assess absolute spatial awareness.                                                  for preparing this table. So, the δ = 6o The results indicate
+    From the Table. 4 we can see for distance, Fourier,                                      that LOOPE achieves the highest values in both undirected
+our encoder, and 1D Sinusoidal perform best in capturing                                     monotonicity and undirected asymmetry, demonstrating its
+global spatial structure. Fourier surpasses 1D Sinusoidal                                    robustness. Conversely, Learnable APE performs the worst
+by 5% due to its richer frequency representations. Our en-                                   across all three metrics, indicating that its embeddings are
+coder, which optimizes patch ordering, outperforms RPE by                                    not highly monotone. A notable observation is the asym-
+17%, proving that absolute encoding retains positional con-                                  metry value of LPE, which is -0.72. This negative value
+sistency better than relative encoding. As for orientation,                                  arises because the average cosine similarity across all cells
+Fourier dominates due to its cyclic transformations aligning                                 is predominantly negative, leading to an overall asymme-
+with periodicity. When a cell rotates, its position in Fourier                               try value below zero. Meanwhile, Learnable Frequency ex-
+space shifts cyclically, preserving relative orientation. Our                                hibits strong directed monotonicity with stable results in the
+encoder (94.6%) follows closely due to its optimal ordering,                                 undirected setting. However, it compromises radial sym-
+while Hilbert (95.0%) excels by preserving spatial locality                                  metry, meaning that values on a single radius show greater
+in the encoding space.                                                                       instability compared to other periodic APEs. In contrast,
+    In case of area, which evaluates how well an en-                                         LOOPE demonstrates the most stable radial symmetry, re-
+coder captures spatial information without context, Fourier                                  inforcing its reliability in positional encoding.
+
+
+                                                                                         7
+4.5. Ablation Studies                                                 struggles to provide a monotone trend in cosine similarity.
+                                                                      As N → 1, MD → MU which is perfectly as we expected.
+                                                                      At N = 4, δ = π/2, we can see that, LOOPE outperforms
+                                                                      zigzag and learnable as it highly depends on hilbert order
+                                                                      which propagates in square pattern.
+
+                                                                      5. Conclusion
+                                                                      In this work, we have explored the critical role of patch or-
+                                                                      der in positional embeddings (PEs) and demonstrated how
+                                                                      optimizing this order enhances performance in downstream
+                                                                      vision tasks. Our proposed contextual SFC generator ex-
+                                                                      hibits improved stability and computational efficiency, ad-
+                                                                      dressing key limitations in existing approaches. Through
+                                                                      the three-cell experiment, we systematically analyzed the
+                                                                      strengths and weaknesses of various PEs, revealing why ab-
+                                                                      solute positional embeddings (APEs) inherently outperform
+         Sin APE           LOOPE         1D Learnable                 relative positional embeddings (RPEs) and how they pre-
+                                                                      serve positional information throughout vision transformers
+Figure 5. Cosine Similarity Maps for Three APEs: Top-Right Cor-
+                                                                      (ViTs).
+ner, Right-Boundary, and Middle Cell (Top to Bottom)
+                                                                         We also introduced three novel PESI metrics that empha-
+                                                                      size the importance of monotonicity and elucidate the trade-
+    Figure:5 clearly shows that ours(LOOPE) is generating             offs required to achieve higher angular precision. These
+more robust cosine similarity map for all positions. Due              metrics provide deeper insights into the structural properties
+to traditional zigzag order in sinusoidal APE, the bound-             of PEs and their influence on model performance. While
+ary and corner cells have inconsistent similarity pattern,            our proposed LOOPE framework does not claim to deliver
+as the order propagates from right to all way back to left            state-of-the-art results across all dimensions, it establishes
+boundary. For 1D learnable APE, it loosely generates map              a solid foundation for future research to further investigate
+with a lots of anomaly in near to far distance. Also, other           and refine positional embeddings in vision models. We be-
+than, central cells, edge cells are having non-monotone sim-          lieve our findings will inspire continued exploration into the
+ilarity map. More visualization can be found in (Supp.                design of more effective and interpretable PEs for computer
+B) Figure 6, shows the interesting facts about directed               vision applications.
+
+                                                                      References
+                                                                       [1] Vaswani Ashish. Attention is all you need. Advances in
+                                                                           neural information processing systems, 30:I, 2017. 1, 2, 7
+                                                                       [2] Chaoqi Chen, Yushuang Wu, Qiyuan Dai, Hong-Yu Zhou,
+                                                                           Mutian Xu, Sibei Yang, Xiaoguang Han, and Yizhou Yu. A
+                                                                           survey on graph neural networks and graph transformers in
+                                                                           computer vision: A task-oriented perspective. IEEE Trans-
+                                                                           actions on Pattern Analysis and Machine Intelligence, 2024.
+                                                                           2
+                                                                       [3] Chun-Fu Richard Chen, Quanfu Fan, and Rameswar Panda.
+                                                                           Crossvit: Cross-attention multi-scale vision transformer for
+                                                                           image classification. In Proceedings of the IEEE/CVF in-
+                                                                           ternational conference on computer vision, pages 357–366,
+                                                                           2021. 6
+                                                                       [4] Wanli Chen, Xufeng Yao, Xinyun Zhang, and Bei Yu. Ef-
+Figure 6. Trend of directed Monotonicity,MD with increasing an-            ficient deep space filling curve. In Proceedings of the
+gle precision, δ = 2π/N                                                    IEEE/CVF International Conference on Computer Vision
+                                                                           (ICCV), pages 17525–17534, 2023. 3
+monotonicity, with this tool one can investigate how pre-              [5] Krzysztof Marcin Choromanski, Shanda Li, Valerii Likhosh-
+cisely the positional embeddings can maintain monotonic-                   erstov, Kumar Avinava Dubey, Shengjie Luo, Di He, Yiming
+ity. Clearly, increasing precision all positional encoders                 Yang, Tamas Sarlos, Thomas Weingarten, and Adrian Weller.
+
+
+                                                                  8
+     Learning a fourier transform for linear relative positional en-       [19] Prajit Ramachandran, Niki Parmar, Ashish Vaswani, Irwan
+     codings in transformers, 2024. 2                                           Bello, Anselm Levskaya, and Jon Shlens. Stand-alone self-
+ [6] X Chu, Z Tian, B Zhang, X Wang, X Wei, H Xia, and C                        attention in vision models. Advances in neural information
+     Shen. Conditional positional encodings for vision transform-               processing systems, 32, 2019. 2
+     ers. arxiv 2021. arXiv preprint arXiv:2102.10882. 1, 2, 6,            [20] Peter Shaw, Jakob Uszkoreit, and Ashish Vaswani. Self-
+     7                                                                          attention with relative position representations.      arXiv
+ [7] Zihang Dai, Zhilin Yang, Yiming Yang, Jaime Carbonell,                     preprint arXiv:1803.02155, 2018. 1, 2
+     Quoc V Le, and Ruslan Salakhutdinov. Transformer-xl:                  [21] Aravind Srinivas, Tsung-Yi Lin, Niki Parmar, Jonathon
+     Attentive language models beyond a fixed-length context.                   Shlens, Pieter Abbeel, and Ashish Vaswani. Bottleneck
+     arXiv preprint arXiv:1901.02860, 2019. 2                                   transformers for visual recognition. In Proceedings of
+                                                                                the IEEE/CVF conference on computer vision and pattern
+ [8] Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina
+                                                                                recognition, pages 16519–16529, 2021. 2
+     Toutanova. Bert: Pre-training of deep bidirectional trans-
+                                                                           [22] Jianlin Su, Murtadha Ahmed, Yu Lu, Shengfeng Pan, Wen
+     formers for language understanding. In Proceedings of the
+                                                                                Bo, and Yunfeng Liu. Roformer: Enhanced transformer with
+     2019 conference of the North American chapter of the asso-
+                                                                                rotary position embedding. Neurocomputing, 568:127063,
+     ciation for computational linguistics: human language tech-
+                                                                                2024. 2
+     nologies, volume 1 (long and short papers), pages 4171–
+                                                                           [23] Christian Szegedy, Vincent Vanhoucke, Sergey Ioffe,
+     4186, 2019. 2
+                                                                                Jonathon Shlens, and Zbigniew Wojna. Rethinking the in-
+ [9] Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov,                     ception architecture for computer vision, 2015. 7
+     Dirk Weissenborn, Xiaohua Zhai, Thomas Unterthiner,
+                                                                           [24] Matthew Tancik, Pratul Srinivasan, Ben Mildenhall, Sara
+     Mostafa Dehghani, Matthias Minderer, Georg Heigold, Syl-
+                                                                                Fridovich-Keil, Nithin Raghavan, Utkarsh Singhal, Ravi Ra-
+     vain Gelly, et al. An image is worth 16x16 words: Trans-
+                                                                                mamoorthi, Jonathan Barron, and Ren Ng. Fourier features
+     formers for image recognition at scale. arXiv preprint
+                                                                                let networks learn high frequency functions in low dimen-
+     arXiv:2010.11929, 2020. 6
+                                                                                sional domains. Advances in neural information processing
+[10] Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun.                     systems, 33:7537–7547, 2020. 1, 2
+     Deep residual learning for image recognition, 2015. 7                 [25] Hugo Touvron, Matthieu Cord, Matthijs Douze, Francisco
+[11] David Hilbert. Über die stetige abbildung einer linie auf ein             Massa, Alexandre Sablayrolles, and Hervé Jégou. Training
+     flächenstück. Mathematische Annalen, 38:459–460, 1891. 3,                data-efficient image transformers & distillation through at-
+     6, 7                                                                       tention. In International conference on machine learning,
+[12] Yifan Jiang, Peter Hedman, Ben Mildenhall, Dejia Xu,                       pages 10347–10357. PMLR, 2021. 2, 6
+     Jonathan T Barron, Zhangyang Wang, and Tianfan Xue.                   [26] Hugo Touvron, Matthieu Cord, Alexandre Sablayrolles,
+     Alignerf: High-fidelity neural radiance fields via alignment-              Gabriel Synnaeve, and Hervé Jégou. Going deeper with im-
+     aware training. In Proceedings of the IEEE/CVF Conference                  age transformers. In Proceedings of the IEEE/CVF interna-
+     on Computer Vision and Pattern Recognition, pages 46–55,                   tional conference on computer vision, pages 32–42, 2021. 6
+     2023. 2                                                               [27] Huiyu Wang, Yukun Zhu, Bradley Green, Hartwig Adam,
+[13] Amirhossein Kazemnejad, Inkit Padhi, Karthikeyan Nate-                     Alan Yuille, and Liang-Chieh Chen. Axial-deeplab: Stand-
+     san Ramamurthy, Payel Das, and Siva Reddy. The impact                      alone axial-attention for panoptic segmentation. In European
+     of positional encoding on length generalization in transform-              conference on computer vision, pages 108–126. Springer,
+     ers. Advances in Neural Information Processing Systems, 36:                2020. 2
+     24892–24928, 2023. 2                                                  [28] Hanyu Wang, Kamal Gupta, Larry Davis, and Abhinav Shri-
+[14] G Ke, D He, and TY Liu. Rethinking positional en-                          vastava. Neural space-filling curves, 2022. 3
+     coding in language pre-training. arxiv. arXiv preprint                [29] Kan Wu, Houwen Peng, Minghao Chen, Jianlong Fu, and
+     arXiv:2006.15595, 2021. 2                                                  Hongyang Chao. Rethinking and improving relative posi-
+                                                                                tion encoding for vision transformer. CoRR, abs/2107.14222,
+[15] Yang Li, Si Si, Gang Li, Cho-Jui Hsieh, and Samy Bengio.
+                                                                                2021. 2, 6, 7
+     Learnable fourier features for multi-dimensional spatial po-
+                                                                           [30] Pan Xu, Cuong Nguyen, and Srikanta Tirthapura. Onion
+     sitional encoding. Advances in Neural Information Process-
+                                                                                curve: A space filling curve with near-optimal clustering,
+     ing Systems, 34:15816–15829, 2021. 2, 6, 7
+                                                                                2018. 3
+[16] Ze Liu, Han Hu, Yutong Lin, Zhuliang Yao, Zhenda Xie,                 [31] Rui Xu, Xintao Wang, Kai Chen, Bolei Zhou, and
+     Yixuan Wei, Jia Ning, Yue Cao, Zheng Zhang, Li Dong, et al.                Chen Change Loy. Positional encoding as spatial inductive
+     Swin transformer v2: Scaling up capacity and resolution. In                bias in gans. In Proceedings of the IEEE/CVF Conference
+     Proceedings of the IEEE/CVF conference on computer vi-                     on Computer Vision and Pattern Recognition, pages 13569–
+     sion and pattern recognition, pages 12009–12019, 2022. 2                   13578, 2021. 2
+[17] Giuseppe Peano. Sur une courbe, qui remplit toute une aire            [32] Liang Zhao, Xiachong Feng, Xiaocheng Feng, Weihong
+     plane. Mathematische Annalen, 36(1):157–160, 1890. 3                       Zhong, Dongliang Xu, Qing Yang, Hongtao Liu, Bing Qin,
+[18] Ali Rahimi and Benjamin Recht. Random features for large-                  and Ting Liu. Length extrapolation of transformers: A
+     scale kernel machines. Advances in neural information pro-                 survey from the perspective of positional encoding. arXiv
+     cessing systems, 20, 2007. 1                                               preprint arXiv:2312.17044, 2023. 2
+
+
+                                                                       9
+[33] Jakub Červený. gilbert: Space-filling curve for rectangu-
+     lar domains of arbitrary size. https://github.com/
+     jakubcerveny/gilbert. 3
+
+
+
+
+                                                                   10
+

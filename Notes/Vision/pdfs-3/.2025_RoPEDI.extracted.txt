@@ -1,0 +1,727 @@
+                                             The Rotary Position Embedding May Cause Dimension Inefficiency
+                                                      in Attention Heads for Long-Distance Retrieval
+
+                                                           Ting-Rui Chiang                                      Dani Yogatama
+                                                    University of Southern California                   University of Southern California
+                                                          tingruic@usc.edu                                    yogatama@usc.edu
+
+
+
+                                                               Abstract                             the failure to the skewed length distribution in the
+                                                                                                    training data. Peng et al. (2024), emozilla (2023),
+                                             The Rotary Position Embedding (RoPE) is
+                                                                                                    and bloc97 (2023) addressed the failure by studying
+                                             widely used in the attention heads of many large
+arXiv:2502.11276v1 [cs.CL] 16 Feb 2025
+
+
+
+
+                                             language models (LLM). It rotates dimensions           ways to interpolate RoPE.
+                                             in the query and the key vectors by different             Orthogonal to existing studies, our work ana-
+                                             angles according to their positions in the input       lyzes the impact of RoPE on models’ utilization of
+                                             sequence. For long context modeling, the range         dimensions in attention heads. We hypothesize that,
+                                             of positions may vary a lot, and thus RoPE ro-         for long distance attention, the way that RoPE ro-
+                                             tates some dimensions by a great range of an-          tates the query and the key vectors may prevent
+                                             gles. We hypothesize that the wide range of ro-
+                                                                                                    the model from utilizing the dimensions that it
+                                             tation angles may prevent LLMs from utilizing
+                                             those dimensions. To validate this hypothesis,         rotates significantly. Our results of a controlled
+                                             we present a controlled experiment showing             experiment and analyses of three real-world large
+                                             that applying RoPE causes low utility of cer-          language models support our hypothesis.
+                                             tain dimensions. Our analyses on three LLMs               As RoPE has been widely used in many LLMs,
+                                             also indicate that these dimensions do not help        our findings have great implications. Not utilizing
+                                             LLMs do long-context question answering.               certain dimensions means that the computational
+                                                                                                    cost for those dimensions may not be necessary.
+                                         1   Introduction
+                                                                                                    LLMs may be made more computationally efficient
+                                         Su et al. (2024) proposed the Rotary Position Em-          by pruning these dimensions. It also implies that
+                                         bedding (RoPE) for Transformer models (Vaswani             LLMs may achieve better performance on long-
+                                         et al., 2017). Because it is parameter-free and com-       context tasks with the same number of parameters
+                                         putationally efficient, it has been widely adopted         if they utilize more dimensions. Addressing this
+                                         in many large language models (LLMs), such as              issue is thus paramount for LLM developers.
+                                         PaLM (Chowdhery et al., 2022), Gemma (Team
+                                         et al., 2024a,b), LLaMA (Touvron et al., 2023a,b;          2    Background: Rotary Position
+                                         Dubey et al., 2024), OLMo (Groeneveld et al.,                   Embeddings (RoPE)
+                                         2024; OLMo et al., 2024), Mistral (Jiang et al.,           Su et al. (2024) proposed the Rotary Position Em-
+                                         2023), Falcon (Almazrouei et al., 2023), and               bedding (RoPE), which can be applied to the key
+                                         Qwen (Bai et al., 2023; Team, 2024). Despite               and query vectors for attention operations. It en-
+                                         the success of these LLMs on several downstream            codes relative position by rotating the intermediate
+                                         tasks, LLMs have also been found to be less effec-         representations according to their positions in the
+                                         tive when handling longer context (Liu et al., 2024;       input sequence. Specifically, RoPE rotates a vector
+                                         Kamradt, 2023; An et al., 2024; Bai et al., 2024;          in R2D at position m with a block-diagonal matrix
+                                         Zhang et al., 2024; Li et al., 2024).                                                                 
+                                            Most recent work has focused on understanding                             Mmθ1
+                                         and mitigating LLM failure to generalize to long                 Mm  (D)
+                                                                                                                  =
+                                                                                                                                ..             ,
+                                                                                                                                                
+                                                                                                                                    .
+                                         context. For example, Kazemnejad et al. (2023)                                                  MmθD        (1)
+                                         inspected different positional encoding methods.                                                      
+                                                                                                                           cos mθi − sin mθi
+                                         Han et al. (2024) and Xiao et al. (2024b) explained              with Mmθi =                             ,
+                                                                                                                           sin mθi cos mθi
+                                         the failure with the distribution shifts of LLMs’
+                                         internal representation. An et al. (2025) attributed       for some scalars θ1 > θ2 > · · · θD that decide the
+
+                                                                                                1
+       1.3                                    5
+       1.2        query, w/o PE                                                           1.8                                 0.9
+                  key, w/o PE                 4                                           1.7
+       1.1
+|Weight|
+
+
+                  query, w/ PE                                                            1.6                                 0.8
+           1                                  3
+
+
+
+
+                                           loss
+                  key, w/ PE                                                              1.5
+                                                        w/o PE, first to last
+       0.9                                                                                                                    0.7
+                                              2         w/o PE, last to first             1.4
+       0.8
+                                                        w/ PE, first to last              1.3
+                                              1                                                                               0.6
+       0.7                                              w/ PE, last to first                                          LLaMA                          LLaMA
+                                                                                          1.2
+       0.6                                    0                                           1.1                         OLMo                           OLMo
+                                                                                                                              0.5
+          1       32      64          96       0   32     64        96          128                                   Qwen                           Qwen
+                                                                                           1
+                  dimension index                  # of removed dim.
+                                                                                              1       32      64     96         1     32     64     96
+
+(a) The average magnitude of               (b) # of removed dimen-                                (a) Average L1 norm           (b) Average utility score.
+the key and the query vectors              sions v.s. loss in Eq. 3
+for each dimension.                        (−E log P (vi |qi , K, V )).
+                                                                                          Figure 2: The average importance of each dimensions
+Figure 1: Analysis of the dimensions in the attention                                     in the query vectors of the attention heads, measured
+head of the models (w/ and w/o applying RoPE) in §4.                                      by the L1 norm of rows in the query weight matrices
+                                                                                          (left) and by utility score in §5.2 (right). We visualize
+                                                                                          all heads in Figure 5 and Figure 6.
+frequency of the rotations.
+   Let a query vector and a key vector at position
+                                                                                          {(k, v)|k ∈ K, v ∈ V } ⊂ {(ki , vi )}ni=1 . Specifi-
+m, n be qm , kn ∈ R2D . RoPE rotates them with
+                                                                                          cally, we optimize the following objective function:
+RoPE matrices Mm and Mn respectively, so the
+dot product for computing the attention weight is                                                                     n
+                                                                                                                   1X
+                                                                                                    min n −           EK,V log P (vi |qi , K, V )
+           RoPE(qm ) · RoPE(kn )                                                                {qi ,ki vi }i=1    n
+                                                                                                                     i=1
+                                  ⊺   ⊺                                     (2)
+               = (Mm qm ) (Mn kn ) = qm (Mn−m )kn .                                                                exp (a⊺ vi )                          (3)
+                                                                                              where P (vi |qi ) = Pn        ⊺
+                                                                                                                                 ,
+                                                                                                                    j exp(a vj )
+3              Dimension Inefficiency
+                                                                                              a = Attention(qi , K, V ).
+We hypothesize that RoPE may cause dimension
+inefficiency in attention heads for long-dependency                                       We train models in two setups, one with RoPE
+modeling. Specifically, when a task requires an                                           applied on K and the other without (details in §A).
+attention head to attend to a distant position, RoPE
+may prevent the attention from utilizing the first                                        Results and Discussion Our experimental results
+few dimensions in its attention heads. This is be-                                        indicate that RoPE causes dimension inefficiency.
+cause RoPE rotates those dimensions with greater                                          Firstly, we plot the average weight of {q}ni=1 and
+rates (θ’s in Eq. 1)1 . For long-context tasks, such as                                   {k}ni=1 for each dimension in Figure 1a. It shows
+long-context question answering, the possible rela-                                       that the model trained with RoPE applied learns to
+tive positions m−n between a key vector kn for the                                        assign lower weights to the first few dimensions of
+target information and a query vector qm can vary                                         {qi }ni=1 and {ki }ni=1 . Secondly, Figure 1b shows
+greatly, so the rotation applied on these dimensions                                      that, when RoPE is applied, removing the first few
+can be any angles. Therefore, the model cannot pro-                                       dimensions does not affect the loss significantly,
+duce query and key vectors such that their first few                                      while removing the last few dimensions greatly
+dimensions can consistently contribute a positive                                         increases the loss. This indicates that the model
+value to the inner product in Eq. 2. We hypothesize                                       relies mainly on the last few dimensions and does
+that the first few dimensions are thus useless for                                        not utilize the first few dimensions. In contrast, the
+long-distance attention.                                                                  models without RoPE do not exhibit these phenom-
+                                                                                          ena. This is in line with our hypothesis in §3.
+4              Controlled Experiment
+                                                                                          5        Inspecting Real-world Models
+We present a controlled experiment to demonstrate
+how RoPE can cause dimension inefficiency. We                                             We then inspect three 7B/8B large language models
+design a simple experiment where the model needs                                          (LLM), Llama-3.1-8B-Instruct (Dubey et al., 2024),
+to learn n vector tuples {(qi , ki , vi )}ni=1 such that                                  QWen-2.5-7B-Instruct (Team, 2024), and OLMo-
+the attention head can retrieve vi with qi from                                           2-7B-Instruct (OLMo et al., 2024). These models
+any randomly sampled subset of key-value pairs                                            have 128 dimensions in their attention heads. For
+    1
+                                                                                          quick inspection, we first plot the L1 norm of the
+      In practice, the dimensions are reordered for computa-
+tional efficiency. Here we assume that the order of the dimen-                            rows in the query projection matrices in all the
+sions is by the magnitude of θ, from greater to smaller.                                  attention heads in Figure 2. It shows increasing
+
+                                                                                      2
+                   LLaMA       OLMo       Qwen                 14                              14
+                                                               12                              12
+       Original     54.09       56.66     58.72                10                              10
+                                                                8                              8
+       Masked       54.15       57.55     57.36                 6                              6
+                                                                4                              4
+                                                                2                              2
+Table 1: The performance of LLMs before and after
+                                                                0                              0
+masking dimensions with low utility. We average the              0     0.2   0.4   0.6   0.8    0      0.2   0.4   0.6   0.8
+
+accuracy of setups where the answer is in the 1st, 10th,        (a) LLaMA first, ρ = −0.34 (b) LLaMA last, ρ = 0.38
+20th document (full results in Table 3).
+                                                               14                              14
+                                                               12                              12
+                                                               10                              10
+trends for all three models, as we have found in                8                              8
+                                                                6                              6
+the toy experiment (Figure 1a). As the L1 norm of               4                              4
+the rows may not directly reflect the importance of             2                              2
+                                                                0                              0
+the dimensions in the query vectors, we utilize a                0     0.2   0.4   0.6   0.8    0      0.2   0.4   0.6   0.8
+
+long-context task for further investigations.                   (c) OLMo first, ρ = −0.12       (d) OLMo last, ρ = 0.20
+
+                                                               14                              14
+5.1   Experimental Setup                                       12                              12
+                                                               10                              10
+As we hypothesize that the dimension inefficiency               8                              8
+only occurs for attention heads that model long                 6                              6
+                                                                4                              4
+dependency, we choose a task that involves long                 2                              2
+dependence modeling, the long-context question-                 0
+                                                                 0     0.2   0.4   0.6   0.8
+                                                                                               0
+                                                                                                0      0.2   0.4   0.6   0.8
+answering task. We follow the setup of Liu et al.                   (e) Qwen first, ρ = 0.1         (f) Qwen last, ρ = 0.54.
+(2024), where we provide the model with 20 doc-
+uments for each question, among which only one                 Figure 3: The relationship between the retrieval-head
+contains the answer. Following Liu et al. (2024),              indicator score (x-axis) and utility score of the first 16
+we measure the accuracy for scenarios where the                or last dimensions (y-axis). Each dot represents an at-
+                                                               tention head. The lighter dot color represents the deeper
+answer is in the 1st, 10th, and 20th document.
+                                                               layers. The red line represents the linear regressor.
+5.2   Utilization of Dimensions
+Identifying dimension utilization To identify                  crucial for the LLM, we conduct a sanity check.
+the dimensions in the query vectors that are not               For each head at layer ℓ with index i, based on uℓ,i ,
+crucial to attention, we train a sparse mask that              we mask dimensions whose utility scores is less
+masks out as many dimensions as possible while                 than 0.5 and prompt the model to answer the same
+preserving the attention head’s output. Specifically,          questions again. We then measure the performance
+for each attention head of 2D dimensions at layer              of the masked model. Table 1 shows that masking
+ℓ with index i, we find a masking vector uℓ,i ∈                these dimensions does not greatly decrease perfor-
+[0, 1]2D over the query vector that minimizes                  mance, suggesting that dimensions with low scores
+                                                               are not crucial to performance.
+ ∥Attnℓ,i (q, K, V ) − Attnℓ,i (q ⊙ uℓ,i , K, V )∥22
+  + α∥uℓ,i ∥1 ,                                     (4)        Observations and Discussion We also plot the
+                                                               average utility score of each dimension (uℓ,i aver-
+                                          1                    aged over ℓ’s and i’s). Figure 2b shows increasing
+where we set the hyper-parameter α = 2D      . We
+then treat the value of u in each dimension as the             trends for the three models, indicating a lower util-
+utilization score of that dimension.                           ity of the first few dimensions. This is also in line
+                                                               with our hypothesis.
+Experiment We first prompt the LLM to answer
+the questions in the dataset. Then we feed in the              5.3 Retrieval Heads vs Dimension Inefficiency
+LLM the concatenation of the instruction, the doc-
+uments, the question, and LLMs’ generation, opti-              We then inspect whether heads for long-distance
+mizing Eq. 4.                                                  attention rely less on the first few dimensions. Ac-
+                                                               cording to Xiao et al. (2024a) and Wu et al. (2025),
+Sanity Check To check whether the dimensions                   LLMs tend to have a small subset of attention
+with low utility scores (u in Eq. 4) are indeed not            heads, called retrieval heads, that are responsible
+
+                                                           3
+                         1st     10th      20th      Avg            scores, while Qwen is an exception, which may be
+                                                                    due to a caveat of the utility score. We discuss
+                ϕ       60.49    53.18     48.59    54.09           more in the next section.
+              [:16]     60.79    53.75     50.32    54.95
+  Llama       [:32]     59.51    52.77     47.88    53.39           5.4    Causal Intervention on Retrieval Heads’
+             [-16:]     13.82    17.29     51.98    27.70                  Dimensions
+             [-32:]      4.07    5.27      36.20    15.18           Although the experiments in §5.2 provide us with
+                ϕ       59.32    53.45     57.21    56.66           a macro view over all the attention heads, the mea-
+              [:16]     60.19    52.92     57.48    56.86           surement of dimension utility in §5.2 has caveats.
+  OLMo        [:32]     60.83    52.84     57.02    56.90           The utility scores only indicates which dimensions
+             [-16:]     42.21    40.11     56.12    46.15           affect the intermediate representations more, but
+             [-32:]     29.87    33.37     46.48    36.57           do not distinguish what causes the LLM to gen-
+                ϕ       60.41    57.14     58.61    58.72           erate the correct answer. Dimensions with high
+              [:16]     63.81    58.98     61.13    61.31           utility score may be even harmful for the LLM’s
+  Qwen        [:32]     60.72    51.22     57.66    56.53           performance. A more direct way to inspect the ef-
+             [-16:]     19.62    20.60     19.51    19.91           fect of some dimensions would be masking those
+             [-32:]      0.30    0.45      0.98     0.58            dimensions and evaluating the performance.
+
+Table 2: The performance of LLMs when the first or last             Experimental Setup We inspect whether the first
+n (denoted as [:n] or [−n:]) out of 128 dimensions in               few dimensions are, as suggested by our hypoth-
+the retrieval-heads are masked. ϕ means no dimensions               esis, not helpful for the model to generate correct
+are masked. The columns are for the setup where the                 answers. To do so, we inspect the effect of masking
+answer is in the 1st, 10th, 20th document.                          dimensions in the attention heads whose retrieval
+                                                                    indication scores are greater than 0.5. We measure
+for retrieving information from long context, while                 the performance when the first 16, 32 or the last 16,
+the majority of the heads are streaming heads, ded-                 32 dimensions out of 128 dimensions are masked.
+icated to modeling local context. In this section,                  Results and Discussion Table 2 shows the effect
+we examine the dimension inefficiency of these                      of masking dimensions in the attention heads. It
+retrieval heads.                                                    shows that masking the first 16 dimensions slightly
+                                                                    increases the average performance. Masking the
+Identifying Retrieval Heads We use the statis-
+                                                                    first 32 dimensions decreases the average accuracy
+tics of LLMs’ attention scores over the context to
+                                                                    by less than 2.2%. These results indicate that the
+identify retrieval heads. Specifically, for each head,
+                                                                    first few dimensions, as suggested by our hypothe-
+we measure the sum of the attention weight be-
+                                                                    sis, do not help the model produce the correct an-
+tween the context part (instruction and documents).
+2 and the question-output part and use the sum as a                 swer. Masking the last 32 dimensions, in contrast,
+                                                                    is detrimental to the LLMs’ performance. Masking
+retrieval-head indication score. Compared with the
+                                                                    the last 16 dimensions also hurts the performance,
+approach by Xiao et al. (2024a), our method does
+                                                                    but it hurts less when the correct answer is in the
+not require gradient computation and thus is faster.
+                                                                    last (20th) documents, i.e., the document closest to
+Observation and Discussion We plot the re-                          the question. It suggests the last few dimensions
+lationship between the retrieval head indication                    are crucial for long-distance attention, but are less
+scores and the utility score of the first or last 16                crucial when the distance is shorter.
+dimensions in Figure 3. There are positive (Pear-
+                                                                    6     Conclusion
+son) correlations between the utility of the last few
+dimensions and the retrieval head indicator scores.                 In this work, we hypothesize that the Rotary Posi-
+The last few dimensions in the retrieval heads also                 tion Embedding (RoPE) may prevent LMs from uti-
+generally have higher utility scores. For LLaMA                     lizing all the dimension for long-context modeling.
+and OLMo, we also see that the first few dimen-                     We also provide supporting evidence, including a
+sions in the retrieval heads tend to have lower utility             toy experiment §4, and a deep inspection of three
+   2
+                                                                    LLMs §5. Based on our finding, we suggest that
+     We ignore the attention weight on the begin-of-string
+token because Xiao et al. (2024b) suggest that models tend to       future LLM creators consider alternatives of RoPE,
+use it as an sinkhole.                                              or at least not use RoPE for all attention heads.
+
+                                                                4
+7   Limitations                                                Proceedings of the 62nd Annual Meeting of the As-
+                                                               sociation for Computational Linguistics (Volume 1:
+One limitation of our work is that, due to limited             Long Papers), pages 3119–3137, Bangkok, Thailand.
+computational resources, we experiment with only               Association for Computational Linguistics.
+three 7B/8B LLMs. However, given the consistent              bloc97. 2023. Ntk-aware scaled rope allows llama
+results across these models, we believe our findings            models to have extended (8k+) context size without
+generalize to other LLMs using RoPE. Addition-                  any fine-tuning and minimal perplexity degrada-
+ally, while Liu et al. (2024) also evaluate LLMs                tion. https://www.reddit.com/r/LocalLLaMA/
+                                                                comments/14lz7j5/ntkaware_scaled_rope_
+using a key-value retrieval task, we focus on long-             allows_llama_models_to_have/.
+context question answering, which we consider a
+more realistic setting. Finally, our primary goal is         Aakanksha Chowdhery, Sharan Narang, Jacob Devlin,
+to raise awareness of RoPE’s potential issues and              Maarten Bosma, Gaurav Mishra, Adam Roberts, Paul
+                                                               Barham, Hyung Won Chung, Charles Sutton, Sebas-
+encourage further research. We do not explore how              tian Gehrmann, et al. 2022. Palm: Scaling language
+our findings could improve LLMs, such as enhanc-               modeling with pathways. arxiv 2022. arXiv preprint
+ing computational efficiency. We also leave the                arXiv:2204.02311, 10.
+mitigation of the dimensional deficiency for future
+                                                             Abhimanyu Dubey, Abhinav Jauhri, Abhinav Pandey,
+work, as it may require significant computational              Abhishek Kadian, Ahmad Al-Dahle, Aiesha Letman,
+resource for additional fine-tuning.                           Akhil Mathur, Alan Schelten, Amy Yang, Angela
+                                                               Fan, et al. 2024. The llama 3 herd of models. arXiv
+Acknowledgements                                               preprint arXiv:2407.21783.
+
+We appreciate Joshua Robinson, Xinyan Velocity               emozilla. 2023. Dynamically scaled rope further
+                                                               increases performance of long context llama with
+Yu, Ollie Liu for providing valuable comments on               zero fine-tuning. https://www.reddit.com/r/
+this paper.                                                    LocalLLaMA/comments/14mrgpr/dynamically_
+                                                               scaled_rope_further_increases/.
+
+References                                                   Dirk Groeneveld, Iz Beltagy, Evan Walsh, Akshita
+                                                               Bhagia, Rodney Kinney, Oyvind Tafjord, Ananya
+Ebtesam Almazrouei, Hamza Alobeidli, Abdulaziz Al-             Jha, Hamish Ivison, Ian Magnusson, Yizhong Wang,
+  shamsi, Alessandro Cappelli, Ruxandra Cojocaru,              Shane Arora, David Atkinson, Russell Authur,
+  Mérouane Debbah, Étienne Goffinet, Daniel Hess-              Khyathi Chandu, Arman Cohan, Jennifer Dumas,
+  low, Julien Launay, Quentin Malartic, et al. 2023.           Yanai Elazar, Yuling Gu, Jack Hessel, Tushar Khot,
+  The falcon series of open language models. arXiv             William Merrill, Jacob Morrison, Niklas Muen-
+  preprint arXiv:2311.16867.                                   nighoff, Aakanksha Naik, Crystal Nam, Matthew
+                                                               Peters, Valentina Pyatkin, Abhilasha Ravichander,
+Chenxin An, Shansan Gong, Ming Zhong, Xingjian                 Dustin Schwenk, Saurabh Shah, William Smith,
+  Zhao, Mukai Li, Jun Zhang, Lingpeng Kong, and                Emma Strubell, Nishant Subramani, Mitchell Worts-
+  Xipeng Qiu. 2024. L-eval: Instituting standardized           man, Pradeep Dasigi, Nathan Lambert, Kyle Richard-
+  evaluation for long context language models. In Pro-         son, Luke Zettlemoyer, Jesse Dodge, Kyle Lo, Luca
+  ceedings of the 62nd Annual Meeting of the Associa-          Soldaini, Noah Smith, and Hannaneh Hajishirzi.
+  tion for Computational Linguistics (Volume 1: Long           2024. OLMo: Accelerating the science of language
+  Papers), pages 14388–14411, Bangkok, Thailand.               models. In Proceedings of the 62nd Annual Meeting
+  Association for Computational Linguistics.                   of the Association for Computational Linguistics (Vol-
+                                                               ume 1: Long Papers), pages 15789–15809, Bangkok,
+Chenxin An, Jun Zhang, Ming Zhong, Lei Li, Shansan             Thailand. Association for Computational Linguistics.
+  Gong, Yao Luo, Jingjing Xu, and Lingpeng Kong.
+  2025. Why does the effective context length of LLMs        Chi Han, Qifan Wang, Hao Peng, Wenhan Xiong,
+  fall short? In The Thirteenth International Confer-          Yu Chen, Heng Ji, and Sinong Wang. 2024. LM-
+  ence on Learning Representations.                            infinite: Zero-shot extreme length generalization for
+                                                               large language models. In Proceedings of the 2024
+Jinze Bai, Shuai Bai, Yunfei Chu, Zeyu Cui, Kai Dang,          Conference of the North American Chapter of the
+   Xiaodong Deng, Yang Fan, Wenbin Ge, Yu Han, Fei             Association for Computational Linguistics: Human
+   Huang, et al. 2023. Qwen technical report. arXiv            Language Technologies (Volume 1: Long Papers),
+   preprint arXiv:2309.16609.                                  pages 3991–4008, Mexico City, Mexico. Association
+                                                               for Computational Linguistics.
+Yushi Bai, Xin Lv, Jiajie Zhang, Hongchang Lyu,
+  Jiankai Tang, Zhidian Huang, Zhengxiao Du, Xiao            AQ Jiang, A Sablayrolles, A Mensch, C Bamford,
+  Liu, Aohan Zeng, Lei Hou, Yuxiao Dong, Jie Tang,             DS Chaplot, D de las Casas, F Bressand, G Lengyel,
+  and Juanzi Li. 2024. LongBench: A bilingual, multi-          G Lample, L Saulnier, et al. 2023. Mistral 7b (2023).
+  task benchmark for long context understanding. In            arXiv preprint arXiv:2310.06825.
+
+
+                                                         5
+Gregory Kamradt. 2023. Needle in a haystack - pressure           Laurent Sifre, Morgane Rivière, Mihir Sanjay Kale,
+  testing llms.   https://github.com/gkamradt/                   Juliette Love, et al. 2024a. Gemma: Open models
+  LLMTestNeedleInAHaystack/tree/main.                            based on gemini research and technology. arXiv
+                                                                 preprint arXiv:2403.08295.
+Amirhossein Kazemnejad, Inkit Padhi, Karthikeyan
+ Natesan, Payel Das, and Siva Reddy. 2023. The                 Gemma Team, Morgane Riviere, Shreya Pathak,
+ impact of positional encoding on length generaliza-             Pier Giuseppe Sessa, Cassidy Hardin, Surya Bhupati-
+ tion in transformers. In Thirty-seventh Conference              raju, Léonard Hussenot, Thomas Mesnard, Bobak
+ on Neural Information Processing Systems.                       Shahriari, Alexandre Ramé, et al. 2024b. Gemma 2:
+Tom Kwiatkowski, Jennimaria Palomaki, Olivia Red-                Improving open language models at a practical size.
+  field, Michael Collins, Ankur Parikh, Chris Alberti,           arXiv preprint arXiv:2408.00118.
+  Danielle Epstein, Illia Polosukhin, Jacob Devlin, Ken-
+  ton Lee, Kristina Toutanova, Llion Jones, Matthew            Qwen Team. 2024. Qwen2.5: A party of foundation
+  Kelcey, Ming-Wei Chang, Andrew M. Dai, Jakob                  models.
+  Uszkoreit, Quoc Le, and Slav Petrov. 2019. Natu-
+  ral questions: A benchmark for question answering            Hugo Touvron, Thibaut Lavril, Gautier Izacard, Xavier
+  research. Transactions of the Association for Compu-           Martinet, Marie-Anne Lachaux, Timothée Lacroix,
+  tational Linguistics, 7:452–466.                               Baptiste Rozière, Naman Goyal, Eric Hambro, Faisal
+                                                                 Azhar, et al. 2023a. Llama: Open and effi-
+Kenton Lee, Ming-Wei Chang, and Kristina Toutanova.              cient foundation language models. arXiv preprint
+  2019. Latent retrieval for weakly supervised open              arXiv:2302.13971.
+  domain question answering. In Proceedings of the
+  57th Annual Meeting of the Association for Computa-
+  tional Linguistics, pages 6086–6096, Florence, Italy.        Hugo Touvron, Louis Martin, Kevin Stone, Peter Al-
+  Association for Computational Linguistics.                     bert, Amjad Almahairi, Yasmine Babaei, Nikolay
+                                                                 Bashlykov, Soumya Batra, Prajjwal Bhargava, Shruti
+Tianle Li, Ge Zhang, Quy Duc Do, Xiang Yue,                      Bhosale, et al. 2023b. Llama 2: Open founda-
+  and Wenhu Chen. 2024. Long-context llms strug-                 tion and fine-tuned chat models. arXiv preprint
+  gle with long in-context learning. arXiv preprint              arXiv:2307.09288.
+  arXiv:2404.02060.
+                                                               Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob
+Nelson F. Liu, Kevin Lin, John Hewitt, Ashwin Paran-             Uszkoreit, Llion Jones, Aidan N Gomez, Ł ukasz
+  jape, Michele Bevilacqua, Fabio Petroni, and Percy             Kaiser, and Illia Polosukhin. 2017. Attention is all
+  Liang. 2024. Lost in the middle: How language mod-             you need. In Advances in Neural Information Pro-
+  els use long contexts. Transactions of the Association         cessing Systems, volume 30. Curran Associates, Inc.
+  for Computational Linguistics, 12:157–173.
+Team OLMo, Pete Walsh, Luca Soldaini, Dirk Groen-              Wenhao Wu, Yizhong Wang, Guangxuan Xiao, Hao
+  eveld, Kyle Lo, Shane Arora, Akshita Bhagia, Yul-             Peng, and Yao Fu. 2025. Retrieval head mechanis-
+  ing Gu, Shengyi Huang, Matt Jordan, Nathan Lam-               tically explains long-context factuality. In The Thir-
+  bert, Dustin Schwenk, Oyvind Tafjord, Taira An-               teenth International Conference on Learning Repre-
+  derson, David Atkinson, Faeze Brahman, Christo-               sentations.
+  pher Clark, Pradeep Dasigi, Nouha Dziri, Michal
+  Guerquin, Hamish Ivison, Pang Wei Koh, Jiacheng              Guangxuan Xiao, Jiaming Tang, Jingwei Zuo, Junxian
+  Liu, Saumya Malik, William Merrill, Lester James V.            Guo, Shang Yang, Haotian Tang, Yao Fu, and Song
+  Miranda, Jacob Morrison, Tyler Murray, Crystal                 Han. 2024a. Duoattention: Efficient long-context llm
+  Nam, Valentina Pyatkin, Aman Rangapur, Michael                 inference with retrieval and streaming heads. arXiv
+  Schmitz, Sam Skjonsberg, David Wadden, Christo-                preprint arXiv:2410.10819.
+  pher Wilhelm, Michael Wilson, Luke Zettlemoyer,
+  Ali Farhadi, Noah A. Smith, and Hannaneh Hajishirzi.         Guangxuan Xiao, Yuandong Tian, Beidi Chen, Song
+  2024. 2 olmo 2 furious.                                        Han, and Mike Lewis. 2024b. Efficient streaming
+                                                                 language models with attention sinks. In The Twelfth
+Bowen Peng, Jeffrey Quesnelle, Honglu Fan, and Enrico            International Conference on Learning Representa-
+  Shippole. 2024. YaRN: Efficient context window ex-             tions.
+  tension of large language models. In The Twelfth
+  International Conference on Learning Representa-
+  tions.                                                       Xinrong Zhang, Yingfa Chen, Shengding Hu, Zihang
+                                                                 Xu, Junhao Chen, Moo Hao, Xu Han, Zhen Thai,
+Jianlin Su, Murtadha Ahmed, Yu Lu, Shengfeng Pan,                Shuo Wang, Zhiyuan Liu, and Maosong Sun. 2024.
+   Wen Bo, and Yunfeng Liu. 2024. Roformer: En-                  ∞Bench: Extending long context evaluation beyond
+   hanced transformer with rotary position embedding.            100K tokens. In Proceedings of the 62nd Annual
+   Neurocomput., 568(C).                                         Meeting of the Association for Computational Lin-
+                                                                 guistics (Volume 1: Long Papers), pages 15262–
+Gemma Team, Thomas Mesnard, Cassidy Hardin,                      15277, Bangkok, Thailand. Association for Compu-
+  Robert Dadashi, Surya Bhupatiraju, Shreya Pathak,              tational Linguistics.
+
+
+                                                           6
+A     Details of the Controlled Experiment in
+      §4                                                           Question : { question }
+                                                                   <| a s s i s t a n t | >
+We train attention models with 128 hidden dimen-
+sions. We sample 128 out of 1000 key-value pairs                       We prompt Qwen with the following template.
+for the K, V in Eq. 3. We use a learning rate of 1e-               <| i m _ s t a r t | > system
+3, a batch size of 64, a maximum position of 2048,                 Write a high − q u a l i t y answer f o r
+10000 samples per epoch and train the model for                         the given question using only
+100 epochs. The implementation and configuration                        the provided search r e s u l t s (
+of RoPE are the same as the one for LLaMA.                              some o f which m i g h t be
+B    Prompts Templates                                                  i r r e l e v a n t ) . < | im_end | >
+                                                                   <| i m _ s t a r t | > u s e r
+We prompt LLaMA with the following template
+<| s t a r t _ h e a d e r _ i d | > system < |                    Document [ 1 ] ( T i t l e : { t i t l e } ) {
+     end_header_id | >                                                 content }
+                                                                   Document [ 2 ] ( T i t l e : { t i t l e } ) {
+Write a high − q u a l i t y answer f o r                              content }
+     the given question using only                                 Document [ 3 ] ( T i t l e : { t i t l e } ) {
+     the provided search r e s u l t s (                               content }
+     some o f which m i g h t be                                   ...
+     irrelevant ) .
+<| e o t _ i d | > <| s t a r t _ h e a d e r _ i d | > user       Question : { question }
+     <| end_header_id | >                                          < | im_end | >
+                                                                   <| i m _ s t a r t | > a s s i s t a n t
+Document [ 1 ] ( T i t l e : { t i t l e } ) {
+    content }                                                      C     Dataset
+Document [ 2 ] ( T i t l e : { t i t l e } ) {
+                                                                   We use the processed dataset from Liu et al. (2024).
+    content }
+                                                                   They released it under the MIT license. It is de-
+Document [ 3 ] ( T i t l e : { t i t l e } ) {
+                                                                   rived from NaturalQuestions-Open (Kwiatkowski
+    content }
+                                                                   et al., 2019; Lee et al., 2019). It can be down-
+...
+                                                                   loaded at https://github.com/nelson-liu/
+                                                                   lost-in-the-middle/tree/main/qa_data/
+Question : { question }
+                                                                   20_total_documents. The language is English.
+<| e o t _ i d | > <| s t a r t _ h e a d e r _ i d | >
+                                                                   There are 2655 examples in the test set.
+     a s s i s t a n t <| end_header_id | >
+    We prompt OLMo with the following template.                    D     Computational Resource
+<| e n d o f t e x t | > <| u s e r | >                            We conduct each experiment with one NVIDIA
+                                                                   RTX A6000 GPU. Generating answers for one
+Write a high − q u a l i t y answer f o r                          setup takes about 3-5 hours. Collecting atten-
+   the given question using only                                   tion statistics and computing the utility score takes
+   the provided search r e s u l t s (                             about 45 minutes per setup, respectively.
+   some o f which m i g h t be
+   irrelevant ) .                                                  E    Package Version
+                                                                   We use the following Python packages:
+Document [ 1 ] ( T i t l e : { t i t l e } ) {
+    content }                                                          • torch: 2.5.1
+Document [ 2 ] ( T i t l e : { t i t l e } ) {
+                                                                       • transformers: 4.48.2
+    content }
+Document [ 3 ] ( T i t l e : { t i t l e } ) {                         • numpy: 2.0.2
+    content }
+...
+
+                                                               7
+                               1st             10th      20th       Avg.
+            original          60.49        53.18        48.59       54.09
+ Llama
+            masked            58.98        52.66        50.81       54.15
+            original          59.32        53.45        57.21       56.66
+ OLMo
+            masked            59.51        53.52        59.62       57.55
+            original          60.41        57.14        58.61       58.72
+ Qwen
+            masked            60.49        55.25        56.35       57.36
+
+Table 3: The detailed performance of LLMs before and
+after masking dimensions with low utility when the
+answer is in the 1st, 10th, 20th document.
+
+
+
+
+                                  0.35
+                                   0.3
+15                                0.25
+                                   0.2
+                                  0.15
+10
+                                   0.1
+                                  0.05
+ 5                                   0
+                                 −0.05
+ 0                                −0.1
+  0   0.2   0.4   0.6   0.8           0          0.2   0.4   0.6   0.8
+
+ (a) LLaMA first, ρ = −0.47 (b) LLaMA last, ρ = 0.44
+                                     0.25
+16                                    0.2
+14
+                                     0.15
+12
+10                                    0.1
+ 8                                   0.05
+ 6
+                                           0
+ 4
+ 2                               −0.05
+ 0                                   −0.1
+  0   0.2   0.4   0.6   0.8              0       0.2   0.4   0.6   0.8
+
+ (c) OLMo first, ρ = −0.03            (d) OLMo last, ρ = 0.26
+                                     0.5
+20
+                                     0.4
+15                                   0.3
+                                     0.2
+10
+                                     0.1
+ 5
+                                      0
+ 0                               −0.1
+  0   0.2   0.4   0.6   0.8          0          0.2    0.4   0.6   0.8
+
+  (e) Qwen first, ρ = −0.27           (f) Qwen last, ρ = 0.10.
+
+Figure 4: The relationship between the L1 norm of
+rows in query projection matrices (x-axis) and the utility
+scores of the first or last dimensions (y-axis). Each
+dot represents an attention head. The lighter dot color
+represents the deeper layers. The red line represents the
+linear regressor.
+
+
+
+
+                                                                            8
+ Layer 1                            Layer 1
+
+ Layer 2                            Layer 2
+
+ Layer 3                            Layer 3
+
+ Layer 4                            Layer 4
+
+ Layer 5                            Layer 5
+
+ Layer 6                            Layer 6
+
+ Layer 7                            Layer 7
+
+ Layer 8                            Layer 8
+
+                                                                       Layer 1
+ Layer 9                            Layer 9
+                                                                       Layer 2
+Layer 10                           Layer 10
+                                                                       Layer 3
+Layer 11                           Layer 11
+                                                                       Layer 4
+Layer 12                           Layer 12
+                                                                       Layer 5
+
+Layer 13                           Layer 13                            Layer 6
+
+Layer 14                           Layer 14                            Layer 7
+
+Layer 15                           Layer 15                            Layer 8
+
+                                                                       Layer 9
+Layer 16                           Layer 16
+                                                                      Layer 10
+Layer 17                           Layer 17
+                                                                      Layer 11
+Layer 18                           Layer 18
+                                                                      Layer 12
+Layer 19                           Layer 19                           Layer 13
+
+Layer 20                           Layer 20                           Layer 14
+
+Layer 21                           Layer 21                           Layer 15
+
+                                                                      Layer 16
+Layer 22                           Layer 22
+                                                                      Layer 17
+Layer 23                           Layer 23
+                                                                      Layer 18
+Layer 24                           Layer 24
+                                                                      Layer 19
+Layer 25                           Layer 25
+                                                                      Layer 20
+
+Layer 26                           Layer 26                           Layer 21
+
+Layer 27                           Layer 27                           Layer 22
+
+                                                                      Layer 23
+Layer 28                           Layer 28
+                                                                      Layer 24
+Layer 29                           Layer 29
+                                                                      Layer 25
+Layer 30                           Layer 30
+                                                                      Layer 26
+Layer 31                           Layer 31
+                                                                      Layer 27
+
+Layer 32                           Layer 32                           Layer 28
+
+
+       0     50    100                    0     50   100                     0    50    100
+
+           (a) LLaMA                          (b) OLMo                           (c) Qwen
+
+           Figure 5: Visualizing the L1 norm of the rows in the query projection matrices.
+
+
+
+
+                                                 9
+ Layer 1                              Layer 1
+
+ Layer 2                              Layer 2
+
+ Layer 3                              Layer 3
+
+ Layer 4                              Layer 4
+
+ Layer 5                              Layer 5
+
+ Layer 6                              Layer 6
+
+ Layer 7                              Layer 7
+
+ Layer 8                              Layer 8
+
+                                                                          Layer 1
+ Layer 9                              Layer 9
+                                                                          Layer 2
+Layer 10                             Layer 10
+                                                                          Layer 3
+Layer 11                             Layer 11
+                                                                          Layer 4
+Layer 12                             Layer 12
+                                                                          Layer 5
+
+Layer 13                             Layer 13                             Layer 6
+
+Layer 14                             Layer 14                             Layer 7
+
+Layer 15                             Layer 15                             Layer 8
+
+                                                                          Layer 9
+Layer 16                             Layer 16
+                                                                         Layer 10
+Layer 17                             Layer 17
+                                                                         Layer 11
+Layer 18                             Layer 18
+                                                                         Layer 12
+Layer 19                             Layer 19                            Layer 13
+
+Layer 20                             Layer 20                            Layer 14
+
+Layer 21                             Layer 21                            Layer 15
+
+                                                                         Layer 16
+Layer 22                             Layer 22
+                                                                         Layer 17
+Layer 23                             Layer 23
+                                                                         Layer 18
+Layer 24                             Layer 24
+                                                                         Layer 19
+Layer 25                             Layer 25
+                                                                         Layer 20
+
+Layer 26                             Layer 26                            Layer 21
+
+Layer 27                             Layer 27                            Layer 22
+
+                                                                         Layer 23
+Layer 28                             Layer 28
+                                                                         Layer 24
+Layer 29                             Layer 29
+                                                                         Layer 25
+Layer 30                             Layer 30
+                                                                         Layer 26
+Layer 31                             Layer 31
+                                                                         Layer 27
+
+Layer 32                             Layer 32                            Layer 28
+
+
+       0      50    100                     0    50     100                     0    50    100
+
+           (a) LLaMA                            (b) OLMo                            (c) Qwen
+
+           Figure 6: Visualizing the utilizatio score for the dimensions in the query vectors.
+
+
+
+
+                                                   10
+

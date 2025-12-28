@@ -1185,3 +1185,643 @@
 2025-12-28T05:51:39+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_WALRUS.pdf error=I/O operation on closed file.
 2025-12-28T05:51:39+00:00 temp_removed path=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_WALRUS.md.tmp.9fa5609b469a43bdbb3e71bd5ef6c291
 2025-12-28T05:51:39+00:00 run_end
+2025-12-28T06:07:50+00:00 run_start folder=/home/jake/Developer/4D/Notes/Vision/pdfs-3 dry_run=False overwrite=False sort_mode=alpha workers=5
+2025-12-28T06:07:50+00:00 codex_cwd path=/home/jake/Developer/4D
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2000_FFRec.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2000_FFRec.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2000_FFRec.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2000_FFRec.md.tmp.c4106131421943b5b09706c0f6e041a5
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2000_FFRec.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2000_FFRec.md.tmp.c4106131421943b5b09706c0f6e041a5 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2000_FFRec.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2007_CoreKnow.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2007_CoreKnow.md
+2025-12-28T06:07:50+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2007_CoreKnow.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2007_CoreKnow.md.tmp.948ab0d2798e4236852e359b1f44ed38
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2007_CoreKnow.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2007_CoreKnow.md.tmp.948ab0d2798e4236852e359b1f44ed38 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2007_CoreKnow.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2007_SudokuLogic.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2007_SudokuLogic.md
+2025-12-28T06:07:50+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2007_SudokuLogic.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2007_SudokuLogic.md.tmp.ccf2c8cd27ee439fb149280466cdf7e6
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2007_SudokuLogic.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2007_SudokuLogic.md.tmp.ccf2c8cd27ee439fb149280466cdf7e6 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2007_SudokuLogic.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2012_CMPC.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2012_CMPC.md
+2025-12-28T06:07:50+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2012_CMPC.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2012_CMPC.md.tmp.8d395a2072824fdfab0bb1c3143f2b8e
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2012_CMPC.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2012_CMPC.md.tmp.8d395a2072824fdfab0bb1c3143f2b8e md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2012_CMPC.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2014_ITC.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2014_ITC.md
+2025-12-28T06:07:50+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2014_ITC.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2014_ITC.md.tmp.9590d81e842c4c49adf9f236c77d31be
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2014_ITC.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2014_ITC.md.tmp.9590d81e842c4c49adf9f236c77d31be md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2014_ITC.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2014_NTM.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2014_NTM.md
+2025-12-28T06:07:50+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2014_NTM.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2014_NTM.md.tmp.86253aca809e4be78a4d4e6630a4a5fd
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2014_NTM.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2014_NTM.md.tmp.86253aca809e4be78a4d4e6630a4a5fd md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2014_NTM.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2016_ACT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2016_ACT.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2016_ACT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2016_ACT.md.tmp.ed9af447a76043569e3b9a4472be68bb
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2016_ACT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2016_ACT.md.tmp.ed9af447a76043569e3b9a4472be68bb md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2016_ACT.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2017_AIAYN.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2017_AIAYN.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2017_AIAYN.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2017_AIAYN.md.tmp.8b24e23a833c464f974594e229ab2615
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2017_AIAYN.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2017_AIAYN.md.tmp.8b24e23a833c464f974594e229ab2615 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2017_AIAYN.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_BERT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_BERT.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_BERT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2018_BERT.md.tmp.37ea39c9c7d44cc39e8d12225259500c
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_BERT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2018_BERT.md.tmp.37ea39c9c7d44cc39e8d12225259500c md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_BERT.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_CC3M.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_CC3M.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_CC3M.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2018_CC3M.md.tmp.4d3852c672504e29b7c618a6215d7fb2
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_CC3M.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2018_CC3M.md.tmp.4d3852c672504e29b7c618a6215d7fb2 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_CC3M.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_RRN.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_RRN.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_RRN.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2018_RRN.md.tmp.6abaf531e989467d87dfcb667028b379
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_RRN.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2018_RRN.md.tmp.6abaf531e989467d87dfcb667028b379 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_RRN.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_UT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_UT.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_UT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2018_UT.md.tmp.94cee0cbc8314e4fb2e2fa00771232ea
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_UT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2018_UT.md.tmp.94cee0cbc8314e4fb2e2fa00771232ea md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_UT.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_DEQ.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_DEQ.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_DEQ.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2019_DEQ.md.tmp.52af935289904bd695806c0ea648b6ee
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_DEQ.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2019_DEQ.md.tmp.52af935289904bd695806c0ea648b6ee md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_DEQ.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_HowTo100M.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_HowTo100M.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_HowTo100M.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2019_HowTo100M.md.tmp.35fed4d5658f4f6a935b5871d7ed5ec0
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_HowTo100M.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2019_HowTo100M.md.tmp.35fed4d5658f4f6a935b5871d7ed5ec0 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_HowTo100M.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_LXMERT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_LXMERT.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_LXMERT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2019_LXMERT.md.tmp.03a04288395e49668950484d08c12b71
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_LXMERT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2019_LXMERT.md.tmp.03a04288395e49668950484d08c12b71 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_LXMERT.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_MOI.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_MOI.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_MOI.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2019_MOI.md.tmp.cf28dfe71eaf4a97b45340713a4c1ed2
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_MOI.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2019_MOI.md.tmp.cf28dfe71eaf4a97b45340713a4c1ed2 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_MOI.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_VideoBERT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_VideoBERT.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_VideoBERT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2019_VideoBERT.md.tmp.c396c91326914c38823af1483777b246
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_VideoBERT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2019_VideoBERT.md.tmp.c396c91326914c38823af1483777b246 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_VideoBERT.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_ViLBERT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_ViLBERT.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_ViLBERT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2019_ViLBERT.md.tmp.91bbb0f888a5411aa72338d3bcc8e7fc
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_ViLBERT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2019_ViLBERT.md.tmp.91bbb0f888a5411aa72338d3bcc8e7fc md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_ViLBERT.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_VisualBERT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_VisualBERT.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_VisualBERT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2019_VisualBERT.md.tmp.762d0296bcfe451eae5cbe14fd572d22
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_VisualBERT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2019_VisualBERT.md.tmp.762d0296bcfe451eae5cbe14fd572d22 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_VisualBERT.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_DETR.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_DETR.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_DETR.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2020_DETR.md.tmp.e952b1a035204fe5b75482424ee06318
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_DETR.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2020_DETR.md.tmp.e952b1a035204fe5b75482424ee06318 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_DETR.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_OSCAR.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_OSCAR.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_OSCAR.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2020_OSCAR.md.tmp.0023a041fed644df875f106bd22a7b5e
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_OSCAR.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2020_OSCAR.md.tmp.0023a041fed644df875f106bd22a7b5e md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_OSCAR.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_UNITER.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_UNITER.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_UNITER.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2020_UNITER.md.tmp.8aac8096f06b485c9df84142a2f3cf58
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_UNITER.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2020_UNITER.md.tmp.8aac8096f06b485c9df84142a2f3cf58 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_UNITER.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_ViT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_ViT.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_ViT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2020_ViT.md.tmp.fa570ac3423841948f632a4de683f30f
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_ViT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2020_ViT.md.tmp.fa570ac3423841948f632a4de683f30f md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_ViT.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALBEF.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALBEF.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALBEF.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_ALBEF.md.tmp.8acb0d238a2e45aeaec4154f6bb779bb
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALBEF.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_ALBEF.md.tmp.8acb0d238a2e45aeaec4154f6bb779bb md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALBEF.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALiBi.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALiBi.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALiBi.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_ALiBi.md.tmp.8eaf14194b1640298c58cbee160f425e
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALiBi.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_ALiBi.md.tmp.8eaf14194b1640298c58cbee160f425e md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALiBi.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALIGN.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALIGN.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALIGN.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_ALIGN.md.tmp.d540c3c09a6947938f2d583499f3cd99
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALIGN.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_ALIGN.md.tmp.d540c3c09a6947938f2d583499f3cd99 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALIGN.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_CLIP.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_CLIP.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_CLIP.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_CLIP.md.tmp.535425d9365a4ab9ac29fa7ca307d72f
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_CLIP.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_CLIP.md.tmp.535425d9365a4ab9ac29fa7ca307d72f md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_CLIP.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ConViT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ConViT.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ConViT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_ConViT.md.tmp.4cb7465ac82f49858ac74805b9ea30ad
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ConViT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_ConViT.md.tmp.4cb7465ac82f49858ac74805b9ea30ad md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ConViT.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_LAION400M.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_LAION400M.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_LAION400M.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_LAION400M.md.tmp.06e5d20991e743cbb6d3b3003a5ac393
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_LAION400M.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_LAION400M.md.tmp.06e5d20991e743cbb6d3b3003a5ac393 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_LAION400M.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_MAE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_MAE.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_MAE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_MAE.md.tmp.8f79f7639dda4d13b8cec76b26ee85fd
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_MAE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_MAE.md.tmp.8f79f7639dda4d13b8cec76b26ee85fd md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_MAE.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_RoFormer.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_RoFormer.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_RoFormer.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_RoFormer.md.tmp.7890464a33e24c33bef9575bb39bfa16
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_RoFormer.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_RoFormer.md.tmp.7890464a33e24c33bef9575bb39bfa16 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_RoFormer.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_Swin.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_Swin.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_Swin.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_Swin.md.tmp.bb75457744c24b5190e0f4887663d11b
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_Swin.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_Swin.md.tmp.bb75457744c24b5190e0f4887663d11b md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_Swin.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_TimeSformer.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_TimeSformer.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_TimeSformer.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_TimeSformer.md.tmp.2a469a2f9f5d40878e89a4067d7ce9a7
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_TimeSformer.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_TimeSformer.md.tmp.2a469a2f9f5d40878e89a4067d7ce9a7 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_TimeSformer.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_VATT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_VATT.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_VATT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_VATT.md.tmp.112f1434409545d994b2eec7c337de2d
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_VATT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_VATT.md.tmp.112f1434409545d994b2eec7c337de2d md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_VATT.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_VideoCLIP.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_VideoCLIP.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_VideoCLIP.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_VideoCLIP.md.tmp.0d874eb9fa5f42689024e88689b027d9
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_VideoCLIP.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_VideoCLIP.md.tmp.0d874eb9fa5f42689024e88689b027d9 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_VideoCLIP.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ViLT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ViLT.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ViLT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_ViLT.md.tmp.ec5c0e7977894bea92c4a5f9916e010e
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ViLT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2021_ViLT.md.tmp.ec5c0e7977894bea92c4a5f9916e010e md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ViLT.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_BLIP.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_BLIP.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_BLIP.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2022_BLIP.md.tmp.668c43166c1747d39c82dffbdc16f553
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_BLIP.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2022_BLIP.md.tmp.668c43166c1747d39c82dffbdc16f553 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_BLIP.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_CoCa.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_CoCa.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_CoCa.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2022_CoCa.md.tmp.069250122bbb44189bec24eb89233282
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_CoCa.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2022_CoCa.md.tmp.069250122bbb44189bec24eb89233282 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_CoCa.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_Flamingo.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_Flamingo.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_Flamingo.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2022_Flamingo.md.tmp.98dcadd353f1447e850cff4cbe05cbed
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_Flamingo.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2022_Flamingo.md.tmp.98dcadd353f1447e850cff4cbe05cbed md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_Flamingo.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_LAION5B.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_LAION5B.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_LAION5B.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2022_LAION5B.md.tmp.b592ccafb15c4a67a5f3d1cedcd1f585
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_LAION5B.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2022_LAION5B.md.tmp.b592ccafb15c4a67a5f3d1cedcd1f585 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_LAION5B.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_NoPELMs.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_NoPELMs.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_NoPELMs.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2022_NoPELMs.md.tmp.43827053bba3473c8b7f64adfb7131a3
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_NoPELMs.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2022_NoPELMs.md.tmp.43827053bba3473c8b7f64adfb7131a3 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_NoPELMs.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_ScienceQA.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_ScienceQA.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_ScienceQA.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2022_ScienceQA.md.tmp.6a2c9e49216b4802b8ce41529cc1d525
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_ScienceQA.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2022_ScienceQA.md.tmp.6a2c9e49216b4802b8ce41529cc1d525 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_ScienceQA.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_Winoground.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_Winoground.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_Winoground.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2022_Winoground.md.tmp.bd9bdb8f2bd9487badfa9fe4face2b8e
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_Winoground.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2022_Winoground.md.tmp.bd9bdb8f2bd9487badfa9fe4face2b8e md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_Winoground.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_AHAT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_AHAT.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_AHAT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_AHAT.md.tmp.a76f2bbec5bc4481935ef04cffbcb96d
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_AHAT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_AHAT.md.tmp.a76f2bbec5bc4481935ef04cffbcb96d md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_AHAT.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_BLIP2.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_BLIP2.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_BLIP2.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_BLIP2.md.tmp.792369fe196f4769af9f83d0ff2d04fb
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_BLIP2.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_BLIP2.md.tmp.792369fe196f4769af9f83d0ff2d04fb md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_BLIP2.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_ConceptARC.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_ConceptARC.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_ConceptARC.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_ConceptARC.md.tmp.93031ba125e6490a9599d50125d47797
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_ConceptARC.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_ConceptARC.md.tmp.93031ba125e6490a9599d50125d47797 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_ConceptARC.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Gemini.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Gemini.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Gemini.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_Gemini.md.tmp.4adecdfb7e7b47ea8a242d3184a17bdb
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Gemini.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_Gemini.md.tmp.4adecdfb7e7b47ea8a242d3184a17bdb md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Gemini.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_GPT4.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_GPT4.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_GPT4.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_GPT4.md.tmp.27949e3528ea41fa8561e3167b58e0e1
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_GPT4.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_GPT4.md.tmp.27949e3528ea41fa8561e3167b58e0e1 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_GPT4.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Kosmos1.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Kosmos1.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Kosmos1.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_Kosmos1.md.tmp.b2fd1d58063847378802be6459a3b5d7
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Kosmos1.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_Kosmos1.md.tmp.b2fd1d58063847378802be6459a3b5d7 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Kosmos1.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_LLaVA.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_LLaVA.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_LLaVA.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_LLaVA.md.tmp.39c29e6c232e429f9840faaedea7d008
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_LLaVA.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_LLaVA.md.tmp.39c29e6c232e429f9840faaedea7d008 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_LLaVA.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MiniGPT4.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MiniGPT4.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MiniGPT4.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_MiniGPT4.md.tmp.8494180f0aac41a8abe29a11a6f5a12f
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MiniGPT4.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_MiniGPT4.md.tmp.8494180f0aac41a8abe29a11a6f5a12f md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MiniGPT4.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MMBench.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MMBench.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MMBench.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_MMBench.md.tmp.cae4fcac88844634b48076bc259ec6f0
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MMBench.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_MMBench.md.tmp.cae4fcac88844634b48076bc259ec6f0 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MMBench.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MMMU.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MMMU.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MMMU.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_MMMU.md.tmp.017c05d3e1f74c319c47b03472f21e4b
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MMMU.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_MMMU.md.tmp.017c05d3e1f74c319c47b03472f21e4b md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MMMU.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_PaLME.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_PaLME.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_PaLME.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_PaLME.md.tmp.c44c5aaa277b49778f27f0474922fbac
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_PaLME.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_PaLME.md.tmp.c44c5aaa277b49778f27f0474922fbac md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_PaLME.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_SphericalPE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_SphericalPE.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_SphericalPE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_SphericalPE.md.tmp.0866a916ba4946a0b649da5cf39aeecb
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_SphericalPE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_SphericalPE.md.tmp.0866a916ba4946a0b649da5cf39aeecb md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_SphericalPE.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Uni3DL.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Uni3DL.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Uni3DL.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_Uni3DL.md.tmp.e4298361ea53482eb543c8aaea39c3b4
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Uni3DL.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_Uni3DL.md.tmp.e4298361ea53482eb543c8aaea39c3b4 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Uni3DL.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_XPOS.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_XPOS.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_XPOS.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_XPOS.md.tmp.20cc945cc597447c8c9441c73d0a540e
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_XPOS.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_XPOS.md.tmp.20cc945cc597447c8c9441c73d0a540e md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_XPOS.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_YaRN.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_YaRN.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_YaRN.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_YaRN.md.tmp.8329a2c2bb8446c69ab84ec9e4fdbbf3
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_YaRN.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_YaRN.md.tmp.8329a2c2bb8446c69ab84ec9e4fdbbf3 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_YaRN.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_AlphaGeometry.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_AlphaGeometry.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_AlphaGeometry.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_AlphaGeometry.md.tmp.7064da94e4964291b9c2cd07d2f432bc
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_AlphaGeometry.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_AlphaGeometry.md.tmp.7064da94e4964291b9c2cd07d2f432bc md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_AlphaGeometry.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_ARCHeavy.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_ARCHeavy.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_ARCHeavy.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_ARCHeavy.md.tmp.34afd198c4da487ea7e4da8a14c9410c
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_ARCHeavy.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_ARCHeavy.md.tmp.34afd198c4da487ea7e4da8a14c9410c md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_ARCHeavy.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_BeyondAStar.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_BeyondAStar.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_BeyondAStar.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_BeyondAStar.md.tmp.93cc96f7ee3e4e14a6273a33289905ac
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_BeyondAStar.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_BeyondAStar.md.tmp.93cc96f7ee3e4e14a6273a33289905ac md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_BeyondAStar.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_DAPE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_DAPE.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_DAPE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_DAPE.md.tmp.0b15a5e6ca53473c8792107bda9f423a
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_DAPE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_DAPE.md.tmp.0b15a5e6ca53473c8792107bda9f423a md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_DAPE.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_EDiffusion.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_EDiffusion.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_EDiffusion.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_EDiffusion.md.tmp.f009b24bbb704429bff4fd0b4568a572
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_EDiffusion.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_EDiffusion.md.tmp.f009b24bbb704429bff4fd0b4568a572 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_EDiffusion.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_EvoTTC.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_EvoTTC.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_EvoTTC.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_EvoTTC.md.tmp.8213fa560e8f409a9514a4364f6861e2
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_EvoTTC.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_EvoTTC.md.tmp.8213fa560e8f409a9514a4364f6861e2 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_EvoTTC.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_FPD.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_FPD.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_FPD.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_FPD.md.tmp.7915ca86809a49709dd0d5f317c04a73
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_FPD.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_FPD.md.tmp.7915ca86809a49709dd0d5f317c04a73 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_FPD.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_GAA.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_GAA.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_GAA.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_GAA.md.tmp.7e2b7d327bdc47c081670a3c56526662
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_GAA.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_GAA.md.tmp.7e2b7d327bdc47c081670a3c56526662 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_GAA.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_HARC.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_HARC.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_HARC.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_HARC.md.tmp.a18fa39519634e1ab4cd5e7dde2c6cfd
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_HARC.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_HARC.md.tmp.a18fa39519634e1ab4cd5e7dde2c6cfd md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_HARC.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_Idefics2.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_Idefics2.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_Idefics2.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_Idefics2.md.tmp.86a56935a81942599f68ee42d005de44
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_Idefics2.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_Idefics2.md.tmp.86a56935a81942599f68ee42d005de44 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_Idefics2.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_IndTrans.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_IndTrans.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_IndTrans.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_IndTrans.md.tmp.859b2adc56b644b98a19d4b48861e88c
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_IndTrans.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_IndTrans.md.tmp.859b2adc56b644b98a19d4b48861e88c md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_IndTrans.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_LieRE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_LieRE.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_LieRE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_LieRE.md.tmp.a73df534695441d6b8ac93c7376c034d
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_LieRE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_LieRE.md.tmp.a73df534695441d6b8ac93c7376c034d md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_LieRE.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_LPS.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_LPS.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_LPS.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_LPS.md.tmp.409d466fdb424dae8feea431bf42fddc
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_LPS.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_LPS.md.tmp.409d466fdb424dae8feea431bf42fddc md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_LPS.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_MesaExtrap.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_MesaExtrap.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_MesaExtrap.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_MesaExtrap.md.tmp.a3c9ebfc50784efabf2f8798a025b7b7
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_MesaExtrap.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_MesaExtrap.md.tmp.a3c9ebfc50784efabf2f8798a025b7b7 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_MesaExtrap.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_NGPI.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_NGPI.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_NGPI.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_NGPI.md.tmp.6528b5b1f96b4376bd529c43b6c3c1d2
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_NGPI.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_NGPI.md.tmp.6528b5b1f96b4376bd529c43b6c3c1d2 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_NGPI.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_NoPE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_NoPE.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_NoPE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_NoPE.md.tmp.fd7361e3bf5b417f853e0e8274618e9c
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_NoPE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_NoPE.md.tmp.fd7361e3bf5b417f853e0e8274618e9c md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_NoPE.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_PESurvey.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_PESurvey.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_PESurvey.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_PESurvey.md.tmp.58841739dd7147c1851f8c18c02e2f76
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_PESurvey.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_PESurvey.md.tmp.58841739dd7147c1851f8c18c02e2f76 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_PESurvey.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoPEBase.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoPEBase.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoPEBase.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_RoPEBase.md.tmp.6b9fd907512e47a3a0d1896458832c5b
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoPEBase.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_RoPEBase.md.tmp.6b9fd907512e47a3a0d1896458832c5b md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoPEBase.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoPEViT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoPEViT.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoPEViT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_RoPEViT.md.tmp.1f14afdc48e144e78eaa6677ce8ec6c3
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoPEViT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_RoPEViT.md.tmp.1f14afdc48e144e78eaa6677ce8ec6c3 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoPEViT.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoTHP.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoTHP.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoTHP.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_RoTHP.md.tmp.e0c33f27643248ca8fb1280e1857e123
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoTHP.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_RoTHP.md.tmp.e0c33f27643248ca8fb1280e1857e123 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoTHP.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_SIPBS.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_SIPBS.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_SIPBS.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_SIPBS.md.tmp.68a77fa08d0e422ba4110e28592eb4e7
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_SIPBS.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_SIPBS.md.tmp.68a77fa08d0e422ba4110e28592eb4e7 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_SIPBS.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_TTCScale.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_TTCScale.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_TTCScale.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_TTCScale.md.tmp.e44f35a087194c48a1339da29e46f1f9
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_TTCScale.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_TTCScale.md.tmp.e44f35a087194c48a1339da29e46f1f9 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_TTCScale.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_TTT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_TTT.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_TTT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_TTT.md.tmp.f788af8f264340ccb904b0b8935b4d0b
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_TTT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_TTT.md.tmp.f788af8f264340ccb904b0b8935b4d0b md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_TTT.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_VG4D.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_VG4D.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_VG4D.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_VG4D.md.tmp.3334364706d043c6b76812793408a2cb
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_VG4D.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_VG4D.md.tmp.3334364706d043c6b76812793408a2cb md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_VG4D.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_WaveletATTN.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_WaveletATTN.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_WaveletATTN.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_WaveletATTN.md.tmp.36fde5360875463eac6a50ce9b8fcc7c
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_WaveletATTN.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2024_WaveletATTN.md.tmp.36fde5360875463eac6a50ce9b8fcc7c md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_WaveletATTN.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_AlphaProof.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_AlphaProof.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_AlphaProof.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_AlphaProof.md.tmp.5c0f1201006441c5aed2aaed038e656e
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_AlphaProof.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_AlphaProof.md.tmp.5c0f1201006441c5aed2aaed038e656e md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_AlphaProof.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_APSRL.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_APSRL.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_APSRL.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_APSRL.md.tmp.962a70ff83604ba28d015fc4f4073612
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_APSRL.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_APSRL.md.tmp.962a70ff83604ba28d015fc4f4073612 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_APSRL.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_CARoPE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_CARoPE.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_CARoPE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_CARoPE.md.tmp.1de89b3a24784bd9ab2f803d62532b9b
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_CARoPE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_CARoPE.md.tmp.1de89b3a24784bd9ab2f803d62532b9b md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_CARoPE.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_CircleRoPE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_CircleRoPE.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_CircleRoPE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_CircleRoPE.md.tmp.b5c075c6821d42c8980b33f6abd7ba9f
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_CircleRoPE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_CircleRoPE.md.tmp.b5c075c6821d42c8980b33f6abd7ba9f md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_CircleRoPE.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_ComRoPE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_ComRoPE.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_ComRoPE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_ComRoPE.md.tmp.f553fef3575d47fc9f96da2c69961511
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_ComRoPE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_ComRoPE.md.tmp.f553fef3575d47fc9f96da2c69961511 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_ComRoPE.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_DoPE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_DoPE.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_DoPE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_DoPE.md.tmp.c822fdea7e9b472b9b1d7b8c6eb4d8e5
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_DoPE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_DoPE.md.tmp.c822fdea7e9b472b9b1d7b8c6eb4d8e5 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_DoPE.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_EVA02AT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_EVA02AT.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_EVA02AT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_EVA02AT.md.tmp.c84756c766f04b7fad4ba0aec3ae2a53
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_EVA02AT.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_EVA02AT.md.tmp.c84756c766f04b7fad4ba0aec3ae2a53 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_EVA02AT.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_GatedAttn.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_GatedAttn.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_GatedAttn.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_GatedAttn.md.tmp.23f6d247d0b24ea9aadd4a28e1553b9f
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_GatedAttn.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_GatedAttn.md.tmp.23f6d247d0b24ea9aadd4a28e1553b9f md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_GatedAttn.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_HARoPE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_HARoPE.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_HARoPE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_HARoPE.md.tmp.cebe1ced4d46411391c136b87ec8bcce
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_HARoPE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_HARoPE.md.tmp.cebe1ced4d46411391c136b87ec8bcce md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_HARoPE.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_HRM.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_HRM.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_HRM.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_HRM.md.tmp.8b0f538521374618a4638e349341397a
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_HRM.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_HRM.md.tmp.8b0f538521374618a4638e349341397a md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_HRM.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_LLaVA4D.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_LLaVA4D.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_LLaVA4D.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_LLaVA4D.md.tmp.3fa2dbf4a8734b0ebf1733fd21b4ce49
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_LLaVA4D.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_LLaVA4D.md.tmp.3fa2dbf4a8734b0ebf1733fd21b4ce49 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_LLaVA4D.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_LOOPE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_LOOPE.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_LOOPE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_LOOPE.md.tmp.5a4ff9e2fa14481fbdcff2031a144956
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_LOOPE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_LOOPE.md.tmp.5a4ff9e2fa14481fbdcff2031a144956 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_LOOPE.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_MPVG.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_MPVG.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_MPVG.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_MPVG.md.tmp.6b4b962e46a04579aac1e1299d4b43b3
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_MPVG.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_MPVG.md.tmp.6b4b962e46a04579aac1e1299d4b43b3 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_MPVG.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_NestedLearning.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_NestedLearning.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_NestedLearning.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_NestedLearning.md.tmp.8aea7f06448546ed9901e2caf8918427
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_NestedLearning.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_NestedLearning.md.tmp.8aea7f06448546ed9901e2caf8918427 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_NestedLearning.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_PoPE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_PoPE.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_PoPE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_PoPE.md.tmp.4fe8346ca3c4474ba3845c0009973ef1
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_PoPE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_PoPE.md.tmp.4fe8346ca3c4474ba3845c0009973ef1 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_PoPE.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_RoPEDI.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_RoPEDI.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_RoPEDI.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_RoPEDI.md.tmp.69ba7cd9811949caaa3df9c567778b47
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_RoPEDI.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_RoPEDI.md.tmp.69ba7cd9811949caaa3df9c567778b47 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_RoPEDI.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_RotaryMAE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_RotaryMAE.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_RotaryMAE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_RotaryMAE.md.tmp.4bdc7c31a2744e0fbe42119ed734ff56
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_RotaryMAE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_RotaryMAE.md.tmp.4bdc7c31a2744e0fbe42119ed734ff56 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_RotaryMAE.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_SelectiveRoPE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_SelectiveRoPE.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_SelectiveRoPE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_SelectiveRoPE.md.tmp.3f31c520ca434f6d9f52cf61c95632e3
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_SelectiveRoPE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_SelectiveRoPE.md.tmp.3f31c520ca434f6d9f52cf61c95632e3 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_SelectiveRoPE.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_SmolVLM.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_SmolVLM.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_SmolVLM.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_SmolVLM.md.tmp.239fc1f4c9d94e46aa1aef2a5d73b870
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_SmolVLM.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_SmolVLM.md.tmp.239fc1f4c9d94e46aa1aef2a5d73b870 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_SmolVLM.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_TransXSSM.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_TransXSSM.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_TransXSSM.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_TransXSSM.md.tmp.3a235e3a62cf4b7980841773448afd5d
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_TransXSSM.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_TransXSSM.md.tmp.3a235e3a62cf4b7980841773448afd5d md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_TransXSSM.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_TRM.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_TRM.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_TRM.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_TRM.md.tmp.c70c10f6488c42e18cdf0d8df712ab41
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_TRM.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_TRM.md.tmp.c70c10f6488c42e18cdf0d8df712ab41 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_TRM.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_VRoPE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_VRoPE.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_VRoPE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_VRoPE.md.tmp.dc6aea138287464cb84732ac29e1920b
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_VRoPE.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_VRoPE.md.tmp.dc6aea138287464cb84732ac29e1920b md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_VRoPE.md
+2025-12-28T06:07:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_WALRUS.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_WALRUS.md
+2025-12-28T06:07:50+00:00 md_work_created pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_WALRUS.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_WALRUS.md.tmp.912d35165fe6475ea2e5716977620f27
+2025-12-28T06:07:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_WALRUS.pdf md_work=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2025_WALRUS.md.tmp.912d35165fe6475ea2e5716977620f27 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_WALRUS.md
+2025-12-28T06:10:14+00:00 codex_success seconds=144.3
+2025-12-28T06:10:14+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:10:14+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2000_FFRec.pdf bytes=5518 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2000_FFRec.md
+2025-12-28T06:12:17+00:00 codex_success seconds=267.0
+2025-12-28T06:12:17+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:12:17+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2012_CMPC.pdf bytes=3664 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2012_CMPC.md
+2025-12-28T06:14:51+00:00 codex_success seconds=421.3
+2025-12-28T06:14:51+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:14:51+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2007_CoreKnow.pdf bytes=6461 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2007_CoreKnow.md
+2025-12-28T06:14:54+00:00 codex_success seconds=423.8
+2025-12-28T06:14:54+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:14:54+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2014_ITC.pdf bytes=10338 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2014_ITC.md
+2025-12-28T06:18:46+00:00 codex_success seconds=656.3
+2025-12-28T06:18:46+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:18:46+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2007_SudokuLogic.pdf bytes=10157 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2007_SudokuLogic.md
+2025-12-28T06:20:02+00:00 codex_success seconds=465.4
+2025-12-28T06:20:02+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:20:02+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2016_ACT.pdf bytes=12019 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2016_ACT.md
+2025-12-28T06:22:28+00:00 codex_success seconds=456.5
+2025-12-28T06:22:28+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2017_AIAYN.pdf bytes=13883 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2017_AIAYN.md
+2025-12-28T06:22:28+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:23:27+00:00 codex_success seconds=792.9
+2025-12-28T06:23:27+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:23:27+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2014_NTM.pdf bytes=17268 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2014_NTM.md
+2025-12-28T06:27:30+00:00 codex_success seconds=523.5
+2025-12-28T06:27:30+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:27:30+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_CC3M.pdf bytes=7913 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_CC3M.md
+2025-12-28T06:32:24+00:00 codex_success seconds=294.0
+2025-12-28T06:32:24+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:32:24+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_HowTo100M.pdf bytes=9434 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_HowTo100M.md
+2025-12-28T06:32:57+00:00 codex_success seconds=774.7
+2025-12-28T06:32:57+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:32:57+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_RRN.pdf bytes=13376 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_RRN.md
+2025-12-28T06:34:42+00:00 codex_success seconds=1188.6
+2025-12-28T06:34:42+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:34:42+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_BERT.pdf bytes=18820 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_BERT.md
+2025-12-28T06:36:15+00:00 codex_success seconds=827.3
+2025-12-28T06:36:15+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_UT.pdf bytes=12100 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_UT.md
+2025-12-28T06:36:15+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:37:09+00:00 codex_success seconds=822.3
+2025-12-28T06:37:09+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:37:09+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_DEQ.pdf bytes=12681 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_DEQ.md
+2025-12-28T06:40:23+00:00 codex_success seconds=445.8
+2025-12-28T06:40:23+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:40:23+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_MOI.pdf bytes=9513 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_MOI.md
+2025-12-28T06:44:16+00:00 codex_success seconds=712.3
+2025-12-28T06:44:16+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:44:16+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_LXMERT.pdf bytes=11521 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_LXMERT.md
+2025-12-28T06:45:20+00:00 codex_success seconds=491.2
+2025-12-28T06:45:20+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:45:20+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_VisualBERT.pdf bytes=14339 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_VisualBERT.md
+2025-12-28T06:48:44+00:00 codex_success seconds=500.9
+2025-12-28T06:48:44+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:48:44+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_DETR.pdf bytes=14960 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_DETR.md
+2025-12-28T06:48:46+00:00 codex_success seconds=751.4
+2025-12-28T06:48:46+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:48:46+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_ViLBERT.pdf bytes=19447 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_ViLBERT.md
+2025-12-28T06:51:54+00:00 codex_success seconds=1032.1
+2025-12-28T06:51:54+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:51:54+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_VideoBERT.pdf bytes=17070 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_VideoBERT.md
+2025-12-28T06:55:56+00:00 codex_success seconds=429.9
+2025-12-28T06:55:56+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:55:56+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALBEF.pdf bytes=14871 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALBEF.md
+2025-12-28T06:57:21+00:00 codex_success seconds=326.6
+2025-12-28T06:57:21+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:57:21+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALiBi.pdf bytes=13762 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALiBi.md
+2025-12-28T06:59:59+00:00 codex_success seconds=942.7
+2025-12-28T06:59:59+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T06:59:59+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_OSCAR.pdf bytes=12279 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_OSCAR.md
+2025-12-28T07:07:37+00:00 codex_success seconds=458.8
+2025-12-28T07:07:37+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T07:07:37+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ConViT.pdf bytes=15337 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ConViT.md
+2025-12-28T07:08:41+00:00 codex_success seconds=1400.7
+2025-12-28T07:08:41+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T07:08:41+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_UNITER.pdf bytes=15969 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_UNITER.md
+2025-12-28T07:11:14+00:00 codex_success seconds=1349.9
+2025-12-28T07:11:14+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T07:11:14+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_ViT.pdf bytes=17365 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_ViT.md
+2025-12-28T07:11:52+00:00 codex_success seconds=956.1
+2025-12-28T07:11:52+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T07:11:52+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALIGN.pdf bytes=17174 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALIGN.md
+2025-12-28T07:15:52+00:00 codex_success seconds=1111.1
+2025-12-28T07:15:52+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T07:15:52+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_CLIP.pdf bytes=20225 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_CLIP.md
+2025-12-28T07:17:57+00:00 codex_success seconds=619.8
+2025-12-28T07:17:57+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T07:17:57+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_LAION400M.pdf bytes=10149 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_LAION400M.md
+2025-12-28T07:23:08+00:00 codex_success seconds=867.2
+2025-12-28T07:23:08+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T07:23:08+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_MAE.pdf bytes=16326 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_MAE.md
+2025-12-28T07:25:38+00:00 codex_success seconds=460.5
+2025-12-28T07:25:38+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T07:25:38+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_VATT.pdf bytes=17526 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_VATT.md
+2025-12-28T07:27:09+00:00 codex_success seconds=955.6
+2025-12-28T07:27:09+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T07:27:09+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_RoFormer.pdf bytes=14065 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_RoFormer.md
+2025-12-28T07:27:47+00:00 codex_success seconds=954.5
+2025-12-28T07:27:47+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_Swin.pdf bytes=14349 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_Swin.md
+2025-12-28T07:27:47+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T07:30:20+00:00 codex_success seconds=867.8
+2025-12-28T07:30:20+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T07:30:20+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_TimeSformer.pdf bytes=19101 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_TimeSformer.md
+2025-12-28T07:37:41+00:00 codex_success seconds=722.9
+2025-12-28T07:37:41+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T07:37:41+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ViLT.pdf bytes=15449 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ViLT.md
+2025-12-28T07:39:34+00:00 codex_success seconds=986.3
+2025-12-28T07:39:34+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T07:39:34+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_VideoCLIP.pdf bytes=13105 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_VideoCLIP.md
+2025-12-28T07:40:52+00:00 codex_success seconds=784.6
+2025-12-28T07:40:52+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T07:40:52+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_CoCa.pdf bytes=15381 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_CoCa.md
+2025-12-28T07:41:02+00:00 codex_success seconds=642.1
+2025-12-28T07:41:02+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T07:41:02+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_Flamingo.pdf bytes=18428 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_Flamingo.md
+2025-12-28T07:42:44+00:00 codex_success seconds=935.2
+2025-12-28T07:42:44+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T07:42:44+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_BLIP.pdf bytes=14763 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_BLIP.md
+2025-12-28T07:46:53+00:00 codex_success seconds=248.9
+2025-12-28T07:46:53+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T07:46:53+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_AHAT.pdf bytes=8578 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_AHAT.md
+2025-12-28T07:49:41+00:00 codex_success seconds=529.6
+2025-12-28T07:49:41+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T07:49:41+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_ScienceQA.pdf bytes=8776 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_ScienceQA.md
+2025-12-28T07:55:16+00:00 codex_success seconds=335.3
+2025-12-28T07:55:16+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T07:55:16+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_ConceptARC.pdf bytes=7302 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_ConceptARC.md
+2025-12-28T07:56:08+00:00 codex_success seconds=1106.9
+2025-12-28T07:56:08+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T07:56:08+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_LAION5B.pdf bytes=28051 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_LAION5B.md
+2025-12-28T07:56:38+00:00 codex_success seconds=936.1
+2025-12-28T07:56:38+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T07:56:38+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_Winoground.pdf bytes=12107 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_Winoground.md
+2025-12-28T07:57:28+00:00 codex_success seconds=1073.7
+2025-12-28T07:57:28+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_NoPELMs.pdf bytes=14022 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_NoPELMs.md
+2025-12-28T07:57:28+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T08:01:12+00:00 codex_success seconds=858.4
+2025-12-28T08:01:12+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T08:01:12+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_BLIP2.pdf bytes=14998 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_BLIP2.md
+2025-12-28T08:09:00+00:00 codex_success seconds=691.5
+2025-12-28T08:09:00+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T08:09:00+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_LLaVA.pdf bytes=11361 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_LLaVA.md
+2025-12-28T08:10:03+00:00 codex_success seconds=804.8
+2025-12-28T08:10:03+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T08:10:03+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Kosmos1.pdf bytes=21220 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Kosmos1.md
+2025-12-28T08:19:11+00:00 codex_success seconds=611.6
+2025-12-28T08:19:11+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T08:19:11+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MMBench.pdf bytes=20085 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MMBench.md
+2025-12-28T08:24:49+00:00 codex_success seconds=1772.3
+2025-12-28T08:24:49+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T08:24:49+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Gemini.pdf bytes=41106 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Gemini.md
+2025-12-28T08:28:31+00:00 codex_failure rc=1 seconds=1943.0 stderr=Reading prompt from stdin...\nOpenAI Codex v0.77.0 (research preview)\n--------\nworkdir: /home/jake/Developer/4D\nmodel: gpt-5.2-codex\nprovider: openai\napproval: never\nsandbox: workspace-write [workdir, /tmp, $TMPDIR, /home/jake/Developer/4D/Notes/Vision/pdfs-3]\nreasoning effort: xhigh\nreasoning summaries: auto\nsession id: 019b63f5-227a-7811-92dc-9daa3180e33d\n--------\nuser\n1. Read and review /home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_GPT4.pdf thoroughly. Make sure the files entire contents has been brought into the context. This will be absolutely essential.\n2. For each question outlined in /home/jake/Developer/4D/Notes/Vision/Survey.md determine the answer. Double check and verify your answer.\n3. Copy your answer for the given question into /home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_GPT4.md.tmp.27949e3528ea41fa8561e3167b58e0e1 be absolutely thorough. Save it.\n4. Continue until you have answered all the questions\n\nmcp startup: no servers\n\nthinking\n**Planning file access approach**\nexec\n/bin/bash -lc ls in /home/jake/Developer/4D succeeded in 19ms:\n4 Dimension Attention.md\nclamp.py\ncodex_queue.log\ncodex_queue_runner.py\nconcepts.md\nDAT-PAT\nGemini.md\ngit-ingest\nGrok.md\nmain.py\nmink.md\nmink.py\nMonSTER.py\nnorm.py\nNotes\no3.md\nOld\np5\n__pycache__\npyproject.toml\n\nthinking\n**Preparing to extract PDF contents**\nexec\n/bin/bash -lc 'which pdftotext' in /home/jake/Developer/4D succeeded in 20ms:\n/usr/bin/pdftotext\n\nthinking\n**Planning PDF text extraction**\nexec\n/bin/bash -lc 'pdftotext /home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_GPT4.pdf -' in /home/jake/Developer/4D succeeded in 300ms:\nGPT-4 Technical Report\n\nOpenAI∗\n\narXiv:2303.08774v6 [cs.CL] 4 Mar 2024\n\nAbstract\nWe report the development of GPT-4, a large-scale, multimodal model which can\naccept image and text inputs and produce text outputs. While less capable than\nhumans in many real-world scenarios, GPT-4 exhibits human-level performance\non var...(truncated) stdout=
+2025-12-28T08:28:31+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_GPT4.pdf error=rc=1
+2025-12-28T08:28:31+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T08:28:31+00:00 temp_removed path=/home/jake/Developer/4D/Notes/Vision/pdfs-3/.2023_GPT4.md.tmp.27949e3528ea41fa8561e3167b58e0e1
+2025-12-28T08:28:31+00:00 codex_success seconds=1639.0
+2025-12-28T08:28:31+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MiniGPT4.pdf bytes=16050 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MiniGPT4.md
+2025-12-28T08:28:31+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T08:32:49+00:00 codex_success seconds=479.8
+2025-12-28T08:32:49+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T08:32:49+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_SphericalPE.pdf bytes=8085 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_SphericalPE.md
+2025-12-28T08:34:21+00:00 codex_success seconds=350.4
+2025-12-28T08:34:21+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T08:34:21+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_XPOS.pdf bytes=10288 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_XPOS.md
+2025-12-28T08:36:39+00:00 codex_success seconds=1596.1
+2025-12-28T08:36:39+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T08:36:39+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MMMU.pdf bytes=8737 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MMMU.md
+2025-12-28T08:43:48+00:00 codex_success seconds=428.7
+2025-12-28T08:43:48+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T08:43:48+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_ARCHeavy.pdf bytes=8873 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_ARCHeavy.md
+2025-12-28T08:47:20+00:00 codex_success seconds=779.4
+2025-12-28T08:47:20+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T08:47:20+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_AlphaGeometry.pdf bytes=14530 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_AlphaGeometry.md
+2025-12-28T08:49:51+00:00 codex_success seconds=1280.1
+2025-12-28T08:49:51+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T08:49:51+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Uni3DL.pdf bytes=18361 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Uni3DL.md
+2025-12-28T08:50:08+00:00 codex_success seconds=1856.6
+2025-12-28T08:50:08+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T08:50:08+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_PaLME.pdf bytes=35210 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_PaLME.md
+2025-12-28T08:54:31+00:00 codex_success seconds=643.1
+2025-12-28T08:54:31+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T08:54:31+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_BeyondAStar.pdf bytes=12912 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_BeyondAStar.md
+2025-12-28T09:02:16+00:00 codex_success seconds=728.3
+2025-12-28T09:02:16+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T09:02:16+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_EvoTTC.pdf bytes=8452 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_EvoTTC.md
+2025-12-28T09:03:51+00:00 codex_success seconds=840.5
+2025-12-28T09:03:51+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T09:03:51+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_EDiffusion.pdf bytes=17067 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_EDiffusion.md
+2025-12-28T09:04:44+00:00 codex_success seconds=613.1
+2025-12-28T09:04:44+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T09:04:44+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_FPD.pdf bytes=12114 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_FPD.md
+2025-12-28T09:06:05+00:00 codex_success seconds=1996.6
+2025-12-28T09:06:05+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T09:06:05+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_YaRN.pdf bytes=11363 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_YaRN.md
+2025-12-28T09:07:05+00:00 codex_success seconds=288.6
+2025-12-28T09:07:05+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T09:07:05+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_GAA.pdf bytes=10067 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_GAA.md
+2025-12-28T09:08:30+00:00 codex_success seconds=279.0
+2025-12-28T09:08:30+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T09:08:30+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_HARC.pdf bytes=7103 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_HARC.md
+2025-12-28T09:09:08+00:00 codex_success seconds=1307.9
+2025-12-28T09:09:08+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T09:09:08+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_DAPE.pdf bytes=16582 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_DAPE.md
+2025-12-28T09:16:16+00:00 codex_success seconds=611.2
+2025-12-28T09:16:16+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T09:16:16+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_IndTrans.pdf bytes=11308 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_IndTrans.md
+2025-12-28T09:17:04+00:00 codex_success seconds=476.1
+2025-12-28T09:17:04+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T09:17:04+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_MesaExtrap.pdf bytes=14441 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_MesaExtrap.md
+2025-12-28T09:21:45+00:00 codex_success seconds=1021.5
+2025-12-28T09:21:45+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T09:21:45+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_Idefics2.pdf bytes=16344 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_Idefics2.md
+2025-12-28T09:22:23+00:00 codex_success seconds=832.4
+2025-12-28T09:22:23+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T09:22:23+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_LPS.pdf bytes=13021 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_LPS.md
+2025-12-28T09:22:55+00:00 codex_success seconds=950.1
+2025-12-28T09:22:55+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T09:22:55+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_LieRE.pdf bytes=11985 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_LieRE.md
+2025-12-28T09:29:52+00:00 codex_success seconds=767.7
+2025-12-28T09:29:52+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T09:29:52+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_NoPE.pdf bytes=11958 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_NoPE.md
+2025-12-28T09:31:05+00:00 codex_success seconds=888.8
+2025-12-28T09:31:05+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T09:31:05+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_NGPI.pdf bytes=17817 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_NGPI.md
+2025-12-28T09:32:43+00:00 codex_success seconds=620.2
+2025-12-28T09:32:43+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T09:32:43+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoPEBase.pdf bytes=7118 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoPEBase.md
+2025-12-28T09:40:26+00:00 codex_success seconds=1121.1
+2025-12-28T09:40:26+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T09:40:26+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_PESurvey.pdf bytes=9094 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_PESurvey.md
+2025-12-28T09:46:28+00:00 codex_success seconds=825.1
+2025-12-28T09:46:28+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T09:46:28+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_TTCScale.pdf bytes=7364 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_TTCScale.md
+2025-12-28T09:50:16+00:00 codex_success seconds=1641.5
+2025-12-28T09:50:16+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T09:50:16+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoPEViT.pdf bytes=10887 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoPEViT.md
+2025-12-28T09:55:41+00:00 codex_success seconds=1548.8
+2025-12-28T09:55:41+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T09:55:41+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoTHP.pdf bytes=13067 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoTHP.md
+2025-12-28T09:57:46+00:00 codex_success seconds=1039.9
+2025-12-28T09:57:46+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T09:57:46+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_TTT.pdf bytes=11377 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_TTT.md
+2025-12-28T10:03:53+00:00 codex_success seconds=1044.5
+2025-12-28T10:03:53+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T10:03:53+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_VG4D.pdf bytes=10383 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_VG4D.md
+2025-12-28T10:04:59+00:00 codex_success seconds=2033.7
+2025-12-28T10:04:59+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T10:04:59+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_SIPBS.pdf bytes=15419 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_SIPBS.md
+2025-12-28T10:06:23+00:00 codex_success seconds=966.7
+2025-12-28T10:06:23+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T10:06:23+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_WaveletATTN.pdf bytes=12005 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_WaveletATTN.md
+2025-12-28T10:08:18+00:00 codex_success seconds=265.1
+2025-12-28T10:08:18+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T10:08:18+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_CARoPE.pdf bytes=9791 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_CARoPE.md
+2025-12-28T10:09:13+00:00 codex_success seconds=811.8
+2025-12-28T10:09:13+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T10:09:13+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_AlphaProof.pdf bytes=6906 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_AlphaProof.md
+2025-12-28T10:12:50+00:00 codex_success seconds=471.0
+2025-12-28T10:12:50+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T10:12:50+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_CircleRoPE.pdf bytes=13304 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_CircleRoPE.md
+2025-12-28T10:18:33+00:00 codex_success seconds=560.6
+2025-12-28T10:18:33+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T10:18:33+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_EVA02AT.pdf bytes=11332 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_EVA02AT.md
+2025-12-28T10:18:57+00:00 codex_success seconds=754.3
+2025-12-28T10:18:57+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_ComRoPE.pdf bytes=10549 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_ComRoPE.md
+2025-12-28T10:18:57+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T10:21:53+00:00 codex_success seconds=815.9
+2025-12-28T10:21:53+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T10:21:53+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_DoPE.pdf bytes=10505 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_DoPE.md
+2025-12-28T10:23:26+00:00 codex_success seconds=636.6
+2025-12-28T10:23:26+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T10:23:26+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_GatedAttn.pdf bytes=12370 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_GatedAttn.md
+2025-12-28T10:29:18+00:00 codex_success seconds=644.3
+2025-12-28T10:29:18+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T10:29:18+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_HARoPE.pdf bytes=16230 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_HARoPE.md
+2025-12-28T10:30:58+00:00 codex_success seconds=451.6
+2025-12-28T10:30:58+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T10:30:58+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_LOOPE.pdf bytes=9264 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_LOOPE.md
+2025-12-28T10:31:32+00:00 codex_success seconds=578.6
+2025-12-28T10:31:32+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T10:31:32+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_LLaVA4D.pdf bytes=10341 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_LLaVA4D.md
+2025-12-28T10:39:36+00:00 codex_success seconds=2509.3
+2025-12-28T10:39:36+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T10:39:36+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_APSRL.pdf bytes=10928 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_APSRL.md
+2025-12-28T10:42:21+00:00 codex_success seconds=1403.3
+2025-12-28T10:42:21+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T10:42:21+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_HRM.pdf bytes=17205 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_HRM.md
+2025-12-28T10:44:06+00:00 codex_success seconds=888.8
+2025-12-28T10:44:06+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T10:44:06+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_MPVG.pdf bytes=12193 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_MPVG.md
+2025-12-28T10:46:56+00:00 codex_success seconds=958.2
+2025-12-28T10:46:56+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T10:46:56+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_NestedLearning.pdf bytes=17027 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_NestedLearning.md
+2025-12-28T10:48:10+00:00 codex_success seconds=514.3
+2025-12-28T10:48:10+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T10:48:10+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_RoPEDI.pdf bytes=9107 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_RoPEDI.md
+2025-12-28T10:54:30+00:00 codex_success seconds=624.0
+2025-12-28T10:54:30+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T10:54:30+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_SelectiveRoPE.pdf bytes=15345 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_SelectiveRoPE.md
+2025-12-28T10:57:30+00:00 codex_success seconds=909.3
+2025-12-28T10:57:30+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T10:57:30+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_RotaryMAE.pdf bytes=15676 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_RotaryMAE.md
+2025-12-28T10:59:48+00:00 codex_success seconds=772.0
+2025-12-28T10:59:48+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-3
+2025-12-28T10:59:48+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_SmolVLM.pdf bytes=16882 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_SmolVLM.md
+2025-12-28T11:00:52+00:00 codex_success seconds=1760.4
+2025-12-28T11:00:52+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_PoPE.pdf bytes=19088 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_PoPE.md
+2025-12-28T11:00:53+00:00 codex_success seconds=763.5
+2025-12-28T11:00:53+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_TransXSSM.pdf bytes=16068 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_TransXSSM.md
+2025-12-28T11:07:04+00:00 codex_success seconds=753.8
+2025-12-28T11:07:04+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_TRM.pdf bytes=11302 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_TRM.md
+2025-12-28T11:09:45+00:00 codex_success seconds=735.4
+2025-12-28T11:09:45+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_VRoPE.pdf bytes=13229 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_VRoPE.md
+2025-12-28T11:21:38+00:00 codex_success seconds=1310.1
+2025-12-28T11:21:38+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_WALRUS.pdf bytes=34525 md_final=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_WALRUS.md
+2025-12-28T11:21:38+00:00 run_end

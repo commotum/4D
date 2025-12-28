@@ -1,0 +1,454 @@
+Developmental Science 10:1 (2007), pp 89– 96                                                                   DOI: 10.1111/j.1467-7687.2007.00569.x
+
+
+
+Core knowledge
+Blackwell Publishing Ltd
+
+
+
+
+Elizabeth S. Spelke and Katherine D. Kinzler
+Department of Psychology, Harvard University, USA
+
+
+
+                      Abstract
+                      Human cognition is founded, in part, on four systems for representing objects, actions, number, and space. It may be based, as
+                      well, on a fifth system for representing social partners. Each system has deep roots in human phylogeny and ontogeny, and it
+                      guides and shapes the mental lives of adults. Converging research on human infants, non-human primates, children and adults
+                      in diverse cultures can aid both understanding of these systems and attempts to overcome their limits.
+
+
+
+Introduction                                                                           predispositions. Instead, we believe that humans are
+                                                                                       endowed with a small number of separable systems of
+Cognitive science has been dominated by two views of                                   core knowledge. New, flexible skills and belief systems
+human nature. On one view, the human mind is a flexible                                build on these core foundations.
+and adaptable mechanism for discovering regularities in                                   Studies of human infants and non-human animals,
+experience: a single learning system that copes with all                               focused on the ontogenetic and phylogenetic origins of
+the diversity of life. On the competing view, the human                                knowledge, provide evidence for four core knowledge
+mind is a collection of special-purpose mechanisms, each                               systems (Spelke, 2004). These systems serve to represent
+shaped by evolution to perform a particular function.                                  inanimate objects and their mechanical interactions,
+The first view traces back to Enlightenment thinkers                                   agents and their goal-directed actions, sets and their
+such as Locke (1689) and Hume (1748) and has been                                      numerical relationships of ordering, addition and sub-
+invigorated more recently by cognitive psychologists and                               traction, and places in the spatial layout and their geo-
+neural network theorists (e.g. Rumelhart & McClelland,                                 metric relationships. Each system centers on a set of
+1985; Hinton, 1993). The second view was inspired by                                   principles that serves to individuate the entities in its
+Darwin (1871) and gained prominence with the rise of                                   domain and to support inferences about the entities’
+evolutionary psychology (e.g. Cosmides & Tooby, 1994;                                  behavior. Each system, moreover, is characterized by a
+Pinker, 2002). Much public discussion has focused on                                   set of signature limits that allow investigators to identify
+the diverging ways in which these views explain human                                  the system across tasks, ages, species, and human cultures.
+behavior. Does a given ethnic group excel in mathematics                                  The core system of object representation has been
+because its members have studied more diligently, or                                   studied most extensively. It centers on the spatio-temporal
+because they have inherited greater talent? Do some                                    principles of cohesion (objects move as connected and
+adolescents join violent gangs because they learned                                    bounded wholes), continuity (objects move on connected,
+aggressive behavior from their communities, or because                                 unobstructed paths), and contact (objects do not interact
+they inherited a predisposition toward intergroup com-                                 at a distance) (Aguiar & Baillargeon, 1999; Leslie & Keeble,
+petition? Behind these specific questions lies a more                                  1987; Spelke, 1990). These principles allow human infants
+general concern: To what degree can we human beings                                    as well as other animals to perceive object boundaries,
+determine our fates and choose our futures? With enough                                to represent the complete shapes of objects that move
+cognitive work, can any person develop her mathematical                                partly or fully out of view, and to predict when objects
+talents and control her aggression?                                                    will move and where they will come to rest. Some of
+   Developmental science was born from these concerns,                                 these abilities are observed in the absence of any visual
+and its research bears on these questions. We believe its                              experience, in newborn human infants or newly hatched
+research has shown that both these views are false: humans                             chicks (Valenza, Leo, Gava & Simion, in press; Regolin
+are endowed neither with a single, general-purpose learning                            & Vallortigara, 1995; Lea, Slater & Ryan, 1996). Even
+system nor with myriad special-purpose systems and                                     infants with months of visual experience do not, however,
+
+Address for correspondence: Elizabeth S. Spelke, Department of Psychology, Harvard University, 1130 William James Hall, Cambridge, MA 02138,
+USA; e-mail: spelke@wjh.harvard.edu
+
+
+© 2007 The Authors. Journal compilation © 2007 Blackwell Publishing Ltd, 9600 Garsington Road, Oxford OX4 2DQ, UK and
+350 Main Street, Malden, MA 02148, USA.
+90   Elizabeth S. Spelke and Katherine D. Kinzler
+
+
+have more specific cognitive systems for representing and                  representations of agents, who need not be cohesive
+reasoning about ecologically significant subcategories of                  (Vishton, Stulac & Calhoun, 1998), continuous in their
+inanimate objects such as foods or artifacts (Shutts, 2006),               paths of motion (Kuhlmeier, Bloom & Wynn, 2004), or
+or systems for reasoning about inanimate, non-object                       subject to contact in their interactions with other agents
+entities such as sand piles or liquids (Huntley-Fenner,                    (Spelke, Phillips & Woodward, 1995). Instead, the inten-
+Carey & Solimando, 2002; Rosenberg & Carey, 2006;                          tional actions of agents are directed to goals (Woodward,
+Shutts, 2006). Moreover, infants are able to represent                     1999), and agents achieve their goals through means that
+only a small number of objects at a time (about three;                     are efficient (Gergely & Csibra, 2003). Agents also interact
+Feigenson & Carey, 2003). These findings provide                           contingently (Johnson, Booth & O’Hearn, 2001; Watson,
+evidence that a single system, with signature limits,                      1972) and reciprocally (Meltzoff & Moore, 1977). Agents
+underlies infants’ reasoning about the inanimate world.                    do not need to have perceptible faces (Johnson, Slaughter
+   By focusing on these signature limits, investigators of                 & Carey 1998; Gergely & Csibra, 2003). When they do,
+animal cognition have discovered the same core system                      however, infants use their direction of gaze to interpret
+of object representation in adult non-human primates                       their social and non-social actions (Hood, Willen &
+(Hauser & Carey, 2003; Santos, 2004). Like human infants,                  Driver, 1998; Johnson et al., 1998), even as newborns
+monkeys’ object representations obey the continuity and                    (Farroni, Massaccesi, Pividori & Johnson, 2004). In con-
+contact constraints (Santos, 2004) and show a set size                     trast, infants do not interpret the motions of inanimate
+limit (of four; Hauser & Carey, 2003). Investigators of                    objects as goal-directed (Woodward, 1998), and they do
+cognitive processes in human adults have discovered that                   not attempt to mirror such actions (Meltzoff, 1995).
+the same system governs adults’ processes of object-                          Goal-directedness, efficiency, contingency, reciprocity,
+directed attention (see Scholl, 2001, for discussion).                     and gaze direction provide signatures of agent represen-
+Human adults are able to attend to three or four separ-                    tations that allow for their study in non-human animals
+ately moving objects, for example, when the objects’                       and in human adults. Newly hatched chicks, rhesus
+boundaries and motions accord with the cohesion and                        monkeys, and chimpanzees are sensitive to what their
+continuity constraints. Adults fail to track entities                      predators or competitors can and cannot see (Agrillo,
+beyond this set size limit, and they fail to track entities                Regolin & Vallortigara, 2004; Flombaum & Santos, 2005;
+that do not obey the spatiotemporal constraints on objects                 Hare, Call & Tomasello, 2001). These studies accord well
+(Scholl & Pylyshyn, 1999; vanMarle & Scholl, 2003;                         with the physiological signatures of ‘mirror neurons’,
+Scholl, Pylyshyn & Feldman, 2001; Marino & Scholl, 2005).                  observed in captive monkeys, which selectively respond
+Of course, adults also have developed knowledge of                         to specific actions performed by the self and others
+more narrow domains of objects such as foods and tools                     (see Rizzolatti, Fogassi & Gallese, 2002, for a review).
+(Keil, Smith, Simons & Levin, 1998; Lavin & Hall, 2001;                    Mirroring behavior and neural activity occurs in human
+Santos, Hauser & Spelke, 2001). When attentional resources                 adults as well (Iacoboni, Woods, Brass, Bekkering,
+are stretched, however, the properties that mark these                     Mazziotta & Rizzolatti, 1999), and representations of goal-
+finer distinctions often fail to guide object representa-                  directed action guide adults’ intuitive moral reasoning
+tions, whereas core properties continue to do so (Leslie,                  (Cushman, Young & Hauser, in press). Together, these
+Xu, Tremoulet & Scholl, 1998).                                             findings provide evidence for a core system of agent
+   If the core system of object representation is constant                 representation that is evolutionarily ancient and that
+over human development, then one would expect that                         persists over human development.
+system to be universal. Recent studies of the Piraha, a                       The core number system is structured around principles
+remote Amazonian group, support that suggestion. The                       that contrast with both the object and the agent systems,
+Piraha have been reported to differ dramatically from                      and it shows its own distinctive signature limits. Three
+most other contemporary human groups in their language,                    competing sets of principles have been proposed to char-
+culture, and cognitive abilities. For example, their lan-                  acterize this system (Dehaene & Changeux, 1993; Meck
+guage has been said to lack number words beyond ‘two’                      & Church, 1983; Church & Broadbent, 1990). Because
+or resources to distinguish past from present, and it may                  each of these proposals accounts for the primary pro-
+lack basic syntactic devices of recursion and quantifica-                  perties of numerical representations, their relative merits
+tion (Everett, 2005). Nevertheless, the Piraha distinguish                 continue to be debated (see Izard & Dehaene, 2006;
+objects from non-object entities (Everett, 2005), and they                 Gallistel & Gelman, 1992). There is broad agreement,
+track objects with the signature set-size limit (Gordon,                   however, on three central properties of core number rep-
+2004).                                                                     resentations. First, number representations are imprecise,
+   A second core system represents agents and their                        and their imprecision grows linearly with increasing
+actions. Spatio-temporal principles do not govern infants’                 cardinal value. Under a broad range of background
+
+© 2007 The Authors. Journal compilation © 2007 Blackwell Publishing Ltd.
+                                                                                                                    Core knowledge    91
+
+
+assumptions, Izard (2006) has shown that this ‘scalar                      properties of the layout such as surface color or odor,
+variability’ produces a ratio limit to the discriminability                and it fails under some conditions to capture geometric
+of sets with different cardinal values. Second, number                     properties of movable objects. When young children or
+representations are abstract: they apply to diverse entities               non-human animals are disoriented, they reorient them-
+encountered through multiple sensory modalities, includ-                   selves in accord with layout geometry (Hermer & Spelke,
+ing arrays of objects, sequences of sounds, and perceived                  1996; Cheng, 1986; see Cheng & Newcombe, 2005, for
+or produced sequences of actions. Third, number rep-                       review). Children fail, in contrast, to orient themselves
+resentations can be compared and combined by opera-                        in accord with the geometry of an array of objects (Gou-
+tions of addition and subtraction.                                         teux & Spelke, 2001), and they fail to use the geometry
+   Number representations with these properties have now                   of an array to locate an object when they are oriented
+been found in human infants, children, and adults, and in                  and the array moves (Lourenco, Huttenlocher & Vasilyeva,
+adult non-human primates. Infants discriminate between                     2005). Under some circumstances, children and animals
+large numbers of objects, actions, and sounds when con-                    who are disoriented fail to locate objects in relation to
+tinuous quantities are controlled, and their discrimina-                   distinctive landmark objects and surfaces, such as a colored
+tion shows a ratio limit (Xu & Spelke, 2000; Xu, Spelke                    wall (Margules & Gallistel, 1988; Wang, Hermer & Spelke,
+& Goddard, 2005; Wood & Spelke, 2005; Lipton &                             1999; Lee, Shusterman & Spelke, in press). When dis-
+Spelke, 2003, 2004; Brannon, Abbott & Lutz, 2004). Infants                 oriented children and animals do use landmarks, their search
+also can add and subtract large numbers of objects                         appears to depend on two distinct processes: a reorien-
+(McCrink & Wynn, 2004). Adult monkeys and humans                           tation process that is sensitive only to geometry and an
+discriminate between large numbers of sounds, with a                       associative process that links local regions of the layout
+ratio limit (Hauser, Tsao, Garcia & Spelke, 2003; Barth,                   to specific objects (Cheng, 1986; Lee et al., in press).
+Kanwisher & Spelke, 2003), and they add and subtract                          Human adults show much more extensive use of land-
+large numbers as well (Flombaum, Junge & Hauser, 2005).                    marks, but they too rely primarily on surface geometry
+In adults and children, cross-modal numerical comparisons                  when they are disoriented under conditions of verbal or
+are as accurate as comparisons within a single modality                    spatial interference (Hermer-Vazquez, Spelke & Katsnel-
+(Barth et al., 2003; Barth, La Mont, Lipton & Spelke, 2005).               son, 1999; Newcombe, 2005). Recent studies of the
+The precision of numerical representations increases                       Munduruku suggest that sensitivity to geometry is uni-
+with development, from a ratio of 2.0 in 6-month-old                       versal, and that it allows children and adults with little
+infants to a ratio of 1.15–1.3 in human adults, depending                  or no formal education to extract and use geometric
+on the task (van Oeffelin & Vos, 1982; Izard, 2006).                       information in pictures as well as in extended surface
+   Because core representations of number are present                      layouts (Dehaene, Izard, Pica & Spelke, 2006).
+throughout development, they should also be present in                        In summary, research on non-human animals and on
+all cultures, independently of formal education in mathe-                  human infants, children, and adults in diverse cultures
+matics. Studies of the Munduruku, a second remote                          casts doubt on both of the dominant views of human
+Amazonian group with no verbal counting routine, no                        nature. This research suggests that the human mind is
+words for exact numbers beyond ‘three’, and little formal                  not a single, general-purpose device that adapts itself to
+instruction, support this prediction. The Munduruku                        whatever structures and challenges the environment
+discriminate between large numbers with a ratio limit                      affords. Humans learn some things readily, and others
+on precision, as accurately as do educated adults in                       with greater difficulty, by exercising more specific cognitive
+France (Pica, Lemer, Izard & Dehaene, 2004). Further,                      systems with signature properties and limits. The human
+both Munduruku adults and US preschool children who                        mind also does not appear to be a ‘massively modular’
+have received no instruction in mathematics can perform                    collection of hundreds or thousands of special-purpose
+approximate addition and subtraction on large approxim-                    cognitive devices (Fodor, 2000). Rather, the mind appears
+ate numerosities: they can add two successively pre-                       to be built on a small number of core systems, including
+sented arrays of objects and explicitly judge whether their                the four systems just described.
+sum is more or less numerous than that of a third array                       Are there other core knowledge systems, with roots in
+of objects (Pica et al., 2004; Barth, LaMont, Lipton,                      our evolutionary past, that emerge in infancy and serve
+Dehaene, Kanwisher & Spelke, 2006) or sequence of                          as foundations for learning and reasoning by children
+sounds (Barth et al., 2005).                                               and adults? Recently, we have begun to investigate a fifth
+   The last system of core knowledge captures the geo-                     candidate system, for identifying and reasoning about
+metry of the environment: the distance, angle, and sense                   potential social partners and social group members.
+relations among extended surfaces in the surrounding                          The social interactions of humans with other humans
+layout. This system fails to represent non-geometric                       are a salient feature of every human community, whose
+
+© 2007 The Authors. Journal compilation © 2007 Blackwell Publishing Ltd.
+92   Elizabeth S. Spelke and Katherine D. Kinzler
+
+
+adult members show cooperation, reciprocity, and group                     speaking. Although each woman had spoken Spanish to
+cohesion. Research in evolutionary psychology suggests                     half the infants and English to the others, infants tended
+that people are predisposed to form and attend to coali-                   to look longer at the woman who had spoken to them in
+tions (Cosmides & Tooby, 2003). A rich and longstanding                    English, their native language.
+literature in social psychology confirms this predisposi-                     Further studies revealed that this preference extends
+tion to categorize oneself and other humans into groups.                   to older ages and guides behaviors that are more directly
+Any minimal grouping, based on race, ethnicity, nation-                    social. For example, 12-month-old infants in Boston
+ality, religion, or arbitrary assignment, tends to produce                 were presented with a native speaker of English and a
+a preference for the in-group, or us, over the out-group,                  native speaker of French who spoke to them in alterna-
+or them. This preference is shown by adults and children                   tion, while eating two different foods. When later given a
+alike, who show parallel biases toward and against indi-                   choice between the two foods, infants reached preferen-
+viduals based on their race (e.g. Baron & Banaji, 2006).                   tially for the snack offered by the English speaker
+   Studies of infants suggest that these tendencies emerge                 (McKee, 2006).
+early in development. Three-month-old infants show a                          These findings suggest that the sound of the native
+visual preference for members of their own race com-                       language provides powerful information for social group
+pared to members of a different race (Kelly, Quinn,                        membership in infancy. Together with the studies of
+Slater, Lee, Gibson, Smith, Liezhong & Pascalis, 2005;                     infants’ sensitivity to race, they raise the possibility that
+Bar-Haim, Ziv, Lamy & Hodes, 2006). This preference is                     a fifth core knowledge system, distinguishing potential
+influenced by infants’ experience, for it depends both on                  members of one’s own social group from members of
+the race of the infant’s family members and the pre-                       other groups, may guide infants’ and children’s learning
+dominance of that race in the larger community. Israeli                    about the social world.
+infants from Caucasian families prefer to look at Cauca-                      Core systems for representing objects, actions, numbers,
+sian over African faces, Ethiopian infants from African                    places, and social partners may provide some of the
+families prefer to look at African over Caucasian faces,                   foundations for uniquely human cognitive achievements,
+and Israeli infants from African families, living in a pre-                including the acquisition of language and other symbol
+dominantly Caucasian culture, show no consistent face                      systems, the development of cognitive skills through
+preferences (Bar-Haim et al., 2006). Infants also look                     formal instruction, and the emergence and growth of
+preferentially at faces of the same gender as their primary                cooperative social networks. Because learning of words
+caregiver (Quinn, Yahr, Kuhn, Slater & Pascalis, 2002).                    and expressions depends on one’s pre-existing concepts,
+   Race and gender may not be the most powerful or                         core concepts figure importantly in children’s word
+reliable cues to social group membership, however. In                      learning (see Bloom, 2000). Similarly, recent research
+the environments in which human social groups evolved,                     suggests that core geometric representations guide devel-
+contact with perceptibly different races rarely would                      oping understanding of maps, even in remote cultures
+have occurred (Cosmides & Tooby, 2003), and all human                      with no formal instruction (Dehaene et al., 2006). Core
+communities would have contained people of both gen-                       representations of number support preschool children’s
+ders. A better source of information for group member-                     mastery of counting (Wynn, 1990; Carey, 2001; Spelke,
+ship might come from the language that people speak,                       2003) and older children’s and adults’ learning and
+and especially from the accent with which they speak it.                   performance of symbolic arithmetic (Dehaene, 1997;
+   Until recently in human history, languages varied                       Feigenson, Dehaene & Spelke, 2004). Finally, a core sys-
+markedly across human groups, even groups living in                        tem for representing potential social partners may guide
+quite close proximity (e.g. Braudel, 1988). From birth,                    infants’ and children’s ‘cultural learning’ (Tomasello, 1999):
+moreover, infants show a preference for the sound of                       their acquisition of skills and behaviors that sustain life
+their native language over a foreign language (Mehler,                     within a particular human group. In all these cases, core
+Jusczyk, Lambertz & Halsted, 1988; Moon, Cooper &                          knowledge systems may support and advance human
+Fifer, 1993). We have asked, therefore, whether infants                    cognitive development, because the principles on which
+use language to categorize unfamiliar people, and whether                  they are based are veridical and adaptive at the scales at
+they prefer people who speak their native language.                        which humans and other animals perceive and act on the
+   In one series of studies (Kinzler & Spelke, 2005), 6-                   world.
+month-old infants were presented with films of the faces                      Nevertheless, core systems of representation also can
+of two women who were bilingual speakers of English                        lead humans into cognitive errors and maladaptive actions.
+and Spanish. After the women spoke to the infants in                       At the smallest and largest scales that science can probe,
+alternation, one in English and the other in Spanish, the                  objects are not cohesive or continuous, and space is
+two women were presented side by side, smiling without                     not Euclidean or three-dimensional. Mathematicians have
+
+© 2007 The Authors. Journal compilation © 2007 Blackwell Publishing Ltd.
+                                                                                                                      Core knowledge     93
+
+
+discovered numbers beyond the reach of the core domains,                   and biased attitudes toward members of other groups
+and astute social observers find many cases where human                    are moderated by certain types of inter-group contact
+intentions depart, either deliberately or inadvertently, from              (Pettigrew & Tropp, 2006). Thus, even the deepest-rooted
+their overt, goal-directed actions. The gaps and inaccuracies              biases are not set in stone. As warring groups in contem-
+in core representations cause problems for adults and                      porary societies gain ever-greater means for mutual
+children alike, who are prone to errors in reasoning about                 destruction, studies of the conditions that fuel or moder-
+properties of object mechanics, non-Euclidean geometry,                    ate the development of intergroup bias could be of
+or numbers that violate the principles of core knowledge                   great importance.
+(e.g. McCloskey, 1983; Randall, 2005; Gelman, 1991).
+   The most serious errors may spring from the system
+for identifying and reasoning about the members of                         Acknowledgements
+one’s own social group. A predisposition for dividing the
+social world into us vs. them may have evolved for the                     We thank Kristin Shutts and Talee Ziv for advice and col-
+adaptive purpose of detecting safe and trustworthy social                  laboration. Supported by NIH grant HD23103 to ESS.
+partners, but it can be misemployed in modern, inter-
+connected and multicultural societies. It even may sup-
+port the ravages of discord, violence and warfare among                    References
+individuals, groups and nations. For example, we need
+not look far to discover linguistic differences leading                    Agrillo, C., Regolin, L., & Vallortigara, G. (2004). Can young
+to social conflicts and intolerance. In US history, the                      chicks take into account the observer’s perspective? 27th
+tongues of slaves who spoke no English were severed,                         Annual Meeting of the European Conference on Visual Percep-
+Russian speakers were executed following the Alaskan                         tion (ECVP), Budapest.
+purchase, and the speaking of German in public was                         Aguiar, A., & Baillargeon, R. (1999). 2.5-month-old infants’
+forbidden during World War II (Shell, 2001). A look                          reasoning about when objects should and should not be
+abroad provides innumerable examples of warfare waged                        occluded. Cognitive Psychology, 39, 116–157.
+                                                                           Bar-Haim, Y., Ziv, T., Lamy, D., & Hodes, R. (2006). Nature
+across linguistic lines.
+                                                                             and nurture in own-race face processing. Psychological Science,
+   Despite these examples, we believe that the strongest                     17, 159–163.
+message, from human history and developmental science                      Baron, A., & Banaji, M. (2006). The development of implicit
+alike, is positive. Although core conceptions are resilient,                 attitudes: evidence of race evaluations from ages 6 and 10
+they can be overcome. The history of science and mathe-                      and adulthood. Psychological Science, 17, 53–58.
+matics provides numerous examples of fundamental                           Barth, H., Kanwisher, N., & Spelke, E. (2003). The construc-
+conceptual changes that occurred as thinkers became                          tion of large number representations in adults. Cognition, 86,
+aware of the mismatches between the principles govern-                       201–221.
+ing their reasoning and the world of phenomena they                        Barth, H., La Mont, K., Lipton, J., & Spelke, E.S. (2005).
+sought to understand. Despite the pull of core concep-                       Abstract number and arithmetic in young children. Proceed-
+tions of Euclidean geometry and object mechanics,                            ings of the National Academy of Sciences, 39, 14117–14121.
+                                                                           Barth, H., La Mont, K., Lipton, J., Dehaene, S., Kanwisher, N.,
+cosmologists and particle physicists can test whether
+                                                                             & Spelke, E. (2006). Non-symbolic arithmetic in adults and
+space is non-Euclidean and has higher dimensions (e.g.                       young children. Cognition, 98, 199–222.
+Randall, 2005) and they can use conceptions of massless,                   Bloom, P. (2000). How children learn the meanings of words.
+discontinuously moving particles to make predictions                         Cambridge, MA: The MIT Press.
+of astonishing precision (Hawking, 2002). Conceptual                       Brannon, E., Abbott, S., & Lutz, D. (2004). Number bias for
+change, moreover, is not the exclusive province of academic                  the discrimination of large visual sets in infancy. Cognition,
+science. Preschool children change their conceptions of                      93, B59–B68.
+numbers when they learn to count (Spelke, 2000), and                       Braudel, F. (1988). The identity of France (S. Reynolds, trans.).
+they change their conceptions of agents when they learn                      London: Collins (original work published 1986).
+about biological processes like eating and breathing                       Carey, S. (1985). Conceptual change in childhood. Cambridge,
+(Carey, 1985, 2001).                                                         MA: Bradford Books, MIT Press.
+                                                                           Carey, S. (2001). Evolutionary and ontogenetic foundations of
+   If core conceptions of social partners lead to errors
+                                                                             arithmetic. Mind and Language, 16, 37–55.
+and harmful conflicts, they too should be open to change,                  Cheng, K. (1986). A purely geometric module in the rat’s spa-
+because understanding of human cognitive development                         tial representation. Cognition, 23, 149–178.
+yields insight into its malleability. For example, 3-month-                Cheng, K., & Newcombe, N. (2005). Is there a geometric
+old infants’ preference for own-race faces is moderated                      module for spatial orientation? Squaring theory and evidence.
+by exposure to other-race faces (Bar-Haim et al., 2006),                     Psychonomic Bulletin and Review, 12, 1–23.
+
+© 2007 The Authors. Journal compilation © 2007 Blackwell Publishing Ltd.
+94   Elizabeth S. Spelke and Katherine D. Kinzler
+
+
+Church, R., & Broadbent, H. (1990). Alternative representa-                  of small numbers of objects by rhesus macaques: examinations
+  tions of time, number, and rate. Cognition, 37, 55–81.                     of content and format. Cognitive Psychology, 47, 367–401.
+Cosmides, L., & Tooby, J. (1994). Origins of domain specificity:           Hauser, M.D., Tsao, F., Garcia, P., & Spelke, E.S. (2003).
+  the evolution of functional organization. In L.A. Hirschfeld               Evolutionary foundations of number: spontaneous repre-
+  & S.A. Gelman (Eds.), Mapping the mind: Domain specificity                 sentation of numerical magnitudes by cotton-top tamarins.
+  in cognition and culture (pp. 85–116). New York: Cambridge                 Proceedings of the Royal Society, London, B, 270, 1441–1446.
+  University Press.                                                        Hawking, S.W. (2002). On the shoulders of giants: The great
+Cosmides, L., Tooby, J., & Kurzban, R. (2003). Perceptions of                works of physics and astronomy. Philadelphia, PA: Running
+  race. Trends in Cognitive Sciences, 7, 173–179.                            Press Book Publishers.
+Cushman, F., Young, L., & Hauser, M.D. (in press). The role                Hermer, L., & Spelke, E. (1996). Modularity and development:
+  of conscious reasoning and intuition in moral judgments:                   the case of spatial reorientation. Cognition, 61, 195–232.
+  testing three principles of harm. Psychological Science.                 Hermer-Vazquez, L., Spelke, E., & Katsnelson, A. (1999).
+Darwin, C. (1871). The descent of man, and selection in relation             Sources of flexibility in human cognition: dual-task studies
+  to sex. London: J. Murray.                                                 of space and language. Cognitive Psychology, 39, 3–36.
+Dehaene, S. (1997). The number sense: How the mind creates                 Hinton, G.E. (1993). How neural networks learn from experience.
+  mathematics. New York: Oxford University Press.                            In Mind and brain: Readings from the Scientific American
+Dehaene, S., & Changeux, J. (1993). Development of elemen-                   magazine (pp. 113–124). New York: Freeman/Times Books/
+  tary numerical abilities: a neuronal model. Journal of Cognitive           Henry Holt & Co.
+  Neuroscience, 5, 390 – 407.                                              Hood, B.M., Willen, J.D., & Driver, J. (1998). Adults’ eyes
+Dehaene, S., Izard, V., Pica, P., & Spelke, E.S. (2006). Core                trigger shifts of visual attention in human infants. Psycho-
+  knowledge of geometry in an Amazonian indigene group.                      logical Science, 9, 131–134.
+  Science, 311, 381–384.                                                   Hume, D. (1748). An enquiry concerning human understanding.
+Everett, D. (2005). Cultural constraints on grammar and                      L.A. Selby-Bigge & P.H. Nidditch (Eds.), (1975 edn.).
+  cognition in Pirahã: another look at the design features of                Oxford: Clarendon Press.
+  human language. Current Anthropology, 46, 621– 634.                      Huntley-Fenner, G., Carey, S., & Solimando, A. (2002). Objects
+Farroni, T., Massaccesi, S., Pividori, D., & Johnson, M. (2004).             are individuals but stuff doesn’t count: perceived rigidity and
+  Gaze following in newborns. Infancy, 5, 39–60.                             cohesiveness influence infants’ representations of small groups
+Feigenson, L., & Carey, S. (2003). Tracking individuals via object-          of discrete entities. Cognition, 85, 203–221.
+  files: evidence from infants’ manual search. Developmental               Iacoboni, M., Woods, R., Brass, M., Bekkering, H., Mazziotta,
+  Science, 6, 568–584.                                                       J., & Rizzolatti, G. (1999). Cortical mechanisms of human
+Feigenson, L., Dehaene, S., & Spelke, E. (2004). Core systems                imitation. Science, 286, 2526–2528.
+  of number. Trends in Cognitive Sciences, 8, 307–314.                     Izard, V. (2006). Interactions entre les representations numeri-
+Flombaum, J., Junge, J., & Hauser, M. (2005). Rhesus monkeys                 ques verbales et non-verbales: études théoriques et expéri-
+  (Macaca mulatta) spontaneously compute addition opera-                     mentales. Unpublished doctoral dissertation, Université Paris
+  tions over large numbers. Cognition, 97, 315 –325.                         VI, Paris.
+Flombaum, J., & Santos, J. (2005). Rhesus monkeys attribute                Izard, V., & Dehaene, S. (2006) Calibrating the number line.
+  perceptions to others. Current Biology, 15, 447– 452.                    Johnson, S., Booth, A., & O’Hearn, K. (2001). Inferring the
+Fodor, J. (2000). The mind doesn’t work that way: The scope and              goals of a nonhuman agent. Cognitive Development, 16, 637–656.
+  limits of computational psychology. Cambridge, MA: The                   Johnson, S., Slaughter, V., & Carey, S. (1998). Whose gaze will
+  MIT Press.                                                                 infants follow? The elicitation of gaze-following in 12-month-
+Gallistel, C., & Gelman, R. (1992). Preverbal and verbal count-              olds. Developmental Science, 1, 233–238.
+  ing and computation. Cognition, 44, 43–74.                               Kelly, D., Quinn, P., Slater, A.M., Lee, K., Gibson, A., Smith,
+Gelman, R. (1991). Epigenetic foundations of knowledge struc-                M., Ge, Liezhong, & Pascalis, O. (2005). Three-month-olds,
+  tures: initial and transcendent constructions. In S. Carey &               but not newborns, prefer own-race faces. Developmental
+  R. Gelman (Eds.), The epigenesis of mind: Essays on biology                Science, 8, F31–F36.
+  and cognition (pp. 293–322). Hillsdale, NJ: Lawrence Erlbaum             Keil, F., Smith, W., Simons, D., & Levin, D. (1998). Two dogmas
+  Associates.                                                                of conceptual empiricism: implications for hybrid models of
+Gergely, G., & Csibra, G. (2003). Teleological reasoning in                  the structure of knowledge. Cognition, 65, 103–135.
+  infancy: the naïve theory of rational action. Trends in Cog-             Kinzler, K.D., & Spelke, E.S. (2005). The effect of language on
+  nitive Sciences, 7 (7), 287–292.                                           infants’ preference for faces. Poster presented at the Biennial
+Gordon, P. (2004). Numerical cognition without words: evidence               Meeting of the Society for Research in Child Development,
+  from Amazonia. Science, 306, 496 – 499.                                    Atlanta, GA.
+Gouteux, S., & Spelke, E. (2001). Children’s use of geometry               Kuhlmeier, V., Bloom, P., & Wynn, K. (2004). Do 5-month-old
+  and landmarks to reorient in an open space. Cognition, 81,                 infants see humans as material objects? Cognition, 94, 95–103.
+  119–148.                                                                 Lavin, T.A., & Hall, D.G. (2001). Domain effects in lexical
+Hare, B., Call, J., & Tomasello, M. (2001). Do chimpanzees know              development: learning words for foods and toys. Cognitive
+  what conspecifics know? Animal Behavior, 61, 139–151.                      Development, 16, 929–950.
+Hauser, M., & Carey, S. (2003). Spontaneous representations                Lea, S., Slater, A., & Ryan, C. (1996). Perception of object
+
+© 2007 The Authors. Journal compilation © 2007 Blackwell Publishing Ltd.
+                                                                                                                        Core knowledge      95
+
+
+  unity in chicks: a comparison with the human infant. Infant                intergoup contact theory. Journal of Personality and Social
+  Behavior and Development, 19, 501–504.                                     Psychology.
+Lee, S.A., Shusterman, A., & Spelke, E.S. (in press). Reorien-             Pica, P., Lemer, C., Izard, V., & Dehaene, S. (2004). Exact and
+  tation and landmark-guided search by young children: evi-                  approximate arithmetic in an Amazonian indigene group.
+  dence for two systems. Psychological Science.                              Science, 306, 499–503.
+Leslie, A., & Keeble, S. (1987). Do six-month-old infants per-             Pinker, S. (2002). The blank slate: The modern denial of human
+  ceive causality? Cognition, 25, 265–288.                                   nature. New York: Viking.
+Leslie, A., Xu, F., Tremoulet, P., & Scholl, B. (1998). Indexing           Quinn, P., Yahr, J., Kuhn, A., Slater, A., & Pascalis, O. (2002).
+  and the object concept: developing ‘what’ and ‘where’ sys-                 Representation of the gender of human faces by infants: a
+  tems. Trends in Cognitive Sciences, 2, 10 –18.                             preference for female. Perception, 31, 1109–1121.
+Lipton, J., & Spelke, E. (2003). Origins of number sense: large-           Randall, L. (2005). Warped passages. New York: Ecco Press.
+  number discrimination in human infants. Psychological                    Regolin, L., & Vallortigara, G. (1995). Perception of partly
+  Science, 14, 396 – 401.                                                    occluded objects by young chicks. Perception and Psycho-
+Lipton, J., & Spelke, E. (2004). Discrimination of large and                 physics, 57, 971–976.
+  small numerosities by human infants. Infancy, 5, 271–290.                Rizzolatti, G., Fogassi, L., & Gallese, V. (2002). Motor and
+Locke, J. (1689). An essay concerning human understanding.                   cognitive functions of the ventral premotor cortex. Current
+  Available through L.A. Selby-Bigge (Ed.), Project Guten-                   Opinion in Neurobiology, 12, 149–161.
+  berg, LA, 2006.                                                          Rosenberg, R., & Carey, S. (2006). Infants’ indexing of objects
+Lourenco, S., Huttenlocher, J., & Vasilyeva, M. (2005). Toddlers’            vs. non-cohesive entities. Poster presented at the Biennial
+  representations of space. Psychological Science, 16, 255–259.              meeting of the International Society for Infant Studies.
+McCloskey, M. (1983). Intuitive physics. Scientific American,              Rumelhart, D.E., & McClelland, J.L. (1985). Distributed memory
+  248, 122–130.                                                              and the representation of general and specific information.
+McCrink, K., & Wynn, K. (2004). Large-number addition and                    Journal of Experimental Psychology: General, 114, 159–188.
+  subtraction by 9-month-old infants. Psychological Science,               Santos, L. (2004). ‘Core knowledges’: a dissociation between
+  15, 776 –781.                                                              spatiotemporal knowledge and contact-mechanics in a non-
+McKee, C. (2006). The effect of social information on infants’               human primate? Developmental Science, 7, 167–174.
+  food preferences. Unpublished honors thesis, Harvard                     Santos, L., Hauser, M., & Spelke, E. (2001). Recognition and
+  University, April 2006 (K. Shutts, K. Kinzler, and E. Spelke,              categorization of biologically significant objects by rhesus
+  advisors).                                                                 monkeys (Macaca mulatta): the domain of food. Cognition,
+Margules, J., & Gallistel, C. (1988). Heading in the rat: deter-             82, 127–155.
+  mination by environmental shape. Animal Learning and Behavior,           Scholl, B. (2001). Objects and attention: the state of the art.
+  16, 404 – 410.                                                             Cognition, 80 (1), 1–46.
+Marino, A., & Scholl, B. (2005). The role of closure in defining           Scholl, B., & Pylyshyn, Z. (1999). Tracking multiple items
+  the ‘objects’ of object-based attention. Perception and Psy-               through occlusion: clues to visual objecthood. Cognitive
+  chophysics, 67, 1140 –1149.                                                Psychology, 2, 259–290.
+Meck, W.H., & Church, R.M. (1983). A mode control model                    Scholl, B., Pylyshyn, Z., & Feldman, J. (2001). What is a visual
+  of counting and timing processes. Journal of Experimental                  object? Evidence from target merging in multiple object
+  Psychology: Animal Behavior Processes, 9, 320–334.                         tracking. Cognition, 80, 159–177.
+Mehler, J., Jusczyk, P., Lambertz, G., & Halsted, N. (1988).               Shell, M. (2001). Language wars. CR: The New Centennial
+  A precursor of language acquisition in young infants. Cogni-               Review, 1, 1–17.
+  tion, 29, 143–178.                                                       Shutts, K. (2006). Properties of infants’ learning about objects.
+Meltzoff, A. (1995). Understanding the intentions of others:                 Unpublished doctoral dissertation, Harvard University.
+  re-enactment of intended acts by 18-month-old children.                  Spelke, E.S. (2000). Core knowledge. American Psychologist,
+  Developmental Psychology, 31, 838–850.                                     55, 1233–1243.
+Meltzoff, A., & Moore, M. (1977). Imitation of facial and                  Spelke, E.S. (2003). What makes humans smart? Core know-
+  manual gestures by human neonates. Science, 198, 75–78.                    ledge and natural language. In D. Gentner & S. Goldin-
+Moon, C., Cooper, R., & Fifer, W. (1993). Two-day-olds prefer                Meadow (Eds.), Language in mind (pp. 277–311). Cambridge,
+  their native language. Infant Behavior and Development, 16,                MA: MIT Press.
+  495–500.                                                                 Spelke, E.S. (2004). Core knowledge. In N. Kanwisher & J.
+Newcombe, N. (2005). Evidence for and against a geometric                    Duncan (Eds.), Attention and performance, vol. 20: Functional
+  module: the roles of language and action. In J. Rieser,                    neuroimaging of visual cognition. Oxford: Oxford University Press.
+  J. Lockman, & C. Nelson (Eds.), Action as an organizer of                Spelke, E., Phillips, A., & Woodward, A. (1995). Infants’ know-
+  learning and development (pp. 221–241). Minneapolis, MN:                   ledge of object motion and human action. In D. Sperber,
+  University of Minnesota Press.                                             D. Premack, & A. Premack (Eds.), Causal cognition: A
+Newcombe, N.S., & Huttenlocher, J. (2000). Making space:                     multidisciplinary debate (pp. 44–78). Oxford: Clarendon
+  The development of spatial representation and reasoning.                   Press/Oxford University Press.
+  Cambridge, MA: MIT Press.                                                Spelke, E.S. (1990). Principles of object perception. Cognitive
+Pettigrew, T.F., & Tropp, L.R. (2006). A meta-analytic test of               Science, 14, 29–56.
+
+© 2007 The Authors. Journal compilation © 2007 Blackwell Publishing Ltd.
+96   Elizabeth S. Spelke and Katherine D. Kinzler
+
+
+Tomasello, M. (1999). The cultural origins of human cognition.             Watson, J.S. (1972). Smiling, cooing, and ‘The Game’. Merrill-
+  Cambridge, MA: Harvard University Press.                                  Palmer Quarterly, 18, 323–339.
+Valenza, E., Leo, I., Gava, L., & Simion, F. (in press). Perceptual        Wood, J., & Spelke, E. (2005). Infants’ enumeration of actions:
+  completion in newborn human infants. Child Development.                   numerical discrimination and its signature limits. Developmental
+Van Oeffelen, M., & Vos, P. (1982). A probabilistic model                   Science, 8, 173–181.
+  for the discrimination of visual number. Perception and Psy-             Woodward, A. (1998). Infants selectively encode the goal
+  chophysics, 32, 163–170.                                                  object of an actor’s reach. Cognition, 69, 1–34.
+vanMarle, K., & Scholl, B. (2003). Attentive tracking of objects           Woodward, A. (1999). Infants’ ability to distinguish between
+  versus substances. Psychological Science, 14, 498–504.                    purposeful and non-purposeful behaviors. Infant Behavior
+Vishton, P.M., Stulac, S.N., & Calhoun, E.K. (1998). Using                  and Development, 22 (2), 145–160.
+  young infants’ tendency to reach for object boundaries to                Wynn, K. (1990). Children’s understanding of counting. Cognition,
+  explore perception of connectedness: rectangles, ovals, and               36, 155–193.
+  faces. Paper presented at the International Conference on                Xu, F., & Spelke, E. (2000). Large number discrimination in
+  Infant Studies, Atlanta, Georgia.                                         6-month-old infants. Cognition, 74, B1–B11.
+Wang, R., Hermer, L., & Spelke, E. (1999). Mechanisms of                   Xu, F., Spelke, E., & Goddard, S. (2005). Number sense in
+  reorientation and object localization by children: a com-                 human infants. Developmental Science, 8, 88–101.
+  parison with rats. Behavioral Neuroscience, 113, 475 – 485.
+
+
+
+
+© 2007 The Authors. Journal compilation © 2007 Blackwell Publishing Ltd.
+

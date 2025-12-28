@@ -1,0 +1,934 @@
+                                                                     HowTo100M: Learning a Text-Video Embedding by
+                                                                      Watching Hundred Million Narrated Video Clips
+
+                                                               Antoine Miech1,2∗      Dimitri Zhukov1,2∗       Jean-Baptiste Alayrac2+
+                                                                                       2                   1,2
+                                                                     Makarand Tapaswi          Ivan Laptev        Josef Sivic1,2,3
+                                                                   1                                   2            3
+                                                                     École Normale Supérieure          Inria        CIIRC, CTU
+                                                                https://www.di.ens.fr/willow/research/howto100m
+arXiv:1906.03327v2 [cs.CV] 31 Jul 2019
+
+
+
+
+                                                                      Abstract
+                                             Learning text-video embeddings usually requires a
+                                         dataset of video clips with manually provided captions.
+                                         However, such datasets are expensive and time consum-
+                                         ing to create and therefore difficult to obtain on a large
+                                         scale. In this work, we propose instead to learn such em-
+                                         beddings from video data with readily available natural lan-
+                                         guage annotations in the form of automatically transcribed
+                                         narrations. The contributions of this work are three-fold.
+                                         First, we introduce HowTo100M: a large-scale dataset of
+                                         136 million video clips sourced from 1.22M narrated in-
+                                         structional web videos depicting humans performing and
+                                         describing over 23k different visual tasks. Our data collec-
+                                         tion procedure is fast, scalable and does not require any ad-
+                                         ditional manual annotation. Second, we demonstrate that a                     Figure 1: We learn a joint text-video embedding by watching mil-
+                                         text-video embedding trained on this data leads to state-of-                  lions of narrated video clips of people performing diverse visual
+                                         the-art results for text-to-video retrieval and action local-                 tasks. The learned embedding transfers well to other instructional
+                                                                                                                       and non-instructional text-video datasets.
+                                         ization on instructional video datasets such as YouCook2
+                                         or CrossTask. Finally, we show that this embedding trans-
+                                         fers well to other domains: fine-tuning on generic Youtube                    tends naturally to artificial agents that need to understand
+                                         videos (MSR-VTT dataset) and movies (LSMDC dataset)                           the visual world and communicate about it with people.
+                                         outperforms models trained on these datasets alone. Our                       Examples of tasks that still represent a significant chal-
+                                         dataset, code and models are publicly available [1].                          lenge for current artificial systems include text-to-video re-
+                                                                                                                       trieval [25, 32, 54, 55, 63], text-based action or event lo-
+                                                                                                                       calization [15], video captioning [36, 61], and video ques-
+                                         1. Introduction                                                               tion answering [51, 63]. Yet, progress on these problems
+                                                                                                                       is important for a host of applications from searching video
+                                            Communicating about the visual world using language                        archives to human-robot communication.
+                                         is a key ability of humans as intelligent beings. A three
+                                                                                                                           A common approach to model visual concepts described
+                                         year old child can manipulate objects, observe its own ac-
+                                                                                                                       with language is to learn a mapping of text and video into a
+                                         tions and describe them to others using language; while
+                                                                                                                       shared embedding space, where related text fragments and
+                                         adults can learn new skills by reading books or watching
+                                                                                                                       video clips are close to each other [15, 32, 37, 38, 59].
+                                         videos. This interplay between video and language ex-
+                                                                                                                       Learning a good representation often requires a large set
+                                             ∗ Equal contribution.                                                     of paired video clips and text captions. In fact, given the
+                                             + Now at DeepMind.
+                                             1 Département d’informatique de l’ENS, École normale supérieure,
+                                                                                                                       huge variability of video scenes and their textual descrip-
+                                         CNRS, PSL Research University, 75005 Paris, France.
+                                                                                                                       tions, learning a generic embedding space may require mil-
+                                             3 Czech Institute of Informatics, Robotics and Cybernetics at the         lions of paired video clips and text captions. However, ex-
+                                         Czech Technical University in Prague.                                         isting datasets (e.g. MSR-VTT [58], DiDeMo [15], EPIC-
+
+
+                                                                                                                   1
+KITCHENS [7]), are on the scale of tens to hundreds of                Dataset              Clips Captions   Videos Duration   Source Year
+thousands of such pairs that have been annotated manually.            Charades [48]        10k       16k 10,000     82h Home 2016
+Manual collection of such datasets is expensive and hard to           MSR-VTT [58]         10k      200k   7,180    40h Youtube 2016
+                                                                      YouCook2 [67]        14k       14k   2,000   176h Youtube 2018
+scale. It is also subjective since video annotation can often         EPIC-KITCHENS [7]    40k       40k     432    55h Home 2018
+be an ill-defined task with low annotator consistency [58].           DiDeMo [15]          27k       41k 10,464     87h   Flickr 2017
+                                                                      M-VAD [52]           49k       56k      92    84h Movies 2015
+    In this work, we explore a different source of supervision        MPII-MD [43]         69k       68k      94    41h Movies 2015
+to obtain paired video clips and text captions for learning           ANet Captions [26]  100k      100k 20,000    849h Youtube 2017
+joint representations of video and language. We observe               TGIF [27]           102k      126k 102,068   103h Tumblr 2016
+                                                                      LSMDC [44]          128k      128k     200   150h Movies 2017
+that narrated instructional videos are available in large             How2 [45]           185k      185k 13,168    298h Youtube 2018
+quantities (e.g. on YouTube) and provide a large amount               HowTo100M          136M      136M 1.221M 134,472h Youtube 2019
+of visual and language data. In particular, instructional
+                                                                      Table 1: Comparison of existing video description datasets. The
+videos [2, 30, 68] often contain narration with an explicit in-
+                                                                      size of our new HowTo100M dataset bypasses the size of largest
+tention of explaining the visual content on screen. To lever-
+                                                                      available datasets by three orders of magnitude. M denotes million
+age this rich source of data, we collect a new large-scale            while k denotes thousand.
+dataset containing 136 million video clips sourced from
+1.22 million narrated instructional videos depicting humans           ing these datasets hard to scale (see Table 1). In this work,
+performing more than 23,000 different tasks. Each clip is             we train a joint video and language model without a sin-
+paired with a text annotation in the form of an automatically         gle manually annotated video description by leveraging au-
+transcribed narration.                                                tomatically transcribed narrated videos. Using the spoken
+Contributions. The contributions of this work are three-              text from narrated videos to supervise vision models has
+fold. First, we collect a new dataset of close-captioned              seen some recent interest [2, 5, 13, 30, 45, 62]. Harwath et
+video clips, HowTo100M, that is orders of magnitude larger            al. [13] utilize the raw speech waveform to supervise the vi-
+than any other existing video-text datasets (Section 3). Sec-         sual model, however, their method does not scale as anno-
+ond, we show that such data can be used to learn power-               tators were paid to record audio descriptions for thousands
+ful video-language representations. Our model (Section 4),            of images. Chen et al. [5] use subtitles from documentaries
+trained on HowTo100M, sets a new state-of-the-art for text-           to automatically obtain object labels, but their focus is on
+based action localization and text-to-video retrieval on ex-          learning object detectors rather than text-video embeddings
+isting datasets of instructional videos, YouCook2 [67] and            and their dataset contains only 9 documentary movies, com-
+CrossTask [68]. Finally, we explore the ability of models             pared to about 15 years of video content considered in this
+trained on our data to transfer to non-instructional videos.          work.
+In particular, we demonstrate that models pretrained on               Learning from instructional videos. Instructional videos
+HowTo100M can be successfully transferred by fine tun-                are rising in popularity in the context of learning steps
+ing on the MSR-VTT dataset (generic Youtube videos) and               of complex tasks [2, 16, 41, 42, 46, 68], visual-linguistic
+the LSMDC dataset (movies).                                           reference resolution [17, 18], action segmentation in long
+                                                                      untrimmed videos [66] and joint learning of object states
+2. Related work                                                       and actions [3]. Related to our work, [2, 30, 62] also con-
+                                                                      sider automatically generated transcription of narrated in-
+   A significant number of computer vision applications               structional videos as a source of supervision. However as
+rely on a joint understanding of visual and textual cues.             opposed to our work, these works typically extract from
+These applications include automatic image and video cap-             transcriptions only a small number of predefined labels.
+tioning [20, 36, 60, 61], visual question answering [9, 29,              Numerous datasets of web instructional videos were pro-
+51, 63], visual content retrieval based on textual queries [32,       posed over the past years [2, 30, 45, 47, 50, 67, 68]. Among
+56, 63], temporal localization of events in videos using nat-         the first to harvest instructional videos, Sener et al. [47]
+ural language [15, 26] or video summarization with natural            use WikiHow, an encyclopedia of how to articles, to col-
+language [38].                                                        lect 17 popular physical tasks, and obtain videos by query-
+Vision, language and speech. A common approach to                     ing these tasks on YouTube. In a similar vein, COIN [50]
+model vision and language is learning a joint embedding               and CrossTask [68] datasets are collected by first search-
+space where visual and textual cues are adjacent if and only          ing for tasks on WikiHow and then videos for each task
+if they are semantically similar [6, 8, 10, 11, 25, 32, 35, 37,       on YouTube. We use the same approach for collecting
+38, 59, 54, 55, 57]. Most of these works rely on medium               HowTo100M. The main distinction between our dataset and
+scale well annotated datasets in which descriptive captions           previous efforts is the unprecedented scale both in terms of
+are collected for each video clip. This process is costly             variety (more than 23,000 tasks from 12 different domains)
+as it requires considerable human annotation effort mak-              and size (136 million clips sourced from 1.2 million instruc-
+
+
+                                                                  2
+Figure 2: Examples of clip-caption pairs retrieved with the help of our joint embedding. Pairs are selected based on the similarity between
+visual appearance and corresponding narration, while they are arranged based on linguistic similarity across pairs. Examples are taken
+from 4 distinct clusters, corresponding to Knitting, Woodwork/Measuring, Cooking/Seasoning and Electric maintenance.
+
+tional videos).                                                         3.1. Data collection
+Large scale data for model pretraining. The use of large                Visual tasks. With an aim to obtain instructional videos
+scale and potentially noisy data from the web is an exciting            that describe how to perform certain activities, we first start
+prospect to pretrain language and vision models. In natural             by acquiring a large list of activities using WikiHow1 – an
+language processing, BERT [19], GPT [39], and GPT-2 [40]                online resource that contains 120,000 articles on How to ...
+are examples of language models trained on large-scale data             for a variety of domains ranging from cooking to human re-
+that achieve state-of-the-art for many tasks. In fact, train-           lationships structured in a hierarchy. We are primarily inter-
+ing GPT-2 on WebText [40] a dataset of 40GB of text from                ested in “visual tasks” that involve some interaction with the
+Reddit achieves state-of-the-art even in zero-shot settings.            physical world (e.g. Making peanut butter, Pruning a tree)
+In vision, [28, 49] explore the use of image metadata such              as compared to others that are more abstract (e.g. Ending
+as Instagram hashtags to pretrain image classifiers.                    a toxic relationship, Choosing a gift). To obtain predomi-
+   We are inspired by these works and focus our efforts                 nantly visual tasks, we limit them to one of 12 categories
+on learning a strong embedding for joint understanding                  (listed in Table 2). We exclude categories such as Relation-
+of video and language. We demonstrate that our video-                   ships and Finance and Business, that may be more abstract.
+language embedding learned from millions of YouTube                         We further refine the set of tasks, by filtering them in a
+videos not only outperforms previous work on tasks re-                  semi-automatic way. In particular, we restrict the primary
+lated to instructional videos without fine-tuning, but also             verb to physical actions, such as make, build and change,
+generalizes well to non-instructional videos with some fine-            and discard non-physical verbs, such as be, accept and feel.
+tuning. We release our dataset, feature extraction pipeline,            This procedure yields 23,611 visual tasks in total.
+and model parameters as a resource that the video and lan-              Instructional videos. We search for YouTube videos re-
+guage community can build on.                                           lated to the task by forming a query with how to preced-
+                                                                        ing the task name (e.g. how to paint furniture). We choose
+3. The HowTo100M dataset                                                videos that have English subtitles - either uploaded man-
+                                                                        ually, generated automatically by YouTube ASR, or gen-
+   We collect a new dataset of narrated videos with an em-              erated automatically after translation from a different lan-
+phasis on instructional videos where content creators teach             guage by YouTube API.
+complex tasks. This ensures that most narrations describe                  We improve the quality and consistency of the dataset,
+the observed visual content. HowTo100M features 1.22                    by adopting the following criteria. We restrict to the top
+million videos from YouTube, with activities from domains               200 search results, as the latter ones may not be related to
+such as cooking, hand crafting, personal care, gardening,               the query task. Videos with less than 100 views are removed
+etc. Each video is associated with a narration available as             as they are often of poor quality or are amateurish. We also
+subtitles that are either written manually or are the output
+of an Automatic Speech Recognition (ASR) system.                           1 https://www.wikihow.com
+
+
+
+
+                                                                    3
+   Category                         Tasks Videos      Clips            egories and their subcategories along with the number of
+   Food and Entertaining        11504        497k    54.4M             chosen tasks and corresponding videos in our dataset. We
+   Home and Garden               5068        270k    29.5M             compare the sizes of existing clip-caption paired datasets in
+   Hobbies and Crafts            4273        251k    29.8M             Table 1. HowTo100M is several orders of magnitude larger
+   Cars & Other Vehicles          810         68k     7.8M             than existing datasets and contains an unprecedented du-
+   Pets and Animals               552         31k     3.5M             ration (15 years) of video data. However, unlike previous
+   Holidays and Traditions        411         27k     3.0M             datasets, HowTo100M does not have clean annotated cap-
+   Personal Care and Style        181         16k     1.6M             tions. As the videos contain complex activities, they are
+   Sports and Fitness             205         16k     2.0M             relatively long with an average duration of 6.5 minutes. On
+   Health                         172         15k     1.7M
+                                                                       average, a video produces 110 clip-caption pairs, with an
+   Education and Communications   239         15k     1.6M
+   Arts and Entertainment         138         10k     1.2M             average duration of 4 seconds per clip and 4 words (after ex-
+   Computers and Electronics       58          5k     0.6M             cluding stop-words) per caption. For more details, we show
+                                                                       in Appendix A [33] the distribution of nouns and verbs. Our
+   Total                             23.6k 1.22M 136.6M
+                                                                       data collection procedure assumes that searching with How
+Table 2: Number of tasks, videos and clips within each category.       to queries on YouTube would result in mostly instructional
+                                                                       videos. We verify this by randomly selecting 100 videos
+                                                                       and labeling their type. 71% of the videos are found to be
+ignore videos that have less than 100 words as that may be             instructional, 12% are vlogs, and another 7% are product
+insufficient text to learn a good video-language embedding.            reviews or advertisements. Note that vlogs, reviews and ads
+Finally, we remove videos longer than 2,000 seconds.                   may also contain correspondences between visual content
+   As some videos may appear in several tasks, we de-                  and narration. In particular, we noticed that objects shown
+duplicate videos based on YouTube IDs. However, note                   on screen are often mentioned in narration. We do not dis-
+that the dataset may still contain duplicates if a video was           card such non-instructional videos, as they may still be use-
+uploaded several times or edited and re-uploaded. Never-               ful for the learning the joint embedding.
+theless, this is not a concern at our scale.
+                                                                       4. Text-video joint embedding model
+3.2. Paired video clips and captions
+                                                                          We now present our model to learn a joint text-video em-
+    Subtitles are often organized as a list of text chunks             bedding from the automatically paired video clips and cap-
+(lines), and need not form complete sentences. Each line               tions in our dataset. More formally, we are given a set of
+is associated with a time interval in the video, typically the         n video clips and associated captions {(Vi , Ci )}ni=1 . We
+duration in which the line is uttered. We select each line             denote by v ∈ Rdv and c ∈ Rdc the dv and dc dimen-
+of the subtitles as a caption, and pair it with the video clip         sional feature representation of a video clip V and caption
+from the time interval corresponding to the line. We show              C, respectively. Given this, our goal is to learn two map-
+some examples from our clip-caption pairs in Figure 2.                 ping functions: f : Rdv → Rd and g : Rdc → Rd that
+    Different from other datasets with clip-caption pairs              respectively embed video and caption features into a com-
+(e.g. MSR-VTT), our captions are not manually annotated,               mon d-dimensional space, such that the cosine similarity
+but automatically obtained through the narration. Thus,
+they can be thought of as weakly paired. Typical examples                                           hf (v), g(c)i
+                                                                                      s(V, C) =                                  (1)
+of incoherence include the content producer asking view-                                          kf (v)k2 kg(c)k2
+ers to subscribe to their channel, talking about something
+                                                                       is high when caption C describes the video clip V , and low
+unrelated to the video, or describing something before or
+                                                                       otherwise.
+after it happens. Furthermore, our captions are often in-
+                                                                           In this work, we use the class of non-linear embedding
+complete, lack punctuation, or are grammatically incorrect
+                                                                       functions used in [32], which are given by:
+sentences, as they come from continuous narration and of-
+ten ASR. We have manually inspected 400 randomly sam-                       f (v) = (W1v v + bv1 ) ◦ σ(W2v (W1v v + bv1 ) + bv2 ) (2)
+pled clip-caption pairs and found that in 51 %, at least one
+                                                                        and g(c) = (W1c c + bc1 ) ◦ σ(W2c (W1c c + bc1 ) + bc2 ), (3)
+object or action mention in the caption is visually seen in
+the video clip.                                                        where W1v ∈ Rd×dv , W1c ∈ Rd×dc , W2v , W2c ∈ Rd×d ,
+Statistics. The initial set of visual tasks are obtained by fo-        bv1 , bc1 , bv2 , bc2 ∈ Rd are learnable parameters, σ is an
+cusing on 12 WikiHow categories. Table 2 shows the num-                element-wise sigmoid activation and ◦ is the element-wise
+ber of collected WikiHow tasks and corresponding videos                multiplication (Hadamard product). In practice, dv =
+and clips per category. In Appendix A [33], we show the                4, 096, dc = 4, 096 and d = 4, 096 resulting in a model
+first two levels of the WikiHow hierarchy: the twelve cat-             composed of 67M parameters. Note that the first term on
+
+
+                                                                   4
+the right-hand side in Equations (2) and (3) is a linear fully-           Negative sampling M (R@10) L (R@10) Y (R@10) C (AVG Recall)
+connected layer and the second term corresponds to a con-                 No intra-negative     30.1     12.3       18.1        25.7
+text gating function [31] with an output ranging between 0                With intra-negative   29.6     14.0       24.8        33.6
+and 1, which role is to modulate the output of the linear                 Table 3: Impact of intra-video negative pairs during training. M:
+layer. As a result, this embedding function can model non-                MSR-VTT, L: LSMDC, Y: YouCook2, C: CrossTask.
+linear multiplicative interactions between the dimensions of
+the input feature vector which has proven effective in other              unlabeled HowTo100M dataset. We provide experimen-
+text-video embedding applications [32].                                   tal results for a variety of domains ranging from in-
+Loss. We train our embedding model using the max-                         structional videos in CrossTask [68], cooking videos in
+margin ranking loss [21, 32, 54, 55, 64]. At each iter-                   YouCook2 [67], generic YouTube videos in MSR-VTT [58]
+ation of our training algorithm, we sample a mini-batch                   to movie video clips in LSMDC [44]. Specifically, we
+B = {i1 , ..., ib } ⊂ {1, . . . , n} of caption-clip training pairs       evaluate our learned embedding on the tasks of localizing
+(Vi , Ci )i∈B , and update the model parameters with a gradi-             steps in instructional videos of CrossTask [68] and text-
+ent step of the following loss:                                           based video retrieval on YouCook2 [67], MSR-VTT [58]
+X X                                                                       and LSMDC [44] datasets.
+            max(0, δ + si,j − si,i ) + max(0, δ + sj,i − si,i ),
+                                                                             Our key findings are the following: (i) For instructional
+i∈B j∈N (i)
+                                                                          video datasets, such as CrossTask [68] and YouCook2 [67],
+where si,j = s(Vi , Cj ) is the similarity score (1) between              our off-the-shelf embedding trained on HowTo100M signif-
+video clip Vi and caption Cj , N (i) is a set of negative pairs           icantly outperforms state-of-the-art models trained on much
+for caption-clip i and δ is the margin. The first term in                 smaller and manually-annotated datasets. (ii) On generic
+Equation (B) corresponds to the ranking loss when sam-                    YouTube videos (MSR-VTT [58]), our HowTo100M em-
+pling a negative caption, while the second term corresponds               bedding provides competitive retrieval performance com-
+to sampling a negative video clip. We fix δ = 0.1 in prac-                pared to state-of-the-art methods trained on MSR-VTT.
+tice. Our model parameters are updated using Adam [23]                    Moreover, we show that fine-tuning our pre-trained em-
+with a learning rate of 10−4 . Implementation details of the              bedding model on just a fifth of annotated videos from
+loss are provided in Appendix B [33].                                     MSR-VTT outperforms state-of-the-art. (iii) We show that
+Sampling strategy. Similar to [15], we apply an intra-                    fine-tuning our embedding on LSMDC enables generaliza-
+video negative sampling strategy to define N (i). We                      tion to movie videos and scripts despite the large domain
+show in Section 5.3 that this approach is critical for good               gap. (iv) Finally, we demonstrate the importance of scale in
+performance. More precisely, half of our negative pairs                   HowTo100M to learn better joint video-text embeddings.
+{(Vi , Cj ) : i 6= j}, are selected such that the video clip
+Vi and the caption Cj belong to the same original YouTube                 5.1. Implementation details
+video (as (Vi , Ci )), while the other half are sampled from              Video features. We extract frame-level and video-level fea-
+other YouTube videos. We apply intra-negative sampling to                 tures with pre-trained 2D and 3D CNNs. 2D features are
+ensure that the learned embedding focuses on relevant as-                 extracted with the ImageNet pre-trained Resnet-152 [14] at
+pects of the video clip (e.g. the hands of the person showing             the rate of one frame per second. 3D features are extracted
+how to knead dough) rather than irrelevant background fea-                with the Kinetics [4] pre-trained ResNeXt-101 16-frames
+tures (e.g. the kitchen). In Appendix C [33], we also provide             model [12] to obtain 1.5 features per second. We aggre-
+an empirical analysis of the positive pair sampling strategy.             gate features from longer video clips by the temporal max-
+We show that even though the training data is noisy, our at-              pooling and concatenate 2D and 3D features to form a sin-
+tempts to automatically select correct positive pairs during              gle 4096 dimensional vector for each video clip.
+training did not yield improvements so far. We think this                 Text pre-processing. We preprocess transcribed video nar-
+could be attributed to the fact our model is shallow and is               rations by discarding common English stop-words. For the
+trained on a large amount of data.                                        word representations, we use the GoogleNews pre-trained
+Clip and caption representation. The clip feature v con-                  word2vec embedding model [34].
+sists of temporally max-pooled pre-extracted CNN features.                Training time. Once the video and text features are
+The caption feature c is the output of a shallow 1D-CNN on                extracted, training our embedding model on the full
+top of pre-computed word embeddings. More details are                     HowTo100M dataset is relatively fast and takes less than
+given in Section 5.1.                                                     three days on a single Tesla P100 GPU.
+5. Experiments                                                            5.2. Datasets and evaluation setups
+   In this section, we demonstrate that a strong joint rep-               Action step localization. We evaluate localization of ac-
+resentation for video and text can be learned from our                    tion steps in instructional videos on the recent CrossTask
+
+
+                                                                      5
+dataset [68]. CrossTask includes 18 tasks and 2.7k instruc-
+tional videos with manually annotated action segments.
+Each video may contain multiple segments, corresponding
+to different actions. It also provides an ordered list of ac-
+tion steps with short natural language descriptions for each
+task. We apply our model trained only on HowTo100M to
+the problem of step localization by computing similarity be-
+tween every frame in the video and the action label names
+of CrossTask. In order to compare to [68], we follow a sim-
+ilar inference procedure. We use the same recall metric as
+                                                                             # of HowTo100M training videos
+in [68], which is defined by the number of step assignments
+that fall into the correct ground truth interval, divided by the       Figure 3: Retrieval and step localization results when varying the
+total number of steps in the video. Videos from the test set           training size of our HowTo100M dataset.
+of CrossTask are removed from the HowTo100M training
+set to ensure that they are not observed at training time.             CrossTask which are more fine-grained datasets than MSR-
+Text-based video retrieval. We also evaluate our learned               VTT and LSMDC. For the rest of the paper, we report num-
+embedding on the task of video clip retrieval using natural            bers using our model trained with the intra-negative sam-
+language queries. Given a textual description, the goal is             pling strategy.
+to retrieve representative video clips from a large pool of
+videos. We evaluate our learned embedding using the stan-              5.4. Scale matters
+dard recall metrics R@1, R@5, R@10 and the median rank
+                                                                           A natural question is whether the large scale of our
+(Median R). We provide experimental results for the follow-
+                                                                       dataset is truly required to achieve high performance. To
+ing domain-specific video description datasets.
+                                                                       answer this, we train our embedding model on smaller sub-
+    YouCook2 [67] is a cooking video dataset collected
+                                                                       sets of our dataset. These smaller subsets of HowTo100M
+from YouTube. It features 89 different recipes and 14k
+                                                                       are created by gradually decreasing the allowed Youtube
+video clips all annotated with textual descriptions collected
+                                                                       search rank (see the paragraph on data collection in Sec-
+from paid human workers. Since no descriptions are pro-
+                                                                       tion 3.1 for more details) for training videos. We experiment
+vided for the test set clips, we evaluate YouCook2 clip re-
+                                                                       with the following rank thresholds: top 2 (15k videos), top
+trieval task on the validation clips (3.5k in total). Note that
+                                                                       3 (28k videos), top 5 (52k videos), top 10 (104k videos),
+we have taken care to remove the few validation YouCook2
+                                                                       top 20 (197k videos), top 40 (364k videos), top 80 (648k
+videos that are also present in HowTo100M.
+                                                                       videos) and top 200 (entire HowTo100M dataset). This
+    MSR-VTT [58] is a dataset of generic videos collected
+                                                                       process ensures that we subsample training videos that are
+from 257 popular video queries depicting 20 categories (in-
+                                                                       more likely to be relevant to the queried task as we reduce
+cluding music, sports, movie, etc.) from YouTube. It con-
+                                                                       the size of the training dataset. Figure 3 shows average re-
+tains 200k unique video clip-caption pairs, all annotated by
+                                                                       call on CrossTask and the R@10 clip retrieval results on
+paid human workers. We evaluate our model on the MSR-
+                                                                       LSMDC, MSR-VTT and YouCook2 when varying the size
+VTT clip retrieval test set used in [63] as performance of
+                                                                       of the training dataset. There is a clear improvement over
+several other methods is reported on it.
+                                                                       all evaluated tasks with the gradual increase in the amount
+    LSMDC [44] is a dataset of movie clips. It features 101k
+                                                                       of training data. Interestingly, we do not observe any satura-
+unique video clip-caption pairs. All clips are associated
+                                                                       tion, hence we can expect further improvements by collect-
+with a description that either comes from the movie script or
+                                                                       ing even more readily-available and unlabeled video data.
+the audio description. We evaluate our model on the official
+LSMDC test set2 that contains 1000 video-caption pairs.                5.5. Comparison with state-of-the-art
+5.3. Study of negative pair sampling strategy                          CrossTask. We compare our off-the-shelf embedding
+                                                                       trained on HowTo100M against methods proposed by
+   We first study the effect of alternative strategies for sam-        Alayrac et al. [2] and Zhukov et al. [68] which is the current
+pling negative caption-video clip pairs when training our              state-of-the-art on CrossTask for weakly supervised meth-
+embedding. Table 3 shows that using negatives from the                 ods. Note that Zhukov et al. [68] have access to the ordered
+same video (intra-negatives) is beneficial as compared to              list of action labels at the task level and narrations are the
+randomly sampling them from other YouTube videos. The                  only form of supervision during training. We also report
+improvement is particularly significant on YouCook2 and                the fully-supervised upper-bound from [68] obtained with a
+  2 https://sites.google.com/site/                                     model that has been trained on action segments with ground
+describingmovies/lsmdc-2016/movieretrieval                             truth annotation. The results are shown in Table 4. Our ap-
+
+
+                                                                   6
+                                                                                                                                                          Strawberry Cake
+                                                               Make Banana
+
+
+
+
+                                                                                                                                           French Toast
+                                      Kimchi Rice
+
+
+
+
+                                                                                                                                                          Irish Coffee
+                                                                                                                             Taco Salad
+                                                                             Jello Shots
+
+
+
+
+                                                                                                                                                                                       Fish Curry
+                                                                             Lemonade
+                                                    Cucumber
+
+                                                               Ice Cream
+
+
+
+
+                                                                                                                                                                            Meringue
+                                                                                                                                                                            Pancakes
+
+
+
+
+                                                                                                                                                                                                     Average
+                                                                             Jack Up
+
+
+
+
+                                                                                                 Add Oil
+
+
+
+
+                                                                                                                   Shelves
+                                                                             Change
+                                                    Pickle
+
+
+
+
+                                                                                                 to Car
+                                      Make
+
+
+
+
+                                                                             Make
+
+
+
+
+                                                                             Make
+
+
+
+
+                                                                                                           Make
+
+
+
+                                                                                                                             Make
+
+                                                                                                                                           Make
+
+                                                                                                                                                          Make
+
+                                                                                                                                                          Make
+
+                                                                                                                                                                            Make
+
+                                                                                                                                                                            Make
+
+                                                                                                                                                                                       Make
+                                                                             Steak
+
+
+
+
+                                                                                                                   Build
+                                                                                                           Latte
+                                                                             Grill
+
+
+
+
+                                                                             Tire
+                                                                             Car
+ Fully-supervised upper-bound [68]    19.1          25.3 38.0 37.5 25.7 28.2 54.3 25.8 18.3 31.2 47.7 12.0 39.5 23.4 30.9 41.1 53.4 17.3                                                            31.6
+ Alayrac et al. [2]                   15.6 10.6 7.5 14.2 9.3 11.8 17.3 13.1 6.4 12.9 27.2 9.2 15.7 8.6 16.3 13.0 23.2 7.4                                                                           13.3
+ Zhukov et al. [68]                   13.3 18.0 23.4 23.1 16.9 16.5 30.7 21.6 4.6 19.5 35.3 10.0 32.3 13.8 29.5 37.6 43.0 13.3                                                                      22.4
+ Ours trained on HowTo100M only       33.5 27.1 36.6 37.9 24.1 35.6 32.7 35.1 30.7 28.5 43.2 19.8 34.7 33.6 40.4 41.6 41.9 27.4                                                                     33.6
+
+                             Table 4: Step localization results on CrossTask [68] instructional video dataset.
+
+Method                    Trainset      R@1 R@5 R@10 Median R                             Method                                          Trainset                R@1 R@5 R@10 Median R
+Random                     None          0.03 0.15                    0.3      1675       Random                                     None                           0.1       0.5   1.0             500
+HGLMM FV CCA [25]        YouCook2         4.6 14.3                   21.6       75        C+LSTM+SA+FC7 [53]                        MSR-VTT                         4.2      12.9   19.9             55
+                                                                                          VSE-LSTM [24]                             MSR-VTT                         3.8      12.7   17.1             66
+Ours                    YouCook2           4.2       13.7            21.5       65
+                                                                                          SNUVL [64]                                MSR-VTT                         3.5      15.9   23.8             44
+Ours                   HowTo100M           6.1       17.3            24.8       46
+                                                                                          Kaufman et al. [22]                       MSR-VTT                         4.7      16.6   24.1             41
+                      PT: HowTo100M
+Ours                                       8.2       24.5            35.3       24        CT-SAN [65]                               MSR-VTT                         4.4      16.6   22.3             35
+                       FT: YouCook2
+                                                                                          JSFusion [63]                             MSR-VTT                        10.2      31.2   43.2             13
+Table 5: YouCook2 clip retrieval results. PT denotes: pre-trained,                        Ours                                   HowTo100M                         7.5 21.2         29.6            38
+while FT denotes: fine-tuned.                                                             Ours                                    MSR-VTT                          12.1 35.0        48.0            12
+                                                                                                                              PT: HowTo100M
+                                                                                          Ours                                              14.9                             40.2   52.8             9
+                                                                                                                               FT: MSR-VTT
+proach significantly outperforms the state-of-the-art, even                               Table 6: MSR-VTT clip retrieval results. PT denotes: pre-trained,
+though it has not been specifically designed for the task of                              while FT denotes: fine-tuned.
+step localization in videos. The improvement made by our
+method is consistent across all tasks (with the exception of
+Make Meringue), showing that the trained model is not bi-                                 against prior work that directly uses MSR-VTT for train-
+ased towards any specific domain. The recall is above 30%                                 ing (reproduced in [63]) in Table 6. Our off-the-shelf
+for most tasks with the significant improvement observed                                  HowTo100M model outperforms [22, 24, 53, 64, 65]
+for the “Add Oil to a Car” task (6.4% to 30.7% boost in                                   that are directly trained on MSR-VTT. Here again, af-
+recall). Note that our method also outperforms the fully-                                 ter fine-tuning the HowTo100M pre-trained model on
+supervised upper bound [68] on average. Thus, we con-                                     MSR-VTT, we observe a significant improvement over
+clude that training on a large amount of narrated videos is                               the state-of-the-art JSFusion [63] trained on MSR-VTT.
+better than training a step localization model on a small but                             However, as opposed to instructional videos (CrossTask)
+carefully annotated training set.                                                         and cooking videos (YouCook2), training our model di-
+YouCook2 [67] does not provide an official benchmark                                      rectly on MSR-VTT performs better than our off-the-shelf
+nor any reported number for clip retrieval. As a conse-                                   model trained on HowTo100M. We believe this is due
+quence, we have applied a state-of-the-art text-video em-                                 to MSR-VTT videos being generic Youtube videos that
+bedding model from Klein et al. [25] (HGLMM FV CCA)                                       are different from the instructional or VLOG type of
+on YouCook2 using our features. We also report results of                                 videos that dominate HowTo100M. In Figure 4, we also
+our model trained on YouCook2 instead of HowTo100M                                        investigate the impact on performance at various amounts
+in Table 5. First, we notice that our off-the-shelf model                                 of supervision when fine-tuning our pre-trained model. It
+trained on HowTo100M significantly outperforms both                                       shows that state-of-the-art performance [63] can be attained
+the exact same model directly trained on YouCook2 and                                     with only 20% of MSR-VTT samples. This has great
+[25]. Furthermore, fine-tuning our model pre-trained on                                   practical implications as comparable performance can be
+HowTo100M on YouCook2 results in a significant improve-                                   obtained using significantly reduced annotation.
+ment of 13.7 % in R@10 against [25]. In conclusion, we                                    LSMDC. Finally, we compare to state-of-the-art on
+show that the off-the-shelf HowTo100M trained model can                                   LSMDC in Table 7. This dataset is even more challeng-
+outperform state-of-the-art on this domain specific instruc-                              ing as movie clips are quite distinct from HowTo100M
+tional video dataset. Moreover, we demonstrate that our                                   videos. We compare against several other prior works that
+model can get further benefits from fine-tuning.                                          have been reproduced in [63] and are trained directly on
+MSR-VTT. We compare our model trained on                                                  LSMDC. Here again, we see that pre-training our model on
+(i) HowTo100M only, (ii) MSR-VTT only and (iii) pre-                                      HowTo100M and fine-tuning it on LSMDC also provides
+trained on HowTo100M and then fine-tuned on MSR-VTT                                       improvements upon a model directly trained on LSMDC.
+
+
+                                                                                      7
+ Method                    Trainset     R@1 R@5 R@10 Median R
+ Random                     None        0.1    0.5    1.0     500
+ C+LSTM+SA+FC7 [53]        LSMDC        4.3   12.6   18.9     98
+ VSE-LSTM [24]             LSMDC        3.1   10.4   16.5      79
+ SNUVL [64]                LSMDC        3.6   14.7   23.9      50
+ Kaufman et al. [22]       LSMDC        4.7   15.9   23.4      64
+ CT-SAN [65]               LSMDC        4.5   14.1   20.9      67
+ JSFusion [63]             LSMDC        9.1   21.2   34.1      36
+ Ours                    HowTo100M      4.0   9.8    14.0     137
+ Ours                     LSMDC         7.2   18.3   25.0      44
+                        PT: HowTo100M
+ Ours                                   7.1   19.6   27.9       40
+                          FT: LSMDC
+
+Table 7: LSMDC clip retrieval results. PT denotes: pre-trained,
+while FT denotes: fine-tuned.
+
+
+
+
+Figure 4: Evaluation of fine-tuning a HowTo100M pre-trained
+model with varying amounts of MSR-VTT supervision for text-
+to-video clip retrieval.                                                    Figure 6: Example video-clip retrieval results on HowTo100M us-
+                                                                            ing our trained joint embedding.
+
+
+                                                                            5.7. Qualitative results
+R@10
+
+
+
+
+                                                                               Figure 6 illustrates examples of retrieved video clips
+                                                                            from HowTo100M using our trained joint text-video em-
+                                                                            bedding. For example, our learned representation can cor-
+              LSMDC              YouCook2             MSR-VTT
+                                                                            rectly distinguish between queries Cut paper and Cut wood.
+Figure 5: Results of clip retrieval by pre-training models on differ-       A demo of the retrieval system is available online [1].
+ent datasets. Evaluation on LSMDC, YouCook2 and MSR-VTT.
+                                                                            6. Conclusion
+                                                                               We have introduced HowTo100M, a video dataset with
+This finding is interesting and shows that a HowTo100M                      more than 130M video clips, extracted from 1.2M narrated
+pre-trained model can still be useful when fine-tuned on                    web videos of people performing complex visual tasks. Our
+videos from a different domain.                                             data collection method is fast, scalable and does not require
+                                                                            any manual annotation. We use this dataset to learn a joint
+5.6. Cross-dataset fine-tuning evaluation
+                                                                            text-video embedding by leveraging more than 130M video
+   In this section, we evaluate the advantage of                            clip-caption pairs. We have shown through various experi-
+HowTo100M for pre-training compared to pre-training                         ments that our learned embedding can perform better com-
+on other smaller datasets. Figure 5 shows evaluation on                     pared to models trained on existing carefully annotated but
+YouCook2, MSR-VTT and LSMDC clip retrieval (R@10)                           smaller video description datasets. The dataset, pre-trained
+using no pre-training (No PT), using pre-training on                        models and code are available at [1].
+YouCook2, MSR-VTT, LSMDC and HowTo100M datasets
+while fine-tuning to the target dataset. For all evaluated
+datasets, pre-training on HowTo100M prior to fine-tuning
+on the target dataset consistently yields best results.
+
+
+                                                                        8
+Acknowledgements. The project was partially supported                       [17] D.-A. Huang, J. J. Lim, L. Fei-Fei, and J. C. Niebles. Un-
+by Antoine Miech Google PhD fellowship, the MSR-Inria                            supervised visual-linguistic reference resolution in instruc-
+joint lab, the Louis Vuitton - ENS Chair on Artificial In-                       tional videos. In CVPR, 2017. 2
+telligence, the ERC grant LEAP (No. 336845), the CIFAR                      [18] D.-A. Huang, V. Ramanathan, D. Mahajan, L. Torresani,
+Learning in Machines&Brains program, and the European                            M. Paluri, L. Fei-Fei, and J. C. Niebles. Finding ”it”:
+Regional Development Fund under the project IMPACT                               Weakly-supervised reference-aware visual grounding in in-
+                                                                                 structional video. In CVPR, 2018. 2
+(reg. no. CZ.02.1.01/0.0/0.0/15 003/0000468).
+                                                                            [19] K. L. Jacob Devlin, Ming-Wei Chang and K. Toutanova.
+                                                                                 BERT: Pre-training of deep bidirectional transformers for
+References
+                                                                                 language understanding. preprint, 2018. 3
+ [1] Project webpage.              https://www.di.ens.fr/                   [20] J. Johnson, A. Karpathy, and L. Fei-Fei. Densecap: Fully
+     willow/research/howto100m/, 2019.                        1, 8,              convolutional localization networks for dense captioning. In
+     9                                                                           CVPR, 2016. 2
+ [2] J.-B. Alayrac, P. Bojanowski, N. Agrawal, I. Laptev, J. Sivic,         [21] A. Karpathy, A. Joulin, and F. F. F. Li. Deep fragment em-
+     and S. Lacoste-Julien. Unsupervised learning from narrated                  beddings for bidirectional image sentence mapping. In NIPS,
+     instruction videos. In CVPR, 2016. 2, 6, 7                                  2014. 5
+ [3] J.-B. Alayrac, J. Sivic, I. Laptev, and S. Lacoste-Julien. Joint       [22] D. Kauman, G. Levi, T. Hassner, and L. Wolf. Temporal
+     discovery of object states and manipulation actions. In ICCV,               tessellation: A unified approach for video analysis. In ICCV,
+     2017. 2                                                                     2017. 7, 8
+ [4] J. Carreira and A. Zisserman. Quo vadis, action recognition?           [23] D. P. Kingma and J. Ba. Adam: A method for stochastic
+     a new model and the kinetics dataset. In CVPR, 2017. 5                      optimization. In ICLR, 2015. 5
+ [5] K. Chen, H. Song, C. Change Loy, and D. Lin. Discover and              [24] R. Kiros, R. Salakhutdinov, and R. S. Zemel. Unifying
+     learn new objects from documentaries. In CVPR, 2017. 2                      visual-semantic embeddings with multimodal neural lan-
+ [6] M. Chowdhury, P. Rameswar, E. Papalexakis, and A. Roy-                      guage models. TACL, 2014. 7, 8
+     Chowdhury. Webly supervised joint embedding for cross-                 [25] B. Klein, G. Lev, G. Sadeh, and L. Wolf. Associating neu-
+     modal image-text retrieval. In ACM International Confer-                    ral word embeddings with deep image representations using
+     ence on Multimedia, 2018. 2                                                 fisher vectors. In CVPR, 2015. 1, 2, 7
+ [7] D. Damen, H. Doughty, G. M. Farinella, S. Fidler,
+                                                                            [26] R. Krishna, K. Hata, F. Ren, L. Fei-Fei, and J. C. Niebles.
+     A. Furnari, E. Kazakos, D. Moltisanti, J. Munro, T. Perrett,
+                                                                                 Dense-captioning events in videos. In ICCV, 2017. 2
+     W. Price, et al. Scaling egocentric vision: The epic-kitchens
+                                                                            [27] Y. Li, Y. Song, L. Cao, J. Tetreault, L. Goldberg, A. Jaimes,
+     dataset. In ECCV, 2018. 2
+                                                                                 and J. Luo. TGIF: A New Dataset and Benchmark on Ani-
+ [8] J. Dong, X. Li, C. Xu, S. Ji, Y. He, G. Yang, and X. Wang.
+                                                                                 mated GIF Description. In CVPR, 2016. 2
+     Dual encoding for zero-example video retrieval. In CVPR,
+                                                                            [28] D. Mahajan, R. Girshick, V. Ramanathan, K. He, M. Paluri,
+     2019. 2
+                                                                                 Y. Li, A. Bharambe, and L. van der Maaten. Exploring the
+ [9] A. Fukui, D. H. Park, D. Yang, A. Rohrbach, T. Darrell, and
+                                                                                 limits of weakly supervised pretraining. In ECCV, 2018. 3
+     M. Rohrbach. Multimodal compact bilinear pooling for vi-
+     sual question answering and visual grounding. In EMNLP,                [29] M. Malinowski, M. Rohrbach, and M. Fritz. Ask your neu-
+     pages 457–468, 2016. 2                                                      rons: A neural-based approach to answering questions about
+[10] Y. Gong, Q. Ke, M. Isard, and S. Lazebnik. A multi-view em-                 images. In ICCV, 2015. 2
+     bedding space for modeling internet images, tags, and their            [30] J. Malmaud, J. Huang, V. Rathod, N. Johnston, A. Rabi-
+     semantics. IJCV, 2014. 2                                                    novich, and K. Murphy. What’s cookin’? interpreting cook-
+[11] Y. Gong, L. Wang, M. Hodosh, J. Hockenmaier, and                            ing videos using text, speech and vision. NAACL, 2015. 2
+     S. Lazebnik. Improving image-sentence embeddings using                 [31] A. Miech, I. Laptev, and J. Sivic. Learnable pooling
+     large weakly annotated photo collections. In ECCV, 2014. 2                  with context gating for video classification. arXiv preprint
+[12] K. Hara, H. Kataoka, and Y. Satoh. Can spatiotemporal 3d                    arXiv:1706.06905, 2017. 5
+     cnns retrace the history of 2d cnns and imagenet? In CVPR,             [32] A. Miech, I. Laptev, and J. Sivic. Learning a Text-
+     2018. 5                                                                     Video Embedding from Incomplete and Heterogeneous
+[13] D. Harwath, A. Recasens, D. Surı́s, G. Chuang, A. Torralba,                 Data. arXiv:1804.02516, 2018. 1, 2, 4, 5
+     and J. Glass. Jointly discovering visual objects and spoken            [33] A. Miech, D. Zhukov, J.-B. Alayrac, M. Tapaswi, I. Laptev,
+     words from raw sensory input. In ECCV, 2018. 2                              and J. Sivic. Howto100M: Learning a text-video embed-
+[14] K. He, X. Zhang, S. Ren, and J. Sun. Deep Residual Learning                 ding by watching hundred million narrated video clips. arXiv
+     for Image Recognition. In CVPR, 2016. 5                                     preprint arXiv:1906.03327, 2019. 4, 5
+[15] L. A. Hendricks, O. Wang, E. Shechtman, J. Sivic, T. Darrell,          [34] T. Mikolov, K. Chen, G. Corrado, and J. Dean. Efficient
+     and B. Russell. Localizing moments in video with natural                    estimation of word representations in vector space. arXiv
+     language. ICCV, 2017. 1, 2, 5, 12                                           preprint arXiv:1301.3781, 2013. 5
+[16] D.-A. Huang, L. Fei-Fei, and J. C. Niebles. Connectionist              [35] N. C. Mithun, J. Li, F. Metze, and A. K. Roy-Chowdhury.
+     temporal modeling for weakly supervised action labeling. In                 Learning joint embedding with multimodal cues for cross-
+     ECCV, 2016. 2                                                               modal video-text retrieval. In Proceedings of the 2018 ACM
+
+
+                                                                        9
+     on International Conference on Multimedia Retrieval. ACM,              [53] A. Torabi, N. Tandon, and L. Sigal. Learning language-
+     2018. 2                                                                     visual embedding for movie understanding with natural-
+[36] P. Pan, Z. Xu, Y. Yang, F. Wu, and Y. Zhuang. Hierarchical                  language. arXiv preprint arXiv:1609.08124, 2016. 7, 8
+     recurrent neural encoder for video representation with appli-          [54] L. Wang, Y. Li, J. Huang, and S. Lazebnik. Learning
+     cation to captioning. In CVPR, pages 1029–1038, 2016. 1,                    two-branch neural networks for image-text matching tasks.
+     2                                                                           PAMI, 2018. 1, 2, 5
+[37] Y. Pan, T. Mei, T. Yao, H. Li, and Y. Rui. Jointly modeling            [55] L. Wang, Y. Li, and S. Lazebnik. Learning deep structure-
+     embedding and translation to bridge video and language. In                  preserving image-text embeddings. In CVPR, pages 5005–
+     CVPR, 2016. 1, 2                                                            5013, 2016. 1, 2, 5
+[38] B. A. Plummer, M. Brown, and S. Lazebnik. Enhancing                    [56] X. Wang, J. Wu, D. Zhang, Y. Su, and W. Y. Wang. Learn-
+     video summarization via vision-language embedding. In                       ing to compose topic-aware mixture of experts for zero-shot
+     CVPR, 2017. 1, 2                                                            video captioning. In AAAI, 2018. 2
+[39] A. Radford, K. Narasimhan, T. Salimans, and I. Sutskever.              [57] C.-Y. Wu, R. Manmatha, A. J. Smola, and P. Krähenbühl.
+     Improving Language Understandingby Generative Pre-                          Sampling matters in deep embedding learning. ICCV, 2017.
+     Training. preprint, 2018. 3                                                 2
+[40] A. Radford, J. Wu, R. Child, D. Luan, D. Amodei, and                   [58] J. Xu, T. Mei, T. Yao, and Y. Rui. Msr-vtt: A large video de-
+     I. Sutskever. Language models are unsupervised multitask                    scription dataset for bridging video and language. In CVPR,
+     learners. preprint, 2019. 3                                                 2016. 1, 2, 5, 6
+[41] A. Richard, H. Kuehne, and J. Gall. Weakly supervised                  [59] R. Xu, C. Xiong, W. Chen, and J. J. Corso. Jointly modeling
+     action learning with rnn based fine-to-coarse modeling. In                  deep video and compositional text to bridge vision and lan-
+     CVPR, 2017. 2                                                               guage in a unified framework. In AAAI, volume 5, page 6,
+[42] A. Richard, H. Kuehne, and J. Gall. Action sets: Weakly                     2015. 1, 2
+     supervised action segmentation without ordering constraints.           [60] Q. You, H. Jin, Z. Wang, C. Fang, and J. Luo. Image cap-
+     In CVPR, 2018. 2                                                            tioning with semantic attention. In CVPR, pages 4651–4659,
+[43] A. Rohrbach, M. Rohrbach, N. Tandon, and B. Schiele. A                      2016. 2
+     dataset for movie description. In CVPR, 2015. 2                        [61] H. Yu, J. Wang, Z. Huang, Y. Yang, and W. Xu. Video
+[44] A. Rohrbach, A. Torabi, M. Rohrbach, N. Tandon, C. Pal,                     paragraph captioning using hierarchical recurrent neural net-
+     H. Larochelle, A. Courville, and B. Schiele. Movie descrip-                 works. In CVPR, pages 4584–4593, 2016. 1, 2
+     tion. IJCV, 2017. 2, 5, 6                                              [62] S.-I. Yu, L. Jiang, and A. Hauptmann. Instructional videos
+[45] R. Sanabria, O. Caglayan, S. Palaskar, D. Elliott, L. Barrault,             for unsupervised harvesting and learning of action examples.
+     L. Specia, and F. Metze. How2: a large-scale dataset for                    In ACM, 2014. 2
+     multimodal language understanding. In Proceedings of the               [63] Y. Yu, J. Kim, and G. Kim. A joint sequence fusion model
+     Workshop on Visually Grounded Interaction and Language                      for video question answering and retrieval. In ECCV, 2018.
+     (ViGIL). NeurIPS, 2018. 2                                                   1, 2, 6, 7, 8
+[46] F. Sener and A. Yao. Unsupervised learning and segmenta-               [64] Y. Yu, H. Ko, J. Choi, and G. Kim. Video captioning
+     tion of complex activities from video. In CVPR, 2018. 2                     and retrieval models with semantic attention. In ECCV
+[47] O. Sener, A. R. Zamir, S. Savarese, and A. Saxena. Unsu-                    LSMDC2016 Workshop, 2016. 5, 7, 8
+     pervised semantic parsing of video collections. In The IEEE            [65] Y. Yu, H. Ko, J. Choi, and G. Kim. End-to-end concept
+     International Conference on Computer Vision (ICCV), De-                     word detection for video captioning, retrieval, and question
+     cember 2015. 2                                                              answering. In CVPR, 2017. 7, 8
+[48] G. A. Sigurdsson, G. Varol, X. Wang, A. Farhadi, I. Laptev,            [66] L. Zhou, X. Chenliang, and J. J. Corso. Towards automatic
+     and A. Gupta. Hollywood in homes: Crowdsourcing data                        learning of procedures from web instructional videos. In
+     collection for activity understanding. In European Confer-                  AAAI, 2018. 2
+     ence on Computer Vision, 2016. 2                                       [67] L. Zhou, C. Xu, and J. J. Corso. Towards automatic learning
+[49] C. Sun, A. Shrivastava, S. Singh, and A. Gupta. Revisiting                  of procedures from web instructional videos. In AAAI, 2018.
+     unreasonable effectiveness of data in deep learning era. In                 2, 5, 6, 7
+     ICCV, 2017. 3                                                          [68] D. Zhukov, J.-B. Alayrac, R. G. Cinbis, D. Fouhey, I. Laptev,
+[50] Y. Tang, D. Ding, Y. Rao, Y. Zheng, D. Zhang, L. Zhao,                      and J. Sivic. Cross-task weakly supervised learning from
+     J. Lu, and J. Zhou. Coin: A large-scale dataset for compre-                 instructional videos. In CVPR, 2019. 2, 5, 6, 7
+     hensive instructional video analysis. In CVPR, 2019. 2
+[51] M. Tapaswi, Y. Zhu, R. Stiefelhagen, A. Torralba, R. Urta-
+     sun, and S. Fidler. Movieqa: Understanding stories in movies
+     through question-answering. In CVPR, 2016. 1, 2
+[52] A. Torabi, C. Pal, H. Larochelle, and A. Courville. Using
+     descriptive video services to create a large data source for
+     video annotation research. arXiv preprint arXiv:1503.01070,
+     2015. 2
+
+
+                                                                       10
+Overview of Appendix
+   We present additional details of our HowTo100M dataset
+in Appendix A. We also provide practical implementation
+details of our ranking loss in Appendix B and analyze the
+sampling strategy for positive pair selection during training
+in Appendix C.
+
+A. Additional details of the HowTo100M
+   dataset
+    Our HowTo100M dataset is based on the hierarchy of
+WikiHow3 tasks. The HowTo100M spans a total of 23,611
+tasks. Here we visualize the first two levels of the WikiHow
+hierarchy – the twelve categories and their subcategories,
+the number of underlying tasks and corresponding videos
+are illustrated in Figure 8.
+    HowTo100M comes with transcribed narrations which
+often describe the content of the videos. Figure 9 shows
+frequencies of nouns and verbs in transcribed video narra-
+tions. We used the MaxEnt Treebank POS Tagger to obtain
+the nouns and verbs. Please see the figure captions for ad-
+ditional analysis.
+
+B. Ranking loss implementation details
+   In the main paper, we have defined our mini-batch rank-
+ing loss as:
+X X
+          max(0, δ + si,j − si,i ) + max(0, δ + sj,i − si,i ).
+i∈B j∈N (i)
+                                                                      Figure 7: We illustrate examples of high and low scoring clip-
+                                                          (4)         caption pairs. Examples from the left column show pairs where
+                                                                      the caption visually describes what is seen in the corresponding
+We explain next how N (i) is constructed to improve com-              video clip. On the other hand, low scoring pairs from the right
+putational efficiency.                                                column have captions that do not match visual content.
+    At each training iteration, we first sample v unique
+YouTube video ids. We then sample with replacement a
+number k of clip-caption pairs from each of these videos.             p ∈ [0, 1] (and inter-video triplets with probability 1 − p),
+Therefore, we are left with a mini-batch containing b = kv            one can equivalently weight the intra-video triplet losses by:
+clip-caption pairs, with v = 32 and k = 64 in prac-                           pk(v−1)
+                                                                      α = (1−p)(k−1)     (thus ensuring a ratio between intra-video
+tice. In order to not waste computation efforts, we use                                                         p
+                                                                      and inter-video negative examples of 1−p     ). This allows us
+every sampled mini-batch pair as a negative anchor, i.e.
+                                                                      to fix the intra-video to inter-video negative sampling ratio
+N (i) = B \ {i}, ∀i.
+                                                                      regardless of v and k. Formally, we define the following
+    Doing so, the proportion of negative examples coming
+                                         k−1                          weighting function:
+from the same video (intra-video) is kv−1      while the pro-
+portion of negatives from different videos (inter-video) is
+k(v−1)
+                                                                                (
+                                                                                      pk(v−1)
+  kv−1 . A problem with this is that the ratio between intra                        (1−p)(k−1)   if i and j are from same video,
+and inter video negative examples depends on the number                αi,j =                                                    (5)
+                                                                                    1,           otherwise.
+of unique videos sampled and the amount of clip-caption
+pairs collected per video (respectively v and k). To address
+this, we follow [15] by re-weighting the inter-video and              We then use this weighing function to define the loss:
+intra-video contributions inside the triplet loss. For exam-
+ple, in order to sample intra-video triplets with probability            X              h                                           i
+                                                                                    αi,j max(0, δ+si,j −si,i )+max(0, δ+sj,i −si,i ) .
+  3 https://www.wikihow.com/
+                                                                      i∈B,j∈N (i)
+
+
+                                                                 11
+  Max pool rate (r) M (R@10) L (R@10) Y (R@10)
+  0.2                       21.9          13.9         19.7
+  0.5                       25.2          12.6         23.5
+  0.9                       27.3          12.6         23.9
+  1.0 (no max pool)         29.6          14.0         24.8
+Table 8: Study of positive pair sampling. When max pool rate r
+is below 1.0 only the proportion r of top scoring clip-caption pairs
+are used for learning. We report R@10 retrieval results from M:
+MSR-VTT, L: LSMDC, Y: YouCook2.
+
+C. Sampling strategy for positive pairs
+    As discussed in the main paper, narrations need not nec-
+essarily describe what is seen in the video. As a conse-
+quence, some captions from HowTo100M do not correlate
+with their corresponding video clips (see Figure 7). To deal
+with this noisy data, we tried a sampling strategy for pos-
+itive pairs that aims to discard non-relevant video-caption
+pairs during training. Inspired by multiple instance learn-
+ing, our idea is to select a subset of top scoring clip-caption
+training pairs within each video.
+    In particular, given a video with N video clip-caption
+pairs {(Vi , Ci )}i∈[1,N ] , we first compute the similarity
+scores of all the N pairs: s(Vi , Ci ) using the current
+model parameters. We then use a pre-defined max-pool                          MP rate RS rate M (R@10) L (R@10) Y (R@10)
+rate r ∈ [0, 1] of the highest scoring positive training                      1.0          0.5        28.8         14.3         24.2
+pairs {(Vi , Ci )}i∈[1,N ] within each video. For example, at                 0.5          1.0        25.2         12.6         23.5
+r = 0.5 we retain the high scoring half of all N pairs for
+                                                                            Table 9: Study of Random Sampling (RS) vs. Max Pool (MP)
+training.
+                                                                            sampling of positive clip-caption pairs. We report R@10 retrieval
+    Table 8 shows results of our positive sampling strategy                 results from M: MSR-VTT, L: LSMDC, Y: YouCook2.
+when varying the max pool rate r with evaluation on video
+clip retrieval. For example, r = 1.0 means that no sam-
+pling strategy is applied as we keep all N pairs as potential
+candidates. Interestingly, in our case, carefully selecting the
+positive pairs does not improve our model as the best results
+are obtained with r = 1.0. Note that decreasing the max
+pool rate also decreases the number of triplet losses com-
+puted within a mini-batch by the same rate. To show that the
+number of triplet losses computed for each mini-batch does
+not impact the overall performance, we have performed a
+sanity check experiment in Table 9 in which we also re-
+placed the max pool sampling by random sampling of pairs
+for r = 0.5. The results with random sampling at r = 0.5
+are very similar to the results obtained with no max pool
+sampling (r=1.0) as shown in Table 8, which confirms our
+finding that our model is relatively robust to the noisy pos-
+itive pairs. We think this could be attributed to the fact our
+model is shallow and is trained on a large amount of data.
+
+
+
+
+                                                                       12
+                                            Pets and Animals                      Hobbies and Crafts
+                                                552 3.5M                            4273 29.8M
+                                        Dogs 137 762k                          Crafts 3135 20670k
+                                        Fish 55 480k                           Games 200 2058k
+                                        Small and Furry 67 459k                Woodworking 183 1446k
+                                        Cats 91 424k                           Toys 171 1254k
+             Personal Care and Style    Birds 66 363k                          Tricks and Pranks 167 941k              Education and Communication
+                   181 1.6M             Horses 52 362k                         Photography 102 929k                              239 1.6M
+          Grooming 125 1205k            Reptiles 22 217k                       Model Making 57 491k
+          Fashion 46 284k               Bugs 19 162k                           Painting 49 475k                      Subjects 89 616k
+          Personal Hygiene 9 88k        Rabbits 21 133k                        Collecting 56 451k                    Writing 94 572k
+          Tattoos and Piercing 1 10k    Crustaceans 6 43k                      Drawing 39 366k                       Speaking 53 408k
+                                        General Pet Accessories 4 27k          Digital Technology Art 32 223k        Presentations 2 20k
+                                        Wildlife 4 20k                         Fireworks 34 131k                     Social Activism 1 3k
+       Sports and Fitness               Snails and Slugs 3 13k                 Sculpting 22 115k
+                                        Animal Welfare Activism 1 10k          Amateur Radio 7 68k                           Computers and Electronics
+          205 2.0M                                                                                                                  58 0.6M
+                                        Animal Rescue 2 9k                     Boredom Busters 4 50k
+    Outdoor Recreation 122 1196k        Amphibian 1 7k                         Wargaming 2 45k                           Software 12 127k
+    Individual Sports 51 472k           General Pet Health 1 3k                Optical Devices 3 28k                     Maintenance and Repair 12 119k
+    Team Sports 28 259k                                                        Kite Making and Flying 9 14k              TV and Home Audio 9 68k
+    Personal Fitness 4 37k                                                     Flags 1 8k                                Phones and Gadgets 9 96k
+                                                                                                                         Hardware 11 95k
+                                                                                                                         Laptops 4 43k
+     Holidays and Traditions                                                                                             Networking 1 12k
+           411 3.0M
+   Halloween 159 1182k
+   Christmas 125 930k
+                                          HowTo100M                                                                            Health 172 1.7M
+   Easter 47 371k
+   Gift Giving 39 259k
+   Valentines Day 12 91k
+                                             23611 tasks                                                                  Emotional Health 63 853k
+                                                                                                                          Conditions and Treatments 35 271k
+                                                                                                                          Injury and Accidents 22 147k
+   Thanksgiving 10 65k
+   Saint Patrick's Day 6 32k
+   Mother's Day 3 28k
+                                                136.6M clips                                                              Medication and Equipment 20 138k
+                                                                                                                          Alternative Health 10 75k
+                                                                                                                          Recreational Drug Use 9 69k
+   Passover 2 15k
+                                                                                                                          Diet & Lifestyle 3 44k
+   Birthdays 2 14k
+                                                                                                                          Health Hygiene 3 32k
+   Hanukkah Chanukah 3 8k
+                                                                                                                          Medical Information 3 31k
+   Diwali 2 2k
+                                       Recipes 7972 37557k                                                                Women’s Health 2 25k
+   National Days (USA) 1 1k
+                                       Drinks 1597 6934k                                                                  Reproductive Health 1 23k
+                                       Food Preparation 588 2885k       Cars 525 5165k                                    Men's Health 1 11k
+          Arts and Entertainment       Breakfast 329 1592k              Bicycles 56 508k
+                                       Parties 280 1399k                Motorcycles 48 464k
+                 138 1.2M                                                                                         Home and Garden 5068 29.5M
+                                       Holiday Cooking 168 980k         Boats 40 328k
+       Music 97 857k                   Cooking Equipment 147 812k       Aviation 27 283k
+       Books 13 145k                   Herbs and Spices 156 794k        Driving Techniques 34 267k              Home Repairs 1391 8734k
+       Costumes 16 130k                Nuts and Seeds 98 404k           Trucks 25 233k                          Gardening 1249 7698k
+       Performing Arts 4 26k           Cooking for Children 85 391k     Vehicle Sports 14 138k                  Housekeeping 1635 7154k
+       Movies 3 32k                                                                                             Outdoor Building 257 1620k
+       Theme Parks 2 32k                Food and Entertaining            Cars & Other Vehicles                  Tools 141 1268k
+       Role Playing 2 10k               11504 54.4M                      810 7.8M                               Home Decorating 184 1119k
+       Exhibited Arts 1 10k                                                                                     Disaster Preparedness 100 961k
+                                       Barbecue 40 304k                 Trailers 12 127k                        Sustainable Living 45 385k
+                                       Appreciation of Food 16 138k     Off Road Vehicles 12 103k               Moving House 28 298k
+                                       Food Safety 12 94k               Recreational Vehicles 7 91k             Swimming Pools and Hot Tubs 38 262k
+                                       Recipe Books 6 59k               Scooters 9 83k
+                                       Picnics 4 24k                    Security and Military Vehicles 1 5k
+                                       Dining Etiquette 5 14k
+                                       Dining Out 1 12k
+
+
+Figure 8: The first two levels of hierarchy of tasks in the HowTo100M dataset. Our dataset includes 12 categories from WikiHow containing
+129 subcategories. For each (sub)category we show the total number of collected tasks and clips. This hierarchy of tasks in our dataset
+follows the WikiHow structure. Please recall that abstract tasks such as Choosing a gift or Meeting new friends, were not considered
+and were removed from the WikiHow hierarchy semi-automatically by verb analysis, as described in Section 3.1 of the main paper. As a
+result, the category tree is imbalanced. For example, the Dining Out subcategory includes only one physical task (Fix a Shaky Table at a
+Restaurant), while Recipes subcategory from the same level of the hierarchy includes a large number of tasks and clips.
+
+
+
+
+                                                                        13
+                       Top 120 verbs                                                      Top 120 nouns
+
+
+
+
+Figure 9: Frequencies of the top 120 most commonly occurring nouns and verbs in our dataset. Note that our dataset is biased towards
+physical actions, with verbs such as get, go and make being the most frequent, while verbs, such as be, know and think are less frequent
+than in common English. Top nouns show the dominant topics in our instructional videos. In particular, many cooking-related words, such
+as water, oil and sugar occur with high frequency.
+
+
+                                                                  14
+

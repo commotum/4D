@@ -1,0 +1,911 @@
+                                                                   Winoground: Probing Vision and Language Models
+                                                                         for Visio-Linguistic Compositionality
+
+                                                                     Tristan Thrush¶ *, Ryan Jiang‡ , Max Bartolo§ ,
+                                                          Amanpreet Singh¶ , Adina Williams† , Douwe Kiela¶ , Candace Ross† *
+                                             ¶
+                                               Hugging Face; † Facebook AI Research; ‡ University of Waterloo; § University College London
+                                                                                     tristan@huggingface.co, ccross@fb.com
+arXiv:2204.03162v2 [cs.CV] 22 Apr 2022
+
+
+
+
+                                                                     Abstract
+
+                                            We present a novel task and dataset for evaluating
+                                         the ability of vision and language models to conduct
+                                         visio-linguistic compositional reasoning, which we call
+                                         Winoground. Given two images and two captions, the goal
+                                         is to match them correctly—but crucially, both captions
+                                         contain a completely identical set of words, only in a dif-                    (a) some plants      (b) a lightbulb surrounding some plants
+                                         ferent order. The dataset was carefully hand-curated by ex-                     surrounding a
+                                                                                                                            lightbulb
+                                         pert annotators and is labeled with a rich set of fine-grained
+                                         tags to assist in analyzing model performance. We probe a                 Figure 1. An example from Winoground. The two sentences con-
+                                         diverse range of state-of-the-art vision and language mod-                tain the same words but in a different order. The task of under-
+                                         els and find that, surprisingly, none of them do much better              standing which image and caption match is trivial for humans but
+                                         than chance. Evidently, these models are not as skilled at                much harder for vision and language models. Every model that we
+                                         visio-linguistic compositional reasoning as we might have                 tested (UNITER, ViLLA, VinVL, VisualBERT, ViLT, LXMERT,
+                                         hoped. We perform an extensive analysis to obtain insights                ViLBERT, UniT, FLAVA, CLIP, VSE++, and VSRN) fails to cor-
+                                         into how future work might try to mitigate these models’                  rectly pair the images and captions, except the large checkpoint of
+                                         shortcomings. We aim for Winoground to serve as a useful                  ViLLA by a very thin margin (0.00013 confidence).
+                                         evaluation set for advancing the state of the art and driv-
+                                         ing further progress in the field. The dataset is available at
+                                         https://huggingface.co/datasets/facebook/winoground.                      that transformers are often remarkably insensitive to word
+                                                                                                                   order [70]. Understanding the relationship between text in
+                                                                                                                   captions and corresponding visual content is a fundamental
+                                         1. Introduction                                                           goal of computer vision, and the fact that different word or-
+                                                                                                                   ders correspond to wildly different visual depictions should
+                                             Despite the impressive performance of pretrained vision               be reflected in the capabilities of our models.
+                                         and language transformers on a wide variety of multimodal                    Motivated by this, we propose a novel task, called
+                                         tasks [47, 51, 56], they remain poorly understood [8, 19, 46,             Winoground, for measuring visio-linguistic compositional
+                                         67]. One important question is to what extent such mod-                   reasoning, whereby two images and two captions have to be
+                                         els are able to conduct unimodal and multimodal compo-                    matched correctly; both captions contain exactly the same
+                                         sitional reasoning. For humans, the visual differences be-                set of words, ordered in such a way that each describes pri-
+                                         tween images depicting “the tree is in the shopping cart”                 marily one of the images. To perform well on Winoground,
+                                         and “the shopping cart is in the tree” will be blatantly obvi-            models must not only encode text and images well (i.e.,
+                                         ous, even when the words in the captions are identical—but                be sensitive to the compositional structure present in each
+                                         is the same true for machines?                                            modality), but they also must be able to synthesize informa-
+                                             While matching simple images and captions may seem                    tion across the two modalities.
+                                         almost too trivial a task, recent work in NLP has shown                      We draw inspiration from the Winograd Schema Chal-
+                                             * Equal contribution. TT, AS, and DK conducted most of the work for   lenge [44], which tests the commonsense capabilities of
+                                         this paper when they were at Facebook AI Research.                        models. In the challenge, a model is given two sentences
+that minimally differ and is tasked with performing coref-         the presence of altogether different words. While it is the-
+erence resolution. The Winograd twin sentence format has           oretically possible for unstructured bag of words models to
+been used for a variety of language-related tasks [59,60,91].      do well on these previous datasets, that is not possible on
+In this work, we study the image-grounding of twin sen-            Winoground.
+tences with identical but differently ordered words.                   Probing. Measuring what exactly a model knows about
+    Winoground was hand-crafted by expert annotators and           word order and linguistic structure has been explored in nat-
+is labeled with a rich set of fine-grained tags to assist in an-   ural language processing. Sinha et al. [70] found that word
+alyzing model performance. In efforts to shed better light         order information does not have a large impact on perfor-
+on what exactly models learn, the NLP community has de-            mance when pretraining large transformer language models,
+signed a wide variety of “probing tasks”: specialized, tar-        across a variety of metrics. This suggests that transformers
+geted tasks meant specifically for evaluation. The primary         use high-level word co-occurence statistics, which gives the
+purpose of Winoground is to serve as a probing task for vi-        illusion of an understanding of word order. Other work in
+sion and language models. See Fig. 1 for an example.               this space has tried to understand what models know about
+    We evaluate a variety of state-of-the-art vision and lan-      syntax [24, 28, 34, 49, 54, 71, 83] or the complex interaction
+guage (V&L) transformers [12, 23, 35, 40, 47, 51, 56, 68,          between syntactic and semantic categories [38, 78, 81, 82].
+76, 90] and RNN-based models [21, 45]. Surprisingly, all               Winograd schemas. The Winograd Schema Chal-
+of the models rarely—and if so only barely—outperform              lenge [44] was named after a coreference resolution prob-
+chance. Our findings indicate that the visio-linguistic com-       lem presented by Terry Winograd [85]. The goal is to
+positional reasoning capabilities of these models fall dra-        correctly resolve (an) ambiguous referent(s) in two En-
+matically short of what we might have hoped.                       glish sentences. The sentences have a minor difference
+    In what follows, we introduce the Winoground task and          that changes how a human resolves the referent. Wino-
+dataset. We then describe the models we tested and discuss         grad schema examples are easily handled by humans, and
+our findings. Next, we conduct an analysis of the perfor-          commonsense reasoning is said to be required [4]. For ex-
+mance of different models. We hope that insights from this         ample, in the sentence “The city councilmen refused the
+work will lead to more robust vision and language models.          demonstrators a permit because they [feared/advocated] vi-
+                                                                   olence”, the pronoun they can either refer to the councilmen
+2. Related Work                                                    or to the demonstrators depending on which word is cho-
+                                                                   sen. The format has been used in a variety of other tasks
+    Visio-linguistic stress testing. There are a number of         and datasets. For instance, Sakaguchi et al. [60] introduce
+existing multimodal stress tests about correctly understand-       WinoGrande: a large-scale approach to building a Wino-
+ing implausible scenes [13], exploitation of language and          grad Schema dataset that uses Amazon Mechanical Turk
+vision priors [11, 27], single word mismatches [64], hate          to generate sentences instead of expert annotators like the
+speech detection [26, 32, 41, 92], memes [39, 75], abla-           original work of Levesque et al. [44]. Other approaches use
+tion of one modality to probe the other [22], distracting          ambiguous pronouns in sentences to probe for gender biases
+models with visual similarity between images [7, 33], dis-         in models [59, 91]. See Kotcijan et al. [42] for an in-depth
+tracting models with textual similarity between many suit-         review. Winoground is the first work to apply these ideas
+able captions [1,17], collecting more diverse image-caption        to the vision and language domain, by using twin captions
+pairs beyond the predominately English and North Ameri-            with identical word content and two images that are each
+can/Western European datasets [50], probing for an under-          associated with one caption over the other.
+standing of verb-argument relationships [30], counting [53],
+or specific model failure modes [65, 69]. Many of these
+                                                                   3. Winoground
+stress tests rely only on synthetically generated images, of-
+ten with minimal visual differences, but no correspondingly           In this section, we describe how the dataset was con-
+minimal textual changes [80]. Other datasets test mod-             structed and how performance on the task is to be measured.
+els with a single caption [74] or a single image [6, 37].
+There are also purely visual stress tests with naturalistic im-    3.1. Dataset
+ages: ImageNet-C/ImageNet-P [31] tests models on pertur-              The Winoground dataset was hand-curated by four ex-
+bations for a variety of image features. Unlike Winoground,        pert annotators with extensive experience in vision and
+these stress tests tend to come from existing datasets that        language research as well as computational linguistics.
+have images and text from typical training domains, such as        Let (C0 , I0 ) and (C1 , I1 ) be two image-caption pairs. An
+Conceptual Captions [63], COCO [48], Visual7W [93] and             example satisfies the Winoground schema if and only if:
+VQA [3, 27]. None of them hold the set of words constant
+in the captions, which is what allows us to carefully test for        • (C0 , I0 ) and (C1 , I1 ) are preferred by the annotator
+compositional reasoning without any biases stemming from                over (C1 , I0 ) and (C0 , I1 ); and
+                                                                                        Category                         Tag    Count
+                                                                                                                     Object       141
+                                                                                        Linguisticswap-dep.         Relation      233
+                                                                                                                       Both        26
+(a) there is [a mug] in (c) a person [sits] and a   (e) it’s a [truck] [fire]
+[some grass]            dog [stands]                                                    Linguisticswap-indep.    1 Main Pred      293
+                                                                                                                2 Main Preds      108
+                                                                                                                   Symbolic         41
+                                                                                        Visual                        Series        31
+                                                                                                                  Pragmatics        24
+(b) there is [some (d) a person [stands]            (f) it’s a [fire] [truck]
+grass] in [a mug]  and a dog [sits]                                             Table 1. Linguistic and visual tag counts in the Winoground
+                                                                                dataset. Every example has a linguistic tag; only examples that
+       Object                   Relation                     Both               contain the visual phenomena have visual tags.
+
+
+
+                                                                                to objects in the real world. Relation swaps reorder el-
+                                                                                ements such as verbs, adjectives, prepositions, and/or ad-
+                                                                                verbs, which tend to take nouns referring to objects as se-
+(a) the kid [with the (c) the person with the (e) there are [three]             mantic arguments [2]. Swaps of both relations and objects
+magnifying       glass] ponytail [packs] stuff people and [two] win-            can involve two separate swaps, or can involve a single swap
+looks at them []        and other [buys] it    dows                             that changes parts of speech (e.g., “it’s a [fire] [truck]” vs.
+                                                                                “it’s a [truck] [fire]”). Examples of each broad tag group
+                                                                                can be seen in Fig. 3. For examples for each fine-grained
+                                                                                linguistic tag, see Appendix C.
+                                                                                    Separately, the annotators tagged examples for how
+(b) the kid [] looks at (d) the person with the (f) there are [two] peo-        many main predicates were in the captions, which is not
+them [with the magni- ponytail [buys] stuff ple and [three] win-                dependent on the specific swap happening between the two
+fying glass]            and other [packs] it    dows                            captions. For example, “left is blue and right is red” has
+                                                                                two main predicates and “water is in a bottle” has one main
+     Pragmatics                  Series                   Symbolic
+                                                                                predicate. It turned out that all examples in Winoground
+Figure 3. Examples from our dataset for the swap-dependent lin-                 have either one main predicate or two.
+guistic tags (top) and visual tags (bottom). The visual examples                    Finally, examples were tagged from a set of three non-
+are additionally tagged with the Relation tag, and 1, 2, and 1 main             mutually exclusive visual reasoning tags, which are tied in
+predicates from left to right. The linguistic examples are addition-            some way to the images in an example, and not necessar-
+ally tagged with 2, 1, and 1 main predicates from left to right.                ily the captions. The “Pragmatics” tag comprises examples
+                                                                                where the images need to be interpreted non-literally due to
+                                                                                idiomatic uses of language in a caption (e.g. “it starts with Z
+   • C0 and C1 have the same words and/or morphemes but
+                                                                                and ends with A” describing an image of a Zebra) or due to
+     the order differs.
+                                                                                attachment preferences of prepositional phrases in the cap-
+    We have secured a license from Getty Images to dis-                         tions (e.g. “the kid looks at them with the magnifying glass”
+tribute images for research purposes. Thus, the expert an-                      describing an image of a child looking at someone through
+notators were given access to the Getty Images API [25],                        a magnifying glass with greater confidence than an image
+and tasked with jointly creating captions and finding images                    of a child looking at someone while holding a magnifying
+to compose examples. We encouraged them to be as cre-                           glass at their side). The “Symbolic” tag represents whether
+ative as possible, and to mark each of their examples with                      a symbolic depiction of something must be understood to
+fine-grained linguistic tags. If applicable, annotators also                    make a correct prediction (e.g., objects in a child’s draw-
+marked examples with one or more visual reasoning tags.                         ing). Lastly, the “Series” tag is given to examples where
+    The annotators created a total of 70 linguistic tags for                    both images come from the same photo series on Getty,
+the swaps that make caption pairs different. This set of tags                   which typically means that the same people occur in both
+can be split into three broad groups: objects, relations, and                   images, with a similar background and in similar lighting.
+swaps involving both relations and objects. Object swaps                            See Fig. 3 for representative examples of the tags, and
+reorder elements such as noun phrases that tend to refer                        Tab. 1 for tag counts. As noted, Winoground is a probing
+dataset and so we prioritize clean, expert annotations over           [76], UniT [35], UNITER [12], VILLA [23], VinVL [90],
+mere size. Our dataset has 1600 image-text pairs in total,            ViLT [40], VisualBERT [47] and ViLBERT [51]. We also
+with 800 correct and 800 incorrect pairings. These comprise           evaluate several configurations of two types of RNN-based
+400 examples, with 800 unique captions and images.                    models: VSE++ [21] and VSRN [45]. We detail differences
+                                                                      between these models and provide a high-level overview in
+3.2. Metrics                                                          Tab. 2. We also establish a human baseline using crowd-
+    Performance on Winoground is computed according to                workers, as described in Sec. 4.3.
+three different metrics that evaluate different aspects of the
+models’ visio-linguistic reasoning abilities. The first metric        4.1. Vision & Language Transformers
+is the text score, which measures whether a model can se-                 Image and language embedding. All transformer
+lect the correct caption, given an image. Given images I0             models we evaluate use a pretrained BERT tokenizer
+and I1 and captions C0 and C1 , the text score for an exam-           [16], except CLIP, which uses a Byte-Pair Encoding tok-
+ple (C0 , I0 , C1 , I1 ) is computed according to:                    enizer [62] trained from scratch. For the image embed-
+                             
+                                                                      ding, five transformers (VisualBERT, ViLBERT, LXMERT,
+                             1 if s(C0 , I0 ) > s(C1 , I0 )
+                             
+                                                                      UNITER, ViLLA) [12,23,47,51,76] use region features ex-
+   f (C0 , I0 , C1 , I1 ) =       and s(C1 , I1 ) > s(C0 , I1 )
+                             
+                                                                     tracted from the fc6 layer of a Faster R-CNN [58] trained
+                               0 otherwise                            on Visual Genome [43]. VinVL trains its own feature ex-
+                                                                (1)   tractor on a large combined dataset from public sources with
+where s(·) is the model’s score for the image/caption pair.           a unified object vocabulary [90]. The CLIP, FLAVA, and
+This metric tests whether the ground truth caption for a              ViLT that we test all use Vision Transformer (ViT) [18]. In
+given image in our dataset is scored higher than the al-              ViT, images are flattened into patches that are linearly pro-
+ternative caption and whether this holds for the other im-            jected and combined with a position encoding. UniT [35]
+age/caption pair in the example too.                                  alternatively uses a transformer network [79] on top of a
+    The second metric is the image score, which measures              convolutional network following Carion et al. [9].
+whether a model can select the correct image, given a cap-                Single-stream vs. dual-stream encoders. Vision and
+tion. Given images I0 and I1 and captions C0 and C1 , the             language transformers are mainly single- or dual-stream
+image score for an example is computed according to:                  models: the embeddings for the image and text modalities
+                             
+                                                                      are either concatenated and then jointly encoded (single-
+                             1 if s(C0 , I0 ) > s(C0 , I1 )
+                             
+                                                                      stream), or encoded by two separate modality-specific en-
+   g(C0 , I0 , C1 , I1 ) =        and s(C1 , I1 ) > s(C1 , I0 )
+                             
+                                                                     coders with optional cross-modality fusion (dual-stream).
+                               0 otherwise                            Five of our transformers are single-stream [12, 23, 40, 47,
+                                                                (2)   90]. VinVL additionally concatenates object tags, which
+This metric tests whether the ground truth image for a given          are the set of objects detected by the X152-C4 model dur-
+caption is scored higher than the image corresponding to the          ing feature extraction, to the language tokens before en-
+alternative caption and whether this holds vice versa.                coding. All single-stream models use merged attention,
+    Our final metric combines the previous two. In their              where the language and visual input attend to both them-
+analysis of the Winograd Schema Challenge, Elazar et                  selves and the other modality. The dual-stream transformers
+al. [20] find that evaluation metrics tend to overestimate            we evaluate are CLIP, FLAVA, UniT, LXMERT and ViL-
+model performance by computing scores for the twin sen-               BERT [35, 51, 56, 68, 76]. CLIP and the contrastive con-
+tences individually instead of as a set. So, we also evalu-           figuration of FLAVA lack cross-modal attention. ViLBERT
+ate using the group score, where every combination for a              has language-only transformer layers that are then fused by
+given example {(C0 , I0 ), (C0 , I1 ), (C1 , I0 ), (C1 , I1 )} must   cross-modal transformer layers. LXMERT, the ITM config-
+be correctly scored by the model in order for the example to          uration of FLAVA, and UniT each use language-only and
+be considered correct. The group score in our framework is            vision-only layers that are also fused by cross-modal trans-
+computed according to:                                                former layers, which perform a combo of modality-specific
+                                                                     attention and co-attention across modalities.
+                              1 if f (C0 , I0 , C1 , I1 )
+                              
+                                                                          Pretraining objectives. V&L transformers use a num-
+     h(C0 , I0 , C1 , I1 ) =       and g(C0 , I0 , C1 , I1 )    (3)
+                              
+                                                                     ber of pretraining objectives including but not limited to
+                                0 otherwise                           masked language modeling, masked region modeling (clas-
+4. Experimental Setup                                                 sification of object classes and regression over image fea-
+                                                                      tures) and image-text matching. As we are evaluating a
+   We evaluate various configurations of the following mul-           model’s ability to determine if an image and a correspond-
+timodal transformers: CLIP [56], FLAVA [68], LXMERT                   ing caption match, we select V&L transformers that are pre-
+ Model                       Datasets                                                             # Images, Captions (Millions)   Architecture    Attention
+ VinVL [90]                  VQA, GQA, VG-QA, COCO, Flickr30k, CC, SBU                                               1.89, 4.87   single-stream   merged
+ UNITER [12]                 COCO, VG, CC, SBU                                                                       4.20, 9.58   single-stream   merged
+ ViLLA [23]                  COCO, VG, CC, SBU                                                                       4.20, 9.58   single-stream   merged
+ VisualBERT [47]             COCO, NVLR2                                                                             0.30, 0.52   single-stream   merged
+ ViLT [40]                   COCO, VG, SBU, CC                                                                       4.10, 9.85   single-stream   merged
+ LXMERT [76]                 COCO, VG                                                                                0.18, 9.18   dual-stream     modality-specific, co-attn, merged
+ ViLBERT [51]                CC                                                                                      3.30, 3.30   dual-stream     modality-specific, co-attn, merged
+ UniT [35]                   COCO detect., VG detect., VQAv2, SNLI-VE QNLI, MNLI-mm, QQP, SST-2                      0.69, 1.91   dual-stream     modality-specific, merged
+ FLAVA IT M [68]             COCO, SBU, LN, CC, VG, WIT, CC 12M, RC, YFCC100M                                     70.00, 70.00    dual-stream     modality-specific, merged
+ FLAVA Contrastive [68]      COCO, SBU, LN, CC, VG, WIT, CC 12M, RC, YFCC100M                                     70.00, 70.00    dual-stream     modality-specific
+ CLIP [56]                   −                                                                                  400.00, 400.00    dual-stream     modality-specific
+ VSE++ and VSRN COCO         COCO                                                                                    0.11, 0.57   dual-stream     −
+ VSE++ and VSRN F lickr30k   Flickr30k                                                                               0.03, 0.16   dual-stream     −
+
+
+Table 2. A high-level overview of the differences between the models we evaluate by the pretraining datasets, architecture, and attention
+mechanisms between the modalities. We omit datasets that were only used to train backbones. We exclude the language embedding from
+this table as every model uses a pretrained BERT tokenizer, except CLIP, VSE++, and VSRN. The pretraining datasets include COCO [48],
+Visual Genome (VG) [43], Conceptual Captions (CC) [63], SBU Captions [52], Flickr30k [88], VQA 2.0 [27], VCR [89], NLVR2 [74],
+SNLI-VE [87], QNLI [57], MLNI-mm [84], QQP [36], Localized Narratives (LN) [55], Wikipedia Image Text (WIT) [73], Conceptual
+Captions 12M (CC 12M) [10], Red Caps (RC) [15], YFCC100M [77], and SST-2 [72]. CLIP uses their own dataset for pretraining.
+
+
+trained with an image-text matching classification head or                               least ten annotators. We compute the human image-caption
+that produce a similarity score between the two modalities1 .                            score as the ratio of annotators who said the image/caption
+                                                                                         pair match over the total number of annotators for the pair.
+4.2. Multimodal RNNs                                                                     More details about the human labelling interface, onboard-
+   To determine whether low performance on Winoground                                    ing criteria, and quality control are provided in Appendix E.
+is unique to transformer-based models, we include results
+for two sequence-based models, which are VSRN [45] and                                   5. Results
+VSE++ [21]. Both VSE++ and VSRN have a loss func-
+                                                                                         5.1. Compared to humans
+tion that prioritizes minimizing the hardest negative’s score.
+The hardest negative is the highest-scoring image-caption                                    As shown in Tab. 3, the models struggle across the board
+pair that is not correct. Intuitively, this type of loss function                        on Winoground, often performing close to or below ran-
+could enable models to get higher scores on Winoground in                                dom chance. Comparatively, as expected, the human per-
+particular and may be useful in future work. Although we                                 formance is high across the full range of linguistic and vi-
+show later in the paper that VSRN and VSE++ do not do                                    sual phenomena. For the text score, we observe ∼50%
+well, perhaps due to issues besides the loss function. Both                              absolute difference between humans and the best perform-
+models use a GRU [14] to get language embeddings and                                     ing models—UNITER, VILLA VinVL, ViLT, FLAVA, and
+a separate pipeline to get image embeddings. Scores for                                  CLIP—with the remaining models below chance.
+image-caption pairs are found by taking an inner-product of                                  The human performance is only slightly lower for the
+the embeddings. VSE’s image encoder is a linear projection                               image score, whereas all models perform much worse.
+of the embedding from a backbone (either ResNet152 [29]                                  Even the highest performing model, FLAVAIT M , has a
+or VGG19 [66]). In VSRN, a ResNet101-based Faster R-                                     ∼70% performance gap compared to humans. This gap is
+CNN with graph convolutions on top is used to get a se-                                  not unique to our dataset: in prior work [21] [56], mod-
+quence of features which are fed into a GRU. The GRU’s                                   els also tend to perform significantly better on caption re-
+last hidden state is then used as the image embedding.                                   trieval compared to image retrieval. More investigation is
+                                                                                         required to pinpoint the reasons: perhaps textual encoders
+4.3. Human Performance                                                                   are stronger, or the text modality has different biases.
+   We employed crowd workers on the Amazon Mechani-                                          Lastly, we consider the group score. For humans, it is
+cal Turk platform to establish a more conservative human                                 not appreciably lower than their text and image scores. All
+baseline than the expert annotator upper bound of a perfect                              of the models are below random chance here as well. We
+score. Like the models, annotators are shown one image                                   report confidence intervals for these results in Appendix A.
+and one caption at a time. Annotators are asked the binary
+                                                                                         5.2. Results by Tags
+choice question “Does the caption match the image?”. All
+1600 combinations of images and captions are labeled by at                                  For the swap-dependent linguistic tags, human perfor-
+    1 UniT is the only model we selected that was not pretrained on image-               mance is highest on object, followed by the relation and
+text matching. To get image-text alignment scores, we finetuned UniT on                  then both. For the swap-independent linguistic tags, hu-
+image-text matching loss using MS-COCO [48]                                              mans do better on examples with two main predicates,
+ Model                              Text    Image      Group        judgements, then the human scores would be substantially
+                                                                    higher. Finally, models do worst on the series tag where
+ MTurk Human                       89.50     88.50      85.50       most get a 0% group score, which indicates that they are
+ Random Chance                     25.00     25.00      16.67       always choosing one image over the other regardless of the
+ VinVL                             37.75     17.75      14.50       caption (or vice versa).
+ UNITERlarge                       38.00     14.00      10.50
+ UNITERbase                        32.25     13.25      10.00       6. Discussion
+ ViLLAlarge                        37.00     13.25      11.00          Despite the fact that every model struggled on
+ ViLLAbase                         30.00     12.00       8.00       Winoground compared to humans, we hope to gain further
+ VisualBERTbase                    15.50      2.50       1.50       insights by analyzing which aspects of these models could
+ ViLT (ViT-B/32)                   34.75     14.00       9.25       contribute to their performance differences.
+ LXMERT                            19.25      7.00       4.00
+                                                                    6.1. Capabilities of Encoders
+ ViLBERTbase                       23.75      7.25       4.75
+ UniTIT M f inetuned               19.50      6.25       4.00           Richer features. UNITER, VILLA, VinVL, ViLT,
+ FLAVAIT M                         32.25     20.50      14.25       FLAVA, and CLIP are the only models that get above ran-
+ FLAVAContrastive                  25.25     13.50       9.00       dom chance performance in Tab. 3, and only for the text
+ CLIP (ViT-B/32)                   30.75     10.50       8.00       score. We hypothesize that these models perform better
+ VSE++COCO (ResNet)                22.75      8.00       4.00       than others due to their richer features (unimodal features
+ VSE++COCO (VGG)                   18.75      5.50       3.50       for CLIP and FLAVAContrastive , multimodal features for
+ VSE++F lickr30k (ResNet)          20.00      5.00       2.75       the others). A potential explanation could be the large-scale
+ VSE++F lickr30k (VGG)             19.75      6.25       4.50       pretraining used by CLIP and FLAVA, the large training
+ VSRNCOCO                          17.50      7.00       3.75       dataset used to train the object detector for VinVL, or the
+ VSRNF lickr30k                    20.00      5.00       3.50       ViT approach for image features used by ViLT, FLAVA, and
+                                                                    CLIP that encodes every portion of the image.
+Table 3. Results on the Winoground dataset across the text, image
+                                                                        Common failure modes. We highlight again that most
+and group score metrics. Results above random chance in bold.       of the models fail with 0% group score on the same image
+                                                                    series tag. One explanation is that the models’ visual en-
+                                                                    coders might be too weak to correctly discriminate between
+which tend to contain longer and more complicated sen-              substantially similar images. This could cause the models
+tences. The models perform poorly on every category, but            to fall back on their unimodal priors, picking one caption
+they largely show the opposite pattern. They perform bet-           or image over the other in the majority of the four potential
+ter on examples with simpler and shorter sentences which            caption-image pairings.
+more often have swaps at the morpheme level (see Tab. 4).               Heat maps. We show a heatmap in Fig. 4 of the word-
+One exception to the low model performance is that CLIP             region alignment between ViLT’s vision and language fea-
+performs comparably to the humans on the both tag text              tures as a visualization for a model with some of the better
+score—the 26 examples with the both tag have some of the            performance on our dataset. ViLLA and UNITER are also
+shortest and least compositional captions in our dataset (e.g.      trained with word-region alignment and we provide their
+“presenting the watch” vs “watching the present”).                  heatmaps in Appendix D.
+   We also evaluate performance for the visual reasoning                Complicated captions. The above-chance models do
+tags as shown in Tab. 5. Models and humans are partic-              worse on examples with longer captions, possibly due to
+ularly good at the symbolic examples, but the models are            weak language encoding abilities. As shown in Tab. 6, cap-
+poor comparatively. On the pragmatics tag, humans have              tion length and lower model performance significantly cor-
+the lowest performance. Ten crowdworkers probably didn’t            relate for the best models, even though the correlation is re-
+capture slight pragmatics preferences that our expert lin-          versed for humans. The examples with the shortest captions
+guist annotators agreed on. One example that the crowd-             are also the least compositional; they are primarily the ex-
+workers failed is Fig. 3(a): “the kid [with the magnifying          amples where the parts of speech change between swapped
+glass] looks at them []”. All ten annotators said that “the         words, or where there is a morpheme-level swap. Finally,
+kid with the magnifying glass looks at them” was accept-            we show in Tab. 6 correlations between caption perplexity2
+able for both images, but captured the correct preference           and model scores. We found that there is typically a weak
+for the second caption. This reveals a limitation in how the        correlation between models assigning an image-caption pair
+task was presented to humans: our hypothesis is that if we          a higher score and a caption having low perplexity.
+gave humans both images and both captions at the same                  2 We used the standard size GPT2 checkpoint from Hugging Face trans-
+
+time, or if significantly more human annotators gave their          formers to get perplexity [86].
+                                           Object                   Relation                   Both                    1 Main Pred            2 Main Preds
+      Model                        Text    Image Group       Text   Image Group       Text    Image    Group    Text     Image Group      Text Image Group
+      MTurk Human                 92.20     90.78   88.65   89.27    90.56   86.70   76.92     57.69   57.69   87.33     85.62   82.53   95.37   96.30   93.52
+      VinVL                       36.88     17.73   14.18   37.77    17.60   14.16   42.31     19.23   19.23   39.38     21.23   17.47   33.33    8.33    6.48
+      UNITERlarge                 39.01     12.77    9.93   36.05    14.16    9.87   50.00     19.23   19.23   40.07     16.44   13.36   32.41    7.41    2.78
+      UNITERbase                  34.04     11.35    9.22   30.04    14.16   10.30   42.31     15.38   11.54   35.27     14.73   11.99   24.07    9.26    4.63
+      ViLLAlarge                  36.88     14.89   11.35   37.34    12.88   11.16   34.62      7.69    7.69   39.73     17.12   14.38   29.63    2.78    1.85
+      ViLLAbase                   33.33     15.60    9.93   27.04     9.01    6.01   38.46     19.23   15.38   33.22     14.04   10.27   21.30    6.48    1.85
+      VisualBERTbase              19.15      2.13    0.71   12.88     2.15    1.72   19.23      7.69    3.85   16.44      2.74    1.71   12.96    1.85    0.93
+      ViLT (ViT-B/32)             31.91     15.60    9.22   36.91    11.59    8.15   30.77     26.92   19.23   35.27     17.12   11.64   33.33    5.56    2.78
+      LXMERT                      22.70      9.22    6.38   17.60     5.58    2.58   15.38      7.69    3.85   19.18      8.56    5.14   19.44    2.78    0.93
+      ViLBERTbase                 29.08     10.64    7.09   19.31     3.00    1.72   34.62     26.92   19.23   23.97      8.90    5.82   23.15    2.78    1.85
+      UniTIT M f inetuned         17.73      5.67    2.13   18.03     4.72    3.43   42.31     23.08   19.23   21.58      6.85    4.11   13.89    4.63    3.70
+      FLAVAIT M                   31.91     23.40   14.89   30.04    16.31   12.02   53.85     42.31   30.77   36.30     24.66   17.81   21.30    9.26    4.63
+      FLAVAContrastive            23.40     19.15   11.35   23.61     8.58    5.58   50.00     26.92   26.92   26.37     16.44   10.62   22.22    5.56    4.63
+      CLIP (ViT-B/32)             34.75      7.80    6.38   22.75     8.58    5.58   80.77     42.31   38.46   35.27     13.01   10.27   18.52    3.70    1.85
+      VSE++COCO (ResNet)          21.99      6.38    1.42   23.61     9.01    5.58   19.23      7.69    3.85   25.00      9.59    4.79   16.67    3.70    1.85
+      VSE++COCO (VGG)             17.73      2.13    2.13   18.45     7.30    3.86   26.92      7.69    7.69   18.49      4.79    2.74   19.44    7.41    5.56
+      VSE++F lickr30k (ResNet)    20.57      6.38    3.55   18.88     4.29    2.15   26.92      3.85    3.85   21.58      6.51    3.42   15.74    0.93    0.93
+      VSE++F lickr30k (VGG)       17.73      4.96    2.84   19.74     6.87    5.15   30.77      7.69    7.69   20.55      6.16    4.79   17.59    6.48    3.70
+      VSRNCOCO                    15.60      4.96    2.13   18.88     7.73    4.72   15.38     11.54    3.85   17.12      7.19    3.77   18.52    6.48    3.70
+      VSRNF lickr30k              16.31      4.96    2.13   21.03     4.29    3.86   30.77     11.54    7.69   20.89      5.82    3.77   17.59    2.78    2.78
+
+
+                                         Table 4. The results by linguistic tag. Results above chance are in bold.
+
+                                                                    Symbolic                 Pragmatics          Same Image Series
+                                 Model                       Text    Image Group      Text     Image Group      Text Image Group
+                                 MTurk Human                96.43    92.86   92.86   58.82     41.18   41.18   95.65     91.30   91.30
+                                 VinVL                      25.00    17.86   14.29   29.41      5.88    5.88   34.78     17.39   13.04
+                                 UNITERlarge                39.29    28.57   17.86   35.29      0.00    0.00    4.35      8.70    0.00
+                                 UNITERbase                 46.43    14.29   14.29   29.41     17.65   11.76    8.70      8.70    0.00
+                                 ViLLAlarge                 39.29    14.29   10.71   17.65      0.00    0.00   17.39      4.35    0.00
+                                 ViLLAbase                  42.86    17.86   14.29   29.41      5.88    5.88   13.04      8.70    4.35
+                                 VisualBERTbase             28.57     0.00    0.00    5.88      0.00    0.00   13.04      0.00    0.00
+                                 ViLT (ViT-B/32)            28.57    17.86   10.71   35.29      0.00    0.00   26.09      0.00    0.00
+                                 LXMERT                     28.57     3.57    3.57   17.65      5.88    0.00    8.70      4.35    0.00
+                                 ViLBERTbase                28.57    10.71    7.14   29.41      5.88    5.88   13.04      0.00    0.00
+                                 UniTIT M f inetuned        14.29    10.71    7.14   17.65      5.88    5.88   21.74      4.35    4.35
+                                 FLAVAIT M                  25.00    28.57   17.86   17.65     29.41   11.76   17.39      8.70    0.00
+                                 FLAVAContrastive           17.86    10.71   10.71   11.76     23.53    5.88   17.39      4.35    4.35
+                                 CLIP (ViT-B/32)            39.29     3.57    3.57   35.29      5.88    5.88    8.70      0.00    0.00
+                                 VSE++COCO (ResNet)         32.14    10.71   10.71   23.53     11.76    0.00   13.04      4.35    4.35
+                                 VSE++COCO (VGG)            17.86    14.29    7.14   17.65      0.00    0.00   13.04      4.35    4.35
+                                 VSE++F lickr30k (ResNet)   21.43     3.57    0.00   23.53      0.00    0.00   17.39      4.35    0.00
+                                 VSE++F lickr30k (VGG)      28.57    10.71   10.71   11.76      0.00    0.00   13.04      4.35    0.00
+                                 VSRNCOCO                    7.14     3.57    0.00   11.76      0.00    0.00   13.04      0.00    0.00
+                                 VSRNF lickr30k             21.43     3.57    3.57   35.29     11.76    5.88    8.70      4.35    4.35
+
+
+                                          Table 5. The results by visual tag. Results above chance are in bold.
+
+
+6.2. By Architecture & Type of Attention                                              6.3. By Multimodal Pretraining Dataset Size
+                                                                                         We find highly significant correlations between the size
+    As shown in Tabs. 3 to 5, both single-stream and dual-                            of the multimodal pretraining dataset and the scores, if we
+stream models perform significantly worse than humans on                              remove CLIP and FLAVA as outliers. Tab. 7 shows these
+the text, image and group scores. We find at least one                                correlations, and Appendix B has graphs showing each
+single-stream model and at least one dual-stream model                                model’s score versus the pretraining data size. The uni-
+are above chance for most of our experiments, suggesting                              modal training data (for image backbones or pre-initialized
+there is not a distinct performance difference by architec-                           text encoders) is not included in these calculations.
+ture. Although, six single-stream model checkpoints do
+above chance overall, compared to only the very large dual-                           7. Conclusion
+stream models (CLIP and FLAVA). CLIP and FLAVA were
+trained on an order of magnitude more data than the other                                We introduced a novel task and dataset, Winoground,
+models. Across all types of attention, models struggled                               aimed at measuring visio-linguistic compositional reason-
+compared to humans. But neither of the two models us-                                 ing in state of the art vision and language models. We
+ing co-attention, in conjunction with single-modality and/or                          demonstrate that models fall short, in most cases perform-
+merged attention, performed above chance.                                             ing no better than chance. Our findings highlight that there
+                a brown dog is on a white couch                                    circular food on heart-shaped wood
+
+
+
+
+              a white dog    is on a   brown couch                                 heart-shaped food on circular wood
+
+
+
+                                                                                                                             .png
+
+
+
+
+Figure 4. Word-region alignment scores between the image and text features for ViLT [40] on examples from Winoground. In this case
+study, ViLT appears to disregard the information from adjectives. E.g., the heatmaps highlight the brown dog just as strongly regardless of
+whether the text was “brown dog” or “white dog”.
+
+
+                                Perplexity      Caption Length                Pretraining Modality       Score     Corr.    p-value
+ Model                        Corr. p-value     Corr. p-value
+                                                                                                         Text       0.84        0.00
+ MTurk Human                   0.05      0.07    0.20      0.00
+                                                                              Image                      Image      0.76        0.00
+ VinVL                        -0.05      0.04   -0.20      0.00
+ UNITERlarge                  -0.01      0.57   -0.16      0.00                                          Group      0.75        0.00
+ UNITERbase                   -0.03      0.22   -0.14      0.00                                          Text       0.77        0.00
+ ViLLAlarge                   -0.02      0.39   -0.12      0.01               Caption                    Image      0.75        0.00
+ ViLLAbase                    -0.04      0.13   -0.11      0.03
+                                                                                                         Group      0.71        0.00
+ VisualBERTbase               -0.04      0.15   -0.06      0.22
+ ViLT (ViT-B/32)              -0.04      0.16   -0.16      0.00
+ LXMERT                       -0.04      0.12   -0.11      0.02         Table 7. Correlations between the number of pretraining images
+ ViLBERTbase                  -0.04      0.11   -0.14      0.00         and captions and the model text, image, and group scores. CLIP
+ UniTIT M f inetuned          -0.01      0.73   -0.02      0.73         and FLAVA are excluded as outliers.
+ FLAVAIT M                    -0.03      0.22   -0.23      0.00
+ FLAVAContrastive             -0.06      0.01   -0.19      0.00
+ CLIP (ViT-B/32)              -0.04      0.09   -0.22      0.00             Broader Impact & Limitations.            Winoground is
+ VSE++COCO (ResNet)           -0.05      0.04    0.01      0.90         English-only and translation to other languages may be non-
+ VSE++COCO (VGG)              -0.04      0.08    0.03      0.56         trivial [50]. Expert curation is time-consuming and our
+ VSE++F lickr30k (ResNet)     -0.02      0.43    0.02      0.67
+                                                                        dataset is limited in size. Multimodal datasets containing
+ VSE++F lickr30k (VGG)         0.01      0.74   -0.10      0.04
+ VSRNCOCO                     -0.07      0.01   -0.05      0.36         images of people require thoughtful consideration of how
+ VSRNF lickr30k               -0.02      0.32   -0.05      0.29         people are represented (see [5] for a detailed analysis of the
+                                                                        stereotypes present in many multimodal datasets). We used
+Table 6. (left) The correlation between model image-caption             gender underspecified human denoting terms (e.g., person,
+scores and the caption perplexity from GPT2. (right) The correla-       child) to avoid issues with inferring gender identity from
+tion between the model group scores and the caption length.             images [61]. Our annotators disproportionately come from
+                                                                        the USA and the same could be true for our crowdworkers.
+                                                                            Getty Acknowledgement. Images in the paper are a
+is more work to be done. Particularly, the field could investi-         compilation of assets, including ©Getty Images/Natasha
+gate possible strengths of single-stream models, the compi-             Breen, Maki Nakamura, Jessica Peterson, Kundanlall
+lation of more pretraining data, improving image-encoding               Sharma, lacaosa, Alberto Bogo, Vu Le, Toson Rueangsuk-
+capabilities, and pretraining objectives that emphasize sim-            sut, Nisian Hughes, Tanja Walter, Douglas Sacha, PBNJ
+ilar but wrong images. We hope that our task and dataset                Productions, Glow Images, 10’000 Hours, zoranm, Marlene
+will help guide research in this important direction.                   Ford, Westend61.
+References                                                          [17] Nan Ding, Sebastian Goodman, Fei Sha, and Radu Soricut.
+                                                                         Understanding image and text simultaneously: a dual vision-
+ [1] Arjun Akula, Spandana Gella, Yaser Al-Onaizan, Song-                language machine comprehension task. In arXiv preprint
+     Chun Zhu, and Siva Reddy. Words aren’t enough, their order          arXiv:1612.07833, 2016. 2
+     matters: On the robustness of grounding visual referring ex-
+                                                                    [18] Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov,
+     pressions. In ACL, 2020. 2
+                                                                         Dirk Weissenborn, Xiaohua Zhai, Thomas Unterthiner,
+ [2] Daniel Altshuler,       Terence Parsons,       and Roger            Mostafa Dehghani, Matthias Minderer, Georg Heigold, Syl-
+     Schwarzschild. A Course in Semantics. MIT Press,                    vain Gelly, Jakob Uszkoreit, and Neil Houlsby. An Image is
+     2019. 3                                                             Worth 16x16 Words: Transformers for Image Recognition at
+ [3] Stanislaw Antol, Aishwarya Agrawal, Jiasen Lu, Margaret             Scale. In ICLR, 2021. 4
+     Mitchell, Dhruv Batra, C Lawrence Zitnick, and Devi Parikh.
+                                                                    [19] Zi-Yi Dou, Yichong Xu, Zhe Gan, Jianfeng Wang, Shuo-
+     Vqa: Visual question answering. In ICCV, 2015. 2
+                                                                         hang Wang, Lijuan Wang, Chenguang Zhu, Zicheng Liu,
+ [4] David Bender. Establishing a human baseline for the wino-           Michael Zeng, et al. An empirical study of training end-
+     grad schema challenge. In Modern Artificial Intelligence and        to-end vision-and-language transformers. In arXiv preprint
+     Cognitive Science, 2015. 2                                          arXiv:2111.02387, 2021. 1
+ [5] Abeba Birhane, Vinay Uday Prabhu, and Emmanuel Ka-
+                                                                    [20] Yanai Elazar, Hongming Zhang, Yoav Goldberg, and Dan
+     hembwe. Multimodal datasets: misogyny, pornography, and
+                                                                         Roth. Back to square one: Artifact detection, training and
+     malignant stereotypes. In arXiv preprint arXiv:2110.01963,
+                                                                         commonsense disentanglement in the winograd schema. In
+     2021. 8
+                                                                         EMNLP, 2021. 4
+ [6] Yonatan Bitton, Gabriel Stanovsky, Roy Schwartz, and
+                                                                    [21] Fartash Faghri, David J. Fleet, Jamie Ryan Kiros, and Sanja
+     Michael Elhadad. Automatic generation of contrast sets
+                                                                         Fidler. Vse++: Improving visual-semantic embeddings with
+     from scene graphs: Probing the compositional consistency
+                                                                         hard negatives. In BMVC, 2018. 2, 4, 5
+     of GQA. In NAACL: Human Language Technologies, 2021.
+                                                                    [22] Stella Frank, Emanuele Bugliarello, and Desmond Elliott.
+     2
+                                                                         Vision-and-language or vision-for-language? on cross-
+ [7] Ben Bogin, Shivanshu Gupta, Matt Gardner, and Jonathan
+                                                                         modal influence in multimodal transformers. In EMNLP,
+     Berant. Covr: A test-bed for visually grounded composi-
+                                                                         2021. 2
+     tional generalization with real images. In EMNLP, 2021. 2
+                                                                    [23] Zhe Gan, Yen-Chun Chen, Linjie Li, Chen Zhu, Yu Cheng,
+ [8] Jize Cao, Zhe Gan, Yu Cheng, Licheng Yu, Yen-Chun Chen,
+                                                                         and Jingjing Liu. Large-scale adversarial training for vision-
+     and Jingjing Liu. Behind the scene: Revealing the secrets of
+                                                                         and-language representation learning. In NeurIPS, 2020. 2,
+     pre-trained vision-and-language models. In ECCV, 2020. 1
+                                                                         4, 5
+ [9] Nicolas Carion, Francisco Massa, Gabriel Synnaeve, Nicolas
+     Usunier, Alexander Kirillov, and Sergey Zagoruyko. End-to-     [24] Jon Gauthier, Jennifer Hu, Ethan Wilcox, Peng Qian, and
+     end object detection with transformers. In ECCV, 2020. 4            Roger Levy. SyntaxGym: An online platform for targeted
+                                                                         evaluation of language models. In ACL: System Demonstra-
+[10] Soravit Changpinyo, Piyush Sharma, Nan Ding, and Radu
+                                                                         tions, 2020. 2
+     Soricut. Conceptual 12m: Pushing web-scale image-text pre-
+     training to recognize long-tail visual concepts. In CVPR,      [25] https://www.gettyimages.com/. 3
+     2021. 5                                                        [26] Raul Gomez, Jaume Gibert, Lluis Gomez, and Dimosthe-
+[11] Wei-Lun Chao, Hexiang Hu, and Fei Sha. Being nega-                  nis Karatzas. Exploring hate speech detection in multimodal
+     tive but constructively: Lessons learnt from creating bet-          publications. In ICCV, 2020. 2
+     ter visual question answering datasets. In arXiv preprint      [27] Yash Goyal, Tejas Khot, Douglas Summers-Stay, Dhruv Ba-
+     arXiv:1704.07121, 2017. 2                                           tra, and Devi Parikh. Making the v in vqa matter: Elevating
+[12] Yen-Chun Chen, Linjie Li, Licheng Yu, Ahmed El Kholy,               the role of image understanding in visual question answer-
+     Faisal Ahmed, Zhe Gan, Yu Cheng, and Jingjing Liu. Uniter:          ing. In CVPR, 2017. 2, 5
+     Universal image-text representation learning. In ECCV,         [28] Kristina Gulordava, Piotr Bojanowski, Edouard Grave, Tal
+     2020. 2, 4, 5                                                       Linzen, and Marco Baroni. Colorless green recurrent net-
+[13] Myung Jin Choi, Antonio Torralba, and Alan S. Willsky.              works dream hierarchically. In NAACL: Human Language
+     Context models and out-of-context objects. In Pattern               Technologies, 2018. 2
+     Recognition Letters, 2012. 2                                   [29] Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun.
+[14] Junyoung Chung, Caglar Gulcehr, KyungHyun Cho, and                  Deep residual learning for image recognition. In CVPR,
+     Yoshua Bengio. Empirical evaluation of gated recurrent neu-         2016. 5
+     ral networks on sequence modeling. In NeurIPS, 2014. 5         [30] Lisa Anne Hendricks and Aida Nematzadeh. Probing image-
+[15] Karan Desai, Gaurav Kaul, Zubin Aysola, and Justin John-            language transformers for verb understanding. In ACL-
+     son. Redcaps: Web-curated image-text data created by the            IJCNLP, 2021. 2
+     people. In NeurIPS Datasets and Benchmarks, 2021. 5            [31] Dan Hendrycks and Thomas Dietterich. Benchmarking neu-
+[16] Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina              ral network robustness to common corruptions and perturba-
+     Toutanova. BERT: Pre-training of deep bidirectional trans-          tions. In ICLR, 2019. 2
+     formers for language understanding. In NAACL: Human            [32] Homa Hosseinmardi, Sabrina Arredondo Mattson, Rahat Ibn
+     Language Technologies, 2019. 4                                      Rafiq, Richard Han, Qin Lv, and Shivakant Mishra. Detec-
+     tion of cyberbullying incidents on the instagram social net-    [48] Tsung-Yi Lin, Michael Maire, Serge Belongie, James Hays,
+     work. In arXiv preprint arXiv:1503.03909, 2015. 2                    Pietro Perona, Deva Ramanan, Piotr Dollár, and C Lawrence
+[33] Hexiang Hu, Ishan Misra, and Laurens van der Maaten. Eval-           Zitnick. Microsoft coco: Common objects in context. In
+     uating text-to-image matching using binary image selection           ECCV, 2014. 2, 5
+     (bison). In ICCV, 2019. 2                                       [49] Tal Linzen, Emmanuel Dupoux, and Yoav Goldberg. As-
+[34] Jennifer Hu, Jon Gauthier, Peng Qian, Ethan Wilcox, and              sessing the ability of lstms to learn syntax-sensitive depen-
+     Roger Levy. A systematic assessment of syntactic general-            dencies. In TACL, 2015. 2
+     ization in neural language models. In ACL, 2020. 2              [50] Fangyu Liu, Emanuele Bugliarello, Edoardo Maria Ponti,
+[35] Ronghang Hu and Amanpreet Singh. Unit: Multimodal mul-               Siva Reddy, Nigel Collier, and Desmond Elliott. Visu-
+     titask learning with a unified transformer. In arXiv preprint        ally grounded reasoning across languages and cultures. In
+     arXiv:2102.10772, 2021. 2, 4, 5                                      EMNLP, 2021. 2, 8
+[36] Shankar Iyer, Nikhil Dandekar, and Kornel Csernai. First        [51] Jiasen Lu, Dhruv Batra, Devi Parikh, and Stefan Lee. ViL-
+     quora dataset release: Question pairs, 2017. 5                       BERT: Pretraining Task-Agnostic Visiolinguistic Represen-
+[37] Justin Johnson, Bharath Hariharan, Laurens Van                       tations for Vision-and-Language Tasks. In NeurIPS, 2019.
+     Der Maaten, Li Fei-Fei, C Lawrence Zitnick, and Ross                 1, 2, 4, 5
+     Girshick. Clevr: A diagnostic dataset for compositional         [52] Vicente Ordonez, Girish Kulkarni, and Tamara Berg.
+     language and elementary visual reasoning. In CVPR, 2017.             Im2text: Describing images using 1 million captioned pho-
+     2                                                                    tographs. In NIPS, 2011. 5
+[38] Katharina Kann, Alex Warstadt, Adina Williams, and              [53] Letitia Parcalabescu, Albert Gatt, Anette Frank, and Iacer
+     Samuel R. Bowman. Verb argument structure alternations               Calixto. Seeing past words: Testing the cross-modal capa-
+     in word and sentence embeddings. In SCiL, 2019. 2                    bilities of pretrained v&l models on counting tasks. In ACL,
+[39] Douwe Kiela, Hamed Firooz, Aravind Mohan, Vedanuj                    2021. 2
+     Goswami, Amanpreet Singh, Pratik Ringshia, and Da-              [54] Prasanna Parthasarathi, Koustuv Sinha, Joelle Pineau, and
+     vide Testuggine. The hateful memes challenge: Detect-                Adina Williams. Sometimes we want ungrammatical trans-
+     ing hate speech in multimodal memes. In arXiv preprint               lations. In Findings of the Association for Computational
+     arXiv:2005.04790, 2020. 2                                            Linguistics: EMNLP, 2021. 2
+[40] Wonjae Kim, Bokyung Son, and Ildoo Kim. Vilt: Vision-           [55] Jordi Pont-Tuset, Jasper Uijlings, Soravit Changpinyo, Radu
+     and-language transformer without convolution or region su-           Soricut, and Vittorio Ferrari. Connecting vision and lan-
+     pervision. In ICML, 2021. 2, 4, 5, 8                                 guage with localized narratives. In ECCV, 2020. 5
+[41] Hannah Rose Kirk, Bertram Vidgen, Paul Röttger, Tris-          [56] Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya
+     tan Thrush, and Scott A Hale.             Hatemoji: A test           Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry,
+     suite and adversarially-generated dataset for benchmark-             Amanda Askell, Pamela Mishkin, Jack Clark, Gretchen
+     ing and detecting emoji-based hate. In arXiv preprint                Krueger, and Ilya Sutskever. Learning transferable visual
+     arXiv:2108.05921, 2021. 2                                            models from natural language supervision. In ICML, 2021.
+[42] Vid Kocijan, Thomas Lukasiewicz, Ernest Davis, Gary                  1, 2, 4, 5
+     Marcus, and Leora Morgenstern. A review of winograd             [57] Pranav Rajpurkar, Jian Zhang, Konstantin Lopyrev, and
+     schema challenge datasets and approaches. In arXiv preprint          Percy Liang. Squad: 100,000+ questions for machine com-
+     arXiv:2004.13831, 2020. 2                                            prehension of text. In arXiv preprint arXiv:1606.05250,
+[43] Ranjay Krishna, Yuke Zhu, Oliver Groth, Justin Johnson,              2016. 5
+     Kenji Hata, Joshua Kravitz, Stephanie Chen, Yannis Kalan-       [58] Shaoqing Ren, Kaiming He, Ross Girshick, and Jian Sun.
+     tidis, Li-Jia Li, David A Shamma, et al. Visual genome: Con-         Faster r-cnn: Towards real-time object detection with region
+     necting language and vision using crowdsourced dense im-             proposal networks. In NeurIPS, 2015. 4
+     age annotations. In arXiv preprint arXiv:1602.07332, 2016.      [59] Rachel Rudinger, Jason Naradowsky, Brian Leonard, and
+     4, 5                                                                 Benjamin Van Durme. Gender bias in coreference resolu-
+[44] Hector Levesque, Ernest Davis, and Leora Morgenstern. The            tion. In arXiv preprint arXiv:1804.09301, 2018. 2
+     winograd schema challenge. In Conference on the Principles      [60] Keisuke Sakaguchi, Ronan Le Bras, Chandra Bhagavatula,
+     of Knowledge Representation and Reasoning, 2012. 1, 2                and Yejin Choi. Winogrande: An adversarial winograd
+[45] Kunpeng Li, Yulun Zhang, Kai Li, Yuanyuan Li, and Yun                schema challenge at scale. In AAAI, 2020. 2
+     Fu. Visual semantic reasoning for image-text matching. In       [61] Morgan Klaus Scheuerman, Jacob M. Paul, and Jed R.
+     ICCV, 2019. 2, 4, 5                                                  Brubaker. How computers see gender: An evaluation of gen-
+[46] Linjie Li, Zhe Gan, and Jingjing Liu. A closer look at the           der classification in commercial facial analysis services. In
+     robustness of vision-and-language pre-trained models. In             ACM: Human Computer Interaction, 2019. 8
+     arXiv preprint arXiv:2012.08673, 2020. 1                        [62] Rico Sennrich, Barry Haddow, and Alexandra Birch. Neural
+[47] Liunian Harold Li, Mark Yatskar, Da Yin, Cho-Jui Hsieh,              machine translation of rare words with subword units. In
+     and Kai-Wei Chang. VisualBERT: A Simple and Perfor-                  arXiv preprint arXiv:1508.07909, 2015. 4
+     mant Baseline for Vision and Language. In arXiv preprint        [63] Piyush Sharma, Nan Ding, Sebastian Goodman, and Radu
+     arXiv:1908.03557, 2019. 1, 2, 4, 5                                   Soricut. Conceptual captions: A cleaned, hypernymed, im-
+     age alt-text dataset for automatic image captioning. In ACL,     [79] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszko-
+     2018. 2, 5                                                            reit, Llion Jones, Aidan N Gomez, Łukasz Kaiser, and Illia
+[64] Ravi Shekhar, Sandro Pezzelle, Yauhen Klimovich, Aure-                Polosukhin. Attention is all you need. In NeurIPS, 2017. 4
+     lie Herbelot, Moin Nabi, Enver Sangineto, and Raffaella          [80] Ramakrishna Vedantam, Arthur Szlam, Maximillian Nickel,
+     Bernardi. ”foil it! find one mismatch between image and               Ari Morcos, and Brenden M Lake. Curi: A benchmark for
+     language caption”. In ACL, 2017. 2                                    productive concept learning under uncertainty. In ICML,
+[65] Oleksii Sidorov, Ronghang Hu, Marcus Rohrbach, and                    2021. 2
+     Amanpreet Singh. Textcaps: a dataset for image captioning        [81] Alex Warstadt, Yu Cao, Ioana Grosu, Wei Peng, Hagen Blix,
+     with reading comprehension. In ECCV, 2020. 2                          Yining Nie, Anna Alsop, Shikha Bordia, Haokun Liu, Alicia
+[66] Karen Simonyan and Andrew Zisserman. Very deep convo-                 Parrish, Sheng-Fu Wang, Jason Phang, Anhad Mohananey,
+     lutional networks for largescale image recognition. In CVPR,          Phu Mon Htut, Paloma Jeretic, and Samuel R. Bowman. In-
+     2015. 5                                                               vestigating BERT’s knowledge of language: Five analysis
+[67] Amanpreet Singh, Vedanuj Goswami, and Devi Parikh. Are                methods with NPIs. In EMNLP-IJCNLP, 2019. 2
+     we pretraining it right? digging deeper into visio-linguistic    [82] Alex Warstadt, Alicia Parrish, Haokun Liu, Anhad Mo-
+     pretraining. In arXiv preprint arXiv:2004.08744, 2020. 1              hananey, Wei Peng, Sheng-Fu Wang, and Samuel R. Bow-
+[68] Amanpreet Singh, Ronghang Hu, Vedanuj Goswami, Guil-                  man. BLiMP: The benchmark of linguistic minimal pairs for
+     laume Couairon, Wojciech Galuba, Marcus Rohrbach, and                 English. In TACL, 2020. 2
+     Douwe Kiela. Flava: A foundational language and vision           [83] Adina Williams, Andrew Drozdov, and Samuel R. Bowman.
+     alignment model. In CVPR, 2022. 2, 4, 5                               Do latent tree learning models identify meaningful structure
+[69] Amanpreet Singh, Vivek Natarajan, Meet Shah, Yu Jiang,                in sentences? In TACL, 2018. 2
+     Xinlei Chen, Dhruv Batra, Devi Parikh, and Marcus                [84] Adina Williams, Nikita Nangia, and Samuel R Bowman. A
+     Rohrbach. Towards vqa models that can read. In CVPR,                  broad-coverage challenge corpus for sentence understand-
+     2019. 2                                                               ing through inference. In arXiv preprint arXiv:1704.05426,
+[70] Koustuv Sinha, Robin Jia, Dieuwke Hupkes, Joelle Pineau,              2017. 5
+     Adina Williams, and Douwe Kiela. Masked language mod-            [85] Terry Winograd. Understanding natural language. In Cogni-
+     eling and the distributional hypothesis: Order word matters           tive psychology, 1972. 2
+     pre-training for little. In EMNLP, 2021. 1, 2                    [86] Thomas Wolf, Lysandre Debut, Victor Sanh, Julien Chau-
+[71] Koustuv Sinha, Prasanna Parthasarathi, Joelle Pineau, and             mond, Clement Delangue, Anthony Moi, Pierric Cistac, Tim
+     Adina Williams. UnNatural Language Inference. In ACL-                 Rault, Rémi Louf, Morgan Funtowicz, Joe Davison, Sam
+     IJCNLP, 2021. 2                                                       Shleifer, Patrick von Platen, Clara Ma, Yacine Jernite, Julien
+[72] Richard Socher, Alex Perelygin, Jean Wu, Jason Chuang,                Plu, Canwen Xu, Teven Le Scao, Sylvain Gugger, Mariama
+     Christopher D. Manning, A. Ng, and Christopher Potts. Re-             Drame, Quentin Lhoest, and Alexander M. Rush. Trans-
+     cursive deep models for semantic compositionality over a              formers: State-of-the-art natural language processing. In
+     sentiment treebank. In EMNLP, 2013. 5                                 EMNLP: System Demonstrations, 2020. 6
+[73] Krishna Srinivasan, Karthik Raman, Jiecao Chen, Michael          [87] Ning Xie, Farley Lai, Derek Doran, and Asim Kadav. Visual
+     Bendersky, and Marc Najork. Wit: Wikipedia-based image                entailment task for visually-grounded language learning. In
+     text dataset for multimodal multilingual machine learning. In         arXiv preprint arXiv:1811.10582, 2018. 5
+     arXiv preprint arXiv:2103.01913, 2021. 5                         [88] Peter Young, Alice Lai, Micah Hodosh, and Julia Hocken-
+[74] Alane Suhr, Mike Lewis, James Yeh, and Yoav Artzi. A cor-             maier. From image descriptions to visual denotations: New
+     pus of natural language for visual reasoning. In ACL, 2017.           similarity metrics for semantic inference over event descrip-
+     2, 5                                                                  tions. In TACL, 2014. 5
+[75] Shardul Suryawanshi and Bharathi Raja Chakravarthi. Find-        [89] Rowan Zellers, Yonatan Bisk, Ali Farhadi, and Yejin Choi.
+     ings of the shared task on troll meme classification in Tamil.        From recognition to cognition: Visual commonsense reason-
+     In Proceedings of the First Workshop on Speech and Lan-               ing. In CVPR, 2019. 5
+     guage Technologies for Dravidian Languages, 2021. 2              [90] Pengchuan Zhang, Xiujun Li, Xiaowei Hu, Jianwei Yang,
+[76] Hao Tan and Mohit Bansal. Lxmert: Learning cross-                     Lei Zhang, Lijuan Wang, Yejin Choi, and Jianfeng Gao.
+     modality encoder representations from transformers. In                Vinvl: Revisiting visual representations in vision-language
+     EMNLP-IJCNLP, 2020. 2, 4, 5                                           models. In CVPR, 2021. 2, 4, 5
+[77] Bart Thomee, David A Shamma, Gerald Friedland, Ben-              [91] Jieyu Zhao, Tianlu Wang, Mark Yatskar, Vicente Ordonez,
+     jamin Elizalde, Karl Ni, Douglas Poland, Damian Borth, and            and Kai-Wei Chang. Gender bias in coreference resolu-
+     Li-Jia Li. Yfcc100m: The new data in multimedia research.             tion: Evaluation and debiasing methods. In arXiv preprint
+     In Communications of the ACM, 2016. 5                                 arXiv:1804.06876, 2018. 2
+[78] Tristan Thrush, Ethan Wilcox, and Roger Levy. Investigating      [92] Haoti Zhong, Hao Li, Anna Cinzia Squicciarini,
+     novel verb learning in BERT: Selectional preference classes           Sarah Michele Rajtmajer, Christopher Griffin, David J
+     and alternation-based syntactic generalization. In Proceed-           Miller, and Cornelia Caragea. Content-driven detection of
+     ings of the Third BlackboxNLP Workshop on Analyzing and               cyberbullying on the instagram social network. In IJCAI,
+     Interpreting Neural Networks for NLP, 2020. 2                         2016. 2
+[93] Yuke Zhu, Oliver Groth, Michael Bernstein, and Li Fei-
+     Fei. Visual7w: Grounded question answering in images. In
+     CVPR, 2016. 2
+                                         A. Confidence Intervals
+                                            We provide confidence intervals for the overall model results on Winoground. We divided the dataset into 4 groups of
+                                         equal size to get 4 scores for each model and score-type, and used Student’s t-distribution to compute the confidence intervals.
+
+                                                   Model                            Text                      Image                       Group
+                                                   MTurk Human                    89.50     [80.83,98.17]     88.50     [79.00,98.00]     85.50     [73.84,97.16]
+                                                   VinVL                          37.75     [28.71,46.79]     17.75     [11.21,24.29]     14.50      [6.65,22.35]
+                                                   UNITERlarge                    38.00     [33.32,42.68]     14.00      [6.77,21.23]     10.50      [8.45,12.55]
+                                                   UNITERbase                     32.25     [25.84,38.66]     13.25      [7.68,18.82]     10.00      [7.75,12.25]
+                                                   ViLLAlarge                     37.00     [31.05,42.95]     13.25      [7.83,18.67]     11.00      [7.10,14.90]
+arXiv:2204.03162v2 [cs.CV] 22 Apr 2022
+
+
+
+
+                                                   ViLLAbase                      30.00     [25.32,34.68]     12.00      [8.33,15.67]      8.00      [5.75,10.25]
+                                                   VisualBERTbase                 15.50      [9.34,21.66]      2.50       [0.00,6.29]      1.50       [0.00,3.55]
+                                                   ViLT (ViT-B/32)                34.75     [29.03,40.47]     14.00      [8.49,19.51]      9.25      [6.53,11.97]
+                                                   LXMERT                         19.25     [16.53,21.97]      7.00      [3.10,10.90]      4.00       [2.70,5.30]
+                                                   ViLBERTbase                    23.75     [18.03,29.47]      7.25      [3.97,10.53]      4.75       [1.47,8.03]
+                                                   UniTIT M F inetuned            19.50     [14.73,24.27]      6.25      [0.53,11.97]      4.00       [2.70,5.30]
+                                                   FLAVAIT M                      32.25     [20.04,44.46]     20.50     [14.34,26.66]     14.25      [8.53,19.97]
+                                                   FLAVAContrastive               25.25     [19.99,30.51]     13.50      [8.55,18.45]      9.00      [5.10,12.90]
+                                                   CLIP (ViT-B/32)                30.75     [25.03,36.47]     10.50      [6.29,14.71]      8.00      [4.56,11.44]
+                                                   VSE++COCO (ResNet)             22.75     [19.22,26.28]      8.00       [6.70,9.30]      4.00       [1.40,6.60]
+                                                   VSE++COCO (VGG)                18.75     [17.23,20.27]      5.50       [3.45,7.55]      3.50       [2.58,4.42]
+                                                   VSE++F lickr30k (ResNet)       20.00     [12.77,27.23]      5.00       [0.89,9.11]      2.75       [0.75,4.75]
+                                                   VSE++F lickr30k (VGG)          19.75     [14.49,25.01]      6.25      [2.27,10.23]      4.50       [2.91,6.09]
+                                                   VSRNCOCO                       17.50      [9.54,25.46]      7.00      [1.19,12.81]      3.75       [0.00,8.50]
+                                                   VSRNF lickr30k                 20.00     [13.25,26.75]      5.00       [2.09,7.91]      3.50       [2.58,4.42]
+
+                                                  Table 1. 95% confidence intervals for the aggregate results on Winoground. Results above chance are shown in bold.
+ B. Impact of Pretraining Data Size and Model Type on Model Performance
+    Correlations between pretraining data size and model performance are highly significant in every case and the numbers
+ are shown in the main paper. We show plots in the figures below. Most of the single-stream models perform slightly above
+ chance on the text score. CLIP and FLAVA are the only dual-stream models which perform above chance, and they have
+ drastically more training data than all other models.
+                 Group Score, Image Score, Text Score
+
+
+
+
+                                                                                                                        Group Score, Image Score, Text Score
+                                                        30                                                                                                          30
+                                                                                          random chance (text, image)                                                                                       random chance (text, image)
+
+
+                                                        20                                                                                                          20
+                                                                                                random chance (group)                                                                                            random chance (group)
+
+
+
+                                                        10                                                                                                          10
+
+
+
+                                                             0           1         2         3         4                                                                      0             2          4       6         8            10
+                                                                        # Pretraining Images (Millions)                                                                                    # Pretraining Captions (Millions)
+
+ Figure 1. Graphs of the model performance on Winoground for each model by the number of pretraining images (left) and pretraining
+ captions (right). ◇ = dual-stream RNNs, ◻ = dual-stream transformers, ◯ = single-stream transformers. CLIP and FLAVA are removed
+ as outliers. Backbone pretraining data is not included.
+
+
+
+                                                                              VinVLbase    UNITERlarge                                                                                                  VinVLbase        UNITERlarge
+                                                                                            VILLAlarge                                                                                                                   VILLAlarge
+                                                                                           UNITERbase                                                                                                                           ViLT
+                                                                                            VILLAbase                                                                                                                    UNITERbase
+                                                                                                                                                                                   VSE++COCO
+                                           30 VSE++COCO                                                    ViLT                                                                                                           VILLAbase
+Image Score, Text Score
+
+
+
+
+                                                                                                                                                    Image Score, Text Score
+
+
+
+
+                                                                                                                                                                              30
+                                                                      VSRNF 30k       ViLBERT
+                                                                                                   random chance                                                                                                          random chance
+                                                                       LXMERT                                                                                                                          ViLBERT
+                                           20                       UniT                        ViLT                                                                                       VSRNF 30k                          LXMERT
+                                                                              VinVLbase                                                                                       20              UniT
+                                                                                                          UNITERlarge                                                                                   VinVLbase       UNITERlarge ViLT
+                                                                 VisualBERT
+                                                                              UNITERbase /VILLAlarge                                                                                     VisualBERT
+                                                                                              VILLAbase                                                                                                 UNITERbase /VILLAlarge
+                                                         VSE++COCO
+                                           10                                  LXMERT                                                                                              VSE++COCO                                   VILLAbase
+                                                                                                 ViLBERT                                                                      10            UniT
+                                                                 UniT                                                                                                                                  ViLBERT
+                                                             VSRN++F 30k
+                                                                                                                                                                                       VSRNF 30k VisualBERT                      LXMERT
+                                                                 VisualBERT
+                                                        0            1          2       3         4                5                                                               0          2          4       6         8              10
+                                                                     # Pretraining Images (Millions)                                                                                         # Pretraining Captions (Millions)
+
+ Figure 2. Graphs of the model performance on Winoground for each model by the number of pretraining images (left) and pretraining
+ captions (right). This is a finer-grained version of Tab. 1, with model names instead of grouping by architecture; we again exclude CLIP
+ and FLAVA as their pretraining dataset sizes are outliers. We only show the best VSE++ and VSRN configurations and do not show group
+ scores due to clutter issues.
+C. Linguistic Tag Breakdown
+   This section reports every different swap-dependent linguistic tag that our annotators gave examples. Many of these
+fine-grained linguistic tags are used for multiple examples, although some tags are only used once in the dataset.
+
+Tag        Fine-Grained Tag                                                Example
+           Noun Phrase, Determiner-Numeral                                 [a person] carrying [more than one flotation device]
+           Noun Phrase                                                     [a person] holding up [books]
+           Determiner-Numeral, Noun Phrase                                 [a lightbulb] surrounding [some plants]
+Object     Noun Phrase, Determiner-Possessive                              [a deer’s nose] is resting on [a child’s hand]
+           Noun Phrase, Adjective-Color                                    aerial view of a green tree in [the brown freshly turned soil] next to [a green field]
+           Pronoun, Noun Phrase                                            [the person] wears a hat but [it] doesn’t
+           Determiner-Numeral Phrase                                       [one] is in a boat and [almost everyone] is swimming
+           Pronoun, Verb-Intransitive                                      [it] ran away while [they] pursued
+           Noun                                                            more [bicycles] than [cars]
+           Adjective-Age                                                   [an older] person blocking [a younger] person
+           Scope, Preposition                                              racing [over] it []
+           Verb-Intransitive, Verb-Transitive Phrase                       a kid [threw a basketball] then [jumped]
+           Verb-Intransitive, Adjective-Manner                             the younger person is [making noise] while the other is [silent]
+           Negation, Noun Phrase, Preposition Phrase                       a person [with long braids] is exercising in front of a person [without braids]
+           Scope, Preposition, Verb-Intransitive                           [out]1[swam]2 the person in the red swimcap []2[]1
+           Noun Phrase, Adjective-Animate                                  the one on the left is [sad] and the other is [happy]
+           Adjective-Size                                                  the [taller] person hugs the [shorter] person
+           Determiner-Possessive                                           the [person’s] leg is on the [dog’s] torso
+           Adjective-Texture                                               [smooth] shoes are on a [soft] floor
+           Adjective-Color                                                 painting the [white] wall [red]
+           Scope                                                           [getting] a horse [] wet
+           Preposition Phrase                                              flat [at the bottom] and pointy [on top]
+           Relative Clause, Scope                                          the person [who is wearing a crown] is kissing a frog []
+           Adjective-Height                                                a [taller] person wearing blue standing next to a [shorter] person
+           Verb-Intransitive Phrase, Preposition                           the gesture of the person [sitting down] is supporting the understanding of the person [standing up]
+           Verb-Intransitive, Determiner-Numeral                           some people are [standing] but more are [sitting]
+           Determiner-Numeral                                              [one]1 person[]2 wearing [two]1 scarf[s]2
+           Adjective-Weight                                                the larger ball is [lighter] and the smaller one is [heavier]
+           Verb-Intransitive, Noun                                         the dog is [standing] and the person is [swimming]
+           Verb-Intransitive Phrase, Adverb-Animate                        the person on the left is [crying sadly] while the one on the right is [smiling happily]
+           Scope, Relative Clause                                          a fencer [who is wearing black pants] having a point scored against them by another fencer [] using a wheelchair
+           Adjective-Speed                                                 the train is [still] while the person is [moving fast]
+           Adverb-Temporal                                                 a person is drinking [now] and eating [later]
+           Adverb-Spatial                                                  the car is sitting [upside down] while the person is standing [rightside up]
+Relation   Adjective-Shape                                                 the [round] table has a [square] base
+           Noun, Adjective-Color                                           Young person playing baseball with a [blue] bat and [green] ball
+           Verb-Transitive                                                 the person with the ponytail [buys] stuff and other [packs] it
+           Scope, Verb-Transitive                                          [] gears for [moving] something
+           Scope, Preposition Phrase                                       [] child in [front facing] row of yellow rubber ducks
+           Adjective-Temperature                                           a [hot] drink on a [cold] day
+           Adjective-Temporal                                              the [first] vowel is E and the [last] consonant is N
+           Scope, Conjunction                                              a person spraying water on [someone else]1 [and]2 a person on a bike []2 []1
+           Scope, Conjunction Phrase                                       A child [] riding a bike [and an adult]
+           Preposition Phrase, Scope                                       someone [with an apple] is hurt by a tree []
+           Adjective-Manner Phrase                                         two people wearing clothes of [different] colors are on [the same] side of the tennis net
+           Verb-Intransitive                                               a person [stands] and a dog [sits]
+           Adjective-Animate                                               [toy] cat with [real] baby
+           Adverb-Spatial Phrase                                           the sailboat sails [close] but the beach is [far away]
+           Scope, Adjective-Texture                                        A [] small animal with [curled] hair
+           Adverb-Animate                                                  someone talks on the phone [angrily] while another person sits [happily]
+           Adjective-Manner                                                [poor] [unfortunate] people
+           Verb-Transitive Phrase                                          they [drank water] then they [worked out]
+           Adjective-Color (3-way swap)                                    The [red]→[yellow] book is above the [yellow]→[blue] book and below the [blue]→[red] book
+           Scope, Adjective-Manner                                         [] living things [drinking]
+           Preposition                                                     seat numbers increasing from [right] to [left]
+           Verb-Intransitive Phrase                                        a cat is [stretching] and a person is [lying down]
+           Sentence                                                        [the coffee is poured] before [it is ground]
+           Adjective-Speed Phrase, Verb-Intransitive                       the person with green legs is running [quite slowly] and the red legged one runs [faster]
+           Adjective-Spatial                                               A [left] hand pulls a glove onto a [right] hand
+           Negation, Scope                                                 The [un]caged bird has an []opened cage door
+           Verb-Transitive Phrase, Verb-Intransitive, Preposition Phrase   the dog [bite]1s []2 what someone would normally [wear]1 [as a hat]2
+           Altered POS                                                     [watch]ing the [present]
+           Verb-Transitive, Noun                                           someone []1 on [the ground]2 [is]1 spraying water towards [a vehicle]2
+           Scope, Altered POS, Verb-Intransitive, Verb-Transitive          [walking]1 someone []1 [cut]2 [lines]2 into green plants
+           Noun, Adjective-Size                                            the [person]1 is too [big]2 for the [small]2 [door]1
+Both       Noun, Verb-Intransitive                                         a [dog sitting] on a couch with a [person lying] on the floor
+           Scope, Noun, Preposition                                        []1 a person [near]1 [water]2 using a []2 lasso
+           Noun, Preposition Phrase, Scope                                 a person wearing a [bear]1 mask []2 in blue on the left hand side of a person wearing a [panda]1 mask [with glasses]2 in pink
+           Scope, Preposition Phrase, Adjective-Color                      [darker]1 things []2 become [light]1 [in stripes]2
+           Altered POS, Determiner-Numeral                                 [one] ear that some [donkey] is whispering a secret into
+
+
+                                      Table 2. Examples showcasing the full linguistic (swap-dependent) tag breakdown.
+D. Heatmaps for the Word-Region Alignment Models
+  We provide heatmaps for models that were trained with a word-region alignment objective: UNITER, ViLLA and ViLT.
+See the main text for ViLT heatmaps.
+
+              a brown dog is on a white couch                               circular food on heart-shaped wood
+
+
+
+
+            a white dog   is on a   brown couch                             heart-shaped food on circular wood
+
+
+
+
+     Figure 3. Word-region alignment scores between the image and text features for ViLLAbase on examples from Winoground.
+
+
+              a brown dog is on a white couch                               circular food on heart-shaped wood
+
+
+
+
+            a white dog   is on a   brown couch                             heart-shaped food on circular wood
+
+
+
+
+    Figure 4. Word-region alignment scores between the image and text features for UNITERbase on examples from Winoground.
+E. Mechanical Turk Interface
+   In order to participate, crowdworkers needed to satisfy several criteria: be an English speaker, have 98% previous HIT
+approval, have completed 1000 previous HITs, and pass the onboarding test. The onboarding test used the same interface as
+the actual task. It consisted of ten image-caption match questions, with images and captions that are independent from the
+actual Winoground dataset. If they made one mistake, a pop-up asked them if they were sure, and they would be allowed to
+select whether there was a match or not again. If they made any additional mistakes during onboarding, they were disqualified.
+
+
+
+
+                                   Figure 5. The Amazon Mechanical Turk validation interface.
+F. Ethical Considerations
+   A key consideration while designing Winoground centered on how the expert annotators would describe the people con-
+tained in the images. We avoided using gendered terms (e.g. using “person” in place of “woman” or “man”) in our captions
+and did not include any swaps between pairs of captions based on gender, race or ethnicity (e.g. “[the man] hands a water to
+[the woman]”). We recognize that, barring direct access to the people in the images, we would be merely making a guess at
+a person’s identity based on our own cultural norms and experiences.
+   In addition, we encouraged the expert annotators to find images that represent a variety of people across the dimensions of
+perceived race, gender, disability, etc.. We gathered the Getty Images metadata (title and short alt text-like description) and
+searched them for specific words as a rough proxy for gender representation. The relevant words are either words referring
+to women (e.g. girl, her), words referring to men (e.g. boy, him) or words that are gender-neutral (e.g. them, themself).
+Using the Getty Images metadata corresponding to the 800 images in Winoground, 371 images have corresponding metadata
+that contained at least one word from the lists we created. Using this metadata for these 371 images, we estimate that 152
+images only contain women, 123 images only contain men, 22 images only contain people without gender descriptors, and
+the remaining 74 images contain people described by multiple genders. This serves only as a rough estimate as much of the
+metadata contain words referring to people that are inherently non-gendered (e.g. scuba diver, friend, etc.) and because the
+relevant gendered words we found are themselves subject to the assumptions of those who wrote the titles and captions.
+

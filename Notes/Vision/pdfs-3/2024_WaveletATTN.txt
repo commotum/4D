@@ -1,0 +1,870 @@
+                                        Beyond Position: the emergence of wavelet-like properties in Transformers
+
+
+                                                              Valeria Ruscio, Umberto Nanni, Fabrizio Silvestri
+                                                                        Sapienza University of Rome
+                                                          ruscio@diag.uniroma1.it, fsilvestri@diag.uniroma1.it
+
+
+
+
+                                                              Abstract                          tion heads do not act as a monolithic block; instead,
+                                                                                                they spontaneously organize into a multi-resolution
+                                            This paper studies how Transformer models           framework. Different heads specialize in process-
+arXiv:2410.18067v4 [cs.LG] 4 Jun 2025
+
+
+
+
+                                            with Rotary Position Embeddings (RoPE) de-
+                                                                                                ing information at distinct frequency bands, effec-
+                                            velop emergent, wavelet-like properties that
+                                            compensate for the positional encoding’s theo-      tively decomposing the input signal in a manner
+                                            retical limitations. Through an analysis span-      strikingly similar to a discrete wavelet transform.
+                                            ning model scales, architectures, and train-           Our work makes the following contributions:
+                                            ing checkpoints, we show that attention heads
+                                            evolve to implement multi-resolution process-           • We demonstrate that the emergence of robust,
+                                            ing analogous to wavelet transforms. We                   wavelet-like, scale-invariant properties is a
+                                            demonstrate that this scale-invariant behavior            distinctive feature of the RoPE architecture
+                                            is unique to RoPE, emerges through distinct
+                                                                                                      compared to other common position encoding
+                                            evolutionary phases during training, and statis-
+                                            tically adheres to the fundamental uncertainty            schemes.
+                                            principle. Our findings suggest that the effec-
+                                            tiveness of modern Transformers stems from              • We provide an evolutionary analysis of these
+                                            their remarkable ability to spontaneously de-             properties, revealing the distinct learning
+                                            velop optimal, multi-resolution decompositions            phases models undergo to form their spectral
+                                            to address inherent architectural constraints.            processing strategies.
+
+                                        1   Introduction                                            • We offer a detailed statistical characterization
+                                                                                                      of attention head behavior, showing that mod-
+                                        Position encoding mechanisms are fundamental
+                                                                                                      els learn to respect the physical constraints of
+                                        to Transformer architectures, enabling these inher-
+                                                                                                      the uncertainty principle and develop diverse
+                                        ently permutation-invariant models to capture se-
+                                                                                                      internal strategies.
+                                        quential information. While early approaches re-
+                                        lied on fixed sinusoidal encodings (Vaswani, 2017),
+                                                                                                   These findings reveal transformers’ remarkable
+                                        Rotary Positional Embeddings (RoPE) (Su et al.,
+                                                                                                adaptability in discovering and implementing opti-
+                                        2024) represents a significant advancement by inte-
+                                                                                                mal solutions to complex information processing
+                                        grating relative positional information through rota-
+                                                                                                challenges. Appendices 11.3, 11.4, and 11.5 pro-
+                                        tional transformations. Despite RoPE’s widespread
+                                                                                                vide further detail on RoPE’s limitations, the rela-
+                                        adoption and empirical success, theoretical anal-
+                                                                                                tionship between language and wavelets, and our
+                                        ysis suggests inherent limitations in its ability to
+                                                                                                metric definitions.
+                                        simultaneously achieve high positional precision
+                                        and frequency resolution (Barbero et al., 2024), a      2    Related Works
+                                        trade-off analogous to the uncertainty principle in
+                                        signal processing. This creates a paradox: why do       The Transformer architecture (Vaswani, 2017)
+                                        models with these theoretical constraints perform       revolutionized sequence modeling through self-
+                                        so well in practice?                                    attention mechanisms. While the original Trans-
+                                           We argue that this is resolved because RoPE-         former used simple sinusoidal positional encod-
+                                        equipped models learn to compensate by devel-           ings, recent work has explored more sophisticated
+                                        oping emergent, wavelet-like processing strate-         approaches. ALiBi (Press et al., 2021) introduced
+                                        gies. Our analysis shows that Transformer atten-        attention bias terms that scale with relative position,
+while T5 (Raffel et al., 2020) employed learned rel-    into low (0-0.25 ωN ), mid (0.25-0.75 ωN ), and
+ative position embeddings. RoPE (Su et al., 2024)       high (0.75-ωN ) bands, where ωN is the Nyquist
+advanced this further by applying rotation matrices     frequency corresponding to the maximum resolv-
+to embeddings, though it faces fundamental limi-        able frequency for the given sequence length.
+tations rooted in the uncertainty principle between         The Nyquist frequency ωN is set to half the
+position and frequency domains.                         sampling rate (1/2 tokens) for three fundamental
+   Neural networks’ behavior, particularly their        reasons: it represents the highest meaningful fre-
+nonlinear components, has been increasingly an-         quency in discrete token sequences, as attention
+alyzed through signal processing principles. Re-        patterns can only alternate between consecutive to-
+search has shown that activation functions can gen-     kens, making faster oscillations indistinguishable
+erate higher-order harmonics and exhibit frequency      due to aliasing. Second, it provides natural nor-
+mixing (Selesnick and Burrus, 1998; Rahimi and          malization across sequence lengths, while absolute
+Recht, 2008), while principles of constructive and      frequency ranges differ, all sequences share the
+destructive interference have proven valuable in an-    same relative frequency structure when normalized
+alyzing network behavior (Oppenheim, 1999; Chi          by ωN , enabling meaningful cross-length compar-
+et al., 2020). Information-theoretic analyses of neu-   isons of attention head frequency sensitivity. Third,
+ral networks (Shwartz-Ziv and Tishby, 2017) have        following Shannon’s sampling theorem, ωN rep-
+provided insights into their representational capa-     resents the theoretical maximum rate for informa-
+bilities and limitations. Studies have examined how     tion transmission through a discrete channel, thus
+information flows through layers (Goldfeld et al.,      defining the finest granularity at which positional
+2018) and how architectural choices affect infor-       information can be encoded without loss, making
+mation bottlenecks (Tishby and Zaslavsky, 2015).        it the natural choice for analyzing models’ repre-
+This theoretical framework has proven particularly      sentational capacity distribution.
+valuable in understanding the capacity limitations          To quantify the relative emphasis a head places
+of various neural network components.                   on different frequency bands, we computed:
+                                                                                  R
+3     Methodology                                                                   b Ph (ω)dω
+                                                                      βh (b) = R ωN                      (2)
+We integrate frequency-domain analyses, wavelet-                                  0    Ph (ω)dω
+based multi-scale decomposition, and entropy-           where b is the frequency band under consideration.
+based uncertainty assessments to comprehensively        To measure how selectively each attention head
+characterize the emergent properties of these mod-      responds to specific frequencies, we define the fre-
+els. Our methodology is designed to isolate po-         quency selectivity S(h) for head h as:
+sitional encoding behaviors, assess their stability
+across model scales and architectures, and validate                          maxω {Ph (ω)}
+                                                           S(h) = R ωN                                   (3)
+their alignment with theoretical expectations re-                    0   Ph (ω)dω − maxω {Ph (ω)}
+lated to the trade-off between positional resolution
+and spectral organization.                              where Ph (ω) is the power spectral density at fre-
+                                                        quency ω, and ωN is the Nyquist frequency, and
+3.1    Frequency Analysis                               a higher value indicates more focused frequency
+To probe the spectral properties of attention distri-   tuning of the head.
+butions, we employed a frequency-domain analysis           These frequency-domain analyses allowed us to
+using the Discrete Fourier Transform (DFT), we          discern how attention heads distribute their repre-
+used the Hann window and zero padding. For each         sentational capacity across multiple scales, testing
+attention head h within each model, we represented      the premise that models spontaneously develop or-
+the attention pattern over token positions as ah (t),   ganized frequency content despite RoPE’s intrinsic
+where t indexes tokens within a single sequence.        limitations.
+We computed the power spectral density (PSD):           3.2   Wavelet Analysis
+                 Ph (ω) = |Fah t|2               (1)    While frequency-domain analysis captures global
+                                                        spectral properties, it lacks explicit positional lo-
+where F denotes the DFT and ω the angular fre-          calization. To address this, we employed wavelet
+quency. The frequency domain was partitioned            decompositions using the Daubechies-2 (db2)
+wavelet 1 . Wavelets offer a time-frequency (or                   correlation ρ(h) through their normalized covari-
+position-frequency) representation that enables si-               ance:
+multaneous assessment of spatial localization and                                     Cov(Hp (h), Hs (h))
+                                                                             ρ(h) =                              (8)
+scale-dependent behaviors.                                                                  σHp σHs
+   For each head h, we computed wavelet coeffi-                      This correlation is then aggregated across all
+cients:                                                           attention heads in a layer to measure how well the
+                      Z                                           model balances the uncertainty principle trade-off
+          Wh (s, τ ) = ah (t)ψs,τ (t)dt        (4)                between positional and spectral information:
+                                                                              ρlayer = meanh∈layer {ρ(h)}          (9)
+where ψs,τ (t) is the mother wavelet at scale s and
+translation τ . We selected a maximum decomposi-                     The layer-wise correlation metric is bounded by
+tion level suitable for the shortest sequence length              [−1, 1], with values closer to -1 indicating strong
+to ensure consistent comparisons across models                    trade-offs between positional and spectral preci-
+and scales. Wavelet entropy was computed at each                  sion, and values closer to 1 indicating successful
+scale:                                                            integration of both domains.
+                X                                                    By comparing Hp (h) and Hs (h) through these
+   Hw (s) = −       |Wh (s, τ )|2 log (|Wh (s, τ )|2 )            correlation metrics, we can ascertain whether the
+                   τ                                              model’s attention patterns obey an uncertainty
+                                             (5)                  principle-like trade-off, wherein improved posi-
+providing a measure of how the model distributes                  tional localization may come at the cost of reduced
+attention energy and complexity across different                  spectral complexity, or vice versa.
+scales and positional shifts.
+                                                                  3.4   Scale Invariance Testing
+3.3    Uncertainty Analysis
+                                                                  We hypothesized that the models’ compensatory
+To evaluate the theoretical trade-off between posi-               strategies would exhibit scale invariance properties,
+tional precision and spectral organization, we com-               i.e., the ability to maintain positional-awareness
+puted entropy measures for both the positional and                structures when the input sequence length changes.
+spectral domains. Positional entropy Hp (h) was                   To test this, we generated scaled variants xα of each
+derived from attention distributions over token po-               input sequence x by sampling ⌊αn⌋ tokens, with
+sitions:                                                          α ∈ {0.5, 0.25} and n the original sequence length.
+                       X                                          After computing the wavelet coefficients Wh (x)
+          Hp (h) = −       ah (t) log ah (t)     (6)
+                                                                  and Wh (xα ), we measured the scale sensitivity:
+                            τ
+                                                                        Sh (α) = 1 − cos(Wh (x), Wh (xα ))        (10)
+reflecting how evenly attention is spread across the
+sequence. Similarly, spectral entropy Hs (h) was                  where cos (·, ·) denotes cosine similarity. A low
+computed from the normalized power spectrum                       Sh (α) indicates that wavelet coefficients remain
+P̂h (ω):                                                          stable under rescaling, suggesting robust scale-
+                     X                                            invariant positional representations.
+         Hs (h) = −      P̂h (ω) log P̂h (ω)     (7)
+                           ω                                      3.5   Frame Completeness
+                                                                  To verify that the learned representations form a
+where P̂h (ω) = PPhP(ω)    is the normalized power                stable, frame-like basis capable of faithful recon-
+                  ω h (ω)
+spectrum.                                                         struction, we performed inverse wavelet transforms.
+   To quantify the relationship between these en-                 The reconstruction error ε was computed as:
+tropy measures, we define the position-spectrum
+                                                                                   ||ah − W −1 (Wh )||F
+   1
+     The selection of Daubechies-2 (db2) for our primary anal-                ε=                                  (11)
+                                                                                          ||ah ||F
+ysis reflects its optimal balance between smoothness and local-
+ization properties. Its compact support of length 4 aligns well   where W −1 (·) denotes the inverse wavelet trans-
+with typical attention spans in language processing, while its
+vanishing moment enables effective detection of local linguis-    form and || · ||F is the Frobenius norm. A small
+tic changes against broader contextual background. The db2        ε indicates that the attention patterns are well-
+wavelet’s mathematical normalization properties match the         represented by their wavelet coefficients, reinforc-
+normalization constraints imposed by softmax attention mech-
+anisms, while its orthogonality properties prevent interference   ing the notion that the model’s positional strategies
+between shifted attention patterns.                               form a coherent, frame-like structure.
+4   Implementation Details                               (0–0.25 ωN ) form the contextual backbone, captur-
+                                                         ing 60–80% of the spectral power. Mid-frequencies
+We selected five pre-trained Transformer-based lan-      (0.25–0.75 ωN ) contribute a stable 15–25%, while
+guage models that vary in size, architecture, and        high-frequencies (0.75–ωN ) handle fine-grained
+training regimen to ensure the generality of our         details with a smaller 5–15% share. In figure 3, we
+findings. Specifically, we analyzed Gemma 2 2B,          can see that as information propagates through the
+Pythia 2.8B and 12B, LLaMA-3-2 1B, Mistral 7B,           model, we observe a smooth, dynamic evolution
+and Qwen 2.5 5B. These models encompass a wide           where the initial dominance of low frequencies ta-
+parameter range (1B–12B), capturing different rep-       pers off, and mid- to high-frequency components
+resentational capacities and training protocols.         gain influence, mirroring the adaptive refinement
+   All models were evaluated on a curated sam-           process of a wavelet analysis.
+ple of 500 sequences drawn from wikipedia. The
+selected sequences varied in length to expose scale-
+dependent behavior and stress-test the models’ posi-
+tional encoding strategies under diverse conditions.
+   All experiments were conducted using PyTorch
+on A100, L4, and T4 GPUs to ensure computa-
+tional efficiency and scalability. Frequency and
+spectral computations employed standard FFT-
+based routines, while wavelet transforms were per-
+formed using the PyWavelets library with a de-
+composition level chosen based on the minimum
+sequence length. Before analysis, attention weights
+were normalized and numerically stabilized to mit-
+igate floating-point underflow, with a threshold of
+10−10 applied to division operations.
+                                                         Figure 1: Local vs Global attention distribution from
+5   Experiments and Analysis                             Pythia 12B
+
+Our analysis shows that Transformer models with
+RoPE spontaneously develop a sophisticated, multi-
+resolution processing strategy, similar to wavelet
+decomposition, to overcome the theoretical limita-
+tions of their position embeddings. This emergent
+behavior is not an isolated artifact but a consistent
+pattern substantiated by three key lines of evidence:
+the hierarchical organization of attention, quanti-
+tative analysis of model scaling and stability, and
+statistical confirmation of a fundamental signal pro-
+cessing principle.
+
+The Emergence of Multi-Scale Processing In
+figure 1 we can see that attention heads specialize
+into either local or global processors, evidenced by
+the pronounced vertical striping in visualizations of
+local-to-global attention ratios. This specialization    Figure 2: Frequency band distribution across heads from
+deepens through the layers, with increasing vari-        Pythia 12B
+ance that closely resembles the branching structure
+of a wavelet packet decomposition tree.
+   This multi-resolution strategy is also evident in     5.1   Quantitative Analysis of Developmental
+the frequency domain. Analysis of attention pat-               Trajectories
+terns, as in figure 2, shows a consistently stratified   Quantitative metrics confirm these visual observa-
+frequency response. Low-frequency components             tions and reveal deeper patterns related to model
+                                                         0.624). This, combined with its other unique met-
+                                                         rics, suggests a distinct hierarchical strategy where
+                                                         information is more complex and dense in local
+                                                         contexts but more predictable at broader scales.
+
+                                                         5.2   Statistical Confirmation of the
+                                                               Uncertainty Principle
+                                                         The most direct evidence for this emergent behav-
+                                                         ior comes from a statistical analysis of the trade-off
+                                                         between positional and spectral information. As
+                                                         shown in table 3, every model analyzed exhibits
+                                                         a consistently negative position-spectrum correla-
+                                                         tion ρ. This finding is a powerful confirmation
+                                                         that the models have implicitly learned and adhere
+                                                         to the Heisenberg-Gabor uncertainty principle, a
+Figure 3: Frequency response evolution across layers     fundamental law governing all time-frequency rep-
+from Pythia 12B
+                                                         resentations, including wavelets.
+                                                         This distributional analysis uncovers two distinct
+                                                         strategic archetypes. Models like Mistral 7B ex-
+scale and capacity, as we can see from table 1.
+                                                         hibit a high-variance, specialized toolkit approach.
+The model’s inherent wavelet-like response is par-
+                                                         It pairs high average frequency selectivity (µ =
+ticularly evident in the scale sensitivity metric.
+                                                         0.804) with a very wide standard deviation (σ =
+As predicted by wavelet theory, sensitivity to se-
+                                                         0.414), indicating that its attention heads are highly
+quence rescaling is not only low but also degrades
+                                                         diversified for a sophisticated division of labor. In
+gracefully, with the error roughly doubling as scal-
+                                                         stark contrast, Pythia 2.8B adopts a low-variance,
+ing moves from 0.5x to 0.25x. This predictable,
+                                                         uniform strategy. Its extremely low mean frequency
+controlled divergence mirrors how high-quality
+                                                         selectivity (µ = 0.174) is highly consistent across
+wavelet basis functions respond to dilation and sug-
+                                                         its heads (IQR=0.153), confirming its "transitional
+gests a learned adherence to power-law scaling
+                                                         phase" is a model-wide phenomenon.
+behavior.
+                                                            The varying strength of the position-spectrum
+   Furthermore, we observe a fascinating, non-           correlation, from Pythia 2.8B’s severe trade-off
+monotonic developmental trajectory as model size         (ρ = −0.737) to Mistral’s more efficient balance
+increases. Mid-sized models like Pythia 2.8B ap-         (ρ = −0.421), shows how different architectures
+pear to enter a unique "transitional exploration         have converged with varying degrees of success on
+phase," marked by remarkably low frequency se-           the optimal, wavelet-like strategies for balancing
+lectivity (0.174) and the highest spectral entropy       the fundamental "what" versus "where" informa-
+(3.786). This suggests a strategy based on highly        tion trade-off inherent in sequence processing.
+distributed, spectrally diffuse representations. In
+contrast, both smaller models (like Qwen 0.5B) and       5.3   Ablation Study
+larger, more advanced models (like Mistral 7B) con-      To validate that the observed compensatory mech-
+verge on higher selectivity, indicating they find a      anisms are uniquely characteristic of RoPE’s im-
+more optimized and efficient balance between spe-        plicit relative positioning, we conducted an ablation
+cialized frequency channels and integrated multi-        study comparing it against three alternative posi-
+resolution analysis, a hallmark of mature wavelet-       tional encoding schemes: T5’s relative position
+like systems.                                            biases, BERT’s absolute positional embeddings,
+   This multi-resolution coherence is also con-          and a GPT-2 model with no explicit positional en-
+firmed by our window entropy analysis, shown             coding (No PE). The results, detailed in Table 4,
+in table 2. Most models demonstrate remarkable           show that RoPE provides a uniquely effective so-
+stability, indicating their representations remain co-   lution for maintaining positional awareness across
+herent across different observational scales. Pythia     different scales.
+2.8B is again a notable exception, with its entropy      The analysis highlights a clear hierarchy in scale
+decreasing as the window size grows (0.751 →             invariance. RoPE stands out with an exceptionally
+                                       Scale Sens.      Scale Sens.    Pos-Spec Corr.       Reconstr. Error
+     Model                  Heads
+                                         (0.5x)           (0.25x)           (ρ)                  (µ)
+     Qwen 2.5 (0.5B)          14          0.058           0.100             -0.438               1.26e-07
+     LLaMA 3.2 (1B)           32          0.038           0.089             -0.510               1.28e-07
+     Gemma 2 (2B)              8          0.038           0.090             -0.526               1.27e-07
+     Pythia (2.8B)            32          0.082           0.121             -0.737               1.16e-07
+     Mistral (7B)             32          0.030           0.074             -0.421               1.41e-07
+     LLaMA 3.1 (8B)           32          0.038           0.090             -0.474               1.28e-07
+     Pythia (12B)             40          0.059           0.099             -0.490               1.26e-07
+
+Table 1: This table summarizes the main findings for scale sensitivity, position-spectrum correlation, and reconstruc-
+tion error.
+
+
+ Model                  16 tok.    32 tok.    64 tok.        ties that other positional encoding implementations
+                                                             don’t. It achieves scale-invariance that surpasses
+ LLaMA 3.2 (1B)          0.877      0.886      0.882
+                                                             not only rigid, explicit encodings but also the more
+ Gemma 2 (2B)            0.894      0.905      0.904
+                                                             diffuse, emergent strategies of models with no posi-
+ Pythia (2.8B)           0.751      0.699      0.624
+                                                             tional guidance, marking it as a uniquely effective
+ Qwen 2.5 (0.5B)         0.850      0.864      0.866
+                                                             and well-balanced method for encoding position.
+ Mistral (7B)            0.870      0.878      0.880
+ LLaMA 3.1 (8B)          0.869      0.877      0.871         5.4   Evolution of wavelet-like features during
+ Pythia (12B)            0.913      0.918      0.916               training
+
+Table 2: Multi-Resolution Window Entropy Analysis           To understand how this wavalet-like compensatory
+                                                            strategies develop, we analyzed Pythia 6.9b at dif-
+                                                            ferent stages of its training, from initialization (step
+low scale sensitivity (S0.5 = 0.038), demonstrating         0) to 143,000 steps. The results, summarized in
+a robust ability to preserve positional representa-         Table 5, reveal that the model does not learn its rep-
+tions when sequence lengths change. At the other            resentations linearly but instead undergoes distinct
+extreme, models with explicit, non-rotary encod-            developmental phases.
+ings (T5 and BERT) proved to be comparatively               Initially, at step 0 and step 128, the untrained
+rigid, with high scale sensitivity values of 0.627 and      model exhibits a simple default state: high fre-
+0.507, respectively. T5’s rigidity is further under-        quency selectivity (∼ 0.76) and low spectral en-
+scored by its high spectral entropy (2.696) and the         tropy (∼ 2.29). This indicates that the attention
+most strongly negative position-spectrum correla-           heads are undifferentiated, focusing on very basic,
+tion (ρ = −0.790), indicating a significant conflict        low-complexity patterns before significant learning
+between positional focus and spectral organization.         has occurred.
+The GPT-2 model (No PE) presents a fascinating              A dramatic "exploratory phase" begins around step
+intermediate case. While it achieves moderate scale         512 and peaks precisely at step 1000. In this crit-
+invariance (S0.5 = 0.141), far superior to T5 and           ical period, frequency selectivity plummets to its
+BERT, it is significantly less robust than RoPE. In-        absolute minimum of 0.230, while spectral entropy
+terestingly, it accomplishes this not through sharp,        surges to its maximum of 3.522. This is driven by
+focused attention, but through the opposite strat-          a significant reallocation of representational power
+egy. It registered the lowest frequency selectivity         away from the low-frequency band (which drops
+(0.514) and the highest spectral entropy (2.868),           to a minimum of 43.4%). Following this peak, the
+suggesting its attention patterns are spectrally dif-       model enters a "specialization phase" (step 5000 on-
+fuse. This implies that in the absence of positional        wards), where spectral entropy gradually decreases
+guidance, the model adopts a high-entropy, less-            and frequency selectivity begins to recover, sug-
+structured approach that offers some resilience but         gesting the model is refining and consolidating its
+lacks the precision of RoPE.                                newly learned complex representations.
+   Ultimately, these findings underscore that                  Perhaps the most striking finding is the evolution
+RoPE’s architecture fosters wavelet-like proper-            of scale sensitivity, which increases in a two-step
+                                       Spectral Entropy                                  Frequency Selectivity
+    Model
+                          Mean (µ)      Std Dev (σ) IQR (Q3-Q1)                   Mean (µ) Std Dev (σ) IQR (Q3-Q1)
+    Qwen 2.5 (0.5B)        2.492            0.733                 0.985            0.700             0.411              0.498
+    LLaMA 3.2 (1B)         2.370            0.650                 0.924            0.758             0.368              0.494
+    Gemma 2 (2B)           2.244            0.599                 0.781            0.794             0.344              0.430
+    Pythia (2.8B)          3.786            0.625                 0.398            0.174             0.269              0.153
+    Mistral (7B)           2.443            0.607                 0.824            0.804             0.414              0.515
+    LLaMA 3.1 (8B)         2.495            0.621                 0.859            0.691             0.339              0.444
+    Pythia (12B)           2.783            0.638                 0.850            0.552             0.321              0.391
+
+Table 3: Distributional statistics for spectral metrics across all attention heads. The standard deviation (σ) and
+interquartile range (IQR) reveal the diversity of learned strategies within each model.
+
+ Model          PE Type   Heads     Spectral       Frequency        Scale 0.5      Scale 0.25     Pos-Spec       Reconstr.
+                                    Entropy          Select.         Sens.           Sens.         Corr.          Error
+ Llama-3.2-3B   RoPE       24     2.425 ± 0.630   0.728 ± 0.349   0.038 ± 0.036   0.090 ± 0.040    -0.502    0.00012 ± 0.00008
+ flan-t5-base    T5        12     2.696 ± 0.712   0.704 ± 0.480   0.627 ± 0.239   0.689 ± 0.231    -0.790    0.00004 ± 0.00003
+ bert-base      BERT       12     2.449 ± 0.819   0.743 ± 0.446   0.507 ± 0.342   0.548 ± 0.350    -0.606    0.00007 ± 0.00006
+ gpt2           No PE      12     2.868 ± 0.767   0.514 ± 0.369   0.141 ± 0.164   0.152 ± 0.154    -0.672    0.00005 ± 0.00005
+
+Table 4: Ablation study comparing different position encoding (PE) methods. We report mean and standard deviation
+across attention heads for key metrics.
+
+
+process. The first significant jump occurs between                of fixed-frequency rotations parallels the Heisen-
+step 512 and step 1000, where sensitivity rises from              berg uncertainty principle, implying a fundamen-
+0.533 to 0.617. A second, larger leap happens                     tal trade-off between positional precision and
+between step 1000 and step 5000 (from 0.617 to                    frequency resolution. With a single, fixed fre-
+0.742), where it reaches its plateau. This shows                  quency scale, RoPE struggles to represent both
+that as the model’s spectral strategies become more               fine-grained local patterns and broad global struc-
+complex, its representations become highly tuned                  tures simultaneously. 2) Scale Non-Invariance:
+to specific scales. Rather than developing a truly                Since RoPE’s positional representation repeats pe-
+robust, scale-invariant understanding, the model                  riodically, it encounters aliasing effects over longer
+specializes, making its learned positional strategies             sequences. As the sequence length grows, the pe-
+more brittle when the input scale is changed.                     riodic nature of the embedding can cause distinct
+Our analysis is anchored by a very low reconstruc-                positions to become indistinguishable, undermin-
+tion error across all checkpoints, validating the nu-             ing reliable long-range positional encoding.
+merical stability of our wavelet methodology.
+                                                                  6.1     Natural Evolution Toward Wavelet
+6     Theoretical Framework for                                           Behavior
+      Wavelet-like Attention Patterns
+                                                                  RoPE’s rotational encoding introduces specific fre-
+Rotary Position Embeddings (RoPE) encode po-                      quency components that propagate through the at-
+sitional information through position-dependent                   tention mechanism in a mathematically structured
+rotation matrices defined over the complex plane.                 way. The rotation matrix R(mθk ) creates an inher-
+At position m, the embedding applies a rotation                   ent trade-off: larger θ provides precise positions
+Rm (θ):                                                           but causes rapid rotation cycles that confuse dis-
+                                                                tant relationships, while smaller θ better captures
+                  cos(mθk ), − sin(mθk )
+     R(mθk ) =                               (12)                 long-range patterns but blurs local positions. The
+                   sin(mθk ), cos(mθk )
+                                                                  wavelet-like properties we observe show how at-
+where θ is a base rotation angle. This approach,                  tention heads adapt to handle different frequency
+which rests on fixed-frequency sinusoidal func-                   ranges created by these rotations.
+tions, inherently imposes two key limitations: 1)                    As models train, these inherent limitations place
+Frequency–Position Uncertainty: RoPE’s use                        evolutionary pressure on the learned representa-
+                             Spectral     Frequency       Low Freq.      Scale Sens.     Scale Sens.
+          Training Step
+                             Entropy      Selectivity     Power (%)        (0.5x)          (0.25x)
+          0                    2.277         0.757           77.0            0.523           0.539
+          128                  2.291         0.760           76.0            0.522           0.539
+          512                  3.169         0.369           54.4            0.533           0.549
+          1000                 3.522         0.230           43.4            0.617           0.633
+          5000                 3.381         0.294           48.6            0.742           0.762
+          10000                3.293         0.330           51.7            0.748           0.767
+          143000               3.010         0.454           59.7            0.740           0.756
+
+   Table 5: Evolution of spectral and scale invariance metrics for a Pythia model across training checkpoints.
+
+
+tions. Attention heads respond by developing              for constants 0 < A ≤ B < ∞. This scale-
+wavelet-like properties for three principal reasons:      specific specialization naturally emerges, allowing
+                                                          the model to cover a broad spectrum of positional
+a. Optimal Information Packaging Wavelets
+                                                          resolutions collectively.
+offer a natural solution to the frequency–position
+uncertainty trade-off. A mother wavelet ψ(t) gen-         c. Natural Gradient-Driven Specialization
+erates a family of wavelets:                              Training gradients encourage heads to diversify
+                        1    t−τ                          their representational roles. For a loss function L,
+             ψs,τ (t) = √ ψ(     )               (13)
+                         s    s                                           ∂L     ∂L ∂A
+                                                                              =(   )(   )                    (17)
+where s is a scale parameter and τ is a translation                       ∂Ah    ∂A ∂Ah
+parameter. Through this construction, wavelets pro-
+                                                          This gradient decomposition penalizes redundancy
+vide high temporal (positional) resolution at high
+                                                          among heads. Over time, heads converge towards
+frequencies, capturing fine local details, and high
+                                                          orthogonal, complementary functions—akin to dis-
+frequency resolution at low frequencies, capturing
+                                                          tinct wavelet scales—minimizing representational
+broader global context. These properties align with
+                                                          overlap and enhancing overall positional encoding
+linguistic processing needs, where local syntactic
+                                                          robustness.
+relations require precise positional encoding, while
+long-range semantic dependencies demand robust            6.2 Emergence of Multi-Resolution Processing
+frequency-domain characterization.                        From these principles, a multi-resolution process-
+b. Complementary Scale Coverage in Multi-                 ing framework naturally emerges: each attention
+Head Architectures Transformer attention heads            head h approximates a wavelet function ϕh (t) ≈
+are ideally suited for wavelet-like decompositions.       ψs(h),τ (t), where s(h) denotes the characteristic
+Consider the attention weight matrix for head h:          scale of head h.Then, the ensemble {ϕh }H     h=1 acts
+                                                          like a discrete wavelet frame {ψs,τ }s,τ ∈Λ , where Λ
+                          Qh K ⊤
+             Ah = softmax( √ h )                 (14)     indexes a set of scale–translation parameters. This
+                             d                            ensures a stable, redundant representation that sup-
+Each head can specialize in a distinct scale or fre-      ports both local and global positional tasks. So, the
+quency band, analogous to wavelet basis functions         attention pattern for a given input becomes:
+at different scales. Summing over all heads,                                     X
+                       X                                                 a(t) =      αh (t)ϕh (t)           (18)
+                   A=     wh Ah                (15)                                  h
+                         h
+                                                          where αh (t) are input-dependent expansion coeffi-
+with wh as learned mixing weights, mirrors the con-       cients, allowing the model to adaptively reconstruct
+struction of a wavelet frame, where sets of wavelet-      a range of positional features at multiple scales.
+like functions ψs,τ form a stable representation
+satisfying frame conditions:                              6.3   Information-Theoretic Optimality
+                                                          This emergent wavelet-like organization is not
+                 X
+      A||f ||2 ≤     |⟨f, ψh ⟩|2 ≤ B||f ||2    (16)
+                  h
+                                                          merely a heuristic convenience but aligns with
+principles of information-theoretic optimality, in       limitations but actively overcome them by devel-
+fact, by reducing mutual information among heads         oping emergent, wavelet-like processing strategies.
+(min I(Ah ; Ak ) for h ̸= k) while maximizing            We have shown that this adaptation is not a mi-
+the total captured information about the input           nor artifact but a fundamental and multi-faceted
+(max I(A; X), the model approaches an efficient          characteristic of modern language models.
+encoding of positional cues. Then, the hierarchi-           Indeed, we established that RoPE’s implicit rela-
+cal, multi-scale representation achieves an optimal      tive encoding is uniquely instrumental in fostering
+balance between representational complexity and          the remarkable scale-invariance observed, distin-
+fidelity. Adapting the wavelet frame to the input dis-   guishing its behavior from models with absolute
+tribution ensures that rate–distortion objectives are    or explicit relative position biases. This adaptation
+efficiently met. And, by leveraging a small set of       is not static; rather, it is learned through distinct
+wavelet-like basis functions and adjusting their co-     developmental phases. An initial "exploratory"
+efficients αh (t), the model encodes both local and      stage, characterized by high spectral entropy, gives
+global patterns compactly. This compression aligns       way to a "specialization" stage where models re-
+with the principle of minimal description length,        fine their strategies, becoming more efficient yet
+favoring representations that are information-rich       often more scale-dependent. Crucially, this dy-
+yet succinct.                                            namic learning process culminates in models that
+                                                         respect the fundamental Heisenberg-Gabor uncer-
+7   Implications                                         tainty principle, with larger and more advanced
+                                                         architectures demonstrating increasingly sophisti-
+Our findings have direct implications for the de-
+                                                         cated and diversified strategies for managing this
+sign, training, and specialization of language mod-
+                                                         inherent trade-off between positional precision and
+els. The discovery that attention heads sponta-
+                                                         spectral organization.
+neously organize into frequency specialists sug-
+gests that models could be made more efficient              Looking forward, this "wavelet framework" of-
+by pre-initializing heads to a wavelet-like basis.       fers a new lens for interpretability, allowing us
+This could accelerate convergence by bypassing           to analyze what a model learns in terms of scale
+the inefficient "exploratory phase" we identified        and frequency. Furthermore, understanding that
+during training. This functional understanding also      these optimal structures are emergent rather than
+provides a principled method for model pruning,          designed could inspire new architectural innova-
+creating smaller models by removing redundant            tions, potentially leading to models that are either
+frequency heads, and a powerful diagnostic tool for      explicitly guided towards these solutions or are
+assessing training stability by monitoring spectral      built with more efficient, innate multi-scale pro-
+metrics.                                                 cessing capabilities from the start.
+   Furthermore, this work provides a roadmap for
+model adaptation and future research. Under-             9   Limitations
+standing head specialization allows for targeted,        While our study provides strong evidence for the
+task-specific fine-tuning, where one could adapt         emergence of wavelet-like properties in RoPE-
+low-frequency heads for summarization or high-           based models, its scope and interpretations have
+frequency heads for code analysis. This "wavelet         several limitations that open promising avenues for
+framework" serves as a new lens for interpretabil-       future research.
+ity and establishes a new benchmark for positional
+                                                            Our primary analysis, like much of the field, ex-
+encodings. The goal is no longer just to provide
+                                                         amines model properties at inference time after
+a position signal, but to find encodings that, like
+                                                         training is complete. While the Pythia checkpoint
+RoPE, act as a powerful inductive bias to catalyze
+                                                         analysis offers a glimpse into the learning trajec-
+the emergence of these optimal, multi-resolution
+                                                         tory, a more fine-grained, continuous analysis of
+strategies.
+                                                         how these spectral properties evolve during the
+                                                         training process could reveal the precise dynamics
+8   Conclusion
+                                                         and triggers for the observed phase shifts.
+Our research demonstrates that Transformer mod-             Although we analyzed a range of model sizes
+els equipped with Rotary Position Embeddings             and architectures, our findings are based on a spe-
+(RoPE) are not merely subject to their theoretical       cific set of open-source language models trained
+predominantly on English text. Further research is       Colin Raffel, Noam Shazeer, Adam Roberts, Katherine
+needed to determine if these principles generalize         Lee, Sharan Narang, Michael Matena, Yanqi Zhou,
+                                                           Wei Li, and Peter J Liu. 2020. Exploring the lim-
+across other modalities (e.g., vision, audio), data
+                                                           its of transfer learning with a unified text-to-text
+types (e.g., code, multilingual text), and proprietary     transformer. Journal of machine learning research,
+architectures.                                             21(140):1–67.
+
+Broader impact A potential societal implication          Ali Rahimi and Benjamin Recht. 2008. Weighted sums
+of our work is that by demonstrating these ben-            of random kitchen sinks: Replacing minimization
+                                                           with randomization in learning. Advances in neural
+eficial properties intensify with model scale, our         information processing systems, 21.
+findings could be used to justify the trend of build-
+ing ever-larger models. This risks exacerbating          Ivan W Selesnick and C Sidney Burrus. 1998. General-
+                                                            ized digital butterworth filter design. IEEE Transac-
+existing issues of computational and environmental          tions on signal processing, 46(6):1688–1694.
+resource concentration.
+                                                         Ravid Shwartz-Ziv and Naftali Tishby. 2017. Opening
+10   Acknowledgments                                       the black box of deep neural networks via informa-
+                                                           tion. arXiv preprint arXiv:1703.00810.
+Research supported in part by European Union             Jianlin Su, Murtadha Ahmed, Yu Lu, Shengfeng Pan,
+- Next Generation EU - namely by the MUR-                   Wen Bo, and Yunfeng Liu. 2024. Roformer: En-
+PRIN 2022 project "2022REWNTE - Artificial In-              hanced transformer with rotary position embedding.
+telligence algorithms to track and detect Covid-            Neurocomputing, 568:127063.
+19 vaccine-related infodemic on social media"            Naftali Tishby and Noga Zaslavsky. 2015. Deep learn-
+- CUP no.B53D23020690006; in part by the                   ing and the information bottleneck principle. In 2015
+projects FAIR under Grant PE0000013 and SER-               ieee information theory workshop (itw), pages 1–5.
+                                                           IEEE.
+ICS under Grant PE00000014 under the MUR Na-
+tional Recovery and Resilience Plan funded by            A Vaswani. 2017. Attention is all you need. Advances
+the European Union-NextGenerationEU, and in                in Neural Information Processing Systems.
+part by the project Neural Reasoning over Open
+                                                         11     Appendix
+Data (NEREO) funded by the Italian Ministry
+of Education and Research (PRIN) under Grant             11.1   Wavelet-like features across multiple
+2022AEFHA, and in part by the project SEED                      models of the Pythia family
+funded by Sapienza University of Rome.                   The Pythia model family provides a good opportu-
+                                                         nity to examine how wavelet-like properties evolve
+                                                         across model scale because these models were
+References
+                                                         trained on identical data with consistent method-
+Federico Barbero, Alex Vitvitskyi, Christos              ologies, differing only in size and depth. We per-
+  Perivolaropoulos, Razvan Pascanu, and Petar            formed the same analysis described in the method-
+  Veličković. 2024. Round and round we go! what
+  makes rotary positional encodings useful? arXiv        ology section.
+  preprint arXiv:2410.06205.
+                                                         Position-spectrum correlation As we see in ta-
+Lu Chi, Borui Jiang, and Yadong Mu. 2020. Fast fourier   ble 6, all models now show negative position-
+  convolution. Advances in Neural Information Pro-       spectrum correlations, ranging from -0.111 to -
+  cessing Systems, 33:4479–4488.                         0.884. This represents a fundamental shift in how
+Ziv Goldfeld, Ewout van den Berg, Kristjan Gree-         we understand these models’ computational strate-
+  newald, Igor Melnyk, Nam Nguyen, Brian Kings-          gies. Smallest model (14M) shows the strongest
+  bury, and Yury Polyanskiy. 2018. Estimating infor-     negative correlation (-0.884), indicating it makes
+  mation flow in deep neural networks. arXiv preprint    the most dramatic trade-offs between positional and
+  arXiv:1810.05728.
+                                                         spectral precision. This makes perfect sense from
+Alan V Oppenheim. 1999. Discrete-time signal process-    a capacity perspective—with extremely limited pa-
+  ing. Pearson Education India.                          rameters, this tiny model must make stark either-
+                                                         or decisions about whether to prioritize knowing
+Ofir Press, Noah A Smith, and Mike Lewis. 2021.
+  Train short, test long: Attention with linear biases
+                                                         exactly where linguistic patterns occur versus un-
+  enables input length extrapolation. arXiv preprint     derstanding their frequency characteristics. The
+  arXiv:2108.12409.                                      410M model presents a fascinating anomaly with
+the weakest negative correlation (-0.111), suggest-     the medium-scale regime. Starting around 410M
+ing it operates in a transitional regime where it’s     parameters, we observe a dramatic improvement
+beginning to develop more sophisticated balanc-         in scale invariance, with sensitivity dropping to
+ing strategies but hasn’t yet fully committed to the    much lower values (0.095 at 0.5× scaling for the
+dramatic trade-offs we see in other models.             410M model, then further improving to around
+                                                        0.059-0.062 for the largest models). This transition
+Frequency selectivity The frequency selectivity
+                                                        suggests there’s a critical computational capacity
+trajectory reveals a more complex developmental
+                                                        threshold where models gain sufficient parameters
+pattern that shows different phases in how models
+                                                        to implement sophisticated wavelet-like processing
+organize their spectral representations. Starting re-
+                                                        strategies. This pattern provides compelling evi-
+markably high at 0.829 for the tiny 14M model,
+                                                        dence for a fundamental principle in neural scaling:
+selectivity follows a complex path: initially de-
+                                                        there are qualitative transitions in computational
+creasing as we scale through the smallest models
+                                                        capability that occur at specific capacity thresh-
+(0.644 for 70M, 0.500 for 160M), then showing in-
+                                                        olds, not just gradual improvements. Below the
+teresting variations through medium scales, reach-
+                                                        threshold, models can develop wavelet-compatible
+ing its dramatic minimum at 2.8B (0.174), before
+                                                        representations but struggle to make them truly
+recovering to moderate, stable levels in the largest
+                                                        scale-invariant. Above the threshold, models dis-
+models (around 0.55-0.56). This developmental
+                                                        cover how to create robust, scale-invariant repre-
+pattern tells us something about how neural net-
+                                                        sentations that maintain their essential structure
+works navigate the fundamental trade-offs in spec-
+                                                        across different observational scales. The consis-
+tral representation. Very small models develop
+                                                        tency of the relationship where 0.25× sensitivity
+sharp frequency selectivity out of computational
+                                                        exceeds 0.5× sensitivity across all models provides
+necessity—with severely limited representational
+                                                        additional evidence that even the smallest models
+capacity, they must make aggressive specializa-
+                                                        discover fundamental wavelet-like properties. They
+tion choices to function effectively. As capacity
+                                                        all exhibit the characteristic progressive degrada-
+increases through the smaller models, we see an
+                                                        tion pattern that mirrors how true wavelet basis
+initial relaxation of this constraint-driven special-
+                                                        functions respond to increasingly aggressive rescal-
+ization. Models can afford to distribute their atten-
+                                                        ing operations.
+tion more broadly across the frequency spectrum,
+leading to decreased selectivity. This represents
+                                                        Position-spectrum correlation All the models,
+a transition from survival-mode specialization to
+                                                        from the tiniest 14M to the largest 12B, exhibit
+exploratory distributed processing.
+                                                        negative position-spectrum correlations. This uni-
+   The largest models converge on moderate selec-
+                                                        versal pattern provides direct, compelling evidence
+tivity values that represent a mature computational
+                                                        that models across the entire scaling range have
+strategy. These models have discovered how to
+                                                        discovered and implemented the fundamental un-
+maintain both specialized frequency channels and
+                                                        certainty principle that governs all time-frequency
+integrated multi-scale representations simultane-
+                                                        representations. The negative correlations we ob-
+ously. They’ve learned that optimal spectral organi-
+                                                        serve across the Pythia family (ranging from -0.111
+zation isn’t about choosing between specialization
+                                                        to -0.884) demonstrate that these models have inter-
+and distribution, but about intelligently combining
+                                                        nalized this constraint and developed sophisticated
+both approaches.
+                                                        strategies for navigating it. When a model achieves
+Scale sensitivity What emerges from our cor-            high precision in localizing where linguistic pat-
+rected data is a story of two distinct computational    terns occur, it necessarily shows less organized fre-
+regimes separated by a critical capacity thresh-        quency structure, and vice versa. The pattern across
+old. The very smallest models (14M through              model sizes reveals fascinating insights about how
+160M) show relatively high scale sensitivity val-       computational capacity affects uncertainty princi-
+ues, ranging from 0.142 to 0.162 at 0.5× scal-          ple navigation. The smallest model (14M) shows
+ing. This tells us these models develop repre-          the strongest negative correlation (-0.884), indicat-
+sentations that undergo substantial transformation      ing it makes the most dramatic either-or decisions
+when rescaled—they haven’t yet learned to cre-          between positional and spectral precision. With
+ate truly scale-invariant representations. However,     extremely limited parameters, this tiny model must
+something remarkable happens as we cross into           choose stark trade-offs—it simply cannot afford nu-
+  Model              Heads     Spectral     Frequency     Scale 0.5     Scale 0.25    Pos-Spec      Reconstr.
+                               Entropy        Select.      Sens.          Sens.        Corr.         Error
+  Pythia (14M)         4         2.279         0.829        0.142         0.138         -0.884        0.00003
+  Pythia (70M)         8         2.667         0.644        0.152         0.150         -0.769        0.00003
+  Pythia (160M)        12        3.018         0.500        0.162         0.159         -0.722        0.00005
+  Pythia (410M)        16        2.631         0.621        0.095         0.121         -0.111        0.00008
+  Pythia (1.4B)        16        2.655         0.614        0.061         0.101         -0.373        0.00009
+  Pythia (2.8B)        32        3.786         0.174        0.082         0.121         -0.737        0.00009
+  Pythia (6.9B)        32        2.764         0.561        0.062         0.102         -0.421        0.00009
+  Pythia (12B)         40        2.783         0.552        0.059         0.099         -0.488        0.00009
+
+            Table 6: Scaling Analysis: Wavelet-Like Properties Across the Pythia Family (Corrected)
+
+
+anced balancing strategies. Interestingly, the 410M       organized enough to support effective processing.
+model presents an anomaly with the weakest nega-
+                                                          Reconstruction Error The slight increase with
+tive correlation (-0.111), suggesting it operates in a
+                                                          scale might initially seem counterintuitive, but it
+transitional computational regime. This model ap-
+                                                          likely reflects the increasing complexity of atten-
+pears to be experimenting with different balancing
+                                                          tion patterns in larger models. More sophisticated
+strategies, possibly representing a developmental
+                                                          representations naturally require more complex
+phase where models begin to discover more sophis-
+                                                          wavelet decompositions, leading to slightly higher
+ticated approaches to uncertainty navigation but
+                                                          reconstruction residuals while still maintaining ex-
+haven’t yet committed to the dramatic optimiza-
+                                                          ceptional overall accuracy. The critical insight is
+tion strategies we see in other scales. The 2.8B
+                                                          that even the reconstruction errors in the largest
+model returns to a very strong negative correla-
+                                                          models remain extraordinarily low, confirming that
+tion (-0.737), aligning with its distinctive properties
+                                                          wavelet decomposition effectively captures the es-
+across all our other metrics. This model appears to
+                                                          sential structure of attention patterns across the
+represent a computational exploration phase where
+                                                          entire scaling range.
+sophisticated trade-off strategies are being discov-
+ered and refined.                                         Conclusion This analysis of the Pythia fam-
+                                                          ily shows us how wavelet-like properties emerge
+Spectral entropy Spectral entropy follows the             across neural network scaling. Rather than develop-
+most complex trajectory, initially increasing from        ing gradually through simple parameter accumula-
+2.279 to 3.018 as we scale from 14M to 160M, then         tion, these properties follow distinct developmental
+showing a more erratic pattern through larger scales      trajectories with clear phase transitions and critical
+(2.655 at 1.4B, peaking at 3.786 at 2.8B, then set-       capacity thresholds. The universal presence of neg-
+tling around 2.77-2.78 for the largest models). This      ative position-spectrum correlations demonstrates
+pattern reflects how models balance organizational        that uncertainty principle navigation represents a
+complexity with representational efficiency. Lower        fundamental computational strategy that emerges
+entropy indicates more organized, predictable spec-       across all scales, implemented through different ap-
+tral structure, while higher entropy suggests more        proaches based on computational constraints. The
+distributed, complex organization. The peak at            dramatic improvement in scale invariance around
+2.8B aligns with this model’s distinctive proper-         410M parameters reveals that there are qualitative
+ties we’ve observed across other metrics—it rep-          transitions in capability that occur at specific thresh-
+resents a transitional phase where the model ex-          olds, not just quantitative improvements. Most im-
+periments with highly distributed representations         portantly, the universal reconstruction quality using
+before converging on more organized strategies at         wavelet decomposition confirms that regardless of
+larger scales. The convergence to moderate entropy        scale or specific organizational strategy, all these
+values in the largest models suggests they achieve        models converge on representations that embody
+sophisticated organization that balances complex-         fundamental wavelet mathematical principles. This
+ity with efficiency, creating spectral structures that    suggests that wavelet-like organization doesn’t rep-
+are rich enough to capture linguistic complexity but      resent one possible solution among many, but rather
+reflects optimal mathematical principles that any ef-     to how wavelets decompose signals at different
+fective multi-scale information processing system         scales). So that local heads maintain high posi-
+must discover and implement.                              tional precision for nearby tokens, global heads
+                                                          capture long-range dependencies without rotation
+11.2   Multi-scale wavelet entropy table                  interference and mid-range heads bridge the gap,
+11.3   RoPE’s Limitations                                 ensuring smooth information flow across scales.
+The first main limitation of RoPE is the frequency-       This is what we see in our empirical results, par-
+position uncertainty principle, because RoPE’s            ticularly in Figure 2, where attention heads natu-
+fixed-frequency rotations create an inherent trade-       rally organize themselves into distinct frequency
+off between positional precision and frequency res-       bands. The low-frequency heads (showing 60-80%
+olution.                                                  of power in the 0-0.25 range) handle global context,
+   When RoPE applies a rotation to token embed-           while high-frequency heads (with 5-15% power
+dings, it follows this equation:                          above 0.75) maintain precise positional informa-
+                                                        tion.
+                   cos(mθk ), − sin(mθk )
+     R(mθk ) =                                 (19)          For the scale non-invariance problem, the
+                    sin(mθk ), cos(mθk )
+                                                          wavelet-like organization provides an elegant so-
+If we want very precise positional information, we        lution, in fact, rather than relying on RoPE’s fixed
+need the rotation angle mθ to change substantially        periodic rotations, attention heads develop scale-
+between nearby positions. This means using a              covariant properties. This means they automati-
+larger base rotation angle θ. However, when we            cally adapt their attention patterns based on the
+do this, the rotations cycle through the complex          sequence length.
+plane more quickly, making it harder to capture              Our empirical evidence shows this through the
+relationships between tokens that are far apart. The      stable entropy values across different window sizes
+rotations start repeating too soon, causing distant       (as shown in Table 2), the consistent correlation
+tokens to look similar to nearby ones. On the other       patterns when scaling sequences (0.98 at 0.5x scale)
+hand, if we want to capture long-range dependen-          and the systematic improvement in reconstruction
+cies well, we need the rotations to change more           error with model size.
+slowly (smaller θ). But then nearby positions get            These quantitative results demonstrate that at-
+similar rotation angles, making it harder to distin-      tention heads collectively form a multi-resolution
+guish exactly where each token is.                        frame that maintains coherent positional represen-
+   Then, we have the scale non-invariance issue,          tation across scales, effectively learning to over-
+where the periodic nature of RoPE’s embeddings            come RoPE’s periodicity limitation. The system-
+can lead to aliasing effects over longer sequences.       atic emergence of these properties suggests that
+RoPE’s rotations are periodic by nature, in fact,         transformer models discover an optimal solution to
+they complete a full circle every 2πθ positions. This     the position encoding challenge. This solution man-
+creates two related problems: first, when sequences       ifests as a wavelet-like framework that balances lo-
+get longer than the period of rotation, positions that    cal precision with global context while maintaining
+are far apart can end up with the same or very sim-       scale invariance - precisely addressing RoPE’s core
+ilar rotation angles. For example, if your rotation       limitations.
+period is 1000 tokens, position 1 and position 1001
+get nearly identical rotations. This makes it hard        11.4   Relationship between Wavelet-like
+for the model to distinguish truly different posi-               Features and Linguistic Understanding
+tions. Second, the fixed rotation frequency means         Language exhibits a natural hierarchical structure
+RoPE treats all sequences the same way, regardless        that spans multiple scales of organization, from
+of their length. But this isn’t ideal, in fact, a posi-   morphemes to discourse-level patterns. This in-
+tion difference of 10 tokens might be significant in      herent multi-scale nature makes wavelet-like pro-
+a 50-token sequence but negligible in a 5000-token        cessing particularly well-suited for language under-
+sequence. RoPE can’t naturally adapt its position         standing tasks. Just as wavelets provide a math-
+encoding to the scale of the input.                       ematical framework for analyzing signals at dif-
+   With the wavelet-like framework we discovered          ferent resolutions while preserving both local and
+that different attention heads spontaneously spe-         global information, attention mechanisms in trans-
+cialize in different frequency bands (similar way         former models appear to develop analogous capa-
+  Model                     Scale 0      Scale 1       Scale 2      Scale 3      Scale 4       Scale 5
+  LLaMA 3.2 (1B)             0.694         0.331        0.562        0.671        0.343         0.235
+  Gemma 2 (2B)               0.715         0.351        0.608        0.752        0.424         0.350
+  Pythia (2.8B)              0.791         0.543        0.922        1.119        1.012         1.019
+  Qwen 2.5 (0.5B)            0.814         0.471        0.753        0.949        0.766         0.711
+  Mistral (7B)               0.689         0.278        0.450        0.633        0.504         0.217
+  LLaMA 3.1 (8B)             0.690         0.327        0.551        0.651        0.320         0.213
+  Pythia (12B)               0.822         0.494        0.766        0.957        0.807         0.772
+                               Table 7: Multi-Scale Wavelet Entropy Analysis
+
+
+bilities for processing linguistic patterns.              The spectral entropy Hs (h) measures how at-
+   At the finest scale, language processing requires   tention heads distribute their focus across different
+attention to local syntactic relationships and mor-    scales, providing insight into how models balance
+phological patterns. These include subject-verb        local and global linguistic features. The observed
+agreement, phrasal boundaries, and morpheme            entropy patterns suggest that attention heads opti-
+combinations. Our analysis shows that high-            mize their frequency sensitivity to match the nat-
+frequency attention heads (those with significant      ural distribution of linguistic information across
+power in the 0.75-1.0 ωN band) specialize in cap-      scales.
+turing these local dependencies, similar to how           Scale sensitivity metrics Sh (α) quantify how
+wavelets with narrow support identify fine-grained     well the model maintains consistent understand-
+signal features.                                       ing as context length changes. This is particularly
+   At intermediate scales, sentence-level relation-    relevant for language processing, where meaning
+ships such as anaphora resolution, clause depen-       must remain stable regardless of the surrounding
+dencies, and semantic role assignments become          context size. The high correlation (0.98) observed
+critical. The mid-frequency attention heads (0.25-     when scaling sequences by 0.5x demonstrates the
+0.75 ωN band) demonstrate patterns remarkably          model’s ability to maintain coherent linguistic rep-
+similar to wavelet basis functions at medium scales,   resentations across varying context windows.
+efficiently capturing these intermediate linguistic       Reconstruction error ε validates that the ob-
+structures. This parallel suggests that the model      served patterns form a complete representation sys-
+learns to balance local precision with broader con-    tem. The low error values indicate that the wavelet-
+textual awareness, much as wavelets provide multi-     like attention patterns capture linguistic structure
+resolution signal analysis.                            with high fidelity across all scales. This complete-
+   The broadest scale encompasses document-level       ness is essential for accurate language understand-
+phenomena such as topic coherence, rhetorical          ing, as it ensures no significant linguistic features
+structure, and thematic development. Our analysis      are lost in the model’s internal representations.
+reveals that low-frequency attention heads (0-0.25        The position-spectrum correlation ρ(h) further
+ωN band) evolve to process these global patterns,      shows how models balance local syntactic preci-
+analogous to how wavelet scaling functions capture     sion with broader semantic understanding. Val-
+broad signal trends. The systematic distribution of    ues closer to 1 indicate successful integration of
+power across these frequency bands (60-80% in          both local and global linguistic features, while val-
+low frequencies, 15-25% in mid-range, and 5-15%        ues closer to -1 suggest a trade-off between fine-
+in high frequencies) mirrors the hierarchical orga-    grained and broad-scale language processing.
+nization of linguistic information.                       This multi-scale organization emerges naturally
+                                                       during training, suggesting that wavelet-like pro-
+11.5   Metrics more in depth
+                                                       cessing represents an optimal solution for handling
+Our metrics were specifically designed to quantify     the inherent hierarchical structure of language. The
+this multi-scale processing capability:                parallel between wavelet decomposition and the
+way transformer models process linguistic informa-
+tion provides insight into why these architectures
+have been so successful in natural language pro-
+cessing tasks.
+

@@ -1,0 +1,820 @@
+                                                 LXMERT: Learning Cross-Modality Encoder Representations
+                                                                  from Transformers
+
+                                                                                Hao Tan    Mohit Bansal
+                                                                                     UNC Chapel Hill
+                                                                            {haotan, mbansal}@cs.unc.edu
+
+
+
+
+                                                                Abstract                                tics, and cross-modal alignments and relation-
+                                            Vision-and-language reasoning requires an un-               ships. There has been substantial past works in
+                                            derstanding of visual concepts, language se-                separately developing backbone models with bet-
+arXiv:1908.07490v3 [cs.CL] 3 Dec 2019
+
+
+
+
+                                            mantics, and, most importantly, the align-                  ter representations for the single modalities of vi-
+                                            ment and relationships between these two                    sion and of language. For visual-content under-
+                                            modalities. We thus propose the LXMERT                      standing, people have developed several backbone
+                                            (Learning Cross-Modality Encoder Represen-                  models (Simonyan and Zisserman, 2014; Szegedy
+                                            tations from Transformers) framework to learn
+                                                                                                        et al., 2015; He et al., 2016) and shown their ef-
+                                            these vision-and-language connections. In
+                                            LXMERT, we build a large-scale Transformer
+                                                                                                        fectiveness on large vision datasets (Deng et al.,
+                                            model that consists of three encoders: an ob-               2009; Lin et al., 2014; Krishna et al., 2017). Pi-
+                                            ject relationship encoder, a language encoder,              oneering works (Girshick et al., 2014; Xu et al.,
+                                            and a cross-modality encoder. Next, to en-                  2015) also show the generalizability of these pre-
+                                            dow our model with the capability of con-                   trained (especially on ImageNet) backbone mod-
+                                            necting vision and language semantics, we                   els by fine-tuning them on different tasks. In terms
+                                            pre-train the model with large amounts of                   of language understanding, last year, we witnessed
+                                            image-and-sentence pairs, via five diverse rep-
+                                                                                                        strong progress towards building a universal back-
+                                            resentative pre-training tasks: masked lan-
+                                            guage modeling, masked object prediction                    bone model with large-scale contextualized lan-
+                                            (feature regression and label classification),              guage model pre-training (Peters et al., 2018; Rad-
+                                            cross-modality matching, and image ques-                    ford et al., 2018; Devlin et al., 2019), which
+                                            tion answering. These tasks help in learn-                  has improved performances on various tasks (Ra-
+                                            ing both intra-modality and cross-modality re-              jpurkar et al., 2016; Wang et al., 2018) to sig-
+                                            lationships. After fine-tuning from our pre-                nificant levels. Despite these influential single-
+                                            trained parameters, our model achieves the
+                                                                                                        modality works, large-scale pretraining and fine-
+                                            state-of-the-art results on two visual ques-
+                                            tion answering datasets (i.e., VQA and GQA).
+                                                                                                        tuning studies for the modality-pair of vision and
+                                            We also show the generalizability of our pre-               language are still under-developed.
+                                            trained cross-modality model by adapting it to                 Therefore, we present one of the first works in
+                                            a challenging visual-reasoning task, NLVR2 ,                building a pre-trained vision-and-language cross-
+                                            and improve the previous best result by 22%                 modality framework and show its strong perfor-
+                                            absolute (54% to 76%). Lastly, we demon-                    mance on several datasets. We name this frame-
+                                            strate detailed ablation studies to prove that
+                                                                                                        work “LXMERT: Learning Cross-Modality En-
+                                            both our novel model components and pre-
+                                            training strategies significantly contribute to             coder Representations from Transformers” (pro-
+                                            our strong results; and also present several                nounced: ‘leksmert’). This framework is mod-
+                                            attention visualizations for the different en-              eled after recent BERT-style innovations while
+                                            coders.1                                                    further adapted to useful cross-modality scenar-
+                                                                                                        ios. Our new cross-modality model focuses on
+                                        1    Introduction
+                                                                                                        learning vision-and-language interactions, espe-
+                                        Vision-and-language reasoning requires the un-                  cially for representations of a single image and its
+                                        derstanding of visual contents, language seman-                 descriptive sentence. It consists of three Trans-
+                                            1
+                                              Published at EMNLP 2019. Code and pre-trained mod-        former (Vaswani et al., 2017) encoders: an object
+                                        els publicly available at: https://github.com/airsplay/lxmert   relationship encoder, a language encoder, and a
+cross-modality encoder. In order to better learn       cessing models (e.g., transformers (Vaswani et al.,
+the cross-modal alignments between vision and          2017)). As shown in Fig. 1, our model takes two
+language, we next pre-train our model with five        inputs: an image and its related sentence (e.g., a
+diverse representative tasks: (1) masked cross-        caption or a question). Each image is represented
+modality language modeling, (2) masked object          as a sequence of objects, and each sentence is rep-
+prediction via RoI-feature regression, (3) masked      resented as a sequence of words. Via careful de-
+object prediction via detected-label classification,   sign and combination of these self-attention and
+(4) cross-modality matching, and (5) image ques-       cross-attention layers, our model is able to gen-
+tion answering. Different from single-modality         erate language representations, image representa-
+pre-training (e.g., masked LM in BERT), this           tions, and cross-modality representations from the
+multi-modality pre-training allows our model to        inputs. Next, we describe the components of this
+infer masked features either from the visible ele-     model in detail.
+ments in the same modality, or from aligned com-
+ponents in the other modality. In this way, it helps   2.1   Input Embeddings
+build both intra-modality and cross-modality rela-     The input embedding layers in LXMERT con-
+tionships.                                             vert the inputs (i.e., an image and a sentence)
+   Empirically, we first evaluate LXMERT on            into two sequences of features: word-level sen-
+two popular visual question-answering datasets,        tence embeddings and object-level image embed-
+VQA (Antol et al., 2015) and GQA (Hudson and           dings. These embedding features will be further
+Manning, 2019). Our model outperforms previ-           processed by the latter encoding layers.
+ous works in all question categories (e.g., Binary,    Word-Level Sentence Embeddings A sentence
+Number, Open) and achieves state-of-the-art re-        is first split into words {w1 , . . . , wn } with length
+sults in terms of overall accuracy. Further, to show   of n by the same WordPiece tokenizer (Wu et al.,
+the generalizability of our pre-trained model, we      2016) in Devlin et al. (2019). Next, as shown in
+fine-tune LXMERT on a challenging visual rea-          Fig. 1, the word wi and its index i (wi ’s absolute
+soning task, Natural Language for Visual Reason-       position in the sentence) are projected to vectors
+ing for Real (NLVR2 ) (Suhr et al., 2019), where       by embedding sub-layers, and then added to the
+we do not use the natural images in their dataset      index-aware word embeddings:
+for our pre-training, but fine-tune and evaluate
+on these challenging, real-world images. In this                   ŵi = WordEmbed (wi )
+setup, we achieve a large improvement of 22% ab-                   ûi = IdxEmbed (i)
+solute in accuracy (54% to 76%, i.e., 48% rela-                    hi = LayerNorm (ŵi + ûi )
+tive error reduction) and 30% absolute in consis-
+tency (12% to 42%, i.e., 34% relative error re-        Object-Level Image Embeddings Instead of
+duction). Lastly, we conduct several analysis and      using the feature map output by a convolutional
+ablation studies to prove the effectiveness of our     neural network, we follow Anderson et al. (2018)
+model components and diverse pre-training tasks        in taking the features of detected objects as the em-
+by removing them or comparing them with their          beddings of images. Specifically, the object detec-
+alternative options. Especially, we use several        tor detects m objects {o1 , . . . , om } from the im-
+ways to take the existing BERT model and its vari-     age (denoted by bounding boxes on the image in
+ants, and show their ineffectiveness in vision-and-    Fig. 1). Each object oj is represented by its po-
+language tasks, which overall proves the need of       sition feature (i.e., bounding box coordinates) pj
+our new cross-modality pre-training framework.         and its 2048-dimensional region-of-interest (RoI)
+We also present several attention visualizations       feature fj . Instead of directly using the RoI feature
+for the different language, object-relationship, and   fj without considering its position pj in Anderson
+cross-modality encoders.                               et al. (2018), we learn a position-aware embedding
+                                                       vj by adding outputs of 2 fully-connected layers:
+2   Model Architecture
+                                                                 fˆj = LayerNorm (WF fj + bF )
+We build our cross-modality model with self-                     p̂j = LayerNorm (WP pj + bP )
+attention and cross-attention layers following the
+                                                                              
+                                                                 vj = fˆj + p̂j /2                         (1)
+recent progress in designing natural language pro-
+                     RoI Feat   NR ⇥                          NX ⇥
+                                                                                                          Vision
+                         +           Self   +    FF     +       Cross      +   Self    +    FF   +        Output
+
+                     Pos Feat   Object-Relationship Encoder                                               Cross-
+                                                                                                         Modality
+                                NL ⇥                                                                     Output
+                     Word Emb
+     A woman
+   riding a bike                                                                                         Language
+  with a dog in a        +           Self   +   FF      +       Cross      +   Self    +    FF   +
+                                                                                                          Output
+      basket.
+                     Idx Emb         Language Encoder                   Cross-Modality Encoder
+
+Figure 1: The LXMERT model for learning vision-and-language cross-modality representations. ‘Self’ and
+‘Cross’ are abbreviations for self-attention sub-layers and cross-attention sub-layers, respectively. ‘FF’ denotes
+a feed-forward sub-layer.
+
+In addition to providing spatial information in vi-           Single-Modality Encoders After the embed-
+sual reasoning, the inclusion of positional infor-            ding layers, we first apply two transformer en-
+mation is necessary for our masked object pre-                coders (Vaswani et al., 2017), i.e., a language en-
+diction pre-training task (described in Sec. 3.1.2).          coder and an object-relationship encoder, and
+Since the image embedding layer and the follow-               each of them only focuses on a single modal-
+ing attention layers are agnostic to the absolute in-         ity (i.e., language or vision). Different from
+dices of their inputs, the order of the object is not         BERT (Devlin et al., 2019), which applies the
+specified. Lastly, in Equation 1, the layer normal-           transformer encoder only to language inputs, we
+ization is applied to the projected features before           apply it to vision inputs as well (and to cross-
+summation so as to balance the energy of the two              modality inputs as described later below). Each
+different types of features.                                  layer (left dashed blocks in Fig. 1) in a single-
+                                                              modality encoder contains a self-attention (‘Self’)
+2.2    Encoders
+                                                              sub-layer and a feed-forward (‘FF’) sub-layer,
+We build our encoders, i.e., the language encoder,            where the feed-forward sub-layer is further com-
+the object-relationship encoder, and the cross-               posed of two fully-connected sub-layers. We take
+modality encoder, mostly on the basis of two kinds            NL and NR layers in the language encoder and the
+of attention layers: self-attention layers and cross-         object-relationship encoder, respectively. We add
+attention layers. We first review the definition and          a residual connection and layer normalization (an-
+notations of attention layers and then discuss how            notated by the ‘+’ sign in Fig. 1) after each sub-
+they form our encoders.                                       layer as in Vaswani et al. (2017).
+Background: Attention Layers Attention lay-
+ers (Bahdanau et al., 2014; Xu et al., 2015) aim to
+retrieve information from a set of context vectors
+{yj } related to a query vector x. An attention layer
+                                                              Cross-Modality Encoder Each cross-modality
+first calculates the matching score aj between the
+                                                              layer (the right dashed block in Fig. 1) in the cross-
+query vector x and each context vector yj . Scores
+                                                              modality encoder consists of two self-attention
+are then normalized by softmax:
+                                                              sub-layers, one bi-directional cross-attention sub-
+               aj = score(x, yj )                             layer, and two feed-forward sub-layers. We stack
+                              X                               (i.e., using the output of k-th layer as the input
+               αj = exp(aj )/     exp(ak )
+                                 k                            of (k+1)-th layer) NX these cross-modality lay-
+The output of an attention layer is the weighted              ers in our encoder implementation. Inside the k-th
+sum of the context vectors w.r.t. the P     softmax-          layer, the bi-directional cross-attention sub-layer
+normalized score: AttX→Y (x, {yj }) = j αj yj .               (‘Cross’) is first applied, which contains two uni-
+An attention layer is called self-attention when the          directional cross-attention sub-layers: one from
+query vector x is in the set of context vectors {yj }.        language to vision and one from vision to lan-
+Specifically, we use the multi-head attention fol-            guage. The query and context vectors are the out-
+lowing Transformer (Vaswani et al., 2017).                    puts of the (k-1)-th layer (i.e., language features
+                                                                                                            RoI-Feature
+                                      RoI Feat
+                                                                                                            Regression
+                            Mask          +
+                                                       ObjectRel
+                            Feat                        Encoder                                    {DOG}   Detected-Label
+                                                                                                     …     Classification
+                                      Pos Feat                          Cross-
+                                                                                           Match? {YES}    Cross-Modality
+                                                                       Modality
+                                                                                          Answer? {RABBIT} Matching & QA
+                                      Word Emb                         Encoder
+                       [CLS] who                                                             [CLS] who
+   Who is eating    [MASK] eat -ing                    Language                              is eat -ing
+                     the [MASK] ?         +                                                                Masked Cross-
+    the carrot?                                         Encoder                            the carrot ?
+                         [EOS]                                                                 [EOS]       Modality LM
+                                       Idx Emb
+
+Figure 2: Pre-training in LXMERT. The object RoI features and word tokens are masked. Our five pre-training
+tasks learn the feature representations based on these masked inputs. Special tokens are in brackets and classifica-
+tion labels are in braces.
+
+{hk−1
+  i   } and vision features {vjk−1 }):                             3      Pre-Training Strategies
+                                                                 In order to learn a better initialization which un-
+ ĥki = CrossAttL→R hk−1
+                     i   ,{v1
+                             k−1
+                                 , . . . , v k−1
+                                             m   }                 derstands connections between vision and lan-
+                                                                 guage, we pre-train our model with different
+                     k−1
+ v̂jk = CrossAttR→L vj ,{hk−11 , . . . , hn }
+                                             k−1
+                                                                   modality pre-training tasks on a large aggregated
+                                                                   dataset.
+The cross-attention sub-layer is used to exchange
+the information and align the entities between                     3.1      Pre-Training Tasks
+the two modalities in order to learn joint cross-                  3.1.1   Language Task: Masked
+modality representations. For further building in-                         Cross-Modality LM
+ternal connections, the self-attention sub-layers                  On the language side, we take the masked cross-
+(‘Self’) are then applied to the output of the cross-              modality language model (LM) task. As shown
+attention sub-layer:                                               in the bottom branch of Fig. 2, the task setup
+                                                                 is almost same to BERT (Devlin et al., 2019):
+       h̃ki = SelfAttL→L ĥki , {ĥk1 , . . . , ĥkn }             words are randomly masked with a probabil-
+                                                                 ity of 0.15 and the model is asked to predict
+       ṽjk = SelfAttR→R v̂jk , {v̂1k , . . . , v̂m
+                                                  k
+                                                     }             these masked words. In addition to BERT where
+                                                                   masked words are predicted from the non-masked
+Lastly, the k-th layer output {hki } and {vjk } are                words in the language modality, LXMERT, with
+produced by feed-forward sub-layers (‘FF’) on top                  its cross-modality model architecture, could pre-
+of {ĥki } and {v̂jk }. We also add a residual connec-             dict masked words from the vision modality as
+tion and layer normalization after each sub-layer,                 well, so as to resolve ambiguity. For example, as
+similar to the single-modality encoders.                           shown in Fig. 2, it is hard to determine the masked
+                                                                   word ‘carrot’ from its language context but the
+2.3    Output Representations                                      word choice is clear if the visual information is
+                                                                   considered. Hence, it helps building connections
+As shown in the right-most part of Fig. 1, our                     from the vision modality to the language modality,
+LXMERT cross-modality model has three outputs                      and we refer to this task as masked cross-modality
+for language, vision, and cross-modality, respec-                  LM to emphasize this difference. We also show
+tively. The language and vision outputs are the                    that loading BERT parameters into LXMERT will
+feature sequences generated by the cross-modality                  do harm to the pre-training procedure in Sec. 5.1
+encoder. For the cross-modality output, follow-                    since BERT can perform relatively well in the
+ing the practice in Devlin et al. (2019), we ap-                   language modality without learning these cross-
+pend a special token [CLS] (denoted as the top                     modality connections.
+yellow block in the bottom branch of Fig. 1) before
+the sentence words, and the corresponding feature                  3.1.2 Vision Task: Masked Object Prediction
+vector of this special token in language feature se-               As shown in the top branch of Fig. 2, we pre-
+quences is used as the cross-modality output.                      train the vision side by randomly masking ob-
+                                                                   Sentences (or Questions)
+           Image Split           Images
+                                             COCO-Cap            VG-Cap    VQA      GQA       VG-QA       All
+       MS COCO - VG                72K           361K               -      387K       -          -       0.75M
+       MS COCO ∩ VG                51K           256K            2.54M     271K     515K       724K      4.30M
+       VG - MS COCO                57K             -             2.85M       -      556K       718K      4.13M
+                All               180K           617K            5.39M     658K    1.07M      1.44M      9.18M
+
+Table 1: Amount of data for pre-training. Each image has multiple sentences/questions. ‘Cap’ is caption. ‘VG’ is
+Visual Genome. Since MS COCO and VG share 51K images, we list it separately to ensure disjoint image splits.
+
+jects (i.e., masking RoI features with zeros) with                Sec. 3.2), around 1/3 sentences in the pre-training
+a probability of 0.15 and asking the model to pre-                data are questions about the images. We ask
+dict proprieties of these masked objects. Similar                 the model to predict the answer to these image-
+to the language task (i.e., masked cross-modality                 related questions when the image and the ques-
+LM), the model can infer the masked objects ei-                   tion are matched (i.e., not randomly replaced in
+ther from visible objects or from the language                    the cross-modality matching task). We show that
+modality. Inferring the objects from the vision                   pre-training with this image QA leads to a better
+side helps learn the object relationships, and infer-             cross-modality representation in Sec. 5.2.
+ring from the language side helps learn the cross-
+modality alignments. Therefore, we perform two                    3.2    Pre-Training Data
+sub-tasks: RoI-Feature Regression regresses the                   As shown in Table. 1, we aggregate pre-training
+object RoI feature fj with L2 loss, and Detected-                 data from five vision-and-language datasets whose
+Label Classification learns the labels of masked                  images come from MS COCO (Lin et al., 2014)
+objects with cross-entropy loss. In the ‘Detected-                or Visual Genome (Krishna et al., 2017). Be-
+Label Classification’ sub-task, although most of                  sides the two original captioning datasets, we also
+our pre-training images have object-level anno-                   aggregate three large image question answering
+tations, the ground truth labels of the annotated                 (image QA) datasets: VQA v2.0 (Antol et al.,
+objects are inconsistent in different datasets (e.g.,             2015), GQA balanced version (Hudson and Man-
+different number of label classes). For these rea-                ning, 2019), and VG-QA (Zhu et al., 2016). We
+sons, we take detected labels output by Faster R-                 only collect train and dev splits in each dataset to
+CNN (Ren et al., 2015). Although detected labels                  avoid seeing any test data in pre-training. We con-
+are noisy, experimental results show that these la-               duct minimal pre-processing on the five datasets to
+bels contribute to pre-training in Sec. 5.3.                      create aligned image-and-sentence pairs. For each
+                                                                  image question answering dataset, we take ques-
+3.1.3 Cross-Modality Tasks                                        tions as sentences from the image-and-sentence
+As shown in the middle-rightmost part of Fig. 2,                  data pairs and take answers as labels in the im-
+to learn a strong cross-modality representation, we               age QA pre-training task (described in Sec. 3.1.3).
+pre-train the LXMERT model with 2 tasks that ex-                  This provides us with a large aligned vision-and-
+plicitly need both language and vision modalities.                language dataset of 9.18M image-and-sentence
+                                                                  pairs on 180K distinct images. In terms of tokens,
+Cross-Modality Matching For each sentence,
+                                                                  the pre-training data contain around 100M words
+with a probability of 0.5, we replace it with a mis-
+                                                                  and 6.5M image objects.
+matched2 sentence. Then, we train a classifier to
+predict whether an image and a sentence match                     3.3    Pre-Training Procedure
+each other. This task is similar to ‘Next Sentence
+                                                                  We pre-train our LXMERT model on the large ag-
+Prediction’ in BERT (Devlin et al., 2019).
+                                                                  gregated dataset (discussed in Sec. 3.2) via the pre-
+Image Question Answering (QA) In order to                         training tasks (Sec. 3.1). The details about the data
+enlarge the pre-training dataset (see details in                  splits are in the Appendix. The input sentences are
+   2
+                                                                  split by the WordPiece tokenizer (Wu et al., 2016)
+     We take a sentence from another image as the mis-
+matched sentence. Although the sentence and the image still       provided in BERT (Devlin et al., 2019). The ob-
+have chance to match each other, this probability is very low.    jects are detected by Faster R-CNN (Ren et al.,
+                                             VQA                                GQA                  NLVR2
+     Method
+                           Binary      Number       Other      Accu    Binary    Open    Accu     Cons     Accu
+     Human                    -           -           -         -       91.2     87.4     89.3       -     96.3
+     Image Only               -           -           -         -       36.1     1.74     17.8     7.40    51.9
+     Language Only           66.8        31.8        27.6      44.3     61.9     22.7     41.1     4.20    51.1
+     State-of-the-Art        85.8        53.7        60.7      70.4     76.0     40.4     57.1     12.0    53.5
+     LXMERT                  88.2        54.2        63.1      72.5     77.8     45.0     60.3     42.1    76.2
+
+Table 2: Test-set results. VQA/GQA results are reported on the ‘test-standard’ splits and NLVR2 results are
+reported on the unreleased test set (‘Test-U’). The highest method results are in bold. Our LXMERT framework
+outperforms previous (comparable) state-of-the-art methods on all three datasets w.r.t. all metrics.
+
+2015) which is pre-trained on Visual Genome                     pre-training process takes 10 days on 4 Titan Xp.
+(provided by Anderson et al. (2018)). We do not
+                                                                Fine-tuning Fine-tuning is fast and robust. We
+fine-tune the Faster R-CNN detector and freeze
+                                                                only perform necessary modification to our model
+it as a feature extractor. Different from detect-
+                                                                with respect to different tasks (details in Sec. 4.2).
+ing variable numbers of objects in Anderson et al.
+                                                                We use a learning rate of 1e − 5 or 5e − 5, a batch
+(2018), we consistently keep 36 objects for each
+                                                                size of 32, and fine-tune the model from our pre-
+image to maximize the pre-training compute uti-
+                                                                trained parameters for 4 epochs.
+lization by avoiding padding. For the model archi-
+tecture, we set the numbers of layers NL , NX , and             4     Experimental Setup and Results
+NR to 9, 5, and 5 respectively.3 More layers are
+used in the language encoder to balance the visual              In this section, we first introduce the datasets that
+features extracted from 101-layer Faster R-CNN.                 are used to evaluate our LXMERT framework and
+The hidden size 768 is the same as BERTBASE . We                empirically compare our single-model results with
+pre-train all parameters in encoders and embed-                 previous best results.
+ding layers from scratch (i.e., model parameters
+                                                                4.1    Evaluated Datasets
+are randomly initialized or set to zero). We also
+show results of loading pre-trained BERT parame-                We use three datasets for evaluating our LXMERT
+ters in Sec. 5.1. LXMERT is pre-trained with mul-               framework: VQA v2.0 dataset (Goyal et al.,
+tiple pre-training tasks and hence multiple losses              2017), GQA (Hudson and Manning, 2019), and
+are involved. We add these losses with equal                    NLVR2 . See details in Appendix.
+weights. For the image QA pre-training tasks, we
+                                                                4.2    Implementation Details
+create a joint answer table with 9500 answer can-
+didates which roughly cover 90% questions in all                On VQA and GQA, we fine-tune our model from
+three image QA datasets.                                        the pre-trained snapshot without data augmenta-
+   We take Adam (Kingma and Ba, 2014) as                        tion (analysis in Sec. 5.2). When training GQA,
+the optimizer with a linear-decayed learning-rate               we only take raw questions and raw images as in-
+schedule (Devlin et al., 2019) and a peak learn-                puts and do not use other supervisions (e.g., func-
+ing rate at 1e − 4. We train the model for 20                   tional programs and scene graphs). Since each da-
+epochs (i.e., roughly 670K4 optimization steps)                 tum in NLVR2 has two natural images img 0 , img 1
+with a batch size of 256. We only pre-train with                and one language statement s, we use LXMERT
+image QA task (see Sec. 3.1.3) for the last 10                  to encode the two image-statement pairs (img 0 , s)
+epochs, because this task converges faster and em-              and (img 1 , s), then train a classifier based on the
+pirically needs a smaller learning rate. The whole              concatenation of the two cross-modality outputs.
+                                                                More details in Appendix.
+    3
+      If we count a single modality layer as one half cross-
+modality layer, the equivalent number of cross-modality lay-    4.3    Empirical Comparison Results
+ers is (9 + 5)/2 + 5 = 12, which is same as the number of       We compare our single-model results with pre-
+layers in BERTBASE .
+    4
+      For comparison, ResNet on ImageNet classification         vious best published results on VQA/GQA test-
+takes 600K steps and BERT takes 1000K steps.                    standard sets and NLVR2 public test set. Be-
+sides previous state-of-the-art (SotA) methods, we                   Method                   VQA       GQA       NLVR2
+also show the human performance and image-
+                                                                     LSTM + BUTD               63.1      50.0       52.6
+only/language-only results when available.
+                                                                     BERT + BUTD               62.8      52.1       51.9
+VQA The SotA result is BAN+Counter in Kim                            BERT + 1 CrossAtt         64.6      55.5       52.4
+et al. (2018), which achieves the best accuracy                      BERT + 2 CrossAtt         65.8      56.1       50.9
+among other recent works: MFH (Yu et al.,                            BERT + 3 CrossAtt         66.4      56.6       50.9
+2018), Pythia (Jiang et al., 2018), DFAF (Gao                        BERT + 4 CrossAtt         66.4      56.0       50.9
+et al., 2019a), and Cycle-Consistency (Shah et al.,                  BERT + 5 CrossAtt         66.5      56.3       50.9
+2019).5 LXMERT improves the SotA over-
+all accuracy (‘Accu’ in Table 2) by 2.1% and                         Train + BERT              65.5      56.2       50.9
+has 2.4% improvement on the ‘Binary’/‘Other’                         Train + scratch           65.1      50.0       50.9
+question sub-categories. Although LXMERT                             Pre-train + BERT          68.8      58.3       70.1
+does not explicitly take a counting module as in                     Pre-train + scratch       69.9      60.0       74.9
+BAN+Counter, our result on the counting-related                            Table 3: Dev-set accuracy of using BERT.
+questions (‘Number’) is still equal or better.6
+
+GQA The GQA (Hudson and Manning, 2019)                           correctly predicted. Our LXMERT model im-
+SotA result is taken from BAN (Kim et al., 2018)                 proves consistency (‘Cons’) to 42.1% (i.e., by 3.5
+on the public leaderbaord. Our 3.2% accuracy                     times).9
+gain over the SotA GQA method is higher than
+VQA, possibly because GQA requires more vi-                      5        Analysis
+sual reasoning. Thus our framework, with novel                   In this section, we analyze our LXMERT
+encoders and cross-modality pre-training, is suit-               framework by comparing it with some alter-
+able and achieves a 4.6% improvement on open-                    native choices or by excluding certain model
+domain questions (‘Open’ in Table 2).7                           components/pre-training strategies.
+NLVR2 NLVR2 (Suhr et al., 2019) is a chal-                       5.1       BERT versus LXMERT
+lenging visual reasoning dataset where some ex-
+isting approaches (Hu et al., 2017; Perez et al.,                BERT (Devlin et al., 2019) is a pre-trained lan-
+2018) fail, and the SotA method is ‘MaxEnt’ in                   guage encoder which improves several language
+Suhr et al. (2019). The failure of existing meth-                tasks. As shown in Table 3, we discuss sev-
+ods (and our model w/o pre-training in Sec. 5.1)                 eral ways to incorporate a BERTBASE pre-trained
+indicates that the connection between vision and                 model for vision-language tasks and empirically
+language may not be end-to-end learned in a                      compare it with our LXMERT approach. Al-
+complex vision-and-language task without large-                  though our full model achieves accuracy of 74.9%
+scale pre-training. However, with our novel pre-                 on NLVR2 , all results without LXMERT pre-
+training strategies in building the cross-modality               training is around 22% absolute lower.
+connections, we significantly improve the accu-                  BERT+BUTD Bottom-Up and Top-Down
+racy (‘Accu’ of 76.2% on unreleased test set ‘Test-              (BUTD) attention (Anderson et al., 2018) method
+U’, in Table 2) by 22%. Another evaluation met-                  encodes questions with GRU (Chung et al.,
+ric consistency measures the proportion of unique                2015), then attends to object RoI features {fj } to
+sentences for which all related image pairs8 are                 predict the answer. We apply BERT to BUTD by
+   5
+       These are state-of-the-art methods at the time of our
+                                                                 replacing its GRU language encoder with BERT.
+EMNLP May 21, 2019 submission deadline. Since then,              As shown in the first block of Table. 3, results of
+there have been some recently updated papers such as             BERT encoder is comparable to LSTM encoder.
+MCAN (Yu et al., 2019b), MUAN (Yu et al., 2019a), and
+MLI (Gao et al., 2019b). MCAN (VQA challenge ver-                BERT+CrossAtt Since BUTD only takes the
+sion) uses stronger mixture of detection features and achieves
+72.8% on VQA 2.0 test-standard. MUAN achieves 71.1%              raw RoI features {fj } without considering the ob-
+(compared to our 72.5%).                                         ject positions {pj } and object relationships, we
+    6
+      Our result on VQA v2.0 ‘test-dev’ is 72.4%.
+    7                                                                 9
+      Our result on GQA ‘test-dev’ is 60.0%.                          These are the unreleased test set (‘Test-U’) results. On
+    8
+      Each statement in NLVR2 is related to multiple image       the public test set (‘Test-P’), LXMERT achieves 74.5% Accu
+pairs in order to balance the dataset answer distribution.       and 39.7% Cons.
+ Method                     VQA      GQA       NLVR2           Method                  VQA       GQA      NLVR2
+ 1. P20 + DA                 68.0     58.1        -            1. No Vision Tasks       66.3     57.1       50.9
+ 2. P20 + FT                 68.9     58.2       72.4          2. Feat                  69.2     59.5       72.9
+ 3. P10+QA10 + DA            69.1     59.2        -            3. Label                 69.5     59.3       73.5
+ 4. P10+QA10 + FT            69.9     60.0       74.9          4. Feat + Label          69.9     60.0       74.9
+
+Table 4: Dev-set accuracy showing the importance             Table 5: Dev-set accuracy of different vision pre-
+of the image-QA pre-training task. P10 means pre-            training tasks. ‘Feat’ is RoI-feature regression; ‘Label’
+training without the image-QA loss for 10 epochs while       is detected-label classification.
+QA10 means pre-training with the image-QA loss. DA
+and FT mean fine-tuning with and without Data Aug-           comparing it with its alternative: data augmenta-
+mentation, resp.                                             tion.
+                                                             Pre-training w/ or w/o Image QA To fairly
+enhance BERT+BUTD with our novel position-
+                                                             compare with our original pre-training procedure
+aware object embedding (in Sec. 2.1) and cross-
+                                                             (10 epochs w/o QA + 10 epochs w/ QA, details in
+modality layers (in Sec. 2.2). As shown in the
+                                                             Sec. 3.3) , we pre-train LXMERT model without
+second block of Table 3, the result of 1 cross-
+                                                             image QA task for 20 epochs. As shown in Ta-
+modality layer is better than BUTD, while stack-
+                                                             ble 4 rows 2 and 4, pre-training with QA loss im-
+ing more cross-modality layers further improves
+                                                             proves the result on all three datasets. The 2.1%
+it. However, without our cross-modality pre-
+                                                             improvement on NLVR2 shows the stronger rep-
+training (BERT is language-only pre-trained), re-
+                                                             resentations learned with image-QA pre-training,
+sults become stationary after adding 3 cross-
+                                                             since all data (images and statements) in NLVR2
+attention layers and have a 3.4% gap to our full
+                                                             are not used in pre-training.
+LXMERT framework (the last bold row in Ta-
+ble 3).                                                      Pre-training versus Data Augmentation Data
+                                                             augmentation (DA) is a technique which is used
+BERT+LXMERT We also try loading BERT                         in several VQA implementations (Anderson et al.,
+parameters10 into LXMERT, and use it in model                2018; Kim et al., 2018; Jiang et al., 2018). It
+training (i.e., without LXMERT pre-training) or              increases the amount of training data by adding
+in pre-training. We show results in the last block           questions from other image QA datasets. Our
+of Table. 3. Compared to the ‘from scratch’ (i.e.,           LXMERT framework instead uses multiple QA
+model parameters are randomly initialized) ap-               datasets in pre-training and is fine-tuned only on
+proach, BERT improves the fine-tuning results but            one specific dataset. Since the overall amounts of
+it shows weaker results than our full model. Em-             data used in pre-training and DA are similar, we
+pirically, pre-training LXMERT initialized with              thus can fairly compare these two strategies, and
+BERT parameters has lower (i.e., better) pre-                results show that our QA pre-training approach
+training loss for the first 3 pre-training epochs            outperforms DA. We first exclude the QA task in
+but was then caught up by our ‘from scratch’ ap-             our pre-training and show the results of DA fine-
+proach. A possible reason is that BERT is already            tuning. As shown in Table. 4 row 1, DA fine-
+pre-trained with single-modality masked language             tuning decreases the results compared to non-DA
+model, and thus could do well based only on the              fine-tuning in row 2. Next, we use DA after QA-
+language modality without considering the con-               pre-training (row 3) and DA also drops the results.
+nection to the vision modality (as discussed in
+Sec. 3.1.1).                                                 5.3   Effect of Vision Pre-training tasks
+                                                             We analyze the effect of different vision pre-
+5.2   Effect of the Image QA Pre-training Task               training tasks in Table 5. Without any vision tasks
+We show the importance of image QA pre-training              in pre-training (i.e., only using the language and
+task (introduced in Sec. 3.1.3) by excluding it or           cross-modality pre-training tasks), the results (row
+                                                             1 of Table 5) are similar to BERT+3 CrossAtt in
+   10
+      Since our language encoder is same as BERTBASE , ex-   Table 3. The two visual pre-training tasks (i.e.,
+cept the number of layers (i.e., LXMERT has 9 layers and
+BERT has 12 layers), we load the top 9 BERT-layer parame-    RoI-feature regression and detected-label classifi-
+ters into the LXMERT language encoder.                       cation) could get reasonable results (row 2 and row
+3) on their own, and jointly pre-training with these          August) on similar cross-modality pre-training di-
+two tasks achieves the highest results (row 4).               rections: ViLBERT (Lu et al., 2019) and Visual-
+                                                              BERT (Li et al., 2019). Our LXMERT methods
+5.4       Visualizing LXMERT Behavior                         differs from them in multiple ways: we use a more
+In the appendix, we show the behavior of                      detailed, multi-component design for the cross-
+LXMERT by visualizing its attention graphs in                 modality model (i.e., with an object-relationship
+the language encoder, object-relationship encoder,            encoder and cross-modality layers) and we em-
+and cross-modality encoder, respectively.                     ploy additional, useful pre-training tasks (i.e., RoI-
+                                                              feature regression and image question answering).
+6        Related Work                                         These differences result in the current best perfor-
+                                                              mance (on overlapping reported tasks): a margin
+Model Architecture Our model is closely re-
+                                                              of 1.5% accuracy on VQA 2.0 and a margin of
+lated to three ideas: bi-directional attention,
+                                                              9% accuracy on NLVR2 (and 15% in consistency).
+Transformer, and BUTD. Lu et al. (2016) applies
+                                                              LXMERT is also the only method which ranks in
+bi-directional attention to the vision-and-language
+                                                              the top-3 on both the VQA and GQA challenges
+tasks while its concurrent work BiDAF (Seo et al.,
+                                                              among more than 90 teams. We provide a detailed
+2017) adds modeling layers in solving reading
+                                                              analysis to show how these additional pre-training
+comprehension. Transformer (Vaswani et al.,
+                                                              tasks contribute to the fine-tuning performance in
+2017) is first used in machine translation, we
+                                                              Sec. 5.2 and Sec. 5.3.
+utilize it as our single-modality encoders and
+design our cross-modality encoder based on it.
+BUTD (Anderson et al., 2018) embeds images                    7   Conclusion
+with the object RoI features, we extend it with ob-
+ject positional embeddings and object relationship            We presented a cross-modality framework,
+encoders.                                                     LXMERT, for learning the connections between
+Pre-training After ELMo (Peters et al., 2018),                vision and language. We build the model based
+GPT (Radford et al., 2018), and BERT (Devlin                  on Transfermer encoders and our novel cross-
+et al., 2019) show improvements in language un-               modality encoder. This model is then pre-trained
+derstanding tasks with large-scale pre-trained lan-           with diverse pre-training tasks on a large-scale
+guage model, progress has been made towards the               dataset of image-and-sentence pairs. Empirically,
+cross-modality pre-training. XLM (Lample and                  we show state-of-the-art results on two image
+Conneau, 2019) learns the joint cross-lingual rep-            QA datasets (i.e., VQA and GQA) and show the
+resentations by leveraging the monolingual data               model generalizability with a 22% improvement
+and parallel data. VideoBert (Sun et al., 2019)               on the challenging visual reasoning dataset of
+takes masked LM on the concatenation of lan-                  NLVR2 . We also show the effectiveness of several
+guage words and visual tokens, where the visual               model components and training methods via
+tokens are converted from video frames by vec-                detailed analysis and ablation studies.
+tor quantization. However, these methods are still
+based on a single transformer encoder and BERT-
+                                                              Acknowledgments
+stype token-based pre-training, thus we develop
+a new model architecture and novel pre-training
+tasks to satisfy the need of cross-modality tasks.            We thank the reviewers for their helpful com-
+                                                              ments. This work was supported by ARO-YIP
+Recent works since our EMNLP submission                       Award #W911NF-18-1-0336, and awards from
+This version of our paper (and all current results)           Google, Facebook, Salesforce, and Adobe. The
+was submitted to EMNLP11 and was used to par-                 views, opinions, and/or findings contained in this
+ticipate in the VQA and GQA challenges in May                 article are those of the authors and should not be
+2019. Since our EMNLP submission, a few other                 interpreted as representing the official views or
+useful preprints have recently been released (in              policies, either expressed or implied, of the fund-
+    11
+                                                              ing agency. We also thank Alane Suhr for evalua-
+     EMNLP deadline was on May 21, 2019, and the standard
+ACL/EMNLP arxiv ban rule was in place till the notification   tion on NLVR2 .
+date of August 12, 2019.
+References                                                Dan Hendrycks and Kevin Gimpel. 2016.
+                                                            Bridging nonlinearities and stochastic reg-
+Peter Anderson, Xiaodong He, Chris Buehler, Damien          ularizers with gaussian error linear units.
+  Teney, Mark Johnson, Stephen Gould, and Lei               https://openreview.net/forum?id=Bk0MRI5lg.
+  Zhang. 2018. Bottom-up and top-down attention for
+  image captioning and visual question answering. In      Benjamin Hoover, Hendrik Strobelt, and Sebastian
+  Proceedings of the IEEE Conference on Computer            Gehrmann. 2019. exbert: A visual analysis tool
+  Vision and Pattern Recognition, pages 6077–6086.          to explore learned representations in transformers
+                                                            models. arXiv preprint arXiv:1910.05276.
+Stanislaw Antol, Aishwarya Agrawal, Jiasen Lu, Mar-
+   garet Mitchell, Dhruv Batra, C Lawrence Zitnick,
+                                                          Ronghang Hu, Jacob Andreas, Marcus Rohrbach,
+   and Devi Parikh. 2015. Vqa: Visual question an-
+                                                            Trevor Darrell, and Kate Saenko. 2017. Learning
+   swering. In Proceedings of the IEEE international
+                                                            to reason: End-to-end module networks for visual
+   conference on computer vision, pages 2425–2433.
+                                                            question answering. In Proceedings of the IEEE In-
+Dzmitry Bahdanau, Kyunghyun Cho, and Yoshua Ben-            ternational Conference on Computer Vision, pages
+  gio. 2014. Neural machine translation by jointly          804–813.
+  learning to align and translate. arXiv preprint
+  arXiv:1409.0473.                                        Drew A Hudson and Christopher D Manning. 2019.
+                                                            Gqa: a new dataset for compositional question an-
+Junyoung Chung, Caglar Gulcehre, Kyunghyun Cho,             swering over real-world images. In Proceedings of
+  and Yoshua Bengio. 2015. Gated feedback recur-            the IEEE Conference on Computer Vision and Pat-
+  rent neural networks. In International Conference         tern Recognition.
+  on Machine Learning, pages 2067–2075.
+                                                          Yu Jiang, Vivek Natarajan, Xinlei Chen, Marcus
+Jia Deng, Wei Dong, Richard Socher, Li-Jia Li, Kai Li,      Rohrbach, Dhruv Batra, and Devi Parikh. 2018.
+   and Li Fei-Fei. 2009. Imagenet: A large-scale hier-      Pythia v0. 1: the winning entry to the vqa challenge
+   archical image database. In 2009 IEEE Conference         2018. arXiv preprint arXiv:1807.09956.
+   on Computer Vision and Pattern Recognition, pages
+   248–255. IEEE.                                         Jin-Hwa Kim, Jaehyun Jun, and Byoung-Tak Zhang.
+                                                             2018. Bilinear attention networks. In Advances
+Jacob Devlin, Ming-Wei Chang, Kenton Lee, and                in Neural Information Processing Systems, pages
+   Kristina Toutanova. 2019. Bert: Pre-training of deep      1564–1574.
+   bidirectional transformers for language understand-
+   ing. In Proceedings of NAACL-HLT.                      Diederik P Kingma and Jimmy Ba. 2014. Adam: A
+                                                            method for stochastic optimization. In International
+Peng Gao, Zhengkai Jiang, Haoxuan You, Pan Lu,              Conference on Learning Representations.
+  Steven C. H. Hoi, Xiaogang Wang, and Hongsheng
+  Li. 2019a. Dynamic fusion with intra- and inter-        Ranjay Krishna, Yuke Zhu, Oliver Groth, Justin John-
+  modality attention flow for visual question answer-       son, Kenji Hata, Joshua Kravitz, Stephanie Chen,
+  ing. In The IEEE Conference on Computer Vision            Yannis Kalantidis, Li-Jia Li, David A Shamma,
+  and Pattern Recognition (CVPR).                           et al. 2017. Visual genome: Connecting language
+                                                            and vision using crowdsourced dense image anno-
+Peng Gao, Haoxuan You, Zhanpeng Zhang, Xiaogang
+                                                            tations. International Journal of Computer Vision,
+  Wang, and Hongsheng Li. 2019b. Multi-modality
+                                                            123(1):32–73.
+  latent interaction network for visual question an-
+  swering. arXiv preprint arXiv:1908.04289.
+                                                          Guillaume Lample and Alexis Conneau. 2019. Cross-
+Ross Girshick, Jeff Donahue, Trevor Darrell, and Ji-        lingual language model pretraining. arXiv preprint
+  tendra Malik. 2014. Rich feature hierarchies for ac-      arXiv:1901.07291.
+  curate object detection and semantic segmentation.
+  In Proceedings of the IEEE conference on computer       Liunian Harold Li, Mark Yatskar, Da Yin, Cho-Jui
+  vision and pattern recognition, pages 580–587.            Hsieh, and Kai-Wei Chang. 2019. Visualbert: A
+                                                            simple and performant baseline for vision and lan-
+Yash Goyal, Tejas Khot, Douglas Summers-Stay,               guage. arXiv preprint arXiv:1908.03557.
+  Dhruv Batra, and Devi Parikh. 2017. Making the
+  v in vqa matter: Elevating the role of image under-     Tsung-Yi Lin, Michael Maire, Serge Belongie, James
+  standing in visual question answering. In Proceed-        Hays, Pietro Perona, Deva Ramanan, Piotr Dollár,
+  ings of the IEEE Conference on Computer Vision            and C Lawrence Zitnick. 2014. Microsoft coco:
+  and Pattern Recognition, pages 6904–6913.                 Common objects in context. In European confer-
+                                                            ence on computer vision, pages 740–755. Springer.
+Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian
+  Sun. 2016. Deep residual learning for image recog-      Jiasen Lu, Dhruv Batra, Devi Parikh, and Stefan
+  nition. In Proceedings of the IEEE conference on           Lee. 2019. Vilbert: Pretraining task-agnostic visi-
+  computer vision and pattern recognition, pages 770–        olinguistic representations for vision-and-language
+  778.                                                       tasks. arXiv preprint arXiv:1908.02265.
+Jiasen Lu, Jianwei Yang, Dhruv Batra, and Devi                Proceedings of the IEEE conference on computer vi-
+   Parikh. 2016.      Hierarchical question-image co-         sion and pattern recognition, pages 1–9.
+   attention for visual question answering. In Advances
+   In Neural Information Processing Systems, pages        Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob
+   289–297.                                                 Uszkoreit, Llion Jones, Aidan N Gomez, Łukasz
+Ethan Perez, Florian Strub, Harm De Vries, Vincent          Kaiser, and Illia Polosukhin. 2017. Attention is all
+  Dumoulin, and Aaron Courville. 2018. Film: Vi-            you need. In Advances in neural information pro-
+  sual reasoning with a general conditioning layer. In      cessing systems, pages 5998–6008.
+  Thirty-Second AAAI Conference on Artificial Intelli-
+  gence.                                                  Alex Wang, Amanpreet Singh, Julian Michael, Felix
+                                                            Hill, Omer Levy, and Samuel R Bowman. 2018.
+Matthew E Peters, Mark Neumann, Mohit Iyyer, Matt           Glue: A multi-task benchmark and analysis platform
+ Gardner, Christopher Clark, Kenton Lee, and Luke           for natural language understanding. EMNLP 2018,
+ Zettlemoyer. 2018. Deep contextualized word rep-           page 353.
+ resentations. In Proceedings of NAACL-HLT, pages
+ 2227–2237.
+                                                          Yonghui Wu, Mike Schuster, Zhifeng Chen, Quoc V
+Alec Radford, Karthik Narasimhan, Tim Salimans,             Le, Mohammad Norouzi, Wolfgang Macherey,
+  and Ilya Sutskever. 2018. Improving language              Maxim Krikun, Yuan Cao, Qin Gao, Klaus
+  understanding by generative pre-training. URL             Macherey, et al. 2016.       Google’s neural ma-
+  https://s3-us-west-2. amazonaws. com/openai-              chine translation system: Bridging the gap between
+  assets/researchcovers/languageunsupervised/language       human and machine translation. arXiv preprint
+  understanding paper. pdf.                                 arXiv:1609.08144.
+
+Pranav Rajpurkar, Jian Zhang, Konstantin Lopyrev, and     Kelvin Xu, Jimmy Ba, Ryan Kiros, Kyunghyun Cho,
+  Percy Liang. 2016. Squad: 100,000+ questions for          Aaron Courville, Ruslan Salakhudinov, Rich Zemel,
+  machine comprehension of text. In Proceedings of          and Yoshua Bengio. 2015. Show, attend and tell:
+  the 2016 Conference on Empirical Methods in Nat-          Neural image caption generation with visual atten-
+  ural Language Processing, pages 2383–2392.                tion. In International conference on machine learn-
+Shaoqing Ren, Kaiming He, Ross Girshick, and Jian           ing, pages 2048–2057.
+  Sun. 2015. Faster r-cnn: Towards real-time ob-
+  ject detection with region proposal networks. In        Zhou Yu, Yuhao Cui, Jun Yu, Dacheng Tao, and
+  Advances in neural information processing systems,        Qi Tian. 2019a. Multimodal unified attention net-
+  pages 91–99.                                              works for vision-and-language interactions. arXiv
+                                                            preprint arXiv:1908.04107.
+Minjoon Seo, Aniruddha Kembhavi, Ali Farhadi, and
+  Hannaneh Hajishirzi. 2017. Bidirectional attention
+                                                          Zhou Yu, Jun Yu, Yuhao Cui, Dacheng Tao, and
+  flow for machine comprehension. In International
+                                                            Qi Tian. 2019b. Deep modular co-attention net-
+  Conference on Learning Representations.
+                                                            works for visual question answering. In Proceed-
+Meet Shah, Xinlei Chen, Marcus Rohrbach, and Devi           ings of the IEEE Conference on Computer Vision
+ Parikh. 2019. Cycle-consistency for robust visual          and Pattern Recognition, pages 6281–6290.
+ question answering. In Proceedings of the IEEE
+ Conference on Computer Vision and Pattern Recog-         Zhou Yu, Jun Yu, Chenchao Xiang, Jianping Fan, and
+ nition.                                                    Dacheng Tao. 2018. Beyond bilinear: Generalized
+                                                            multimodal factorized high-order pooling for visual
+Karen Simonyan and Andrew Zisserman. 2014. Very             question answering. IEEE Transactions on Neu-
+  deep convolutional networks for large-scale image         ral Networks and Learning Systems, 29(12):5947–
+  recognition. arXiv preprint arXiv:1409.1556.              5959.
+Alane Suhr, Stephanie Zhou, Iris Zhang, Huajun Bai,
+  and Yoav Artzi. 2019. A corpus for reasoning about      Yuke Zhu, Oliver Groth, Michael Bernstein, and Li Fei-
+  natural language grounded in photographs. In Pro-         Fei. 2016. Visual7w: Grounded question answering
+  ceedings of the 57th Annual Meeting of the Associa-       in images. In Proceedings of the IEEE conference
+  tion for Computational Linguistics.                       on computer vision and pattern recognition, pages
+                                                            4995–5004.
+Chen Sun, Austin Myers, Carl Vondrick, Kevin Mur-
+  phy, and Cordelia Schmid. 2019. Videobert: A joint
+  model for video and language representation learn-      Appendix
+  ing. arXiv preprint arXiv:1904.01766.
+Christian Szegedy, Wei Liu, Yangqing Jia, Pierre          A     Evaluated Datasets Description
+  Sermanet, Scott Reed, Dragomir Anguelov, Du-
+  mitru Erhan, Vincent Vanhoucke, and Andrew Ra-          We use three datasets for evaluating our LXMERT
+  binovich. 2015. Going deeper with convolutions. In      framework.
+VQA The goal of visual question answering               is equivalent to minimize the binary cross entropy
+(VQA) (Antol et al., 2015) is to answer a natu-         loss:
+ral language question related to an image. We take
+VQA v2.0 dataset (Goyal et al., 2017) which re-              L = -y ∗ log prob − (1 − y ∗ ) log(1 − prob)
+duces the answer bias compared to VQA v1.0. The
+dataset contains an average of 5.4 questions per        C        Training, Validation, and Testing
+image and the total amount of questions is 1.1M.                 Splits
+GQA The task of GQA (Hudson and Manning,                We carefully split each dataset to ensure that
+2019) is same as VQA (i.e., answer single-image         all testing images are not involved in any pre-
+related questions), but GQA requires more reason-       training or fine-tuning steps. Our data splits for
+ing skills (e.g., spatial understanding and multi-      each dataset and reproducible code are available
+step inference). 22M questions in the dataset are       at https://github.com/airsplay/lxmert.
+generated from ground truth image scene graph to
+                                                        LXMERT Pre-Traininig Since MS COCO has
+explicitly control the question quality.
+                                                        a relative large validation set, we sample a set
+NLVR2 Since the previous two datasets are used          of 5k images from the MS COCO validation set
+in pre-training for increasing the amount of pre-       as the mini-validation (minival) set. The rest of
+training data to a certain scale, we evaluate our       the images in training and validation sets (i.e.,
+LXMERT framework on another challenging vi-             COCO training images, COCO validation images
+sual reasoning dataset NLVR2 where all the sen-         besides minival, and all the other images in Visual
+tences and images are not covered in pre-training.      Genome) are used in pre-training. Although the
+Each datum in NLVR2 contains two related nat-           captions and questions of the MS COCO test sets
+ural images and one natural language statement.         are available, we exclude all of them to make sure
+The task is to predict whether the statement cor-       that testing images are not seen in pre-training.
+rectly describes these two images or not. NLVR2
+                                                        Fine-tuning For training and validating VQA
+has 86K, 7K, 7K data in training, development,
+                                                        v2.0, we take the same split convention as in our
+and test sets, respectively.
+                                                        LXMERT pre-training. The data related to im-
+B   Details of NLVR2 Fine-tuning                        ages in LXMERT mini-validation set is used to
+                                                        validate model performance and the rest of the
+Each datum in NLVR2 consists of a two-image             data in train+val are used in fine-tuning. We test
+pair (img0 , img1 ), one statement s, and a ground      our model on the VQA v2.0 ‘test-dev’ and ‘test-
+truth label y ∗ indicating whether the statement cor-   standard’ splits. For GQA fine-tuning, we follow
+rectly describe the two images. The task is to pre-     the suggestions in official GQA guidelines12 to
+dict the label y given the images and the statement.    take testdev as our validation set and fine-tune our
+   To use our LXMERT model on NLVR2 , we                model on the joint train + validation sets. We test
+concatenate the cross-modality representations of       our GQA model on GQA ‘test-standard’ split. The
+the two images and then build the classifier with       images in NLVR2 are not from either MS COCO
+GeLU activation(Hendrycks and Gimpel, 2016).            or Visual Genome, we thus keep using the original
+Suppose that LXMERT(img, sent) is the single-           split: fine-tune on train split, validate the model
+vector cross-modality representation, the pre-          choice on val split, and test on the public (‘Test-
+dicted probability is:                                  P’) and unreleased (‘Test-U’) test splits.
+
+          x0 = LXMERT(img 0 , s)                        D        Training Details of ‘BERT versus
+          x1 = LXMERT(img 1 , s)                                 LXMERT’
+           z 0 = W0 [x0 ; x1 ] + b0                     When training with BERT only, we train each
+            1                            0              experiments for 20 epochs with a batch size
+                                 
+           z = LayerNorm GeLU(z )
+                                                        64/128 since it was not pre-trained on these cross-
+        prob = σ(W1 z 1 + b1 )
+                                                        modality datasets. The learning rate is set to 1e−4
+                                                        instead of 5e − 5.
+where σ is sigmoid function. The model is op-
+                                                            12
+timized by maximizing the log-likelihood, which                  https://cs.stanford.edu/people/dorarad/gqa/evaluate.html
+                                                                  Is it warm enough for him to be wearing shorts ?
+
+
+
+
+ (a) LXMERT 2nd Lang-layer (b) BERT 3rd Layer
+                                                                What colors are the pole the horse is jumping over?
+
+
+
+
+ (c) LXMERT 4th Lang-layer       (d) BERT 4th Layer       Figure 5: Attention graphs in LXMERT’s cross-
+                                                          modality encoder showing that the attention focus on
+Figure 3: Attention graphs reveal similar behavior in     pronouns (marked in pink), nouns (marked in blue),
+the LXMERT language encoder (a, c) and in the origi-      and articles (marked in red).
+nal BERT encoder (b, d). Fig. a & b show the attention
+pointing to next words while Fig. c & d show the atten-
+tion pointing to previous words.                          d)) come from Hoover et al. (2019).13 We find
+                                                          that both the second LXMERT layer (Fig. 3(a))
+                                                          and third BERT layer (Fig. 3(b)) point to the
+                                                          next words while both the fourth LXMERT layer
+                                                          (Fig. 3(c)) and fourth BERT layer (Fig. 3(d)) point
+                                                          to the previous words, thus showing the similar be-
+                                                          haviour of the two encoders.
+
+                                                          E.2   Object-Relationship Encoder
+ (a) LXMERT 1st Visn-layer      (b) Recovered graphs
+                                                          In Fig. 4, we visualize the attention graph of the
+Figure 4: The attention graph (a) and its recovered       first layer in LXMERT’s object-relationship en-
+scene graph (b) in the first layer of LXMERT’s object-    coder. We only highlight the objects with the
+relationship encoder.                                     highest attention scores while the other objects
+                                                          are mostly not attended to. We manually build
+E     Visualizing LXMERT Behavior                         the connections between objects (marked as yel-
+                                                          low lines in Fig. 4(b)) according to the attention
+In this section, we show the behavior of LXMERT           graph. These connections faithfully draw a scene
+by visualizing its attention graphs in the language       graph of the figure, which indicates that the object-
+encoder, object-relationship encoder, and cross-          relationship encoder might be learning a reason-
+modality encoder, respectively.                           ably good network of the relationships between
+                                                          objects.
+E.1    Language Encoder
+                                                          E.3   Cross-Modality Encoder
+In Fig. 3, we reveal that the LXMERT language
+encoder has similar behaviour as the original             In Fig. 5, we visualize the attention in LXMERT’s
+BERT encoder, by using the same sentence “Is it           cross-modality encoder to reveal the connections
+warm enough for him to be wearing shorts?” as             between objects and words. We find that the atten-
+the input to both models. LXMERT’s attention              tion focuses on nouns and pronouns as shown in
+graphs (in Fig. 3(a, c)) are extracted from the pre-      the top figure of Fig. 5 because they are the most
+trained LXMERT without fine-tuning on a spe-                13
+                                                               exBERT demo (Hoover et al., 2019) is available at
+cific task. BERT’s attention graphs (in Fig. 3(b,         http://exbert.net/
+informative words in current vision-and-language
+tasks. However, for non-plural nouns (as shown in
+the bottom example in Fig. 5), the attention will
+focus on the articles. Although we do not specif-
+ically design for this behavior, we think that arti-
+cles are possibly serving as special tokens (e.g.,
+[CLS], [SEP] in BERT), thus providing unified
+target entries for the attention layers. Next, we
+are also looking at how to utilize pre-training tasks
+which directly capture pairwise noun-noun and
+noun-verb relationships between the images and
+text sentences.
+

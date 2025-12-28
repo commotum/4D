@@ -1,0 +1,965 @@
+                                             VRoPE: Rotary Position Embedding for Video Large Language Models
+                                                               Zikang Liu1,2 * , Longteng Guo1 * , Yepeng Tang3 * , Tongtian Yue1,2
+                                                                Junxian Cai4 , Kai Ma4 , Qingbin Liu4 , Xi Chen4 , Jing Liu1,2† ,
+                                                                    1
+                                                                      Institute of Automation, Chinese Academy of Sciences,
+                                                       2
+                                                         School of Artificial Intelligence, University of Chinese Academy of Sciences,
+                                                          3
+                                                            School of Computer Science and Technology, Beijing Jiaotong University,
+                                                                                 4
+                                                                                   Basic Algorithm Center, Tencent
+                                                      {liuzikang2023,yuetongtian2022}@ia.ac.cn, yepengtang@bjtu.edu.cn
+                                                              {jasoncjxcai,kylekma,qingbinliu,jasonxchen}@tencent.com
+                                                                              {longteng.guo,jliu}@nlpr.ia.ac.cn
+                                                                   Abstract                                  Low                   High
+                                                                                                                                              𝒘               𝒖𝟏                   𝒖𝟐
+                                                 Rotary Position Embedding (RoPE) has shown
+arXiv:2502.11664v4 [cs.AI] 31 Oct 2025
+
+
+
+
+                                                                                                                                      𝒉
+                                                 strong performance in text-based Large Lan-
+                                                 guage Models (LLMs), but extending it to
+                                                 video remains a challenge due to the intricate                                                               𝒖𝟑                    𝒖𝟒
+                                                                                                           Frame tokens             Frame tokens              Frame tokens
+                                                 spatiotemporal structure of video frames. Ex-
+                                                                                                                     RoPE                    RoPE-3D                 VRoPE (Ours)
+                                                 isting adaptations, such as RoPE-3D, attempt
+                                                 to encode spatial and temporal dimensions sep-                                (a) Positional Unbiasedness
+                                                 arately but suffer from two major limitations:
+                                                 positional bias in attention distribution and dis-          Video          Discontinuous
+                                                                                                                                                                        Video
+                                                                                                                                            Text   Text                      Continuous
+                                                 ruptions in video-text transitions. To overcome
+                                                                                                                                                                         …
+                                                 these issues, we propose Video Rotary Position
+                                                 Embedding (VRoPE), a novel positional encod-               Text
+
+                                                 ing method tailored for Video-LLMs. Specifi-                                         Position
+                                                                                                                          𝒕 𝒉 𝒘                        𝒗𝟏 𝒗𝟐 𝒗𝟑 𝒗𝟒                Text
+                                                 cally, we introduce a more balanced encoding                                          Index
+
+                                                 strategy that mitigates attention biases, ensur-                           RoPE-3D                           VRoPE (Ours)
+                                                 ing a more uniform distribution of spatial fo-
+                                                                                                                            (b) Seamless Video-Text Transition
+                                                 cus. Additionally, our approach restructures
+                                                 positional indices to ensure a smooth transi-
+                                                 tion between video and text tokens. Extensive            Figure 1: Comparison of RoPE, RoPE-3D, and our
+                                                 experiments on different models demonstrate              VRoPE in video positional encoding. (a) Positional Un-
+                                                 that VRoPE consistently outperforms previous             biasedness: RoPE and RoPE-3D exhibit spatial biased
+                                                 RoPE variants, achieving significant improve-            attention, particularly towards later tokens or specific
+                                                 ments in video understanding, temporal reason-           frame regions, while VRoPE ensures more uniform at-
+                                                 ing, and retrieval tasks. Code is available at           tention. (b) Seamless Video-Text Transition: RoPE-3D
+                                                 https://github.com/johncaged/VRoPE.                      causes a discontinuity when transitioning from video
+                                                                                                          to text tokens, which VRoPE smooths for better cross-
+                                                                                                          modal dependency modeling.
+                                         1       Introduction
+                                         In recent years, Large Language Models (LLMs)                       In LLMs, positional encoding plays a crucial
+                                         have achieved remarkable progress (Touvron et al.,               role in enabling models to capture order-dependent
+                                         2023; Bai et al., 2023). Building on the success                 patterns, as self-attention mechanisms themselves
+                                         of LLMs, Video Large Language Models (Video-                     are inherently permutation-invariant. Among vari-
+                                         LLMs) (Maaz et al., 2023; Li et al., 2024d; Jin                  ous positional encoding schemes, Rotary Position
+                                         et al., 2024) have emerged as a powerful paradigm                Embedding (RoPE) (Su et al., 2024) has gained
+                                         for video-language understanding. These models                   widespread adoption due to its ability to encode
+                                         typically integrate LLMs with pre-trained vision                 relative position relationships. RoPE enables ef-
+                                         encoders, enabling the joint modeling of video and               ficient long-range dependencies, making it highly
+                                         textual information. However, a fundamental chal-                effective in text-based models. However, when ap-
+                                         lenge in Video-LLMs lies in effectively modeling                 plied directly to video data, vanilla RoPE—where
+                                         positional relationships within video sequences.                 video tokens are treated as a simple sequence akin
+                                             * Equal contribution.                                        to text—fails to account for the complex spatiotem-
+                                             †
+                                                 Corresponding author.                                    poral structure inherent in video frames, leading
+
+                                                                                                      1
+to suboptimal representations. Despite its critical           components to satisfy those principles. (1) Sym-
+role, an effective video-specific positional encoding         metric Bias Mitigation: To counteract the attention
+strategy remains an open challenge.                           bias present in RoPE-based encodings, we design
+   To optimally encode positional relationships in            a symmetric positional representation that encodes
+Video-LLMs, we identify three key properties that             each spatial coordinate from vertices to the center.
+an ideal video positional encoding should satisfy:            By distributing attention more uniformly across
+   (1) Spatiotemporal Structure Modeling. Un-                 spatial locations, this method prevents positional
+like text, where positional relationships are strictly        distortions and improves overall video understand-
+one-dimensional, video frames exhibit both spatial            ing. (2) Temporal Centered Arrangement: We pro-
+(width, height) and temporal (frame index) dimen-             pose a center-aligned design that spatially aligns
+sions. An effective encoding must reflect this in-            the geometric centers of video frames with the tex-
+herent structure to facilitate accurate modeling of           tual arrangement axis, and arranges video frames
+spatiotemporal dependencies. Recent approaches                in temporally ordered progression along the tex-
+(Wang et al., 2024; Bai et al., 2025), referred to            tual positional axis. This transformation not only
+as RoPE-3D, extend RoPE for video structure by                maintains spatial coherence within video frames
+splitting the feature channels into three parts to sep-       but also ensures a smooth transition between video
+arately encode frame, width, and height positions.            and text tokens, mitigating discontinuities in the
+   (2) Positional Unbiasedness. A critical yet of-            positional encoding space.
+ten overlooked aspect of positional encoding is its              Overall, VRoPE effectively enhances Video-
+impact on attention distribution. As illustrated in           LLMs by preserving spatiotemporal structure, miti-
+Figure 1 (a), RoPE, by design, applies a long-term            gating attention bias, and ensuring smooth video-
+decay over increasing positional indices, inadver-            text transitions. We conduct extensive experiments
+tently introducing a bias that amplifies attention            on different models and training datasets. Our re-
+toward later tokens. This issue persists in RoPE-             sults demonstrate significant performance improve-
+3D, where spatial positions within video frames are           ments over RoPE and RoPE-3D on multiple video
+unevenly weighted, causing attention to be dispro-            benchmarks, covering general video understand-
+portionately focused on certain areas—typically the           ing, temporal reasoning, long video comprehen-
+bottom-right regions of frames—while suppressing              sion, and video retrieval. These findings establish
+others, which is shown in Figure 1 (a). Such biases           VRoPE as a robust and efficient positional encod-
+distort spatial contextual modeling, leading to sub-          ing method tailored for Video-LLMs. We hope
+optimal video comprehension. An effective video               this work inspires further research on Video-LLM
+positional encoding should mitigate these biases to           positional encoding and provides valuable insights
+ensure uniform attention across the entire frame.             for future Video-LLM designs.
+   (3) Seamless Video-Text Transition. For effec-
+tive multimodal understanding, an ideal positional            2     Related Work
+encoding should ensure a seamless transition be-
+tween video and text tokens. However, as demon-               2.1    Video Large Language Models
+strated in Figure 1 (b), RoPE-3D introduces a dis-            Recent advancements in Video-LLMs (Maaz et al.,
+continuity when transitioning from video to text              2023; Li et al., 2023, 2024b; Jin et al., 2024;
+tokens, as the positional indices of text tokens are          Li et al., 2024d; Xu et al., 2024) have signif-
+arbitrarily offset by the maximum position index              icantly enhanced video processing by integrat-
+of the video sequence (determined by the largest              ing multiple modalities and employing instruction
+of frame count, width, and height, which often                fine-tuning. Notable innovations include Video-
+vary significantly). This artificial “jump” in the            ChatGPT (Maaz et al., 2023), which introduced
+positional encoding space disrupts the smooth flow            video instruction tuning for text generation, and
+of information between modalities, hindering the              VideoChat (Li et al., 2023) and VideoChat2 (Li
+model to establish meaningful cross-modal depen-              et al., 2024b), which improved modality alignment
+dencies.                                                      via cross-attention and multi-stage bootstrapping
+   Based on the above principles, we propose Video            etc. Other models, such as Chat-UniVi (Jin et al.,
+Rotary Position Embedding (VRoPE), a novel po-                2024) and LLaMA-VID (Li et al., 2024d), focus on
+sitional encoding method specifically designed for            efficient video representations through techniques
+Video-LLMs. Our approach consists of two key                  like token compression and dual-token methods
+
+                                                          2
+that separate context and content. Additionally,            where base is a hyperparameter, d is the feature
+PLLaVA (Xu et al., 2024) explores the use of                dimension, and j = [0, 1, ..., d/2 − 1] denotes the
+image-pretrained LLaVA models for video tasks,              index of each feature channel.
+utilizing simple spatial pooling techniques.                  In the self-attention mechanism, RoPE trans-
+                                                            forms absolute position embeddings into relative
+2.2    Multimodal Position Embedding                        ones. The attention score between m-th query qm
+Most Video-LLMs inherit the default design from             and n-th key kn is
+LLMs by using Rotary Position Embedding (RoPE)                                    h                  i
+(Su et al., 2024) for positional encoding. RoPE                      A(m,n) = ℜ qm · k∗n ei(m−n)θ           (3)
+encodes relative distance information as absolute           where ℜ[·] denotes the real part, and ∗ represents
+position embeddings, offering key advantages like           the complex conjugate.
+no additional training parameters and improved                 While RoPE excels in sequential text modeling,
+performance in various tasks (Su et al., 2024). It          its direct application to video-text interleaved se-
+is widely used in modern LLMs due to its ability            quences poses challenges due to the complex spa-
+to extrapolate context length, extending a model’s          tiotemporal relationships inherent in video frames.
+window size without the need for expensive re-
+training. However, RoPE’s 1D design, effective              3.2   RoPE for Video-LLMs
+for text, overlooks the spatiotemporal structure of         In Video-LLMs, video frames are typically pro-
+video data, limiting its suitability for Video-LLMs.        cessed by vision encoders (e.g., ViTs (Alexey,
+To address this, several approaches have adapted            2020) or CNNs (He et al., 2016)) and transformed
+RoPE for video. For instance, RoPE-2D (Agrawal              into a sequence of visual tokens. These visual to-
+et al., 2024; Wang et al., 2024) extends the encod-         kens are then concatenated with text tokens and fed
+ing to capture spatial relationships in video frames,       into an LLM backbone.
+while RoPE-3D (Wang et al., 2024; Bai et al., 2025)            In most existing approaches, video tokens are
+divides the channel dimension into three groups to          treated as a simple 1D sequence, with position in-
+better represent the spatiotemporal dimensions.             dices assigned in an increasing order, similar to
+   However, these approaches still face issues like         text. However, this naive approach, referred to as
+Positional Attention Bias and Cross-Modal Posi-             RoPE, overlooks the inherent spatiotemporal struc-
+tional Discontinuity, which are discussed in Section        ture of video data. Flattening video frames this way
+3. Our VRoPE method addresses these limitations,            disrupts spatiotemporal structure and leads to in-
+offering more accurate and robust positional encod-         efficient position usage. Unlike text, video tokens
+ing tailored for Video-LLMs.                                carry less dense semantic information, and their
+                                                            excessive sequence length can weaken contextual
+3     Motivation                                            dependencies, making long-range understanding
+3.1    Preliminary: Rotary Position Embedding               harder.
+Rotary Positional Embedding (RoPE) is a widely              3.3   RoPE-3D for Video-LLMs
+adopted method in LLMs that encodes absolute
+                                                            Recent approaches, such as M-RoPE in Qwen2-
+positional information while preserving relative po-
+                                                            VL(Wang et al., 2024), have proposed RoPE-
+sitional relationships. This property makes RoPE
+                                                            3D as an extension of RoPE for video structure
+particularly effective for self-attention mechanisms,
+                                                            preserving. RoPE-3D intuitively partitions the
+as it allows models to capture the relative distance
+                                                            feature dimensions to separately encode spatial
+between tokens in a computationally efficient man-
+                                                            (width, height) and temporal (frame index) po-
+ner. Given a token embedding x at position index
+                                                            sitions. Given a video token with coordinates
+m, RoPE applies a complex-valued rotation opera-
+                                                            (w, h, t), RoPE-3D computes:
+tion, formulated as:
+                                                                                    
+              RoPE(x, m) = xe       imθ
+                                                 (1)                                RoPEj (x, w), j ∈ Dw
+                                                                                    
+                                                             RoPE-3Dj (x, w, h, t) = RoPEj (x, h), j ∈ Dh    (4)
+                                                                                    
+                                                                                    RoPE (x, t), j ∈ D
+                                                                                         j              t
+where i is the imaginary unit, and the frequency
+encoding vector θ is defined as:                            where where Dw , Dh , Dt denote feature partitions
+                              −2j
+                                                            assigned to width, height, and temporal axes, re-
+                   θ j = base d                  (2)        spectively. For text tokens, the encoding remains
+
+                                                        3
+                                                                                                         1.0
+
+                                                                                                         0.8
+
+
+
+
+                                                                                                           Attention Weight
+                                                                                                         0.6
+        H                               H                                  H
+                                                                                                         0.4
+
+                                                                                                         0.2
+
+                                                                                                         0.0
+                    W                                 W                                 W
+                 (a) RoPE                       (b) RoPE-3D                         (c) VRoPE
+Figure 2: Attention weight visualization of RoPE, RoPE-3D, and VRoPE. We compute average text-to-video frame
+attention weights on VideoMME (Fu et al., 2024) benchmark (lighter color indicates higher attention). (a) RoPE
+exhibits row-wise attention decay within frames. (b) RoPE-3D shows a similar decay from the bottom-right to the
+top-left, introducing positional bias that skews attention toward spatially closer frame tokens. (c) VRoPE mitigates
+this bias, leading to a more balanced attention distribution.
+
+
+Table 1: Average attention weights at the video-text           As is shown in Figure 2 (b), notably, tokens in the
+boundary on Video-MME. We use the subsequent text              bottom-right of each frame receive disproportion-
+instruction as the query and video/text tokens as keys.
+                                                               ately higher attention, while those in the top-left
+Note that text-to-video attention weights of RoPE-3D
+are an order of magnitude lower than other methods,            are increasingly suppressed. This imbalance can
+indicating its positional discontinuity between video          distort spatial contextual modeling by weakening
+and text.                                                      dependencies on earlier tokens, which in turn af-
+                                                               fects the model’s understanding of the video.
+   Method            Text-to-Text    Text-to-Video
+                                                               (2) Cross-Modal Positional Discontinuity.
+   RoPE                 1.41e-2          2.08e-4
+                                                               RoPE-3D introduces separate positional encodings
+   RoPE-3D              1.27e-2          5.12e-5
+                                                               for spatial (width, height) and temporal (frame
+   VRoPE (Ours)         1.32e-2          3.70e-4
+                                                               index) dimensions. However, when video tokens
+                                                               are concatenated with subsequent text tokens,
+consistent with the original RoPE by setting w =               their positional indices do not follow a smooth
+h = t = m, ensuring that:                                      transition. Instead, text tokens inherit positional
+                                                               indices that are arbitrarily offset by the maximum
+      RoPE-3Dj (x, m, m, m) ≡ RoPEj (x, m)           (5)       position value across spatial (W, H) and temporal
+                                                               dimensions T , i.e., max(W, H, T ). This results
+   This design explicitly models spatial and tempo-
+                                                               in an artificial “jump” in the positional encoding
+ral positions while preserving text token behavior.
+                                                               space when transitioning from video to text
+However, RoPE-3D still exhibits two key limita-
+                                                               tokens. The discontinuity creates an abrupt and
+tions, which we elaborate on below.
+                                                               non-uniform gap between the final video token and
+3.4     Problem Analysis                                       the subsequent text token. As is shown in Table
+                                                               1, text-to-video attention weights of RoPE-3D at
+While RoPE-3D introduces a promising design by
+                                                               the video-text boundary are an order of magnitude
+partitioning the feature dimensions to encode spa-
+                                                               lower than RoPE and VRoPE, which demonstrates
+tial (width, height) and temporal (frame index) po-
+                                                               that the discontinuity in position embedding will
+sitions separately, two critical issues persist when
+                                                               affect the attention weights. Further, the magnitude
+handling video–text data.
+                                                               of this gap depends on video dimensions rather
+(1) Positional Attention Bias. As is demon-                    than being a fixed offset, making it inconsistent
+strated in Figure 2 (a), RoPE naturally applies a              across different video-text samples. Such a
+long-term decay over increasing positional indices,            discrepancy can degrade the model’s ability to
+which amplify attention toward later positions. Un-            establish seamless contextual dependencies across
+fortunately, we find that this issue persists in RoPE-         modalities. This issue is particularly problematic
+3D, where the decay leads to an uneven distribution            in long videos, as the increasing frame count T
+of focus across spatial positions in video frames.             exacerbates the positional gap, which will be
+
+                                                           4
+                                                    VRoPE (Ours)
+                                                    (a) Symmetric Bias Mitigation                             (b) Temporal Centered Arrangement
+                             “Please provide a                                              𝒖𝟏       𝒖𝟐
+                          detailed description of     𝒖𝟎       𝒖𝟏                𝒖𝟐                                …
+                            the video content.”
+                                                                                                          …                               Video
+ Video Input                                                                                                      Text
+      Vision Encoder         Text Tokenizer                                                 𝒖𝟑       𝒖𝟒
+                                                                                                          …
+                                                                                                                                          …
+                                                     Text        Bidirectional Text         Video Frame
+
+                                                    Symmetric Arrangement in Video Frames
+               Position Embedding                                                                𝑗                                                 Text
+                                                                                                                                                  …
+                                                      𝑢& = 𝑤 + ℎ                                                 𝑣& = 𝑢& + 𝑏&
+
+
+
+
+                                                                                            …
+
+
+                                                                                                     …
+          Large Language Model                                    Uniform           𝒖𝟒
+                                                      𝑢' = 𝑤 − ℎ Partitioning      𝒖𝟑                            𝑣' = 𝑢' + 𝑏'
+                                                                                 𝒖
+                                                                              ℎ 𝒖 𝟐                                                        𝑣* + 𝑡(𝐻 + 𝑊 − 1)
+                                                      𝑢( = −𝑤 − ℎ                𝟏                               𝑣( = 𝑢( + 𝑏(    Frame
+ “The video shows a group of penguin chicks
+                                                      𝑢) = −𝑤 + ℎ                                         𝑛      𝑣) = 𝑢) + 𝑏)    Offset
+ migrating. On the left side of the frame, a
+ penguin chick is observing its surroundings…”
+
+
+Figure 3: Left: the overall architecture of a typical Video-LLM. In this work, our improvements primarily target
+the positional embedding component of the LLM to enhance its video understanding capability. Right: method
+illustration of VRoPE. (a) We first apply symmetric arrangement to mitigate positional bias in video frames.
+The RoPE frequencies are uniformly allocated to the four dimensions. (b) We propose to use temporal centered
+arrangement in video frames to form a seamless video-text transition, which enables video input of arbitrary length
+without causing discontinuity.
+
+
+further discussed in Section 5.3.                                                     tends to three-dimensional space with eight-vertex
+                                                                                      symmetry, etc. Given an input video frame of size
+4     Method: VRoPE                                                                   (W, H), we compute four symmetric directional
+                                                                                      positional arrangements as follows:
+In this section, we introduce Video Rotary Position
+Embedding (VRoPE), a novel positional encoding
+                                                                                                                     
+method tailored for Video-LLMs. Our approach                                                               u1     w+h
+addresses the inherent limitations of RoPE-3D, in-                                                        u2   w − h 
+                                                                                                           =
+                                                                                                          u3  −w − h .                                (6)
+                                                                                                                        
+cluding positional attention bias and cross-modal
+positional discontinuity, by leveraging a combina-                                                         u4    −w + h
+tion of Symmetric Bias Mitigation and Temporal
+Centered Arrangement. The overall framework of                                           Considering that RoPE employs different fre-
+VRoPE is illustrated in Figure 3.                                                     quencies across channels, we strategically allocate
+                                                                                      frequencies to these four symmetric positional in-
+4.1     Symmetric Bias Mitigation
+                                                                                      dices in a uniform manner. This design enables
+As discussed in Section 3.4, both RoPE and RoPE-                                      distinct positional arrangement directions to model
+3D employ a single positional arrangement direc-                                      features through different RoPE frequencies (high,
+tion when encoding features within video frames                                       medium and low).
+(e.g., row-major scanning for RoPE and top-left to
+bottom-right ordering for RoPE-3D), inevitably in-                                    4.2        Temporal Centered Arrangement
+troducing positional attention bias. To address this
+limitation, we propose Symmetric Bias Mitigation                                      While Symmetric Bias Mitigation effectively al-
+as illustrated in Figure 3 (a).                                                       leviates positional bias, the inherent discontinu-
+   Specifically, we design a unified symmetric po-                                    ity between video and textual modalities persists.
+sitional arrangement paradigm applicable to arbi-                                     To address this challenge, we propose the Tempo-
+trary dimensions. For textual tokens represented                                      ral Centered Arrangement for positioning video
+as points, their inherent symmetry is preserved.                                      frames. Given that textual positions inherently sat-
+For one-dimensional sequences, we adopt bidirec-                                      isfy u1 = u2 = u3 = u4 (demonstrating isotropic
+tional positional indexing starting from both end-                                    symmetry), we first align the geometric center of
+points (similar to bidirectional modeling in lan-                                     each video frame with the textual arrangement axis
+guage models). For two-dimensional planes (i.e.,                                      through coordinate transformation. Specifically,
+video frames), we implement a four-directional                                        for a video of size (W, H, T ) with an initial posi-
+symmetric arrangement extending from frame ver-                                       tion index pstart (i.e., the last position id + 1 of the
+tices toward the center. This scheme naturally ex-                                    previous text), this process can be denoted as:
+
+                                                                                5
+                                                                64 tokens as input. Training follows a two-stage
+      
+     v1          u1
+                                                               paradigm: in the pre-training stage, only the MLP
+    v2   u2 + H − 1                                         connector is trained, while in the instruction-tuning
+     =
+    v3  u3 + H + W − 2 + pstart .                 (7)       stage, both the MLP and LLM backbones are fine-
+                         
+
+     v4      u4 + W − 1                                         tuned, with the Vision Encoder frozen throughout.
+                                                                During pre-training, we use a batch size of 256 and
+   Subsequently, we systematically arrange frame                a learning rate of 1e-3, while for instruction-tuning,
+positions along the temporal dimension using the                we reduce the batch size to 128 and set the learning
+following formulation:                                          rate to 2e-5. A warm-up ratio of 0.03 is used, fol-
+                                                                lowed by cosine learning rate decay after the linear
+             vjt = vj + t(H + W − 1),                 (8)       warm-up phase. The training was conducted on 8
+where t is the frame index. This configuration en-              Nvidia A800 GPUs.
+sures that: (1) The central position of each video              Training Data. For Vicuna-7B, we pre-train the
+frame coincides with the textual arrangement axis,              model on the LLaVA-558K dataset (Liu et al.,
+and (2) Sequential frames naturally extend along                2024a) with WebVid samples (Bain et al., 2021)
+the textual positional progression direction through            and fine-tune it on the LLaVA-mix665K (Liu et al.,
+temporal ordering. Consequently, the temporal ex-               2024a) dataset augmented with VideoChatGPT
+pansion axis of video sequences becomes intrinsi-               data (Maaz et al., 2023). For the Qwen2 LLM
+cally aligned with the positional growth direction              series, we pre-train the models on a randomly sam-
+of text tokens, which means that arbitrary length of            pled 1M caption dataset, which includes LLaVA-
+video input does not affect the continuity between              558K, WebVid, DenseFusion-1M (Li et al., 2024c),
+video and text.                                                 VALOR (Liu et al., 2024b), and CC3M (Chang-
+   Finally, our VRoPE computes the positional en-               pinyo et al., 2021). The models are then fine-tuned
+coding as:                                                      on a combination of LLaVA-mix665K, VideoChat-
+        VRoPEj (x, v1t , v2t , v3t , v4t )                      GPT, and LLaVA-Video-178K (Zhang et al., 2024).
+
+                        RoPEj (x, v1t )j=4k                     Evaluation Benchmarks. We evaluated VRoPE
+                    
+                    
+                                                                across diverse video benchmarks, covering gen-
+                    
+                    RoPE (x, v t )
+                    
+                                                      (9)
+                                  j        2 j=4k+1
+                =                                               eral video understanding (Video-MME (Fu et al.,
+                        RoPEj (x, v3t )j=4k+2
+                                                                2024)), video temporal understanding (MVBench
+                    
+                    
+                    
+                        RoPEj (x, v4t )j=4k+3
+                    
+                                                                (Li et al., 2024b), TempCompass (Liu et al.,
+                                                                2024c)), long video understanding (MLVU (Zhou
+where k ∈ {0, 1, 2, ...}. For text tokens, we retain
+                                                                et al., 2024), LongVideoBench (Wu et al., 2025),
+the original RoPE encoding structure (Eq. 5) to en-
+                                                                EgoSchema (Mangalam et al., 2024)), and long
+sure compatibility with LLMs. Further discussions
+                                                                video retrieval (Video-NIAH (Zhao et al., 2024))
+can be found in Appendix A.
+                                                                to validate its effectiveness. The evaluation is con-
+5     Experiments                                               ducted using the official code provided by each
+                                                                benchmark.
+5.1    Experimental Setup
+Implementation Details. We apply our proposed                   5.2   Main Results
+VRoPE to Video-LLM architectures with three                     We evaluate the performance of RoPE, RoPE-3D,
+widely used LLM backbones: Vicuna-7B, Qwen2-                    and our proposed VRoPE across six video un-
+1.5B, and Qwen2-7B, the resulting models are                    derstanding benchmarks. As shown in Table 2,
+denoted as Video-Vicuna-7B, Video-Qwen2-1.5B,                   VRoPE consistently outperforms both RoPE and
+and Video-Qwen2-7B. For the vision encoder, we                  RoPE-3D, achieving the highest average scores
+leverage Eva-CLIP (Sun et al., 2023), and connect               across all tasks and backbones.
+the Vision Encoder to the LLM using a Multi-Layer                 For instance, in the Video-Vicuna-7B row,
+Perceptron (MLP) (Tolstikhin et al., 2021). We use              VRoPE achieves an average score of 44.48, sur-
+a 224 × 224 resolution for both image and video in-             passing RoPE by 1.13 points. Similarly, when eval-
+puts. For video input, the number of input frames is            uated with Qwen2-1.5B and Qwen2-7B, VRoPE
+16 and the frames are tokenized using a 2 × 2 pool-             demonstrates consistent improvements across all
+ing kernel with a stride of 2, i.e., each frame has             benchmarks. Notably, it outperforms RoPE and
+
+                                                            6
+Table 2: Performance comparison of RoPE variants on video benchmarks across different LLM backbones. Results
+across tasks, including general video understanding (Video-MME), video temporal understanding (MVBench,
+TempCompass), and long video understanding (MLVU, LongVideoBench, EgoSchema).
+
+                                     Video-MME             MLVU                                          LongVideoBench                      TempCompass          EgoSchema
+         Method                                                                       MVBench                                                                                          Avg.
+                                      (w/o subs)          @M-Avg                                             @Val                            @Multi-Choice          @Test
+         Video-Vicuna-7B
+          w/ RoPE                        38.5                47.00                       43.90                41.66                               53.10               35.92            43.35
+          w/ RoPE-3D                  38.0 (↓0.5)         46.30 (↓0.7)               44.55 (↑0.65)        40.16 (↓1.5)                        54.94 (↑1.84)       39.79 (↑3.87)    43.96 (↑0.61)
+          w/ VRoPE                    38.9 (↑0.4)        47.37 (↑0.37)               45.18 (↑1.28)        40.69 (↓0.97)                       54.05 (↑0.95)       40.71 (↑4.79)    44.48 (↑1.13)
+         Video-Qwen2-1.5B
+          w/ RoPE                        39.0                51.15                       51.15                46.63                               56.96               48.50            48.90
+          w/ RoPE-3D                  39.3 (↑0.3)        51.19 (↑0.04)               50.45 (↓0.70)        48.01 (↑1.38)                       57.97 (↑1.01)       49.00 (↑0.50)    49.32 (↑0.42)
+          w/ VRoPE                    42.4 (↑3.4)        51.76 (↑0.61)               50.78 (↓0.37)        47.79 (↑1.16)                       57.15 (↑0.19)       49.90 (↑1.40)    49.96 (↑1.06)
+         Video-Qwen2-7B
+          w/ RoPE                        50.1                54.87                       54.33                49.36                               63.73               57.14            54.92
+          w/ RoPE-3D                  49.5 (↓0.6)        56.06 (↑1.19)                54.23 (↓0.1)        49.55 (↑0.19)                       64.49 (↑0.76)       58.80 (↑1.66)    55.44 (↑0.52)
+          w/ VRoPE                    50.6 (↑0.5)        57.81 (↑2.94)               54.70 (↑0.37)        50.48 (↑1.12)                       65.88 (↑2.15)       58.60 (↑1.46)    56.35 (↑1.43)
+
+
+                                 (a) RoPE                                                  (b) RoPE-3D                                                        (c) VRoPE                       1.0
+Needle Depth (%)
+
+
+
+
+                                                            Needle Depth (%)
+
+
+
+
+                                                                                                                          Needle Depth (%)
+                    20                                                          20                                                            20
+                    40                                                          40                                                            40                                              0.8
+
+
+
+
+                                                                                                                                                                                                Accuracy
+                    60                                                          60                                                            60
+                                                                                                                                                                                              0.6
+                    80                                                          80                                                            80
+                   100                                                         100                                                           100                                              0.4
+                     6
+
+                            8
+
+                                 0
+
+                                      2
+
+                                            24
+
+                                                    16
+
+
+
+
+                                                                                 6
+
+                                                                                     8
+
+                                                                                            0
+
+                                                                                                     2
+
+                                                                                                           24
+
+                                                                                                                 16
+
+
+
+
+                                                                                                                                               6
+
+                                                                                                                                                     8
+
+                                                                                                                                                              0
+
+                                                                                                                                                                     2
+
+                                                                                                                                                                           24
+
+                                                                                                                                                                                  16
+                    25
+
+                           44
+
+                                64
+
+                                     83
+
+
+
+
+                                                                                25
+
+                                                                                     44
+
+                                                                                          64
+
+                                                                                                 83
+
+
+
+
+                                                                                                                                              25
+
+                                                                                                                                                    44
+
+                                                                                                                                                          64
+
+                                                                                                                                                                   83
+                                            10
+
+                                                    12
+
+
+
+
+                                                                                                          10
+
+                                                                                                                12
+
+
+
+
+                                                                                                                                                                         10
+
+                                                                                                                                                                                  12
+                           Number of Video Frames                                    Number of Video Frames                                         Number of Video Frames
+
+Figure 4: Visualization of long video retrieval results on Video-NIAH (Zhao et al., 2024). Our VRoPE consistently
+achieves high accuracy across varying background lengths and needle depths, showing strong retrieval capability in
+long videos.
+
+
+RoPE-3D by significant margins on tasks such as                                                           RoPE drops significantly when the number of in-
+Video-MME (a 3.4-point increase for Qwen2-1.5B)                                                           put frames exceeds 832, while VRoPE outperforms
+and MLVU (a 2.94-point increase for Qwen2-7B).                                                            other approaches by a considerable margin. The
+   These results highlight the superior adaptabil-                                                        quantitative results, presented in Table 4, further ev-
+ity of VRoPE across different LLM types and pa-                                                           idence this finding. Specifically, VRoPE achieves
+rameter sizes. Importantly, VRoPE introduces no                                                           an accuracy that is 32.19 points higher than RoPE
+new learnable parameters and does not increase                                                            and 14.22 points higher than RoPE-3D when the
+computational complexity, making it a cost-free                                                           number of input frames increases to 1024-1216.
+performance enhancement for Video-LLMs. More                                                              Notably, these results are obtained even though
+results and visualization examples can be found in                                                        the input frame count in this range is dozens of
+Appendix B and Appendix C.                                                                                times greater than the maximum number seen dur-
+                                                                                                          ing training. This demonstrates the exceptional
+5.3                      Results on Long Video Retrieval                                                  extrapolation ability of VRoPE. Moreover, RoPE-
+We compare our method with RoPE (Su et al.,                                                               3D underperforms the RoPE baseline for inputs of
+2024) and RoPE-3D (Wang et al., 2024) on the long                                                         256-512, 512-768, and 768-1024 frames, which
+video retrieval task to evaluate the model’s general-                                                     further proves that the cross-modal positional dis-
+ization ability with longer video inputs. Following                                                       continuity affects the model’s ability to understand
+the setup in Video-NIAH (Zhao et al., 2024), we                                                           videos of different lengths.
+conduct Video Needle-In-A-Haystack (V-NIAH)
+experiments, where a target "needle" frame is in-                                                         5.4    Ablation Studies
+serted into a sequence of background frames, with                                                         Comparison of RoPE Variants. We conduct ex-
+the total frame count varying between 256 and                                                             periments to assess the impact of three key proper-
+1216.                                                                                                     ties: Spatiotemporal Structure Modeling (S.S.M.),
+   As shown in Figure 4, the retrieval accuracy of                                                        Positional Unbiasedness (P.U.), and Seamless
+
+                                                                                                     7
+Table 3: We assess various RoPE designs to validate the necessity of the three desired properties: Spatiotemporal
+Structure Modeling (S.S.M), Positional Unbiasedness (P.U.), and Seamless Video-Text Transition (S.V.T.). The
+results indicate that the model attains optimal performance when all properties are fully incorporated.
+
+  Method               S.S.M.     P.U.   S.V.T.     Video-MME           EgoSchema          LongVideoBench        Avg.
+  RoPE                   ✘        ✘       ✔             39.0               48.50                46.63            44.71
+  RoPE-2D                ✔        ✘       ✔          43.2 (↑4.2)       47.60 (↓0.90)        46.33 (↓0.30)    45.71 (↑1.00)
+  RoPE-3D                ✔        ✘       ✘          39.3 (↑0.3)       49.00 (↑0.50)        48.01 (↑1.38)    45.44 (↑0.73)
+  RoPE-Share             ✘        ✔       ✔          39.7 (↑0.7)       48.66 (↑0.16)        45.10 (↓1.53)    44.49 (↓0.22)
+  RoPE-Compact           ✔        ✘       ✔          38.1 (↓0.9)       50.77 (↑2.27)        45.96 (↓0.67)    44.94 (↑0.23)
+  VRoPE                  ✔        ✔       ✔          42.4 (↑3.4)       49.90 (↑1.40)        47.79 (↑1.16)    46.70 (↑1.99)
+
+
+Table 4: Average retrieval accuracy across different               Table 5: Ablation study on VRoPE components. We
+input frame length intervals on Video-NIAH (Zhao et al.,           evaluate the impact of Symmetric Bias Mitigation (Sym-
+2024). Compared to RoPE, the performance advantage                 metric) and Temporal Centered Arrangement (Continu-
+of VRoPE becomes more pronounced at longer video                   ity). The model achieves the best performance when
+lengths.                                                           both components are applied together.
+
+  Method     256-512    512-768     768-1024      1024-1216            Continuity   Symmetric   Video-MME   LongVideoBench
+  RoPE        94.84      87.03        73.28         54.84                  ✘           ✘           39.0         46.63
+  RoPE-3D     88.90      80.94        69.69         72.81                  ✔           ✘           42.3         46.30
+  VRoPE       98.28      95.16        90.31         87.03                  ✘           ✔           41.3         47.27
+                                                                           ✔           ✔           42.4         47.79
+
+
+Video-Text Transition (S.V.T.), as discussed in Sec-               be found in Appendix D.
+tion 1. The results, summarized in Table 3, high-
+light the importance of these properties.                          Ablation on VRoPE Components. We conduct
+   We first compare RoPE-2D (Agrawal et al.,                       ablation experiments to evaluate the individual con-
+2024) and RoPE-3D (Wang et al., 2024) with the                     tributions of the Symmetric Bias Mitigation and
+baseline RoPE (Su et al., 2024) method. RoPE-                      Temporal Centered Arrangement components. The
+2D encodes only the spatial coordinates (w, h) of                  results, presented in Table 5, reveal that when ap-
+each frame. While it resolves the cross-modal posi-                plied separately, each method produces mixed ef-
+tional discontinuity, it still suffers from positional             fects. Specifically, Temporal Centered Arrange-
+bias. Both RoPE-2D and RoPE-3D show improve-                       ment improves performance on Video-MME, indi-
+ments over RoPE, demonstrating the benefits of                     cating its effectiveness in enhancing smooth trans-
+spatiotemporal structure modeling.                                 lation for general video understanding. Symmet-
+   Next, we evaluate two additional variants, RoPE-                ric Bias Mitigation shows a significant gain on
+Share and RoPE-Compact, to further ablate the                      LongVideoBench, indicating its effectiveness in
+impact of S.S.M. and P.U. RoPE-Share uses iden-                    reducing bias in long video tasks. When combined
+tical positional embeddings within each frame, ar-                 in VRoPE, the two components work synergisti-
+ranged sequentially. While it resolves positional                  cally, resulting in more consistent performance.
+bias and ensures continuity, it neglects the spatial
+                                                                   6      Conclusion
+structure of the frames, leading to a performance
+drop compared to RoPE. RoPE-Compact is an ex-                      In conclusion, we propose VRoPE, a dedicated
+tention of RoPE-3D that addresses positional dis-                  positional encoding strategy for Video-LLMs that
+continuity by encoding subsequent text tokens with                 balances spatiotemporal structure, mitigates atten-
+(W + 1, H + 1, T + 1)T , but it deviates from text                 tion bias, and ensures a smooth transition between
+compatibility requirements, which slightly limits                  video and text tokens. Extensive experiments on
+its performance. In contrast, our proposed method                  different model scales validate its superior perfor-
+(VRoPE) incorporates all three properties, achiev-                 mance in video understanding, temporal reasoning,
+ing a 1.99-point improvement over the RoPE base-                   and retrieval tasks. We believe VRoPE can serve
+line, surpassing all other variants. More detailed                 as a useful building block for future Video-LLMs,
+illustration of RoPE-Share and RoPE-Compact can                    enabling better video-language understanding.
+
+                                                              8
+7   Acknowledgments                                          Yifan Du, Kun Zhou, Yuqi Huo, Yifan Li, Wayne Xin
+                                                               Zhao, Haoyu Lu, Zijia Zhao, Bingning Wang,
+This research is supported by Artificial Intelligence-         Weipeng Chen, and Ji-Rong Wen. 2024. Towards
+National Science and Technology Major Project                  event-oriented long video understanding. arXiv
+(2023ZD0121200) and the National Natural                       preprint arXiv:2406.14129.
+Science Foundation of China (6243000159,                     Chaoyou Fu, Yuhan Dai, Yongdong Luo, Lei Li,
+62102416), and the Key Research and Develop-                   Shuhuai Ren, Renrui Zhang, Zihan Wang, Chenyu
+ment Program of Jiangsu Province under Grant                   Zhou, Yunhang Shen, Mengdan Zhang, and 1 oth-
+BE2023016-3, and CCF-Tencent Rhino-Bird Open                   ers. 2024. Video-mme: The first-ever comprehensive
+                                                               evaluation benchmark of multi-modal llms in video
+Research Fund.                                                 analysis. arXiv preprint arXiv:2405.21075.
+8   Limitations                                              Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian
+                                                               Sun. 2016. Deep residual learning for image recog-
+While VRoPE demonstrates strong performance,                   nition. In Proceedings of the IEEE conference on
+there are some limitations. Due to computational               computer vision and pattern recognition, pages 770–
+resource constraints, our experiments were limited             778.
+to models with 1.5B, 7B and 8B (shown in Ap-                 Peng Jin, Ryuichi Takanobu, Wancai Zhang, Xiaochun
+pendix B) parameters. Larger-scale models could                Cao, and Li Yuan. 2024. Chat-univi: Unified visual
+potentially yield further performance gains. Addi-             representation empowers large language models with
+tionally, although VRoPE is adaptable across dif-              image and video understanding. In Proceedings of
+                                                               the IEEE/CVF Conference on Computer Vision and
+ferent dimensions, its extension to other modalities           Pattern Recognition, pages 13700–13710.
+(e.g., audio, 3D point clouds, Electroencephalogra-
+phy (EEG)) and higher-dimensional data (e.g., 4D             Bo Li, Yuanhan Zhang, Dong Guo, Renrui Zhang, Feng
+spatiotemporal or medical imaging data) remains                Li, Hao Zhang, Kaichen Zhang, Peiyuan Zhang,
+                                                               Yanwei Li, Ziwei Liu, and 1 others. 2024a. Llava-
+an area for future research and validation.                    onevision: Easy visual task transfer. arXiv preprint
+                                                               arXiv:2408.03326.
+
+References                                                   KunChang Li, Yinan He, Yi Wang, Yizhuo Li, Wen-
+                                                               hai Wang, Ping Luo, Yali Wang, Limin Wang, and
+Pravesh Agrawal, Szymon Antoniak, Emma Bou Hanna,              Yu Qiao. 2023. Videochat: Chat-centric video under-
+   Baptiste Bout, Devendra Chaplot, Jessica Chud-              standing. arXiv preprint arXiv:2305.06355.
+   novsky, Diogo Costa, Baudouin De Monicault,
+   Saurabh Garg, Theophile Gervet, and 1 others. 2024.       Kunchang Li, Yali Wang, Yinan He, Yizhuo Li,
+   Pixtral 12b. arXiv preprint arXiv:2410.07073.               Yi Wang, Yi Liu, Zun Wang, Jilan Xu, Guo Chen,
+                                                               Ping Luo, and 1 others. 2024b. Mvbench: A com-
+Dosovitskiy Alexey. 2020. An image is worth 16x16
+                                                               prehensive multi-modal video understanding bench-
+  words: Transformers for image recognition at scale.
+                                                               mark. In Proceedings of the IEEE/CVF Conference
+  arXiv preprint arXiv: 2010.11929.
+                                                               on Computer Vision and Pattern Recognition, pages
+Jinze Bai, Shuai Bai, Yunfei Chu, Zeyu Cui, Kai Dang,          22195–22206.
+   Xiaodong Deng, Yang Fan, Wenbin Ge, Yu Han, Fei
+   Huang, and 1 others. 2023. Qwen technical report.         Xiaotong Li, Fan Zhang, Haiwen Diao, Yueze
+   arXiv preprint arXiv:2309.16609.                            Wang, Xinlong Wang, and Ling-Yu Duan. 2024c.
+                                                               Densefusion-1m: Merging vision experts for com-
+Shuai Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wen-          prehensive multimodal perception. arXiv preprint
+  bin Ge, Sibo Song, Kai Dang, Peng Wang, Shijie               arXiv:2407.08303.
+  Wang, Jun Tang, and 1 others. 2025. Qwen2. 5-vl
+  technical report. arXiv preprint arXiv:2502.13923.         Yanwei Li, Chengyao Wang, and Jiaya Jia. 2024d.
+                                                               Llama-vid: An image is worth 2 tokens in large lan-
+Max Bain, Arsha Nagrani, Gül Varol, and Andrew Zis-            guage models. In European Conference on Computer
+ serman. 2021. Frozen in time: A joint video and               Vision, pages 323–340. Springer.
+ image encoder for end-to-end retrieval. In Proceed-
+ ings of the IEEE/CVF international conference on            Haotian Liu, Chunyuan Li, Qingyang Wu, and Yong Jae
+ computer vision, pages 1728–1738.                             Lee. 2024a. Visual instruction tuning. Advances in
+                                                               neural information processing systems, 36.
+Soravit Changpinyo, Piyush Sharma, Nan Ding, and
+  Radu Soricut. 2021. Conceptual 12m: Pushing web-           Jing Liu, Sihan Chen, Xingjian He, Longteng Guo,
+  scale image-text pre-training to recognize long-tail          Xinxin Zhu, Weining Wang, and Jinhui Tang. 2024b.
+  visual concepts. In Proceedings of the IEEE/CVF               Valor: Vision-audio-language omni-perception pre-
+  conference on computer vision and pattern recogni-            training model and dataset. IEEE Transactions on
+  tion, pages 3558–3568.                                        Pattern Analysis and Machine Intelligence.
+
+
+                                                         9
+Yuanxin Liu, Shicheng Li, Yi Liu, Yuxiang Wang,                 Advances in Neural Information Processing Systems,
+  Shuhuai Ren, Lei Li, Sishuo Chen, Xu Sun,                     37:28828–28857.
+  and Lu Hou. 2024c. Tempcompass: Do video
+  llms really understand videos?  arXiv preprint              Lin Xu, Yilin Zhao, Daquan Zhou, Zhijie Lin,
+  arXiv:2403.00476.                                             See Kiong Ng, and Jiashi Feng. 2024. Pllava:
+                                                                Parameter-free llava extension from images to
+Muhammad Maaz, Hanoona Rasheed, Salman Khan,                    videos for video dense captioning. arXiv preprint
+ and Fahad Shahbaz Khan. 2023. Video-chatgpt:                   arXiv:2404.16994.
+ Towards detailed video understanding via large
+ vision and language models.     arXiv preprint               An Yang, Anfeng Li, Baosong Yang, Beichen Zhang,
+ arXiv:2306.05424.                                              Binyuan Hui, Bo Zheng, Bowen Yu, Chang
+                                                                Gao, Chengen Huang, Chenxu Lv, and 1 others.
+Karttikeya Mangalam, Raiymbek Akshulakov, and Ji-               2025. Qwen3 technical report. arXiv preprint
+  tendra Malik. 2024. Egoschema: A diagnostic bench-            arXiv:2505.09388.
+  mark for very long-form video language understand-
+  ing. Advances in Neural Information Processing              Yuanhan Zhang, Jinming Wu, Wei Li, Bo Li, Zejun
+  Systems, 36.                                                  Ma, Ziwei Liu, and Chunyuan Li. 2024. Video in-
+                                                                struction tuning with synthetic data. arXiv preprint
+Kepan Nan, Rui Xie, Penghao Zhou, Tiehan Fan, Zhen-             arXiv:2410.02713.
+  heng Yang, Zhijie Chen, Xiang Li, Jian Yang, and
+  Ying Tai. 2024. Openvid-1m: A large-scale high-             Zijia Zhao, Haoyu Lu, Yuqi Huo, Yifan Du, Tongtian
+  quality dataset for text-to-video generation. arXiv           Yue, Longteng Guo, Bingning Wang, Weipeng Chen,
+  preprint arXiv:2407.02371.                                     and Jing Liu. 2024. Needle in a video haystack:
+                                                                 A scalable synthetic framework for benchmarking
+Jianlin Su, Murtadha Ahmed, Yu Lu, Shengfeng Pan,                video mllms. arXiv preprint arXiv:2406.09367.
+   Wen Bo, and Yunfeng Liu. 2024. Roformer: En-
+   hanced transformer with rotary position embedding.         Junjie Zhou, Yan Shu, Bo Zhao, Boya Wu, Shitao Xiao,
+   Neurocomputing, 568:127063.                                  Xi Yang, Yongping Xiong, Bo Zhang, Tiejun Huang,
+                                                                and Zheng Liu. 2024. Mlvu: A comprehensive
+Quan Sun, Yuxin Fang, Ledell Wu, Xinlong Wang,                  benchmark for multi-task long video understanding.
+  and Yue Cao. 2023. Eva-clip: Improved train-                  arXiv preprint arXiv:2406.04264.
+  ing techniques for clip at scale. arXiv preprint
+  arXiv:2303.15389.
+Ilya O Tolstikhin, Neil Houlsby, Alexander Kolesnikov,
+   Lucas Beyer, Xiaohua Zhai, Thomas Unterthiner, Jes-
+   sica Yung, Andreas Steiner, Daniel Keysers, Jakob
+   Uszkoreit, and 1 others. 2021. Mlp-mixer: An all-
+   mlp architecture for vision. Advances in neural in-
+   formation processing systems, 34:24261–24272.
+Hugo Touvron, Thibaut Lavril, Gautier Izacard, Xavier
+  Martinet, Marie-Anne Lachaux, Timothée Lacroix,
+  Baptiste Rozière, Naman Goyal, Eric Hambro, Faisal
+  Azhar, and 1 others. 2023. Llama: Open and effi-
+  cient foundation language models. arXiv preprint
+  arXiv:2302.13971.
+Michael Tschannen, Alexey Gritsenko, Xiao Wang,
+  Muhammad Ferjad Naeem, Ibrahim Alabdulmohsin,
+  Nikhil Parthasarathy, Talfan Evans, Lucas Beyer,
+ Ye Xia, Basil Mustafa, and 1 others. 2025. Siglip
+  2: Multilingual vision-language encoders with im-
+  proved semantic understanding, localization, and
+  dense features. arXiv preprint arXiv:2502.14786.
+Peng Wang, Shuai Bai, Sinan Tan, Shijie Wang, Zhi-
+  hao Fan, Jinze Bai, Keqin Chen, Xuejing Liu, Jialin
+  Wang, Wenbin Ge, and 1 others. 2024. Qwen2-
+  vl: Enhancing vision-language model’s perception
+  of the world at any resolution. arXiv preprint
+  arXiv:2409.12191.
+Haoning Wu, Dongxu Li, Bei Chen, and Junnan Li.
+  2025. Longvideobench: A benchmark for long-
+  context interleaved video-language understanding.
+
+
+                                                         10
+Table 6: Performance comparison of RoPE variants on        Table 7: Detailed performance comparison of RoPE
+event-based EventBench (Du et al., 2024).                  variants on Video-MME (Fu et al., 2024).
+
+       Method                 EventBench                    Method               Short        Medium         Long
+                                                            Video-Vicuna-7B
+       Video-Vicuna-7B                                       w/ RoPE              46.4          38.0          31.0
+        w/ RoPE                   38.97                      w/ RoPE-3D        46.0 (↓0.4)   37.5 (↓0.5)   30.6 (↓0.4)
+        w/ RoPE-3D            39.33 (↑0.36)                  w/ VRoPE           46.4 (-)     38.3 (↑0.3)   31.8 (↑0.8)
+
+        w/ VRoPE              40.38 (↑1.41)                 Video-Qwen2-1.5B
+                                                             w/ RoPE              47.4          37.6          32.2
+       Video-Qwen2-1.5B                                      w/ RoPE-3D        47.1 (↓0.3)   37.0 (↓0.6)   33.8 (↑1.6)
+                                                             w/ VRoPE          50.1 (↑2.7)   39.3 (↑1.7)   37.8 (↑5.6)
+        w/ RoPE                   53.31
+        w/ RoPE-3D            52.76 (↓0.55)                 Video-Qwen2-7B
+                                                             w/ RoPE              60.2          47.6          42.5
+        w/ VRoPE              54.23 (↑0.92)                  w/ RoPE-3D        60.0 (↓0.2)   46.7 (↓0.9)   41.7 (↓0.8)
+                                                             w/ VRoPE          60.4 (↑0.2)    47.6 (-)     43.9 (↑1.4)
+       Video-Qwen2-7B
+        w/ RoPE                   59.25
+                                                           Table 8: Results on Video-MME (Du et al., 2024) under
+        w/ RoPE-3D            58.61 (↓0.64)
+                                                           lower frame rates (8 frames).
+        w/ VRoPE              60.35 (↑1.1)
+                                                                     Method                       Acc.
+A     Discussion                                                     Video-Qwen2-1.5B
+                                                                      w/ RoPE                    38.9
+Dimensional Adaptability. A key advantage of
+                                                                      w/ RoPE-3D              37.2 (↓1.7)
+VRoPE is its ability to degenerate into lower-
+                                                                      w/ VRoPE                40.9 (↑2.0)
+dimensional embeddings without altering its funda-
+mental structure. Unlike methods that assign sepa-
+rate feature channels for each coordinate, VRoPE           approach maintains superior comprehension capa-
+employs linear combinations of the original coor-          bilities when processing videos containing intricate
+dinates, allowing any dimension set to 1 to seam-          event sequences.
+lessly adapt into lower-dimension form. For in-
+stance, when H = 1, the encoded positions sim-             B.2   Results on Video-MME with varying
+plify to (w, w, −w, −w), effectively reducing to                 lengths
+a 1D form—unlike previous methods that rely on
+                                                           In this section, we analyze the performance of
+separate encodings, such as (w, 0). This property
+                                                           RoPE, RoPE-3D, and our VRoPE across varying
+is particularly beneficial for adapting pre-trained
+                                                           input video lengths on the Video-MME dataset,
+model’s positional encodings from images (2D) or
+                                                           as summarized in Table 7. The results indicate
+videos (3D) to data of varying dimensions with-
+                                                           that VRoPE demonstrates marked superiority in
+out disrupting the original encoding scheme. Con-
+                                                           processing long-form videos, while also achiev-
+sequently, models can transfer more effectively
+                                                           ing moderate advantages for medium and short
+across modalities while preserving consistent posi-
+                                                           videos, maintaining comparable performance to
+tional behavior.
+                                                           baselines at minimum. This further validates the
+B     More Results                                         effectiveness of our approach in enhancing model
+                                                           comprehension capabilities across varying video
+B.1    Results on EventBench                               durations. The consistent improvements under-
+The benchmark evaluated in Section 5.2 already             score our method’s robustness in understanding
+encompasses comprehensive capabilities required            tasks under various video context lengths.
+for video understanding tasks. To further validate
+temporal reasoning performance, we conduct addi-           B.3   Results under Challenging Conditions
+tional evaluations focusing on event-based tasks           In this section, we evaluate the performance of
+involving complex temporal dependencies. As                RoPE, RoPE-3D, and VRoPE on Video-MME
+shown in Table 6, our VRoPE demonstrates con-              under low frame-rate inputs (8 frames), as re-
+sistent improvements across all models compared            ported in Table 8. Notably, VRoPE maintains
+to existing methods. These results confirm that our        enhanced performance even in these challenging
+
+                                                      11
+          Video                       …                                           …                                  …
+
+
+
+
+          Question: What is the object that appears after the red door opens in the video?
+          Options: (A) A bird.    (B) A large building.   (C) A helicopter.    (D) An oil drum.
+
+
+
+
+                          RoPE                                     RoPE-3D                             VRoPE (Ours)
+
+                  Predict: (D) An oil drum                 Predict: (D) An oil drum               Predict: (C) A helicopter
+
+
+
+Figure 5: Attention weight visualization of RoPE, RoPE-3D, and VRoPE. The visualization reveals that VRoPE
+exhibits stronger attention activation within critical frames (highlighted by red boxes), demonstrating its accurate
+focus on pivotal spatiotemporal regions. In contrast, RoPE and RoPE-3D display attenuated attention responses in
+these corresponding areas, indicating insufficient awareness of key events. This attention misalignment consequently
+leads to erroneous predictions, as evidenced by their incorrect interpretations of the visual content.
+
+
+sparse-sampling scenarios, empirically confirming                             results further substantiate the generalizability and
+the robustness of our approach. This empirical                                robustness of our method across diverse architec-
+evidence highlights our method’s capability to pre-                           tural scales and data regimes.
+serve spatiotemporal coherence under severe input
+degradation.                                                                  C    Visualization Analysis
+                                                                           In Section 3.4, we analyze the positional attention
+B.4   Results of Larger Models and Datasets                                bias and cross-modal positional discontinuity inher-
+In this section, we validate the superiority of our                        ent to RoPE and RoPE-3D. To further substantiate
+approach through scaled-up model architectures                             these observations, we provide concrete attention
+and expanded training datasets. Specifically, we                           visualization examples in this section. As illus-
+conduct experiments using SigLIP-2 (Tschannen                              trated in Figure 5, for an input video sequence, our
+et al., 2025) and Qwen3-8B (Yang et al., 2025)                             VRoPE effectively focuses on the video frames
+as backbone architectures. We expand the num-                              most relevant to the query (the red door and the
+ber of input frames to 32 and the resolution is set                        helicopter), whereas RoPE and RoPE-3D exhibit
+to 384 × 384. During the pre-training stage, we                            insufficient attention to critical frames. This defi-
+utilize LLaVA-558K (Liu et al., 2024a) combined                            ciency leads to localization errors and subsequent
+with 500K randomly sampled video-text pairs from                           incorrect responses – for instance, misidentifying
+OpenVid-1M (Nan et al., 2024). For instruction                             the opening of a black door as the opening of a red
+tuning, we integrate LLaVA-NeXT-790K (Li et al.,                           door in this example. The comparative visualiza-
+2024a), LLaVA-Video-178K (Zhang et al., 2024),                             tion demonstrates our method’s enhanced capabil-
+and the full OpenVid-1M dataset. This configura-                           ity in spatiotemporal feature localization and event
+tion results in approximately 1 million samples for                        understanding.
+pre-training and 3 million samples for instruction
+                                                                              D    Detailed Illustration of Other RoPE
+tuning. As demonstrated in Table 9, VRoPE main-
+                                                                                   Variants
+tains performance advantages even under these
+enhanced baseline conditions (larger models, ex-                              RoPE-Share. RoPE-Share is a 1D positional en-
+panded datasets, and stronger baselines). These                               coding where all spatial tokens within a video
+
+                                                                      12
+Table 9: Performance comparison of RoPE variants on larger models and datasets. Results across tasks, including
+general video understanding (Video-MME), video temporal understanding (MVBench, TempCompass), and long
+video understanding (MLVU, LongVideoBench, EgoSchema).
+
+                  Video-MME         MLVU                           LongVideoBench      TempCompass     EgoSchema
+ Method                                            MVBench                                                                 Avg.
+                   (w/o subs)      @M-Avg                              @Val            @Multi-Choice     @Test
+ Video-Qwen3-8B
+  w/ RoPE             61.00           64.96           59.68                60.81           68.67           56.41           61.92
+  w/ RoPE-3D      61.44 (↑0.44)   64.50 (↓0.46)   59.34 (↓0.34)        61.00 (↑0.19)   69.11 (↑0.44)   56.03 (↓0.38)   61.90 (↓0.02)
+  w/ VRoPE        62.56 (↑1.56)   65.36 (↑0.40)   59.23 (↓0.45)        61.48 (↑0.67)     68.67 (-)     57.07 (↑0.66)   62.40 (↑0.48)
+
+
+
+frame share the same positional ID, i.e., the po-
+sitional IDs of all frame tokens in the tth frame
+are n + t. Text tokens follow the original encod-
+ing: n + T + 1, n + T + 2, .... While this design
+eliminates spatial attention bias and ensures cross-
+modal continuity, it fails to model spatial positional
+relationships within frames, leading to suboptimal
+performance (as is shown in Section 5.4).
+RoPE-Compact. RoPE-Compact is a variant
+of RoPE-3D. The key difference lies in han-
+dling cross-modal boundaries: (1) RoPE-3D
+assigns the next text token a positional ID of
+(max(W, H, T ), max(W, H, T ), max(W, H, T ))T .
+For example, if T > W, H, the last video token
+is (W, H, T )T , and the next text token becomes
+(T, T, T )T , causing discontinuity in the w and h di-
+mensions (as shown in Section 5.3). (2) To address
+the above issue, RoPE-Compact increments each
+dimension by 1, and uses it as the positional ID
+for the next text token: (W + 1, H + 1, T + 1)T .
+While this resolves cross-modal discontinuity,
+it disrupts the pre-trained RoPE’s positional
+frequency patterns of text, degrading performance.
+
+E    License Statement
+The scientific artifacts used in this work are all
+publicly available and this work only uses them
+for research purposes, thus not violating any of the
+artifacts’ licenses. The new models released in this
+work is also licensed for research purposes only,
+prohibiting any other misuse.
+
+
+
+
+                                                                  13
+

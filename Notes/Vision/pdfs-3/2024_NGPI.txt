@@ -1,0 +1,931 @@
+                                                   Towards Efficient Neurally-Guided Program Induction for ARC-AGI
+
+                                                                                                     Simon Ouellette
+arXiv:2411.17708v1 [cs.AI] 13 Nov 2024
+
+
+
+
+                                                                     Abstract                                    We discuss three paradigms: Learning the grid space
+                                                                                                              (LGS), Learning the program space (LPS), and Learning
+                                           ARC-AGI is an open-world problem domain in which the
+                                                                                                              the transformation space (LTS). The first two have been im-
+                                           ability to generalize out-of-distribution is a crucial quality.
+                                           Under the program induction paradigm, we present a series          plemented and thoroughly experimented upon. The second
+                                           of experiments that reveal the efficiency and generalization       one (LPS) is the best performing method on the ARC eval-
+                                           characteristics of various neurally-guided program induction       uation set, so it is retained for ARC-AGI submission. It is
+                                           approaches. The three paradigms we consider are Learning           the approach that is therefore described in most detail. The
+                                           the grid space, Learning the program space, and Learning the       third one (LTS) has not been implemented yet, due to lack
+                                           transformation space. We implement and experiment thor-            of time, but it is described in a brief, general way. This third
+                                           oughly on the first two, and retain the second one for ARC-        approach is proposed as a way to combine the strengths and
+                                           AGI submission. After identifying the strengths and weak-          weaknesses of the other two approaches. While preliminary
+                                           nesses of both of these approaches, we suggest the third as a      experiments are made to support this hypothesis, full imple-
+                                           potential solution, and run preliminary experiments.
+                                                                                                              mentation and experimentation is left to future work.
+                                                                                                              Our main contributions We present a few novel results:
+                                                                 Introduction
+                                                                                                              1. To the best of our knowledge, we are the first to ana-
+                                         Deep Learning is notoriously powerful when addressing a                 lyze the out-of-distribution generalization characteristics
+                                         wide variety of problems. Yet, in other areas, it is deficient.         of program induction approaches based on enumerating
+                                         One predominant difference between the problem domains                  the program probability space.
+                                         where it is highly successful, and the domains where it is less      2. We present the first results on ARC-AGI for the LGS ap-
+                                         so, is the openness of that domain. In closed-world domains,            proach, and analyze its strengths and weaknesses.
+                                         where the model is able to densely sample and interpolate
+                                         over the full set of possbilities, deep learning often achieves      3. We propose a novel probabilistic program enumeration-
+                                         near-human or sometimes even super-human ability. How-                  based search algorithm for program induction, leaning
+                                         ever, in open-world domains, where the full range of possi-             heavily on Transformer-based auto-regressive token se-
+                                         bilities is so vast that it is practically infeasible to densely        quences, rather than the typical n-gram approach, and an-
+                                         sample its entirety, interpolation-based techniques like Deep           alyze its strengths and weaknesses.
+                                         Learning can be sub-optimal.                                         4. We sketch the outline of a novel approach (LTS) aimed
+                                            This results in Deep Learning’s well-known challenges in             at addressing the flaws in the previous approaches. We
+                                         generalizing outside the training set distribution. The Ab-             provide preliminary experimentation to support the hy-
+                                         straction & Reasoning Corpus (Chollet et al. 2024) (ARC-                potheses being advanced.
+                                         AGI) is one of the foremost problem domains that specifi-
+                                         cally challenges this closed-world assumption. This is done                                 The Problem
+                                         by using a hidden test set that contains tasks that are qualita-     The problem setting we use for this paper follows a typical
+                                         tively distinct from any of the publicly available tasks. This       program synthesis setting. We assume that the Domain Spe-
+                                         encourages research on extending the out-of-distribution             cific Language (DSL) includes all the necessary primitives
+                                         generalization capablities of learning systems. This will be         to solve each test task. The goal is to search (as efficiently as
+                                         the focus of the work presented here.                                possible) for the program that solves each task in the test set,
+                                            The current implementations of the proposed approaches            given the provided DSL. Throughout this paper, the tasks ex-
+                                         are not yet mature enough to yield an interesting or compet-         perimented upon are mainly taken from the ARC-AGI eval-
+                                         itive performance on ARC-AGI. This paper reports proof-              uation set.
+                                         of-concept results of experiments made under controlled                 A compute and memory time budget is allocated for each
+                                         and limited conditions, exploring ways in which we can               task solution, so it must find it within those budget con-
+                                         efficiently extend the generalization capabilities of a Deep         straints. This can be easy, even trivial for very small pro-
+                                         Learning model via search, in a program induction context.           grams, but due to combinatorial explosion can become quite
+unmanageable for large programs. More formally, given a            with the number of transformations applied, constitute a full
+DSL Ω = {π1 , π2 , ..., πN } containing N primitive functions      training sample. The number of transformations is converted
+denoted πi , a search algorithm F (X, Y ) given the support        to a similarity between zero and one.
+input examples Xs and support output examples Ys must                 It should be noted that the procedurally generated training
+return within the allocated CPU and memory budgets a pro-          data often contained over-estimated transformation distance
+gram P such that P (Xq ) = Yq , where Xq and Yq are the            ground truths. This is because it is very easy to accidentally
+query examples. In other words, the support examples are           generate redundant transformations. The desirable quality of
+used to infer the underlying program, and the query exam-          a good grid distance ground truth is that it represents the
+ples are used to confirm the correctness of the program.           shortest distance between two grids, rather than whatever
+   There is an additional, crucial aspect to our problem set-      distance was arbitrarily used to generate these two grids. A
+ting. While we assume the DSL Ω to fully contain the re-           trivial example of this is that ”rotate 90, rotate 90, rotate 90”
+quired primitives to solve both the training and test datasets,    should yield a grid distance of one (rotate 270), not three
+we allow the test dataset’s solution programs to follow dif-       steps. Several heuristics were implemented in the training
+ferent structures than the test datasets. In other words, we       data generation script to attempt to mitigate this issue, but
+place the additional constraint to our problem domain that         nonetheless the issue remains. This is arguably one of the
+the test set must be out-of-distribution with respect to the       weaknesses of applying supervised learning to a cost-to-go
+training set in terms of the compositional structures of P .       type of approach.
+This is important because, if it were not the case, a neural
+network would be sufficient to solve this problem domain.                      Learning the Program Space
+               Learning the Grid Space                             This is the selected approach, because it performed better
+                                                                   than LGS on the ARC-AGI evaluation set. As such, it will
+The idea of this approach is to learn a model of the space of      be described in more depth than the other two methods. Fur-
+possible ARC-AGI grids, under a specific DSL. It is impor-         thermore, because we are referring to a specific, novel im-
+tant to note that there is no such thing as a pure grid similar-   plementation of the overarching paradigm of LPS, we name
+ity space unconditioned on some DSL, since under two dif-          it GridCoder.
+ferent DSLs the same grid pair can have quite different dis-
+                                                                      At a high-level, the solution consists of training a trans-
+tances. From there, it is possible to input two different grids
+                                                                   former to output a program, using a pre-determined gram-
+and estimate their similarity. This can be used in a search al-
+                                                                   mar (DSL) and syntax, that solves the task. Specifically, the
+gorithm to gradually build a program in an execution-guided
+                                                                   transformer outputs a sequence of probabilities over tokens
+manner. The idea of execution-guided program induction is
+                                                                   that can be interpreted as a probability distribution over pro-
+to leverage some heuristic to guide the choice of primitives
+                                                                   gram space. We then use a search algorithm to enumerate
+during construction. This heuristic requires feedback from
+                                                                   that space and test valid programs for correctness. In a sense,
+partial execution of the program being constructed. As such,
+                                                                   the search explores the area of the solution space covering
+program solution construction and execution happen in par-
+                                                                   the neural network’s region of uncertainty.
+allel and impact each other.
+   At each iteration of the search, the algorithm attempts all
+possible primitives on the current intermediate grid in the
+                                                                   The Search Algorithm
+program execution, and selects the one that brings it the clos-    It is a probability-based enumeration of programs, concep-
+est to the target grid state. Note that this approach assumes      tually similar to DreamCoder (Ellis et al. 2021) and Heap
+that all (or most) steps in program execution result in a grid-    Search (Fijalkow et al. 2021). However, unlike these ap-
+to-grid transformation. This is why the experiments on LGS         proaches, the probability predictions are not based on n-
+use a DSL that strictly contains grid-to-grid transformations      grams, but instead are based on transformer generated to-
+(DSL Version 1). As such, it should be kept in mind that the       ken probability sequences. That is, instead of predicting the
+results reported for this method are therefore the best case       probability over children classes conditional on (n-1) par-
+scenario where all steps in program execution result in a grid     ents, we predict the probability over children classes condi-
+transformation.                                                    tional on the entire maximum probability token sequence (as
+   The experiments reported here used a Transformer                in typical auto-regressive transformer decoding).
+encoder-only model with max pooling that outputs a flat-              Also, unlike the other two paradigms presented in this pa-
+tened vector: a grid embedding. The training procedure con-        per (LGS and LTS), this approach is not execution-guided,
+sists of iteratively feeding a pair of grids into the model,       in that it does not receive feedback about the intermediate
+retrieving their respective embeddings, and then penalizing        state of the program as it develops a solution. Initially, there
+deviations between their dot product and their ground truth        was hope that the transformer decoder could learn to do this
+distance.                                                          implicitly, however the empirical results point to this not be-
+   The training data is generated by randomly sampling             ing the case (at least, not with the current architecture).
+patches of ARC-AGI training set grids, and then picking a             A first full decoding loop is executed on the Vision-
+random number of grid transformation primitives to apply           Language Model (VLM) that is fed one input and output grid
+to them(zero to eight, in our expeirments). This randomly          pair from a given task’s demonstration set. The full decoding
+selected sequence of transformations is executed, and the          loop stops until either the maximum sequence length (40, in
+output grid is retained. The input and output grids, along         our experiments) is reached, or a token is found where the
+only class that has a probability greater than some threshold
+τ is the End Of Sentence class. See algorithm 2 for the
+pseudo-code of a full decoding loop.
+   From there, there is a short bootstrapping phase in which
+a few more inference runs are made. In these, the example
+pair index and the starting token (or, sometimes, the first
+two starting tokens) are randomly selected. The full proba-
+bility distrbution is calculated as a mean of the probabilities
+over tokens for all of these initial decoding loops. Hence, the
+probability distribution prob dist (see algorithm 1) is a two-
+dimensional array, where one dimension represents the to-
+ken positions in the sequence, and the other dimension rep-
+resents the probability distribution over the possible classes
+(i.e. primitives in the DSL) at that token position. Therefore,
+our probability distribution is represented as a flat sequence,
+rather than a tree in which the probability of children de-       Algorithm 2: getProbSpace
+pends on which parents are selected. This is a simplifying        Input: X, input for each example
+assumption of conditional independence, similar to the one        Input: Y , target for each example
+made in Bayesian networks, that increases the efficiency of       Input: M , the neural network model
+the search in our experiments.                                    Input: τ , probability threshold
+                                                                  Input: idx, the example pair index
+                                                                  Input: seq, the starting seq, empty by default
+Algorithm 1: GridCoder
+                                                                  Input: L, maximum sequence length
+Input: X, input for each example                                  Output: Probability distribution over each token in the se-
+Input: Y , target for each example                                quence.
+Input: DSL, a DSL to search over
+                                                                   1: seq len ← 0
+Input: T , the timeout parameter
+                                                                   2: done ← False
+Input: M , the neural network model
+                                                                   3: shif tedSeq ← [StartOf Sentence] + seq
+Input: K, number of bootstrapping examples
+                                                                   4: prob dist ← []
+Input: τ , probability threshold
+                                                                   5: while not done and seq len < L do
+Output: correct program if found
+                                                                   6:   probs ← predict(M ,X[idx],Y [idx],shif tedSeq)
+ 1: // Bootstrapping probabilities                                 7:   prob dist ← prob dist + [probs]
+ 2: prob dist ← getProbSpace(M , X, Y )                            8:   best token ← argmax(probs)
+ 3: counts = array of ones of length of prob dist                  9:   if best token is End Of Sentence then
+ 4: for k ∈ {1..K} do                                             10:       if End Of Sentence is the only class with P > τ
+ 5:    idx ← Pick a random example index                                    then
+ 6:    seq ← Pick a random first or first two tokens              11:          done ← True
+ 7:    tmp dist ← getProbSpace(M , X, Y , idx, seq)               12:       else
+ 8:    prob dist[len(seq) :]+ = tmp dist                          13:          best token ← second most probable class
+ 9:    counts[len(seq) :]+ = 1                                    14:       end if
+10: end for                                                       15:   end if
+11: prob dist = prob dist/counts                                  16:   shif tedSeq ← shif tedSeq + [best token]
+12:                                                               17:   seq len ← seq len + 1
+13: // Enumerate programs from tokens with P > τ                  18: end while
+14: sorted progs ← enumerate and sort programs
+15:
+16: // Evaluate the programs and return the correct one
+17: for π ∈ sorted progs do
+18:    if time elapsed > T then
+19:        return null
+20:    end if
+21:    success ← evaluate program(π, X, Y , DSL)
+22:    if success then
+23:        return π
+24:    end if
+25: end for
+26: return null
+
+  In the main algorithm (alg. 1), once we have estimated our
+probability space over the DSL, we then proceed to enumer-         vious version. They are briefly described here. You can refer
+ating all the possible programs formed by the token classes        to the appendix to see a full list of all primitives in each ver-
+whose probability is greater than τ , the probability threshold    sion, along with a brief description of each primitive.
+hyperparameter. If we calculate that the total set of possible
+programs is greater than a pre-determined number, we grad-         Version 1 The first version of the DSL contains 74 prim-
+ually increase τ until the cut-off level results in a manage-      itives, which exclusively transform one or two input grids
+able number of programs. This is not shown in the pseudo-          into one grid. These grid-to-grid transformations include
+code, for the sake of brevity. Then, we proceed to sort the        things such as changing all pixels of one color to another
+programs in decreasing order of their joint probability: we        color, applying grid rotations, mirroring, etc. This choice
+multiply the probabilities associated with all of the tokens in    of primitives was initially made to facilitate research on the
+its sequence, truncating at the first <End Of Sentence>            LGS paradigm.
+token seen.                                                        Version 2 The second version of the DSL contains 89
+                                                                   primitives. It contains all the primitives in version 1, plus
+Conditional Independence                                           some primitives for object detection and manipulation. In
+One aspect of the algorithm that is important, yet is not ob-      particular, six different versions of object detection were im-
+vious in the pseudo-code, is the underlying data structure.        plemented, for various concepts of objectness (what defines
+While typical program induction operates on a tree, Grid-          an object tends to change from task to task). In addition, it
+Coder operates on a flat sequence of nodes. In other words,        contains new primitives that allowing looping through ob-
+our probabilities are represented by a list of lists: the proba-   ject lists and applying transforms to them, either in-place, or
+bility distribution over a given token is solely dependent on      by cropping all the objects and generating a new grid out of
+its position in the sequence, rather than being conditional on     them.
+the previous choices of tokens. That is, to be more exact, it
+was conditional on the previous (max probability) tokens at        Version 3 The third version of the DSL contains 98 prim-
+the time of auto-regressively calculating the probability dis-     itives. New primitives were added to allow filtering objects
+tribution. But, at search time, we do not update the choice        based on a few characteristics such as size and symmetry.
+of selected tokens and requery the model to find the new,
+conditionally updated probabilities.                               VLM Architecture & Training
+   Doing this, and maintaing a tree of probabilities instead,      The neural network used to provide the probabilities that
+would be theoretically correct, because it would respect           guide the search is based on a Vision Language Model
+the natural conditional dependence between primitives. The         (VLM) paradigm (see figure 1). It is a pair of convolutional
+probability over the next token is theoretically dependent         neural networks, one receiving the input grid, the other the
+not just on the token’s position in the sequence, but on all       output grid, eventually bridging their intermediate features
+of the previous selections that were made. However, we             into one convolutional network. This serves as an encoder,
+choose to make a simplifying assumption of conditional             followed by a transformer decoder that processes the tar-
+independence between nodes, much like in Bayesian net-             get sequence. In our experiments this architecture converged
+works. While this simplifying assumption potentially hurts         faster and to a higher validation accuracy on our dataset
+in some cases, overall we believe it yields a significant gain     than a T5 or LongT5 architecture, while allowing us to use
+in efficiency: making this assumption means that we only           a higher parameter count for the same amount of VRAM.
+need to call the neural network a few times while bootstrap-       Specifically, the model used for the experiments has 452 mil-
+ping the probabilities.                                            lion parameters, and only one decoder layer with an embed-
+   In fact, in the baseline version of this approach, the neural   ding dimensionality of 512 and 4 attention heads.
+network need only be called exactly once. From there, all             Each predicted token sequence forms a program syn-
+of the necessary probability distributions can be acquired.        tax tree in a bottom-up, left-to-right manner. Each token
+However, it was found empirically that using a bit of boot-        refers to a primitive from the DSL, or to one of the three
+strapping helps. Bootstrapping in this context means that we       special tokens: <End of Sentence>, <New Level>,
+collect the probability distributions as a mean of K decoding      <Identity>. <Identity> can be thought of as a prim-
+iterations (where K is six in our experiments). Each decod-        itive that takes as input a grid and returns that grid without
+ing iteration differs in which example pair is provided to the     any modification. It is often used as a placeholder in order to
+neural network, and which starting token is selected. This         disambiguate between different possible interpretations of a
+bootstrapping idea helps mitigate the rare cases where con-        program. <New Level> is a special token that indicates
+ditional independence hurts because the neural network out-        that the tokens that follow define the next level in the pro-
+puts an unusually constrained (i.e., falsely confident) set of     gram syntax tree. The syntax tree is built bottom-up (as the
+probabilities on the first inference. Using a few bootstrapped     token sequence is read from left to right), and in each level
+inference trials seems to open up the space of possibilities a     the function argument ordering is defined from left to right
+bit, introducing a bit of much needed entropy the process.         in the same order as the token sequence. Here are a few ex-
+                                                                   amples to help better understand the syntax structure.
+The DSLs                                                              Suppose the following token sequence: [lefthalf,
+A few iterations of the DSL were used during the experi-           righthalf, <New Level>, cellwiseOR, <New
+ments, in which primitives were gradually added to the pre-        Level>, set fg color3, <End of Sentence>].
+Figure 1: Architecture of VLM
+                                                                 Figure 3: Syntax tree for [topthird, hcenterthird,
+                                                                 bottomthird,         <New Level>,      <Identity>,
+                                                                 cellwiseOR, <New Level>, cellwiseOR, <End
+Figure 2: Syntax tree for [lefthalf, righthalf,                  of Sentence>]
+<New Level>,       cellwiseOR,     <New Level>,
+set fg color3, <End of Sentence>]
+                                                                 training samples were generated, and around 300K for DSL
+                                                                 version 3 (because data generation is slower). More data
+The corresponding syntax tree (see figure 2) indicates that      would have been preferable, but time was a significant con-
+we take the left half and right half of the original grid        straint.
+separately, merge the pixels using OR logic (i.e., if any
+pixel is a foreground pixel, we place a foreground pixel of      Training Data Generation
+the same color on the target grid, prioritizing the color of
+                                                                 The training data for the VLM is the output of procedu-
+the first argument if both are foreground pixels), and then
+                                                                 rally generated tasks. The concept is to identify task ”meta-
+change all of the non-zero pixels to color three.
+                                                                 patterns” or categories in the ARC-AGI Training Set, and to
+   A more advanced example is the following token se-
+                                                                 implement data generators that reproduce them, while ran-
+quence: [topthird, hcenterthird, bottomthird,
+                                                                 domly varying several aspects of the tasks. Different DSL
+<New Level>, <Identity>, cellwiseOR, <New
+                                                                 versions have different task generators associated with them.
+Level>, cellwiseOR, <End of Sentence>]. Here
+the corresponding syntax tree (figure 3) forms a program         DSL version 1 In this version, there are only three task
+that splits the original grid into three sub-grids vertically,   generators implemented. The input grids used to generate
+and then merges them with OR logic. Specifically, in the         the output grids are randomly sampled from two sources:
+second level it passes on the output of topthird in-             manually pre-generated grids (mostly drawn from the ARC-
+tact to the upper level, which means that it first merges        AGI Training set), and randomly generated grids. Input grids
+the output of hcenterthird and bottomthird. Fi-                  that match grids found in the ARC-AGI Evaluation set are
+nally, at the last level, it merges topthird with the output     not allowed, though it is not impossible for the randomly
+from the previous level that merged hcenterthird and             generated grids, by extreme luck, to reproduce grids similar
+bottomthird.                                                     to those in the ARC-AGI Evaluation set.
+   The training was first done on the DSL version 1 data,           The first task generator consists of randomly generating
+until convergence. Then, the DSL version 2 and DSL ver-          trivial tasks that are either made up of one primitive (that
+sion 3 models were separately fine-tuned on their respective     takes as input a grid and generates a grid as outupt), or of two
+datasets, starting from the pre-trained DSL version 1 model.     primitives composed together. The two primitive tasks are
+The DSL 2 and DSL 3 datasets contain training examples           not entirely random: a script that generates all two-primitive
+from the previous versions as well (not just exclusively tasks   permutations of the DSL was created, but several heuristics
+related to the newly added primitives). The learning rate se-    were used to prevent non-sensical or redundant composi-
+lected was 0.0001, and the weight decay is 0.005. For DSL        tions. Overall, this task generator has 796 distinct tasks.
+version 1, a total of around 5M training samples (i.e., input-      The second task generator is based on a ”split-merge” pat-
+output grid pairs + ground-truth program sequence for dis-       tern that was observed. This task category produces tasks
+tinct tasks) were generated. For DSL version 2, around 600K      in which the goal is to split the input grid in some way,
+and then merge them back together into one grid based on           The concept is to train a model such that, given an interme-
+OR, XOR, AND, NOR or Difference logic (see the appendix            diate or starting program state, and a target grid, it predicts
+for details). Finally, one last global grid-to-grid transform      the probability distribution over the DSL for the next token.
+can be randomly applied on the resulting grid. The possible        In other words, the main difference with LPS is that we ex-
+split patterns are two-way to four-way horizontally or verti-      plicitly feed back into each decoding step some notion of
+cally, or four-way by taking each quadrant separately. These       the intermediate state of the program. Thus, the algorithm
+various parameters (split method, logical operator, optional       can leverage the efficiency of auto-regressive decoding with
+last transform) are randomized and combined to generate a          the ability to evaluate the transformations in and of them-
+whole range of possible tasks that follow the same ”meta-          selves regardless of whether this program pattern has been
+pattern”.                                                          seen during training.
+   The third task generator is based on a ”tiling” pattern.           The emphasis is on learning what transformations are re-
+In this task category, the idea is to apply various rotational     quired to bring the program execution from its current state
+and mirroring transforms to the input grid, and concatenate        to the target grid. Initially, this was the intended result of the
+its transformed variants together in some way to produce a         GridCoder algorithm, however further analysis reveals that
+larger output grid. The possible individual transforms are         the latter does not maintain such an hidden state implicitly, it
+randomly picked from rotations, the identity function, or          only superficially relies on the encoding of the input-output
+flipping the grid horizontally or vertically. The tilling pat-     grid and the token sequence generated so far. See the Dis-
+terns that can be generated are 2x2, 3x3, horizontal concate-      cussion section for a deeper analysis.
+nation of 2 to 4 grids, and vertical concatenation of 2 to 4          LTS borrows the same program syntax and auto-
+grids.                                                             regressive sequence supervision as in GridCoder. In a more
+                                                                   basic implementation, the intermediate program state could
+DSL version 2 This DSL version includes a new general-             simply be the last full intermediate grid produced by the pro-
+purpose task generator whose pattern is to randomly pick a         gram execution. The experiments associated with Table 4
+number of objects to generate, to randomly pick some trans-        make this basic assumption. In a more sophisticated version,
+forms to apply to them (including no transform at all as a         however, there needs to be a hidden latent state maintained
+possibility), and to decide whether to apply those transforms      throughout the decoding process that gets updated at each
+to the objects in-place, or to crop the objects and tile them      step.
+together into some pattern (which itself is randomly deter-           The challenging aspect of maintaining this generalized in-
+mined among a few possible templates). Finally, there is an        termediate state is that the output of a primitive can be any-
+optional post-processing transform, applied to the grid as a       thing from a Grid to an integer, a Boolean, a list of integers,
+whole, that can be selected.                                       a list of Grids, etc. A clever mechanism must be designed to
+DSL version 3 This DSL version includes three new task             allow embedding into a fixed vector space this dynamic and
+generators that are a bit more niche than the one added in         diverse range of outputs, which is left to future work.
+DSL version 2. The first one, the object selector task gen-
+erator, consists of generating random objects and deciding                         Experiments & Results
+randomly whether the task is to keep one, or to filter out         This section presents the results of three experiments. First,
+some objects based on one of the following characteristics:        a comparison of the performance of different approaches
+horizontal symmetry or lack thereof, vertical symmetry or          on the ARC evaluation set is made. Second, the increments
+lack thereof, object size (number of foreground pixels it con-     of performance of the selected approach (GridCoder) are
+tains), and the number of sub-objects it contains. As for most     shown, as new primitives are added to the DSL. Finally,
+other task generators, a random post-processing transform          an experiment on structurally out-of-distribution tasks is
+can be applied to the output grid.                                 shown, to illustrate the limitations of the selected approach
+   The windowing task generator produces frame-like ob-            and the promising capabilities of the suggested new ap-
+jects, i.e. non-filled rectangles of uniform color that can con-   proach (Learning the transformation space).
+tain randomly generated pixels or objects. The objective of
+the task is to apply randomly selected transforms to the in-
+                                                                   Performance Comparison on ARC-AGI Eval Set
+side of the frames (with or without the rectangular boundary)      Table 1 reports the success rate (as a percentage of solved
+and then either crop the object, if there is only one, or apply    tasks) of various approaches on the ARC-AGI evaluation set.
+those transforms in place.                                         We show the numbers in terms of the absolute ARC-AGI
+   Finally, the object recombiner task generator creates ran-      evaluation set performance, but also in terms of the subset
+dom objects on a grid, decides whether to split the ob-            of the ARC-AGI evaluation set that is theoretically solvable
+jects horizontally or vertically, and applies some color-based     according to the DSL. DSL Version 1 is used for these ex-
+modification to one of the halves. It then recombines the          periments (see section titled ”The DSLs”). This subset refers
+halves into whole objects.                                         to the 29 tasks (7.25% of full evaluation set) that can theo-
+                                                                   retically be solvable in the current DSL. All the other tasks
+                                                                   are impossible to solve regardless of how efficient the search
+           Learning the Transform Space                            is.
+This approach can be thought of as an evolution of LPS,                For each task, a time budget of up to 15 minutes to find the
+while bringing back the execution-guided aspect of LGS.            answer is allowed. For GridCoder and GridCoder cond., the
+                                                                   tics of the LPS approach and determine whether scaling this
+                                                                   proof-of-concept to a competitive solution is plausible. This
+                                                                   is done by training three separate VLM instances, one on
+                                                                   each of the three DSLs and their associated training data
+                                                                   generators. This can be thought of as a curriculum progres-
+                                                                   sion, where the DSL version 3 model includes all primitives
+                                                                   and task generators of DSL version 2, which itself includes
+                                                                   all primitives and task generators of DSL version 1.
+                                                                      The performance (success rate) on the ARC-AGI Evalua-
+                                                                   tion set can be found in Table 2. For each, the performance
+                                                                   on the DSL version 1 solvable tasks (a subset of 29 tasks
+                                                                   from the ARC Evaluation Set), with a 5-minute time bud-
+                                                                   get, is used to show whether there is regression on previous
+                                                                   tasks as we grow the DSL. For the sake of transparency, the
+Figure 4: Success rate on the 29-task solvable set from ARC-       hidden test set performance is also displayed.
+AGI evaluation set                                                    The inference times per task are presented in Table 3, to
+                                                                   determine whether the solution time scaling with respect to
+                                                                   DSL size is super-linear, linear, or sub-linear. The latter is
+5-minute time budget performance is also shown, in order           a more attractive quality, since it suggests that the DSL can
+to better differentiate the impact of the conditional indepen-     be grown to solve more tasks, while the former would sug-
+dence assumption. The following algorithms are compared            gest a solution that scales unfavorably. The average infer-
+in this experiment:                                                ence time per task, per DSL, and its standard deviations are
+GridCoder This is the selected approach for the associ-            reported. Additionally, the normalized time per DSL size,
+ated ARC-AGI submission, elaborated upon in the Learning           i.e. the number of seconds per task on average divided by
+the program space section.                                         the number of primitives in the DSL, is shown in order to
+                                                                   directly observe whether we have such a super-linear or sub-
+GridCoder cond. This is a variant of GridCoder where               linear progression.
+the conditional independence assumption is not made. The
+objective is to show that the conditional independence as-         Generalization of LTS
+sumption is an improvement.
+                                                                   The purpose of this experiment is to suggest a promising
+VLM-only This is the pre-trained neural network used in            new method that mitigates the limitations of the selected
+GridCoder, but without the search component. The objective         GridCoder approach (see Discussion section), by indicating
+is to show the necessity of search.                                preliminary empirical results on its out-of-distribution gen-
+                                                                   eralization characteristics. 10 new tasks are hand-crafted,
+MCTS+VLM This uses Monte-Carlo Tree Search, in-
+                                                                   specifically selected to guarantee that there is no structurally
+stead of GridCoder, for the search algorithm. Specifically,
+                                                                   similar task ever generated in the training data. One of them
+it uses a MuZero-like approach (Schrittwieser et al. 2020)
+                                                                   is picked from the ARC-AGI evaluation set, task #48131b3c,
+where the probabilities instruct the primitive selection at
+                                                                   since it has been observed that GridCoder fails to generalize
+each node, and a pixelwise similarity metric (same as in Pix-
+                                                                   to this task.
+elwise sim) is used to backpropagate the value.
+                                                                      A high-level description of the 10 tasks follows:
+Pixelwise sim This is an LGS approach. Here, pixelwise             1. Task #48131b3c from ARC-AGI evaluation set: tile the
+refers to a simple hand-crafted pixelwise comparison of the           original grid 2x2, and invert the colors. The training data
+grid, and the percentage of identical pixels is the similarity        generator never presents the post-tiling inversion of col-
+heuristic. There is no learning in this version.                      ors.
+Learned sim Similar to Pixelwise sim, but the heuristic is         2. Hand-crafted task 1: gravitate the pixels to the left, then
+a pre-trained Transformer encoder that outputs a similarity           gravitate the pixels upward, then change the foreground
+heuristic between 0 and 1, as discussed in the Learning the           pixels’ color to aquamarine. The training data genera-
+Grid Space section.                                                   tor never generates tasks that involves the application of
+   It should be noted that the two LGS implementations tend           three primitives in a row (or longer). The maximum is
+to fail on tasks whose ground truth program has more than 5           two.
+or 6 primitives, explaining its relatively low performance. It
+                                                                   3. Hand-crafted task 2: rotate the grid 90 degrees, upscale
+captures the low-hanging fruit of relatively small programs
+                                                                      it horizontally by two, and then upscale it vertically by
+quite well, but it is not efficient enough to solve the programs
+                                                                      two.
+that have longer descriptions.
+                                                                   4. Hand-crafted task 3: same as task 2, but add an extra op-
+GridCoder on Different DSLs                                           eration of horizontal mirroring at the end.
+These results make full use of the three presented versions        5. Hand-crafted task 4: same as task 3, but add an extra op-
+of DSLs. The objective is to study the scaling characteris-           eration of color inversion at the end.
+                Algorithm         ARC-AGI Eval Set % (15m)         Solvable subset % (15m)      Solvable subset % (5m)
+               GridCoder                   5.75                              79.3                        79.3
+             GridCoder cond.               5.5                               75.9                        72.4
+              MCTS+LVM                      5                                 69                           -
+              Pixelwise Sim                3.25                              44.8                          -
+               Learned Sim                 2.75                              37.9                          -
+                VLM-only                    1                                13.8                          -
+
+ Table 1: Success rate on full ARC-AGI evaluation set at 15-minute budget, on subset of 29 solvable tasks at 15-minute budget,
+ and on subset of 29 solvable tasks at 5-minute budget.
+
+                          DSL Version      ARC-AGI Eval Set %        DSL 1 subset %      Hidden test set %
+                           Version 1             5.75                    79.3                   0
+                           Version 2             7.75                    79.3                   1
+                           Version 3             8.25                    79.3                   1
+
+ Table 2: Success rates of different DSL versions on full ARC-AGI evaluation set at 5-minute budget, and on the 29-task DSL
+ version 1 subset at 5-minute time budget. ARC-AGI hidden test set performance is also presented.
+
+
+     DSL Version     Mean per task     Mean per primitive             trained to decode in an execution-guided way (see the sec-
+      Version 1       4.74 (1.07)           0.064                     tion Learning the Transformation Space), receiving execu-
+      Version 2       5.82 (1.22)           0.064                     tion feedback at each step along the way. While the potential
+      Version 3       5.66 (1.22)           0.057                     impact on inference time is not simulated, the task attempt is
+                                                                      considered a success if it is possible to reach the solution by
+ Table 3: Mean number of seconds taken to solve a task,               re-launching the current search algorithm on the intermedi-
+ by DSL. Standard devations in parentheses. Mean number               ate output of one of the program sequences that get evaluated
+ of seconds taken to solve a task, normalized by number of            in the previous run. As a result, the program is expected to
+ primitives in a DSL.                                                 provide a probability over the program space from a starting
+                                                                      point that is the intermediate output of a previous program –
+                                                                      hence it is given the opportunity to compose sub-programs.
+                                                                         This proxy experiment was done, instead of correctly
+ 6. Hand-crafted task 5: tile the original grid 2x4 while alter-
+                                                                      training a model that learns to decode in such a way, due
+    nating 180-degree rotation with the identity transform on
+                                                                      to lack of time. It is intended as an approximation, or sug-
+    each tile. This is out-of-distribution because a 2x4 tiling
+                                                                      gestion of what is potentially achievable, if we fully train
+    is never generated in the training data. The closest are
+                                                                      the model to receive an execution output at each decoding
+    either 2x2 or 1x4.
+                                                                      step. Table 4 indicates the results on the 10 tasks, compar-
+ 7. Hand-crafted task 6: tile the smallest object in the grid         ing the non-execution-guided GridCoder to the execution-
+    twice horizontally (i.e. concatenate it with itself horizon-      guided GridCoder.
+    tally), and use that as output grid. In the training data,           Task 5 fails on both approaches because when the neural
+    tiling tasks and object selection tasks are never com-            network sees a large target grid (of 2x4 in this case), instead
+    bined.                                                            of attempting a 2x2 solution or a 1x4 solution which can
+ 8. Hand-crafted task 7: crop the the object that contains the        then be scaled by composition to the correct 2x4 solution, it
+    largest number of sub-objects, rotate it 90 degrees, and          goes directly for 3x3. So the partial solutions that it suggests
+    then duplicate the top row and the bottom row. The train-         cannot be used to produce the correct solution.
+    ing data only at most applies 1 post-processing transform            Task 6 fails on both approaches because it fails to see what
+    on these types of object cropping tasks.                          needs to be done after the initial object cropping. It attributes
+ 9. Hand-crafted task 8: filter out the largest object in the         near-zero probabilities to the primitives that yield the re-
+    grid and then rotate the grid 270 degrees. The training           quired horizontal tiling. Instead it seems to suggest programs
+    data generation never applies rotation primitives to the          that would mirror the input, horizontally or vertically.
+    output of an object filtering task.
+10. Hand-crafted task 9: crop the largest object in the grid,                                  Discussion
+    split it in half horiziontally, and merge the left and right      Generalization Characteristics
+    halves with cellwise OR logic. In the training data, object       In the first experiment, the gap between VLM-only and Grid-
+    cropping and ”split and merge” types of tasks are never           Coder is strictly an out-of-distribution generalization gap.
+    combined.                                                         The fact that the search-enabled algorithms obtain a signifi-
+   The experiment consists of simulating a model that was             cantly better performance than the VLM-only approach sug-
+         Task             GridCoder      Execution-guided
+    Task #48131b3c           NO               YES
+        Task 1               YES              YES
+        Task 2               NO               YES
+        Task 3               NO               YES
+        Task 4               NO               YES
+        Task 5               NO                NO
+        Task 6               NO                NO
+        Task 7               NO               YES
+        Task 8               NO               YES
+        Task 9               NO               YES
+       Total (%)              10                80
+
+Table 4: Success on out-of-distribution tasks, comparing
+the selected GridCoder with the suggested execution-guided
+search.
+
+
+gests that searching over the probability space significantly
+extends the neural network’s reach beyond its training dis-
+tribution. However, generalization obstacles remain, as in-
+dicated by the experiments in out-of-distribution generaliza-        Figure 5: Two examples of GridCoder failures. Left: task
+tion where the GridCoder approach only succeeds in 1 out of          bc4146bd. Right: task d47aa2ff.
+the 10 tasks. Furthermore, we note the following additional
+GridCoder failure cases:
+bc4146bd.json This task (see figure 5) consists of ”tiling”          generalize out-of-distribution in that sense.
+the original grid fives time horizontally, using various grid           An example will better illustrate this. Consider, for exam-
+transformations (e.g. rotations) each time. While the neural         ple, the predicted probabilities for task 59341089.json:
+network was exposed to conceptually similar tasks during
+                                                                     Probabilities at position 0:
+training, it has never seen fivefold horizontal (or vertical)
+tiling at all. As such, it struggled to generate the program          • <Identity>: 0.56
+structure that allows this fivefold tiling.                           • vmirror: 0.10
+d47aa2ff.json This task (see figure 5) consists of copying            • hmirror: 0.17
+over to the output grid the pixels that are common to both            • rot90: 0.02
+halves of the input grid. However, when there is a discrep-
+ancy between both halves, if the pixel only appears on the            • rot180: 0.11
+left grid, it must be colored red in the output, and if it is the     • rot270: 0.03
+reverse it must be colored blue. While the DSL allows us
+to solve this task in principle, the solution is quite elaborate     Probabilities at position 1:
+and there is no conceptually similar task in the training data.       • <Identity>: 0.43
+   The vast improvement in generalization capabilities from
+VLM-only to GridCoder can appear to be in opposition to               • vmirror: 0.13
+the poor structural generalization findings from Table 4. We          • hmirror: 0.22
+hypothesize that the out-of-distribution uncertainty that gets        • rot90: 0.02
+resolved by the probabilistic search is mainly related to a
+grid-level distribution shift. The test grids are distinct from       • rot180: 0.15
+the training ones, hence it struggles with properly predicting        • rot270: 0.05
+the types of per-grid transformations. This results in a rela-
+tively high entropy when choosing a primitive that produces          Probabilities at position 2:
+some kind of grid-to-grid transformation.                             • <Identity>: 0.24
+   However, we observe a very low entropy on tokens that set
+the overall program structure (for example, when differenti-          • vmirror: 0.16
+ating ”tiling” types of tasks from ”split and merge” types of         • hmirror: 0.33
+tasks). As a result, the search is able to resolve grid-level dis-    • rot90: 0.02
+tribution shift by searching over the relatively high-entropy
+distribution, while the very low entropy distribution of pro-         • rot180: 0.20
+gram structure across task categories means that it cannot            • rot270: 0.04
+Probabilities at position 3:                                         This is where Learning the transformation space (adding
+ • <New Level>: 0.02                                              an execution-guided feedback and re-evaluating the proba-
+                                                                  bilities on the intermediate grids) can help break through
+ • <Identity>: 0.31
+                                                                  this generalization barrier, as suggested by the experimen-
+ • vmirror: 0.14                                                  tal results of Table 4.
+ • hmirror: 0.26
+ • rot90: 0.03                                                    Scaling the DSL
+ • rot180: 0.19                                                   A potential criticism for the LPS approach is that, as we
+ • rot270: 0.04                                                   grow the DSL, the search space might become exponentially
+                                                                  more complex, so the solution time slows down proporti-
+Probabilities at position 4:                                      nately. This would make this approach unlikely to scale to
+ • <New Level>: 0.99                                              a competitive solution on ARC-AGI. Another possibility is
+                                                                  that, as we add new primitives to the DSL, and train on new
+Probabilities at position 5:                                      tasks, performance degrades on previous tasks.
+ • hconcat: 1.00                                                     Tables 2 and 3 paint a positive picture of the scaling prop-
+                                                                  erties of the LPS approach. First, we see from Table 2 that
+Probabilities at position 6:                                      as we grow the DSL from version 1 to version 3, the tasks
+ • hconcat: 0.99                                                  that the approach was able to solve in DSL version 1 are
+Probabilities at position 7:                                      still solved in subsequent sections. There is no forgetting,
+                                                                  and no significant loss in search performance that degrades
+ • <New Level>: 0.99                                              the success rate. Meanwhile, the overall performance on the
+Probabilities at position 8:                                      ARC-AGI evaluation set increases as we add primitives and
+                                                                  corresponding training tasks.
+ • hconcat: 0.99                                                     Furthermore, we see that from Version 1 to Version 3, the
+Probabilities at position 9:                                      mean solution time per primitive does not increase. In fact,
+  • <End of Sentence>: 0.99                                       it seems to decrease a bit from Version 2 to Version 3. This
+                                                                  may simply be a fluke from having a better trained model in
+  • hconcat: 0.01                                                 Version 3 and Version 2. As a reminder, DSL Version 1 has
+   Only the classes whose probability is 0.01 or greater are      74 primitives, DSL Version 2 has 89 primitives, and DSL
+shown. This task consists of tiling the input grid four times     Version 3 has 98 primitives. In summary, the solution time
+horizontally, while applying the following transforms to the      scales sub-linearly as we add more primitives to the DSL,
+grid, in order, from left to right: [hmirror, <Identity>,         which is a desirable property.
+hmirror, <Identity>]. The token positions responsi-
+ble for the ”skeleton”, or ”structure” of the 4-way tiling pro-   Flaws in LGS
+gram have very high probabilities (low entropy) associated        The LGS approach reveals itself to be somewhat ineffi-
+to them. These are the token positions 4 to 9. The token po-      cient, though a priori it may be better at structural out-of-
+sitions responsible to determining what transformations are       distribution generalization (because it is not trained on spe-
+applied to the grid, and in what order, are, however, high        cific task solutions). Extensive work has been done to under-
+entropy.                                                          stand the causes of this inefficiency. The main hypothesized
+   Further training the model will not solve these generaliza-    causes are as follows:
+tion issues. What has been observed is that the solved tasks
+are solved more rapidly when the neural network is better         A* versus Q* The idea of a model that takes as input two
+trained, because the probabilities are more accurate and less     grids and predicts their similarity suggests an A*-style usage
+noisy. However, a token sub-sequence that has never been          pattern:
+observed during training will still retain a probablity near      1. Each transformation in the DSL is applied to the input
+zero (obviously, since the probability of that sub-sequence          grid to obtain some intermediate grid.
+in the training set is exactly zero), and a token sub-sequence
+that is always observed under a given ”type” of input-output      2. Each pair of intermediate grid and target grid is fed to the
+grid pairs will have a probability of one, since nothing else        similarity model to obtain their respective similarities.
+has ever been observed during training. This is precisely the     3. The primitive that yields the biggest increase in similarity
+behaviour that limits the generalization capabilities of LPS         is selected.
+methods such as GridCoder.                                        4. This is done iteratively until a solution is found or some
+   Adding a bit of entropy such that no probability is ever          budget limit is reached.
+zero or one, could help break through the hard probability
+                                                                    Agostinelli et al. (2024) show that this approach is both
+barriers, at the expense of a vastly increased search space.
+                                                                  temporally and spatially inefficient, and propose Q* search,
+Furthermore, this is unlikely to allow the search to discover
+                                                                  which can be differentiated as follows:
+extremely low probability (high complexity) modifications
+such as the one required to go from the most similar program      1. The input grid and output grid pair is fed to the neural
+for task bc4146bd (from figure 5) to its correct solution.           network, which in one shot simultaneously predicts all of
+                                                                   right half are taken, and merged together using XOR logic.
+                                                                   Consider what happens at training time, when the model is
+                                                                   learning to predict the cost-to-go for the first primitive (i.e.
+                                                                   ”Take left half” or ”Take right half”).
+                                                                      The choice of whether to use XOR, OR, AND, NOR, or
+                                                                   any other merge-based logic requires knowing which two
+                                                                   input grids are fed to these primitives. There are several dif-
+                                                                   ferent cost-to-go values that correspond to the same pair
+                                                                   (output of ”Take right half” and the target grid), depend-
+                                                                   ing on the left half that is used in the procedurally gen-
+                                                                   erated program. Because the model necessarily involves a
+                                                                   similarity between exactly two grids, the model has to learn
+                                                                   without knowing the output of the left half operation. Thus,
+                                                                   the model is trained on incomplete information, resulting in
+                                                                   weak cost-to-go estimates.
+                                                                   ARC-AGI is not a grid-to-grid problem ARC-AGI is
+            Figure 6: Example of a task solution                   fundamentally not a grid-to-grid problem, when we consider
+                                                                   the execution trace of a solution. That is, most of the steps
+                                                                   involved in solving an ARC-AGI task are not strictly grid-to-
+   the similarity (or cost-to-go) values for each of the prim-     grid transformations and thus do not result in an intermedi-
+   itives.                                                         ate grid that can be evaluated for its similarity to the target.
+2. The best one is selected, and used to generate the next         This is related to the previous argument, in the sense that
+   intermediate state.                                             a solution program for most ARC-AGI tasks is not a sim-
+                                                                   ple sequence of grid-to-grid transformations, but instead can
+3. This is done iteratively until a solution is found or some      be thought of as a sequence of intermediate program states
+   budget limit is reached.                                        which themselves are lists of various kinds of intermediate
+   Hence, where the grid-to-grid similarity approach results       objects and values. As such, the grid-to-grid similarity con-
+in N evaluations where N is the size of the DSL, the Q* ap-        cept only potentially allows guiding a small portion of the
+proach has a constant number of evaluations with respect to        overall search for a solution.
+the DSL size. Note that this means we are inherently moving           In summary, these conceptual flaws, combined with the
+from a LGS approach to a LTS approach. Instead of having           inferior empirical results, led to the choice of selecting the
+a model that learns a latent grid space contrastively and out-     LPS approach instead. However, it should be noted that the
+puts similarities between two vectors, we have a model that        LGS idea also presents some essential characteristics that
+necessarily has to learn the effect of applying each trans-        the selected LPS approach is lacking. This is why we attempt
+formation from the DSL, and evaluate its cost-to-go. This          to combine the best of both approaches via the suggested
+becomes even more evident when we supervise this model             LTS approach.
+to output probabilities over the DSL instead of a cost-to-go.
+   The choice of cost-to-go or probability in this context is      Limitations and Future work
+debatable, but we hypothesize that learning probabilities is       Limited DSL The work done so far has been a proof-
+more direct and efficient than the cost-to-go. This is the case    of-concept centered on finding an optimal neurally-guided
+both from the standpoint of learning the underlying relation-      search algorithm given some pre-determined DSL and a set
+ships and from the standpoint of generating training data.         of tasks that are known to be solvable within this DSL. Very
+It is easy to accidentally produce incorrect cost-to-go labels     limited work has been done on improving the DSL. This is,
+from procedurally generated programs with redundant prim-          therefore, the main limitation of this work.
+itives.                                                               Scaling the algorithms presented here to a competitive
+                                                                   level will certainly involve completing the DSL by introduc-
+Incomplete information A program is a syntax tree, not
+                                                                   ing all of the necessary primitives required to solve all ARC
+a flat sequence of grid-to-grid operations. Because of that,
+                                                                   training and evaluation tasks. This is not as simple as going
+as we execute a program from the bottom of the tree up-
+                                                                   through the existing tasks and implementing primitives for
+wards, there are potentially multiple operations that need
+                                                                   every high-level functionality seen.
+to be done in ”parallel” (not computationally speaking, but
+                                                                      We aspire to making the DSL more flexible and general
+syntactically speaking). Thus, at any given point in execu-
+                                                                   as well, as we currently deem it too high-level and specific.
+tion time, the intermediate state of a program is in fact a list
+                                                                   We aim for a certain compromise between a purely generic
+of objects (not necessarily grids, it can be lists of indices,
+                                                                   programming language and a highly specific DSL such as
+integers, etc.).
+                                                                   the current one. We expect this work, on its own, to make
+   To select the next primitive based only on the output of
+                                                                   our approach competitive on the ARC hidden test set.
+one of the previous transformations means that we rely on
+incomplete information. As an example, refer to figure 6. In       Functional DSL Based on the work by Hocquette and
+this diagram, X represents the input grid. The left half and       Cropper (2024), it appears that a relational type of DSL
+can lead to more efficient search than the kind of functional       be duplicated twice, thereby increasing the solution by six
+paradigm currently being used in these experiments. Intu-           tokens. This is obviously not very efficient.
+itively, relational decomposition of tasks means that partial
+verification of a subset of the rules is possible while search-     Learning the transform space The empirical results sug-
+ing for a solution. In contrast, our current approaches can         gest that GridCoder is limited to proposing program struc-
+only verify the full program in a binary ”fully correct” or         tures that have been seen during training. The neural net-
+”fully incorrect” manner. Relational decomposition there-           work does not get to observe explicitly or even generate im-
+fore allows a more gradual progression towards the full so-         plicitly the intermediate state of a program as it derives its
+lution.                                                             solution. Instead, it currently has to be able to solve all of it
+                                                                    in one go based on the provided input-output examples.
+get objects primitives In retrospect, the current imple-               In other words, as it generates new tokens in the decoding
+mentation of six different primitives for object detection is       loop, it does not get to look at the intermediate program state
+very sub-optimal. In spite of having implemented six differ-        to decide on the next steps. We certainly do not do this ex-
+ent notions of what is an object, there are still many cases        plicitly (yet), and we know from how transformer decoders
+where object detection primitives fail. Going forward, we           work that it does not naturally maintain a hidden state be-
+will instead implement this primitive as an ”object segmen-         tween decoding steps. It only gets to look at the decoded
+tation” neural network that, we hope, will allow us to reduce       sequence so far, as well as the output of the encoder. As a
+the number of object detection primitives to one, while si-         result, it tends to lazily rely on positional encoding and pre-
+multaneously covering more use cases.                               determined sequence templates that it learned during train-
+                                                                    ing. The consequence of this is that, as the search stumbles
+Program syntax The program representation syntax                    into a territory where the model should know what to do to
+needs to be improved. First, the difference in program struc-       transform the intermediate grids into the target grids, it can-
+ture between four tiles and five tiles is relatively large, when    not leverage this knowledge.
+in principle it should be quite small. Here is an example pro-         It could be argued that a sufficiently flexible transformer
+gram sequence that tiles an input grid four times horizon-          decoder module could potentially learn to maintain implic-
+tally:                                                              itly the current intermediate state by applying the current
+    [hmirror, <Identity>, hmirror, <Identity>,                      token sequence to the encoder output. This is, in fact, what
+<New Level>, hconcat, hconcat, <New Level>,                         we were hoping to see, and our architectural choice of a par-
+hconcat, <End of Sentence>]                                         ticularly lean decoder could be the culprit. However, it’s not
+    Here is the program sequence to tile an input grid five         clear what would encourage it to learn to do this if it can
+times horizontally:                                                 lazily rely on the positional encoding and the token sequence
+    [hmirror, <Identity>, hmirror, <Identity>,                      as it does at the moment. Even if this were to be true, how-
+hmirror, <New Level>, hconcat, hconcat,                             ever, it is still the case that explicitly feeding back the in-
+<Identity>,               <New Level>,                hconcat,      termediate state would constitute an inductive bias that can
+<Identity>, <New Level>, hconcat, <End                              guide the learning process towards faster and better conver-
+of Sentence>]                                                       gence. This makes LTS a promising paradigm regardless.
+    There is a difference of five tokens between the two,
+spread throughout all of the levels of the program. Clearly,                              Related Work
+the conceptual similarity of these two tasks is not reflected
+in the syntactical similarity of their solutions. This certainly    Execution-guided program induction Execution-guided
+does not help the search.                                           program induction can apply to both the LGS and LTS
+                                                                    paradigms, in our current nomenclature. Much work has fo-
+    Another problem is that a lot of duplication is necessary
+                                                                    cused on this approach (Nye et al. 2020; Chen, Song, and
+in the lower levels. For example, in the last task used for the
+                                                                    Tian 2021; Chen, Liu, and Song 2018). Recently, Kapur,
+results of Table 4, the goal is to crop the largest object, split
+                                                                    Jenner, and Russell (2024) use an image similarity heuris-
+it in half horizontally and merge it pixelwise using OR logic.
+                                                                    tic to discover programs that transform an input image into
+In order to take the left half and the right half on the same
+                                                                    a target image. The training procedure follows a denoising
+input, the current program syntax forces us to duplicate the
+                                                                    paradigm, and the search process is based on a diffusion,
+entire sub-tree that generates the cropped object. The corre-
+                                                                    in which program edits are gradually made to arrive at the
+sponding solution program is:
+                                                                    denoised image.
+    [get objects1,                            get objects1,
+get object size, get objects1, get objects1,                        Neurally-guided probabilistic program induction
+get object size, <New Level>, <Identity>,                           DreamCoder (Ellis et al. 2021) is a program induction
+for each,          <Identity>,          for each,          <New     approach not unlike the one proposed here, under what we
+Level>, keep largest, keep largest, <New                            refer to as the LPS paradigm. There is a neural network
+Level>, lefthalf, righthalf, <New Level>,                           that learns to output probabilities over the DSL, and a
+cellwiseOR, <End of Sentence>]                                      search algorithm suggests programs to evaluate against the
+    The entire sub-tree [get objects1, get objects1,                example inputs and outputs. It brings as its main innovations
+get object size, <New Level>, <Identity>,                           a DSL growth mechanism, in which frequently occurring
+for each, <New Level>, keep largest] needs to                       semantically equivalent subroutines are added to the DSL.
+   GridCoder does not use such a DSL growth mechanism.                                  References
+On one hand, we see the limited amount of natural ARC-           Agostinelli, F.; Shperberg, S. S.; Shmakov, A.; McAleer, S.;
+AGI examples as an obstacle to making this feature par-          Fox, R.; and Baldi, P. 2024. Q* Search: Heuristic Search
+ticularly useful. Correctly fine-tuning the granularity of the   with Deep Q-Networks.
+DSL, and having the relevant reusable primitives, is some-       Alford, S. 2021. A Neurosymbolic Approach to Abstrac-
+thing we prefer to do manually. Similarly, DreamCoder has        tion and Reasoning. Ph.D. thesis, Massachusetts Institute
+a ”dreaming” functionality in which new tasks are randomly       of Technology.
+generated from the DSL in order to train the neural network.
+We found that a purely random task generation approach           Chen, X.; Liu, C.; and Song, D. 2018. Execution-guided
+tends to generate several incoherent, redundant, unnatural       neural program synthesis. In International Conference on
+tasks. Instead, in GridCoder we adopt an intermediate posi-      Learning Representations.
+tion in which we manually design high-level task categories      Chen, X.; Song, D.; and Tian, Y. 2021. Latent execution
+or concepts, but allow some random variation in their pa-        for neural program synthesis beyond domain-specific lan-
+rameters and details.                                            guages. Advances in Neural Information Processing Sys-
+                                                                 tems, 34: 22196–22208.
+   A variety of other neurally guided program induction al-
+gorithms have been proposed (Fijalkow et al. 2021; Kapur,        Chollet, F.; Knoop, M.; Landers, B.; Kamradt, G.; Jud, H.;
+Jenner, and Russell 2024; Devlin et al. 2017). To the best       Reade, W.; and Howard, A. 2024. ARC Prize 2024. https:
+of our knowledge, GridCoder differs from these algorithms        //kaggle.com/competitions/arc-prize-2024. Kaggle.
+mainly in the neural architecture used and in the fact that we   Devlin, J.; Uesato, J.; Bhupatiraju, S.; Singh, R.; Mohamed,
+lean heavily into the auto-regressive sequence output as the     A.-r.; and Kohli, P. 2017. Robustfill: Neural program learn-
+basis for enumerating the probability space.                     ing under noisy i/o. In International conference on machine
+   Most approaches use a neural network that outputs prob-       learning, 990–998. PMLR.
+abilities for each of the n-grams that can be formed by their    Ellis, K.; Wong, C.; Nye, M.; Sablé-Meyer, M.; Morales,
+DSL, relying instead more heavily on search than learning.       L.; Hewitt, L.; Cary, L.; Solar-Lezama, A.; and Tenenbaum,
+Learning bigram probabilities, for example, means that the       J. B. 2021. DreamCoder: Bootstrapping Inductive Pro-
+model learns to predict a probability for the children of a      gram Synthesis with Wake-Sleep Library Learning. In Pro-
+primitive pi conditionally on the choice of pi (and pi alone).   ceedings of the 42nd ACM SIGPLAN International Confer-
+Our auto-regressive approach, instead, learns the probability    ence on Programming Language Design and Implementa-
+over a child node given the entire program sequence (and the     tion, PLDI 2021, 835–850. New York, NY, USA: Associa-
+encoder embedding) so far.                                       tion for Computing Machinery. ISBN 9781450383912.
+   As an illustration of this significant distinction, Alford    Fijalkow, N.; Lagarde, G.; Matricon, T.; Ellis, K.; Ohlmann,
+(2021) experimented on using DreamCoder on ARC-AGI,              P.; and Potta, A. 2021. Scaling Neural Program Synthesis
+and concluded that the main bottleneck was the search effi-      with Distribution-based Search. CoRR, abs/2110.12485.
+ciency. In our experiments with GridCoder, the main bottle-      Hocquette, C.; and Cropper, A. 2024. Relational de-
+neck was not the search efficiency (since the neural network     composition for program synthesis.             arXiv preprint
+was very good at identifying program structure), but its chal-   arXiv:2408.12212.
+lenges at generalizing to unseen program structures (see the     Kapur, S.; Jenner, E.; and Russell, S. 2024. Diffusion
+Discussion section for more details).                            On Syntax Trees For Program Synthesis. arXiv preprint
+                                                                 arXiv:2405.20519.
+                                                                 Nye, M.; Pu, Y.; Bowers, M.; Andreas, J.; Tenenbaum,
+                       Conclusion                                J. B.; and Solar-Lezama, A. 2020. Representing partial
+                                                                 programs with blended abstract semantics. arXiv preprint
+In summary, we compared three different program induction        arXiv:2012.12964.
+paradigms: LGS, LPS (specifically GridCoder) and LTS.            Schrittwieser, J.; Antonoglou, I.; Hubert, T.; Simonyan, K.;
+Given the experimentation and analysis on GridCoder, we          Sifre, L.; Schmitt, S.; Guez, A.; Lockhart, E.; Hassabis, D.;
+are confident that scaling up the DSL and training data could    Graepel, T.; et al. 2020. Mastering atari, go, chess and shogi
+make it reach a performance that is competitive with the cur-    by planning with a learned model. Nature, 588(7839): 604–
+rent top solutions (unless we later discover that these ap-      609.
+proaches explicitly solve the structural generalization prob-
+lem instead of training on a dataset that unknowingly in-
+cludes solutions to the hidden test set).                                Appendix - Description of the DSL
+   However, given its fundamental challenges with structural     The DSL revolves around the concept of a Grid, which is a
+generalization, we are not confident that the LPS approach       custom class that contains the following information about a
+could solve ARC-AGI in any true sense. Instead, prelim-          grid:
+inary experimentation on the LTS approach suggests that           • Its pixels, represented as a list of (X, Y, color) tuples.
+GridCoder could be extended via execution-guided search           • A utility method that converts from the pixels list to a 2D
+to solve these generalization obstacles. This will be the fo-       grid representation (a tuple of tuples where each value is
+cus of our future work.                                             the color at that position).
+  • Its width.                                                   31. leftthird: keep only the leftmost third of the grid.
+  • Its height.                                                  32. hcenterthird: keep only the middle third of the grid
+  • Its upper-left corner position in the outer Grid. Default:       (horizontally).
+    (0, 0).                                                      33. rightthird: keep only the rightmost third of the grid.
+ DSL Version 1:                                                  34. cellwiseOR: 2-argument primitive that takes in two
+                                                                     grids of the same shape, and merges them into one by
+ 1. set fg color1 to set fg color9: set all the non-                 applying OR logic to the foreground pixels (prioritizing
+    zero pixels to color 1 to 9.                                     the first argument’s pixel color if both grids have a fore-
+ 2. shift left: translate pixels once to the left.                   ground pixel at a certain position).
+ 3. shift right: translate pixels once to the right.             35. cellwiseAND: 2-argument primitive that takes in two
+ 4. shift up: translate pixels once upward.                          grids of the same shape, and merges them into one by
+ 5. shift down: translate pixels once downward.                      applying AND logic to the foreground pixels (using the
+                                                                     first argument’s pixel color).
+ 6. vmirror: flip the grid vertically.
+ 7. hmirror: flip the grid horizontally.                         36. cellwiseXOR: 2-argument primitive that takes in two
+                                                                     grids of the same shape, and merges them into one by
+ 8. rot90: rotate the grid 90 degrees.                               applying XOR logic to the foreground pixels.
+ 9. rot180: rotate the grid 180 degrees.                         37. cellwiseDifference: 2-argument primitive that
+10. rot270: rotate the grid 270 degrees.                             takes in two grids of the same shape, and merges them
+11. tophalf: keep only the top half of the grid.                     into one by setting the target grid cells the same color
+12. bottomhalf: keep only the bottom half of the grid.               as the first argument’s foreground pixels when the sec-
+                                                                     ond argument does not contain a foreground pixel at that
+13. lefthalf: keep only the left half of the grid.                   position.
+14. righthalf: keep only the right half of the grid.
+                                                                 38. cellwiseNOR: 2-argument primitive that takes in two
+15. symmetrize left around vertical: copy the                        grids of the same shape, and places a foreground pixel of
+    left half to the right half, in a mirroring fashion.             the same color as the dominant color in the first argument
+16. symmetrize right around vertical: copy the                       if neither grid has a foreground pixel at a given position.
+    right half to the left half, in a mirroring fashion.         39. vconcat: 2-argument primitive that vertically concate-
+17. symmetrize top around horizontal: copy the                       nates two grids.
+    top half to the bottom half, in a mirroring fashion.         40. hconcat: 2-argument primitive that horizontally con-
+18. symmetrize bottom around horizontal:                             catenates two grids.
+    copy the bottom half to the top half, in a mirroring         41. color change: 3-argument primitive that takes as in-
+    fashion.                                                         put a grid, and two integers representing colors. Every
+19. upscale horizontal by two: duplicate pixels                      pixel in the grid that is of the color of the first integer gets
+    once, horizontally.                                              converted to the color of the second integer. At search
+20. upscale vertical by two: duplicate pixels once,                  time, the integer values get resolved by an enumerative
+    vertically.                                                      search built into the program evaluation logic.
+21. upscale by two: duplicate pixels once, vertically and        42. invert colors: Finds the least dominant color and
+    horizontally.                                                    the most dominant color, and swaps them in the grid.
+22. gravitate right: stack the pixels to the right, as if        43. first quadrant: Return the top-left quadrant of the
+    they had fallen rightward.                                       grid.
+23. gravitate left: stack the pixels to the left, as if they     44. second quadrant: Return the top-right quadrant of
+    had fallen leftward.                                             the grid.
+24. gravitate up: stack the pixels at the top, as if they        45. third quadrant: Return the bottom-left quadrant of
+    had fallen upward.                                               the grid.
+25. gravitate down: stack the pixels at the bottom, as if        46. fourth quadrant: Return the bottom-right quadrant
+    they had fallen downward.                                        of the grid.
+26. gravitate left right: stack the leftmost pixels to           47. hfirstfourth: Returns the leftmost fourth of the grid
+    the left, and the rightmost pixels to the right.                 (horizontal splitting).
+27. gravitate top down: stack the top-half pixels at the         48. hsecondfourth: Returns the middle-left fourth of the
+    top, and the bottom-half pixels at the bottom.                   grid (horizontal splitting).
+28. topthird: keep only the top third of the grid.               49. hthirdfourth: Returns the middle-right fourth of the
+29. vcenterthird: keep only the middle third of the grid             grid (horizontal splitting).
+    (vertically).                                                50. hlastfourth: Returns the rightmost fourth of the grid
+30. bottomthird: keep only the bottom third of the grid.             (horizontal splitting).
+51. vfirstfourth: Returns the topmost fourth of the grid            6. get objects6:returns a list of Grids, each represent-
+    (vertical splitting).                                              ing an object. This variant is good at isolating shapes that
+52. vsecondfourth: Returns the middle-top fourth of the                are potentially disjoint, but clustered in a grid-like pat-
+    grid (vertical splitting).                                         tern.
+53. vthirdfourth: Returns the middle-bottom fourth of               7. compress objects linear: this generates an out-
+    the grid (vertical splitting).                                     put grid from a list of objects by concatenating them to
+                                                                       each other in horizontal or vertically fashion, automati-
+54. vlastfourth: Returns the bottommost fourth of the                  cally determined from their relative positions.
+    grid (vertical splitting).
+                                                                    8. compress objects quad: this generates an output
+55. duplicate top row: duplicates the rop row.                         grid from a list of objects by concatenating them to each
+56. duplicate bottom row: duplicates the bottom row.                   other in a rectangular fashion (mostly 2x2, 2x3, 3x2 and
+57. duplicate left column: duplicates the left col-                    3x3 patterns), automatically determined from their rela-
+    umn.                                                               tive positions.
+                                                                    9. compress objects quad pad:                    similar       to
+58. duplicate right column: duplicates the right col-
+                                                                       compress objects quad, but introduces one row
+    umn.
+                                                                       and column of black padding between the concatenated
+59. remove outline: removes the top row, bottom row,                   objects.
+    left column, right column.                                     10. for each: 2-argument primitive. The first argument is
+60. shear grid left: from the bottom up of the grid, it                a list of objects to which to apply a function. The second
+    gradually shifts left the pixels by an increment that in-          argument is the lambda function to apply to each object.
+    creases by 1 each row.                                             The input argument of that lambda function must be a
+61. shear grid right: from the bottom up of the grid,                  Grid type.
+    it gradually shifts right the pixels by an increment that      11. apply to grid: 2-argument primitive. The first argu-
+    increases by 1 each row.                                           ment is the original grid itself, and the second argument
+62. shear grid zigzag: from the bottom up of the grid,                 is the list of transformed objects to overlay onto the grid
+    it shifts the pixels horizontally by an increment that cy-         (blanking out the previous objects).
+    cles between [-1, 0, +1].                                      12. cellwise OR list: like cellwise OR, but takes a
+63. insert outline: it adds a black row at the top and                 list of two or more objects, instead of strictly only taking
+    bottom, and a black column at the left and the right.              two arguments.
+64. get major pixel: finds the most frequent color in the          13. get pixels: returns a list of integers representing all
+    grid, and outputs a 1x1 grid of that color.                        the colors of the pixels in the grid (this is not a set, but a
+                                                                       list, so it can be used to count the number of pixels in an
+65. get minor pixel: finds the least frequent color in the             object, for example).
+    grid, and outputs a 1x1 grid of that color.
+                                                                   14. get object size: returns an integer, the number of
+66. upscale by three: upsamples the grid by a factor of                pixels in a Grid instance.
+    three.                                                         15. count: counts the number of elements in a list.
+ DSL Version 2 - added primitives:                                  DSL Version 3 - added primitives:
+ 1. get objects1: returns a list of Grids, each represent-          1. filter largest: 2-argument primitive that takes as
+    ing an object. This variant is good at isolating rectangular       input a list of objects and a list of integer values. It returns
+    shapes (filled or empty) from noisy backgrounds.                   a list of objects in which the object that has the largest
+ 2. get objects2: returns a list of Grids, each represent-             associated integer value is removed.
+    ing an object. This variant is good at finding four-way         2. filter smallest: 2-argument primitive that takes as
+    (up, down, left, right) adjacent objects against a black           input a list of objects and a list of integer values. It returns
+    background.                                                        a list of objects in which the object that has the smallest
+ 3. get objects3:returns a list of Grids, each represent-              associated integer value is removed.
+    ing an object. This variant is good at finding eight-way        3. keep largest: 2-argument primitive that takes as in-
+    adjacent objects against a black background.                       put a list of objects and a list of integer values. It returns
+ 4. get objects4:returns a list of Grids, each represent-              the object from the list that has the largest associated in-
+    ing an object. This variant is good at finding four-way            teger value.
+    (up, down, left, right) adjacent objects against of any         4. keep smallest: 2-argument primitive that takes as
+    color, as long as the object’s color is uniform.                   input a list of objects and a list of integer values. It re-
+ 5. get objects5:returns a list of Grids, each represent-              turns the object from the list that has the smallest associ-
+    ing an object. This variant is good at finding eight-way           ated integer value.
+    adjacent objects against of any color, as long as the ob-       5. is h symmetrical: returns True is the grid is hori-
+    ject’s color is uniform.                                           zontally symmetrical, False otherwise.
+6. is v symmetrical: returns True is the grid is verti-
+   cally symmetrical, False otherwise.
+7. logical not: takes as input a Boolean value, and re-
+   turns its negation.
+8. keep boolean: 2-argument primitive that takes as in-
+   put a list of objects and a list of Boolean values. It returns
+   the first object from the list that has True as its associated
+   value.
+9. filter boolean: 2-argument primitive that takes as
+   input a list of objects and a list of Boolean values. It re-
+   turns a list of objects in which the objects whose associ-
+   ated value is True are removed.
+
