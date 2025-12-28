@@ -1,0 +1,218 @@
+2025-12-28T04:55:20Z run_start folder=/home/jake/Developer/4D/Notes/Vision/pdfs-3 dry_run=True strict=True allow_fuzzy=False
+2025-12-28T04:55:20Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/simultaneous_instance_pooling_bag_selection_for_mil_using_vits.pdf status=unmatched score=0.0
+2025-12-28T05:00:52Z run_start folder=/home/jake/Developer/4D/Notes/Vision/pdfs-3 dry_run=False strict=False allow_fuzzy=False
+2025-12-28T05:00:52Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/simultaneous_instance_pooling_bag_selection_for_mil_using_vits.pdf status=unmatched score=0.0
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/a_length_extrapolatable_transformer_xpos_lex.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_XPOS.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/adaptive_computation_time.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2016_ACT.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/adaptive_patch_selection_for_vits_via_reinforcement_learning.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_APSRL.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/albef_align_before_fuse.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALBEF.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/an_image_is_worth_16_16_words_vision_transformer_vit.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_ViT.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/arc_heavy_arc_potpourri_dataset_description_embedded_in_cornell_report.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_ARCHeavy.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/attention_is_all_you_need.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2017_AIAYN.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/average_hard_attention_transformers_are_threshold_circuits.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_AHAT.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/base_of_rope_bounds_context_length.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoPEBase.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/bert_pre_training_of_deep_bidirectional_transformers_for_language_understanding.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_BERT.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/beyond_a_planning_with_transformers.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_BeyondAStar.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/beyond_position_the_emergence_of_wavelet_like_properties_in_transformers.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_WaveletATTN.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/blip_2_bootstrapping_language_image_pre_training_with_frozen_models.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_BLIP2.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/blip_bootstrapping_language_image_pre_training.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_BLIP.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/canonical_microcircuits_for_predictive_coding.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2012_CMPC.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/circle_rope_cone_like_decoupled_rotary_positional_embedding_for_large_vision_language_models.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_CircleRoPE.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/coca_contrastive_captioners.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_CoCa.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/combining_induction_and_transduction_for_abstract_reasoning.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_IndTrans.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/comrope_scalable_and_robust_rotary_position_embedding.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_ComRoPE.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/conceptarc.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_ConceptARC.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/conceptual_captions_a_cleaned_hypernymed_image_alt_text_dataset.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_CC3M.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/context_aware_rotary_position_embedding_carope.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_CARoPE.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/convit_improving_vision_transformers_with_soft_convolutional_inductive_biases.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ConViT.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/core_knowledge.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2007_CoreKnow.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/dape_data_adaptive_positional_encoding_for_length_extrapolation.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_DAPE.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/decoupling_the_what_and_where_with_polar_coordinate_positional_embeddings_pope.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_PoPE.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/deep_equilibrium_models.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_DEQ.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/dope_denoising_rotary_position_embedding.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_DoPE.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/end_to_end_object_detection_with_transformers_detr.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_DETR.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/eva02_at_egocentric_video_language_with_spatial_temporal_rope.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_EVA02AT.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/evolutionary_test_time_compute_write_up.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_EvoTTC.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/feedforward_and_recurrent_processing_in_vision.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2000_FFRec.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/fixed_point_diffusion_models.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_FPD.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/flamingo_a_visual_language_model_for_few_shot_learning.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_Flamingo.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/gated_attention_for_llms_non_linearity_sparsity_sink_free.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_GatedAttn.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/gaussian_adaptive_attention_is_all_you_need.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_GAA.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/gemini_a_family_of_highly_capable_multimodal_models.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Gemini.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/gpt_4_technical_report.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_GPT4.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/h_arc_a_robust_estimate_of_human_performance_on_the_abstraction_and_reasoning_corpus_benchmark.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_HARC.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/head_wise_adaptive_rotary_positional_encoding_harope.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_HARoPE.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/hierarchical_reasoning_model_hrm.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_HRM.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/hierarchy_of_intrinsic_timescales_in_cortex.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2014_ITC.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/howto100m_learning_a_text_video_embedding_by_watching_narrated_videos.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_HowTo100M.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/is_space_time_attention_all_you_need_for_video_understanding_timesformer.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_TimeSformer.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/kosmos_1_language_is_not_all_you_need.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Kosmos1.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/laion_400m_open_dataset_for_clip_training.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_LAION400M.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/laion_5b_an_open_large_scale_dataset_for_training_next_generation_image_text_models.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_LAION5B.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/learning_iterative_reasoning_through_energy_diffusion.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_EDiffusion.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/learning_transferable_visual_models_from_natural_language_supervision_clip.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_CLIP.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/length_extrapolation_of_causal_transformers_without_position_encoding_nope.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_NoPE.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/length_extrapolation_of_transformers_a_survey_from_the_perspective_of_positional_encoding.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_PESurvey.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/less_is_more_recursive_reasoning_with_tiny_networks.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_TRM.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/liere_lie_rotational_positional_encodings.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_LieRE.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/llava_4d_embedding_spatiotemporal_prompt_into_lmms.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_LLaVA4D.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/llava_large_language_and_vision_assistant.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_LLaVA.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/loope_learnable_optimal_patch_order_in_vision_transformers.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_LOOPE.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/lxmert_learning_cross_modality_encoder_representations.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_LXMERT.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/masked_autoencoders_are_scalable_vision_learners_mae.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_MAE.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/maximizing_the_position_embedding_for_vision_transformers_mpvg.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_MPVG.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/mesa_extrapolation_a_weave_position_encoding_method_for_enhanced_extrapolation_in_llms.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_MesaExtrap.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/minigpt_4.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MiniGPT4.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/mmbench_evaluating_multimodal_llms.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MMBench.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/mmmu_a_massive_multidiscipline_multimodal_benchmark.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MMMU.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/nested_learning_the_illusion_of_deep_learning_architecture.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_NestedLearning.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/neural_turing_machines.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2014_NTM.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/olympiad_level_formal_mathematical_reasoning_with_large_language_models_alphaproof.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_AlphaProof.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/on_the_measure_of_intelligence.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_MOI.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/oscar_object_semantics_aligned_pre_training_for_vision_language_tasks.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_OSCAR.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/palm_e_an_embodied_multimodal_language_model.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_PaLME.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/recurrent_relational_networks.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_RRN.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/roformer_enhanced_transformer_with_rotary_position_embedding_rope.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_RoFormer.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/rotary_masked_autoencoders_are_versatile_learners.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_RotaryMAE.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/rotary_position_embedding_for_vision_transformer_rope_vit.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoPEViT.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/rothp_rotary_position_embedding_based_transformer_hawkes_process.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoTHP.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/scaling_llm_test_time_compute_optimally_can_be_more_effective_than_scaling_model_parameters.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_TTCScale.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/scaling_up_vision_language_learning_with_noisy_text_supervision_align.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALIGN.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/scienceqa_benchmark_for_multimodal_reasoning.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_ScienceQA.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/searching_latent_program_spaces.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_LPS.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/selective_rotary_position_embedding.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_SelectiveRoPE.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/smolvlm_redefining_small_and_efficient_multimodal_models.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_SmolVLM.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/solving_olympiad_geometry_without_human_demonstrations_alphageometry.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_AlphaGeometry.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/spherical_position_encoding_for_transformers.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_SphericalPE.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/swin_transformer.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_Swin.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/the_hidden_logic_of_sudoku_second_edition.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2007_SudokuLogic.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/the_rotary_position_embedding_may_cause_dimension_inefficiency.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_RoPEDI.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/the_surprising_effectiveness_of_test_time_training_for_few_shot_learning.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_TTT.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/towards_efficient_neurally_guided_program_induction_for_arc_agi.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_NGPI.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/train_short_test_long_attention_with_linear_biases_alibi.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALiBi.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/transformer_language_models_without_positional_encodings_still_learn_positional_information.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_NoPELMs.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/transxssm_hybrid_transformer_ssm_with_unified_rope.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_TransXSSM.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/uni3dl_unified_model_for_3d_and_language_understanding.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Uni3DL.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/uniter_universal_image_text_representation_learning.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_UNITER.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/universal_transformers.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_UT.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/vatt_transformers_for_multimodal_self_supervised_learning.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_VATT.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/vg4d_vision_language_model_goes_4d_video_recognition.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_VG4D.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/videobert_a_joint_model_for_video_and_language_representation_learning.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_VideoBERT.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/videoclip_contrastive_pretraining_for_zero_shot_video_text_understanding.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_VideoCLIP.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/vilbert_pretraining_task_agnostic_v_l_representations.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_ViLBERT.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/vilt_vision_and_language_transformer_without_convolution_or_region_supervision.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ViLT.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/visualbert_a_simple_and_performant_baseline_for_vision_and_language.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_VisualBERT.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/vrope_rotary_position_embedding_for_video_large_language_models.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_VRoPE.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/walrus_a_cross_domain_foundation_model_for_continuum_dynamics.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_WALRUS.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/what_matters_when_building_vision_language_models_idefics2.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_Idefics2.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/winoground_probing_vision_language_models_for_compositionality.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_Winoground.pdf
+2025-12-28T05:00:52Z renamed source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/yarn_efficient_context_window_extension_of_large_language_models.pdf target=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_YaRN.pdf
+2025-12-28T05:00:52Z run_end renamed=105 skipped=1
+2025-12-28T05:02:36Z run_start folder=/home/jake/Developer/4D/Notes/Vision/pdfs-3 dry_run=True strict=False allow_fuzzy=False
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2000_FFRec.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2007_CoreKnow.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2007_SudokuLogic.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2012_CMPC.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2014_ITC.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2014_NTM.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2016_ACT.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2017_AIAYN.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_BERT.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_CC3M.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_RRN.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2018_UT.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_DEQ.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_HowTo100M.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_LXMERT.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_MOI.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_ViLBERT.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_VideoBERT.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2019_VisualBERT.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_DETR.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_OSCAR.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_UNITER.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2020_ViT.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALBEF.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALIGN.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ALiBi.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_CLIP.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ConViT.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_LAION400M.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_MAE.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_RoFormer.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_Swin.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_TimeSformer.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_VATT.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_ViLT.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2021_VideoCLIP.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_BLIP.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_CoCa.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_Flamingo.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_LAION5B.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_NoPELMs.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_ScienceQA.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2022_Winoground.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_AHAT.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_BLIP2.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_ConceptARC.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_GPT4.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Gemini.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Kosmos1.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_LLaVA.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MMBench.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MMMU.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_MiniGPT4.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_PaLME.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_SphericalPE.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_Uni3DL.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_XPOS.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2023_YaRN.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_ARCHeavy.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_AlphaGeometry.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_BeyondAStar.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_DAPE.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_EDiffusion.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_EvoTTC.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_FPD.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_GAA.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_HARC.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_Idefics2.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_IndTrans.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_LPS.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_LieRE.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_MesaExtrap.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_NGPI.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_NoPE.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_PESurvey.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoPEBase.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoPEViT.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_RoTHP.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_SIPBS.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_TTCScale.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_TTT.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_VG4D.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2024_WaveletATTN.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_APSRL.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_AlphaProof.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_CARoPE.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_CircleRoPE.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_ComRoPE.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_DoPE.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_EVA02AT.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_GatedAttn.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_HARoPE.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_HRM.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_LLaVA4D.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_LOOPE.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_MPVG.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_NestedLearning.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_PoPE.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_RoPEDI.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_RotaryMAE.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_SelectiveRoPE.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_SmolVLM.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_TRM.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_TransXSSM.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_VRoPE.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z unmatched source=/home/jake/Developer/4D/Notes/Vision/pdfs-3/2025_WALRUS.pdf status=unmatched score=0.0
+2025-12-28T05:02:36Z dry_run_complete ok=0 skipped=106

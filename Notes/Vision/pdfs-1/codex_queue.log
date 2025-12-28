@@ -362,3 +362,166 @@
 2025-12-28T02:54:41+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_MAE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_MAE.md
 2025-12-28T02:54:41+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_MAE.pdf
 2025-12-28T02:54:41+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_MAE.pdf
+2025-12-28T03:44:31+00:00 run_start folder=/home/jake/Developer/4D/Notes/Vision/pdfs-1 dry_run=False overwrite=True sort_mode=alpha
+2025-12-28T03:44:31+00:00 codex_cwd path=/home/jake/Developer/4D
+2025-12-28T03:44:31+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.md
+2025-12-28T03:44:31+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.pdf
+2025-12-28T03:44:31+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:32+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:32.138076Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:32.138126Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:32+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.pdf error=rc=1
+2025-12-28T03:44:32+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.md
+2025-12-28T03:44:32+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.pdf
+2025-12-28T03:44:32+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:32+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:32.312179Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:32.312213Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:32+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.pdf error=rc=1
+2025-12-28T03:44:32+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.md
+2025-12-28T03:44:32+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.pdf
+2025-12-28T03:44:32+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:32+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:32.485035Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:32.485064Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:32+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.pdf error=rc=1
+2025-12-28T03:44:32+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.md
+2025-12-28T03:44:32+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.pdf
+2025-12-28T03:44:32+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:32+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:32.655533Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:32.655565Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:32+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.pdf error=rc=1
+2025-12-28T03:44:32+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_Taming.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_Taming.md
+2025-12-28T03:44:32+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_Taming.pdf
+2025-12-28T03:44:32+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:32+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:32.831699Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:32.831731Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:32+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_Taming.pdf error=rc=1
+2025-12-28T03:44:32+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_ViT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_ViT.md
+2025-12-28T03:44:32+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_ViT.pdf
+2025-12-28T03:44:32+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:33+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:33.002878Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:33.002908Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:33+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_ViT.pdf error=rc=1
+2025-12-28T03:44:33+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_ALIGN.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_ALIGN.md
+2025-12-28T03:44:33+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_ALIGN.pdf
+2025-12-28T03:44:33+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:33+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:33.178000Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:33.178032Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:33+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_ALIGN.pdf error=rc=1
+2025-12-28T03:44:33+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_BEiT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_BEiT.md
+2025-12-28T03:44:33+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_BEiT.pdf
+2025-12-28T03:44:33+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:33+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:33.344874Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:33.344904Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:33+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_BEiT.pdf error=rc=1
+2025-12-28T03:44:33+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CLIP.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CLIP.md
+2025-12-28T03:44:33+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CLIP.pdf
+2025-12-28T03:44:33+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:33+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:33.514762Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:33.514793Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:33+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CLIP.pdf error=rc=1
+2025-12-28T03:44:33+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CoAtNet.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CoAtNet.md
+2025-12-28T03:44:33+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CoAtNet.pdf
+2025-12-28T03:44:33+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:33+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:33.687196Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:33.687227Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:33+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CoAtNet.pdf error=rc=1
+2025-12-28T03:44:33+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CrossViT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CrossViT.md
+2025-12-28T03:44:33+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CrossViT.pdf
+2025-12-28T03:44:33+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:33+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:33.864246Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:33.864281Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:33+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CrossViT.pdf error=rc=1
+2025-12-28T03:44:33+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CSWin.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CSWin.md
+2025-12-28T03:44:33+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CSWin.pdf
+2025-12-28T03:44:33+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:34+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:34.032302Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:34.032331Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:34+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CSWin.pdf error=rc=1
+2025-12-28T03:44:34+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CvT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CvT.md
+2025-12-28T03:44:34+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CvT.pdf
+2025-12-28T03:44:34+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:34+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:34.199787Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:34.199821Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:34+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CvT.pdf error=rc=1
+2025-12-28T03:44:34+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_DALLE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_DALLE.md
+2025-12-28T03:44:34+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_DALLE.pdf
+2025-12-28T03:44:34+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:34+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:34.374034Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:34.374069Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:34+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_DALLE.pdf error=rc=1
+2025-12-28T03:44:34+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_MAE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_MAE.md
+2025-12-28T03:44:34+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_MAE.pdf
+2025-12-28T03:44:34+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:34+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:34.540130Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:34.540161Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:34+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_MAE.pdf error=rc=1
+2025-12-28T03:44:34+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_PVT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_PVT.md
+2025-12-28T03:44:34+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_PVT.pdf
+2025-12-28T03:44:34+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:34+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:34.717953Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:34.717983Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:34+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_PVT.pdf error=rc=1
+2025-12-28T03:44:34+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SegFormer.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SegFormer.md
+2025-12-28T03:44:34+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SegFormer.pdf
+2025-12-28T03:44:34+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:34+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:34.894560Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:34.894597Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:34+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SegFormer.pdf error=rc=1
+2025-12-28T03:44:34+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Swin.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Swin.md
+2025-12-28T03:44:34+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Swin.pdf
+2025-12-28T03:44:34+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:35+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:35.065576Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:35.065611Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:35+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Swin.pdf error=rc=1
+2025-12-28T03:44:35+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SwinV2.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SwinV2.md
+2025-12-28T03:44:35+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SwinV2.pdf
+2025-12-28T03:44:35+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:35+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:35.238924Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:35.238964Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:35+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SwinV2.pdf error=rc=1
+2025-12-28T03:44:35+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TimeSformer.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TimeSformer.md
+2025-12-28T03:44:35+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TimeSformer.pdf
+2025-12-28T03:44:35+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:35+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:35.400287Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:35.400317Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:35+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TimeSformer.pdf error=rc=1
+2025-12-28T03:44:35+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TNT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TNT.md
+2025-12-28T03:44:35+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TNT.pdf
+2025-12-28T03:44:35+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:35+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:35.562419Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:35.562450Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:35+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TNT.pdf error=rc=1
+2025-12-28T03:44:35+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Twins.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Twins.md
+2025-12-28T03:44:35+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Twins.pdf
+2025-12-28T03:44:35+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:35+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:35.742195Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:35.742230Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:35+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Twins.pdf error=rc=1
+2025-12-28T03:44:35+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BEiT3.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BEiT3.md
+2025-12-28T03:44:35+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BEiT3.pdf
+2025-12-28T03:44:35+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:35+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:35.908045Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:35.908077Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:35+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BEiT3.pdf error=rc=1
+2025-12-28T03:44:35+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BLIP.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BLIP.md
+2025-12-28T03:44:35+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BLIP.pdf
+2025-12-28T03:44:35+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:36+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:36.082116Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:36.082147Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:36+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BLIP.pdf error=rc=1
+2025-12-28T03:44:36+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_Flamingo.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_Flamingo.md
+2025-12-28T03:44:36+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_Flamingo.pdf
+2025-12-28T03:44:36+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:36+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:36.252976Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:36.253009Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:36+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_Flamingo.pdf error=rc=1
+2025-12-28T03:44:36+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_MaxViT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_MaxViT.md
+2025-12-28T03:44:36+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_MaxViT.pdf
+2025-12-28T03:44:36+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:36+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:36.427451Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:36.427486Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:36+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_MaxViT.pdf error=rc=1
+2025-12-28T03:44:36+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2023_SAM.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2023_SAM.md
+2025-12-28T03:44:36+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2023_SAM.pdf
+2025-12-28T03:44:36+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:44:36+00:00 codex_failure rc=1 seconds=0.2 stderr=2025-12-28T03:44:36.606374Z ERROR codex_core::codex: failed to initialize rollout recorder: Permission denied (os error 13)\n2025-12-28T03:44:36.606409Z ERROR codex_core::codex: Failed to create session: Permission denied (os error 13)\nError: Fatal error: Codex cannot access session files at /home/jake/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /home/jake/.codex (underlying error: Permission denied (os error 13))\n stdout=
+2025-12-28T03:44:36+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2023_SAM.pdf error=rc=1
+2025-12-28T03:44:36+00:00 run_end
+2025-12-28T03:45:50+00:00 run_start folder=/home/jake/Developer/4D/Notes/Vision/pdfs-1 dry_run=False overwrite=True sort_mode=alpha
+2025-12-28T03:45:50+00:00 codex_cwd path=/home/jake/Developer/4D
+2025-12-28T03:45:50+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.md
+2025-12-28T03:45:50+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.pdf
+2025-12-28T03:45:50+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T03:57:52+00:00 codex_success seconds=721.7
+2025-12-28T03:57:52+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.pdf bytes=11322
+2025-12-28T03:57:52+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.md
+2025-12-28T03:57:52+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.pdf
+2025-12-28T03:57:52+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T04:08:17+00:00 codex_success seconds=625.1
+2025-12-28T04:08:17+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.pdf bytes=17214
+2025-12-28T04:08:17+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.md
+2025-12-28T04:08:17+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.pdf
+2025-12-28T04:08:17+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T04:17:16+00:00 codex_success seconds=539.2
+2025-12-28T04:17:16+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.pdf bytes=12086
+2025-12-28T04:17:16+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.md
+2025-12-28T04:17:16+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.pdf
+2025-12-28T04:17:16+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1
+2025-12-28T04:30:22+00:00 codex_success seconds=785.6
+2025-12-28T04:30:22+00:00 md_written pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.pdf bytes=14992
+2025-12-28T04:30:22+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_Taming.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_Taming.md
+2025-12-28T04:30:22+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_Taming.pdf
+2025-12-28T04:30:22+00:00 codex_launch cmd=codex exec --full-auto -C /home/jake/Developer/4D --add-dir /home/jake/Developer/4D/Notes/Vision/pdfs-1

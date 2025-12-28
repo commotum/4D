@@ -6,25 +6,23 @@ DRY_RUN = False
 OVERWRITE_MD = False
 SORT_MODE = "alpha"
 LOG_PATH = "codex_queue.log"
-EXIT_COMMANDS = ["/quit"]
-PEXPECT_START_DELAY = 1.0
-PEXPECT_TIMEOUT = 45.0
-PEXPECT_EXIT_TIMEOUT = 15.0
+CODEX_EXEC_ARGS = ["exec", "--full-auto"]  # Adjust Codex CLI mode/permissions here.
+CODEX_EXEC_TIMEOUT = 3600
+CODEX_CWD = None
+CODEX_ADD_DIR = True
+CODEX_SKIP_GIT_CHECK = False
+MAX_LOG_CHARS = 2000
+MIN_MD_BYTES = 1
 
 import argparse
 import datetime
 import json
 import os
 import shlex
+import shutil
+import subprocess
 import sys
 import time
-
-try:
-    import pexpect
-
-    HAVE_PEXPECT = True
-except Exception:
-    HAVE_PEXPECT = False
 
 PROMPT_TEMPLATE = (
     "1. Read and review [PDF_ABS_PATH] thoroughly. Make sure the files entire contents has been brought into the context. This will be absolutely essential.\n"
@@ -72,6 +70,26 @@ def save_state(state_path, state, log_path):
             json.dump(state, handle, indent=2, sort_keys=True)
     except Exception as exc:
         log_event(log_path, f"state_save_failed path={state_path} error={exc}")
+
+
+def find_git_root(start_path):
+    current = os.path.abspath(start_path)
+    while True:
+        if os.path.isdir(os.path.join(current, ".git")):
+            return current
+        parent = os.path.dirname(current)
+        if parent == current:
+            return None
+        current = parent
+
+
+def sanitize_log_text(text, max_chars):
+    if not text:
+        return ""
+    scrubbed = text.replace("\n", "\\n").replace("\r", "\\r")
+    if len(scrubbed) <= max_chars:
+        return scrubbed
+    return scrubbed[:max_chars] + "...(truncated)"
 
 
 def quote_path(path):
@@ -134,42 +152,65 @@ def ensure_md_file(md_abs_path, overwrite, dry_run, log_path):
         return False
 
 
-def run_codex_with_prompt(codex_cmd, prompt, exit_commands, log_path):
-    if not HAVE_PEXPECT:
-        return False, "pexpect_missing"
+def build_codex_exec_command(codex_cmd, codex_cwd, add_dir, skip_git_check):
     args = shlex.split(codex_cmd)
     if not args:
+        return []
+    if "exec" not in args:
+        args.extend(CODEX_EXEC_ARGS)
+    if codex_cwd and "-C" not in args and "--cd" not in args:
+        args.extend(["-C", codex_cwd])
+    if add_dir and "--add-dir" not in args:
+        args.extend(["--add-dir", add_dir])
+    if skip_git_check and "--skip-git-repo-check" not in args:
+        args.append("--skip-git-repo-check")
+    return args
+
+
+def run_codex_exec(codex_cmd, prompt, codex_cwd, add_dir, skip_git_check, log_path):
+    args = build_codex_exec_command(codex_cmd, codex_cwd, add_dir, skip_git_check)
+    if not args:
         return False, "empty_codex_cmd"
-    child = None
+    base_cmd = args[0]
+    if shutil.which(base_cmd) is None:
+        log_event(log_path, f"codex_missing cmd={base_cmd}")
+        return False, "codex_missing"
+    cmd_display = " ".join(shlex.quote(arg) for arg in args)
+    log_event(log_path, f"codex_launch cmd={cmd_display}")
+    start_time = time.monotonic()
     try:
-        child = pexpect.spawn(
-            args[0],
-            args[1:],
-            encoding="utf-8",
-            timeout=PEXPECT_TIMEOUT,
+        result = subprocess.run(
+            args,
+            input=prompt,
+            text=True,
+            capture_output=True,
+            timeout=CODEX_EXEC_TIMEOUT,
         )
-        time.sleep(PEXPECT_START_DELAY)
-        # Adjust this block if Codex CLI needs a different prompt injection workflow.
-        child.sendline(prompt)
-        # Adjust EXIT_COMMANDS above if Codex uses a different quit command.
-        for exit_cmd in exit_commands:
-            child.sendline(exit_cmd)
-        child.expect(pexpect.EOF, timeout=PEXPECT_EXIT_TIMEOUT)
-        child.close()
-        return True, None
-    except pexpect.exceptions.TIMEOUT as exc:
-        if child is not None:
-            child.terminate(force=True)
-        log_event(log_path, f"codex_timeout error={exc}")
+    except subprocess.TimeoutExpired:
+        elapsed = time.monotonic() - start_time
+        log_event(log_path, f"codex_timeout seconds={elapsed:.1f}")
         return False, "timeout"
     except Exception as exc:
-        if child is not None:
-            try:
-                child.terminate(force=True)
-            except Exception:
-                pass
         log_event(log_path, f"codex_exception error={exc}")
         return False, str(exc)
+    elapsed = time.monotonic() - start_time
+    if result.returncode != 0:
+        stderr_trimmed = sanitize_log_text(result.stderr, MAX_LOG_CHARS)
+        stdout_trimmed = sanitize_log_text(result.stdout, MAX_LOG_CHARS)
+        log_event(
+            log_path,
+            f"codex_failure rc={result.returncode} seconds={elapsed:.1f} stderr={stderr_trimmed} stdout={stdout_trimmed}",
+        )
+        return False, f"rc={result.returncode}"
+    log_event(log_path, f"codex_success seconds={elapsed:.1f}")
+    return True, None
+
+
+def md_has_content(md_abs_path):
+    try:
+        return os.path.getsize(md_abs_path) >= MIN_MD_BYTES
+    except OSError:
+        return False
 
 
 def parse_args():
@@ -218,6 +259,17 @@ def main():
         f"run_start folder={target_folder} dry_run={dry_run} overwrite={overwrite} sort_mode={sort_mode}",
     )
 
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    codex_cwd = os.path.abspath(CODEX_CWD) if CODEX_CWD else None
+    if codex_cwd is None:
+        codex_cwd = find_git_root(script_dir) or find_git_root(target_folder)
+    if codex_cwd:
+        log_event(log_path, f"codex_cwd path={codex_cwd}")
+    else:
+        log_event(log_path, "codex_cwd_missing")
+    add_dir = target_folder if CODEX_ADD_DIR else None
+    skip_git_check = CODEX_SKIP_GIT_CHECK
+
     survey_md_path = os.path.abspath(SURVEY_MD_PATH)
     if not os.path.exists(survey_md_path):
         log_event(log_path, f"survey_missing path={survey_md_path}")
@@ -233,9 +285,6 @@ def main():
         print("No PDF files found.")
         log_event(log_path, "no_pdfs_found")
         return 0
-
-    if not HAVE_PEXPECT and not dry_run:
-        log_event(log_path, "pexpect_unavailable_manual_mode")
 
     for index, name in enumerate(queue, start=1):
         pdf_abs_path = os.path.abspath(os.path.join(target_folder, name))
@@ -268,26 +317,31 @@ def main():
             log_event(log_path, f"dry_run_skip pdf={pdf_abs_path}")
             continue
 
-        if not HAVE_PEXPECT:
-            print("Manual mode (pexpect not available). Paste this prompt into Codex:")
-            print(prompt)
-            log_event(log_path, f"manual_prompt_printed pdf={pdf_abs_path}")
-            continue
-
-        log_event(log_path, f"codex_launch pdf={pdf_abs_path}")
-        success, error = run_codex_with_prompt(
+        # Adjust CODEX_EXEC_ARGS above to change how Codex runs (e.g., --full-auto).
+        success, error = run_codex_exec(
             codex_cmd,
             prompt,
-            EXIT_COMMANDS,
+            codex_cwd,
+            add_dir,
+            skip_git_check,
             log_path,
         )
         if success:
-            log_event(log_path, f"codex_success pdf={pdf_abs_path}")
-            completed[pdf_abs_path] = now_iso()
-            state["completed"] = completed
-            save_state(state_path, state, log_path)
+            if md_has_content(md_abs_path):
+                size = os.path.getsize(md_abs_path)
+                log_event(log_path, f"md_written pdf={pdf_abs_path} bytes={size}")
+                completed[pdf_abs_path] = now_iso()
+                state["completed"] = completed
+                save_state(state_path, state, log_path)
+            else:
+                log_event(log_path, f"md_empty pdf={pdf_abs_path}")
+                print(f"  warning: output file is empty for {name} (see log)")
         else:
             log_event(log_path, f"codex_failure pdf={pdf_abs_path} error={error}")
+            if error == "codex_missing":
+                print("Codex CLI not found. Paste this prompt into Codex manually:")
+                print(prompt)
+                log_event(log_path, f"manual_prompt_printed pdf={pdf_abs_path}")
 
     log_event(log_path, "run_end")
     return 0
