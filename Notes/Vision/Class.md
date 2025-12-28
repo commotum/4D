@@ -4,7 +4,9 @@
 2. **Increasing Transformer’s Dimensions**
 3. **Computation & Reasoning Mechanism Proposal**
 4. **Data, Benchmarks & Measurement**
-5. **Other**
+5. **ML Foundations & Principles**
+6. **External Foundations & Cross-Disciplinary Context**
+7. **Misclassifications**
 
 ---
 
