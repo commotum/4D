@@ -14,6 +14,7 @@ CODEX_ADD_DIR = True
 CODEX_SKIP_GIT_CHECK = False
 MAX_LOG_CHARS = 2000
 MIN_MD_BYTES = 1
+CLEANUP_TEMP_ON_START = True
 
 import argparse
 import datetime
@@ -180,6 +181,30 @@ def remove_temp_md(path, log_path):
         log_event(log_path, f"temp_remove_failed path={path} error={exc}")
 
 
+def cleanup_stale_temp_files(folder, log_path):
+    removed = 0
+    try:
+        for name in os.listdir(folder):
+            if not name.startswith("."):
+                continue
+            if ".md.tmp." not in name:
+                continue
+            path = os.path.join(folder, name)
+            if not os.path.isfile(path):
+                continue
+            try:
+                os.remove(path)
+                removed += 1
+                log_event(log_path, f"temp_removed path={path}")
+            except Exception as exc:
+                log_event(log_path, f"temp_remove_failed path={path} error={exc}")
+    except Exception as exc:
+        log_event(log_path, f"temp_cleanup_failed folder={folder} error={exc}")
+        return
+    if removed:
+        log_event(log_path, f"temp_cleanup_removed count={removed}")
+
+
 def build_codex_exec_command(codex_cmd, codex_cwd, add_dir, skip_git_check):
     args = shlex.split(codex_cmd)
     if not args:
@@ -343,6 +368,9 @@ def main():
         print("No PDF files found.")
         log_event(log_path, "no_pdfs_found")
         return 0
+
+    if CLEANUP_TEMP_ON_START and not dry_run:
+        cleanup_stale_temp_files(target_folder, log_path)
 
     futures = {}
     executor = None
