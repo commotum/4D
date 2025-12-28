@@ -27,7 +27,8 @@ import sys
 import time
 import threading
 import uuid
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed, CancelledError
+from tqdm import tqdm
 
 PROMPT_TEMPLATE = (
     "1. Read and review [PDF_ABS_PATH] thoroughly. Make sure the files entire contents has been brought into the context. This will be absolutely essential.\n"
@@ -37,6 +38,32 @@ PROMPT_TEMPLATE = (
 )
 
 LOG_LOCK = threading.Lock()
+
+
+class ProgressTracker:
+    def __init__(self, total):
+        self.total = total
+        self.count = 0
+        self._bar = tqdm(total=total, unit="file", dynamic_ncols=True, ascii=True)
+
+    def update(self, name, status):
+        self.count += 1
+        label = f"{status} {name}"
+        self._bar.update(1)
+        self._bar.set_postfix_str(label, refresh=True)
+
+    def write(self, message):
+        self._bar.write(message)
+
+    def close(self):
+        self._bar.close()
+
+
+def progress_write(progress, message):
+    if progress is None:
+        print(message)
+    else:
+        progress.write(message)
 
 
 def now_iso():
@@ -181,6 +208,14 @@ def remove_temp_md(path, log_path):
         log_event(log_path, f"temp_remove_failed path={path} error={exc}")
 
 
+def cleanup_temp_paths(temp_paths, log_path):
+    if not temp_paths:
+        return
+    for path in list(temp_paths):
+        remove_temp_md(path, log_path)
+        temp_paths.discard(path)
+
+
 def cleanup_stale_temp_files(folder, log_path):
     removed = 0
     try:
@@ -220,10 +255,21 @@ def build_codex_exec_command(codex_cmd, codex_cwd, add_dir, skip_git_check):
     return args
 
 
-def run_codex_exec(codex_cmd, prompt, codex_cwd, add_dir, skip_git_check, log_path):
+def run_codex_exec(
+    codex_cmd,
+    prompt,
+    codex_cwd,
+    add_dir,
+    skip_git_check,
+    log_path,
+    stop_event=None,
+):
     args = build_codex_exec_command(codex_cmd, codex_cwd, add_dir, skip_git_check)
     if not args:
         return False, "empty_codex_cmd"
+    if stop_event and stop_event.is_set():
+        log_event(log_path, "codex_skip_interrupted")
+        return False, "interrupted"
     base_cmd = args[0]
     if shutil.which(base_cmd) is None:
         log_event(log_path, f"codex_missing cmd={base_cmd}")
@@ -232,29 +278,62 @@ def run_codex_exec(codex_cmd, prompt, codex_cwd, add_dir, skip_git_check, log_pa
     log_event(log_path, f"codex_launch cmd={cmd_display}")
     start_time = time.monotonic()
     try:
-        result = subprocess.run(
+        proc = subprocess.Popen(
             args,
-            input=prompt,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
-            capture_output=True,
-            timeout=CODEX_EXEC_TIMEOUT,
         )
-    except subprocess.TimeoutExpired:
-        elapsed = time.monotonic() - start_time
-        log_event(log_path, f"codex_timeout seconds={elapsed:.1f}")
-        return False, "timeout"
     except Exception as exc:
         log_event(log_path, f"codex_exception error={exc}")
         return False, str(exc)
+
+    stdout = ""
+    stderr = ""
+    input_payload = prompt
+    try:
+        while True:
+            if stop_event and stop_event.is_set():
+                proc.terminate()
+                try:
+                    stdout, stderr = proc.communicate(timeout=5)
+                except subprocess.TimeoutExpired:
+                    proc.kill()
+                    stdout, stderr = proc.communicate()
+                elapsed = time.monotonic() - start_time
+                log_event(log_path, f"codex_interrupted seconds={elapsed:.1f}")
+                return False, "interrupted"
+            try:
+                stdout, stderr = proc.communicate(input=input_payload, timeout=0.5)
+                break
+            except subprocess.TimeoutExpired:
+                input_payload = None
+                if time.monotonic() - start_time > CODEX_EXEC_TIMEOUT:
+                    proc.kill()
+                    stdout, stderr = proc.communicate()
+                    elapsed = time.monotonic() - start_time
+                    log_event(log_path, f"codex_timeout seconds={elapsed:.1f}")
+                    return False, "timeout"
+                continue
+    except Exception as exc:
+        try:
+            proc.kill()
+            proc.communicate()
+        except Exception:
+            pass
+        log_event(log_path, f"codex_exception error={exc}")
+        return False, str(exc)
+
     elapsed = time.monotonic() - start_time
-    if result.returncode != 0:
-        stderr_trimmed = sanitize_log_text(result.stderr, MAX_LOG_CHARS)
-        stdout_trimmed = sanitize_log_text(result.stdout, MAX_LOG_CHARS)
+    if proc.returncode != 0:
+        stderr_trimmed = sanitize_log_text(stderr, MAX_LOG_CHARS)
+        stdout_trimmed = sanitize_log_text(stdout, MAX_LOG_CHARS)
         log_event(
             log_path,
-            f"codex_failure rc={result.returncode} seconds={elapsed:.1f} stderr={stderr_trimmed} stdout={stdout_trimmed}",
+            f"codex_failure rc={proc.returncode} seconds={elapsed:.1f} stderr={stderr_trimmed} stdout={stdout_trimmed}",
         )
-        return False, f"rc={result.returncode}"
+        return False, f"rc={proc.returncode}"
     log_event(log_path, f"codex_success seconds={elapsed:.1f}")
     return True, None
 
@@ -275,6 +354,7 @@ def process_pdf_task(
     add_dir,
     skip_git_check,
     log_path,
+    stop_event,
 ):
     success, error = run_codex_exec(
         codex_cmd,
@@ -283,6 +363,7 @@ def process_pdf_task(
         add_dir,
         skip_git_check,
         log_path,
+        stop_event,
     )
     return success, error
 
@@ -367,119 +448,180 @@ def main():
     if total == 0:
         print("No PDF files found.")
         log_event(log_path, "no_pdfs_found")
+        log_event(log_path, "run_end")
         return 0
 
-    if CLEANUP_TEMP_ON_START and not dry_run:
-        cleanup_stale_temp_files(target_folder, log_path)
-
+    progress = ProgressTracker(total)
+    stop_event = threading.Event()
+    temp_paths = set()
     futures = {}
     executor = None
-    if not dry_run:
-        executor = ThreadPoolExecutor(max_workers=workers)
+    interrupted = False
 
-    for index, name in enumerate(queue, start=1):
-        pdf_abs_path = os.path.abspath(os.path.join(target_folder, name))
-        md_abs_path = os.path.splitext(pdf_abs_path)[0] + ".md"
-        print(f"[{index}/{total}] processing {name}")
-        log_event(log_path, f"file_start pdf={pdf_abs_path} md={md_abs_path}")
+    try:
+        if CLEANUP_TEMP_ON_START and not dry_run:
+            cleanup_stale_temp_files(target_folder, log_path)
 
-        if not overwrite and pdf_abs_path in completed:
-            log_event(log_path, f"skipped_state pdf={pdf_abs_path}")
-            continue
-
-        if not overwrite and os.path.exists(md_abs_path):
-            log_event(log_path, f"skipped_existing_md pdf={pdf_abs_path}")
-            if not dry_run:
-                completed[pdf_abs_path] = now_iso()
-                state["completed"] = completed
-                save_state(state_path, state, log_path)
-            continue
-
-        md_work_path = md_abs_path
         if not dry_run:
-            md_work_path = make_temp_md_path(md_abs_path)
-            if not ensure_md_file(md_work_path, dry_run, log_path):
-                log_event(log_path, f"skipped_md_prepare_failed pdf={pdf_abs_path}")
+            executor = ThreadPoolExecutor(max_workers=workers)
+
+        for name in queue:
+            if stop_event.is_set():
+                interrupted = True
+                break
+            pdf_abs_path = os.path.abspath(os.path.join(target_folder, name))
+            md_abs_path = os.path.splitext(pdf_abs_path)[0] + ".md"
+            log_event(log_path, f"file_start pdf={pdf_abs_path} md={md_abs_path}")
+
+            if not overwrite and pdf_abs_path in completed:
+                log_event(log_path, f"skipped_state pdf={pdf_abs_path}")
+                progress.update(name, "skipped")
                 continue
-            log_event(
-                log_path,
-                f"md_work_created pdf={pdf_abs_path} md_work={md_work_path}",
-            )
 
-        prompt = build_prompt(pdf_abs_path, md_work_path, survey_md_path)
-        log_event(
-            log_path,
-            f"prompt_generated pdf={pdf_abs_path} md_work={md_work_path} md_final={md_abs_path}",
-        )
-
-        if dry_run:
-            print("DRY RUN prompt:")
-            print(prompt)
-            log_event(log_path, f"dry_run_skip pdf={pdf_abs_path}")
-            continue
-
-        # Adjust CODEX_EXEC_ARGS above to change how Codex runs (e.g., --full-auto).
-        future = executor.submit(
-            process_pdf_task,
-            pdf_abs_path,
-            md_abs_path,
-            prompt,
-            codex_cmd,
-            codex_cwd,
-            add_dir,
-            skip_git_check,
-            log_path,
-        )
-        futures[future] = (pdf_abs_path, md_abs_path, md_work_path, name, prompt)
-
-    if executor is not None:
-        for future in as_completed(futures):
-            pdf_abs_path, md_abs_path, md_work_path, name, prompt = futures[future]
-            try:
-                success, error = future.result()
-            except Exception as exc:
-                log_event(log_path, f"codex_failure pdf={pdf_abs_path} error={exc}")
-                remove_temp_md(md_work_path, log_path)
-                continue
-            if success:
-                if md_has_content(md_work_path):
-                    try:
-                        md_bytes = os.path.getsize(md_work_path)
-                    except OSError:
-                        md_bytes = 0
-                    try:
-                        os.replace(md_work_path, md_abs_path)
-                    except Exception as exc:
-                        log_event(
-                            log_path,
-                            f"md_replace_failed pdf={pdf_abs_path} error={exc}",
-                        )
-                        remove_temp_md(md_work_path, log_path)
-                        continue
-                    log_event(
-                        log_path,
-                        f"md_written pdf={pdf_abs_path} bytes={md_bytes} md_final={md_abs_path}",
-                    )
+            if not overwrite and os.path.exists(md_abs_path):
+                log_event(log_path, f"skipped_existing_md pdf={pdf_abs_path}")
+                if not dry_run:
                     completed[pdf_abs_path] = now_iso()
                     state["completed"] = completed
                     save_state(state_path, state, log_path)
-                else:
-                    log_event(log_path, f"md_empty pdf={pdf_abs_path}")
-                    print(f"  warning: output file is empty for {name} (see log)")
-                    remove_temp_md(md_work_path, log_path)
-            else:
-                log_event(log_path, f"codex_failure pdf={pdf_abs_path} error={error}")
-                remove_temp_md(md_work_path, log_path)
-                if error == "codex_missing":
-                    print("Codex CLI not found. Paste this prompt into Codex manually:")
-                    prompt_final = build_prompt(
-                        pdf_abs_path, md_abs_path, survey_md_path
-                    )
-                    print(prompt_final)
-                    log_event(log_path, f"manual_prompt_printed pdf={pdf_abs_path}")
-        executor.shutdown(wait=True)
+                progress.update(name, "skipped")
+                continue
 
-    log_event(log_path, "run_end")
+            md_work_path = md_abs_path
+            if not dry_run:
+                md_work_path = make_temp_md_path(md_abs_path)
+                if not ensure_md_file(md_work_path, dry_run, log_path):
+                    log_event(log_path, f"skipped_md_prepare_failed pdf={pdf_abs_path}")
+                    progress.update(name, "failed")
+                    continue
+                temp_paths.add(md_work_path)
+                log_event(
+                    log_path,
+                    f"md_work_created pdf={pdf_abs_path} md_work={md_work_path}",
+                )
+
+            prompt = build_prompt(pdf_abs_path, md_work_path, survey_md_path)
+            log_event(
+                log_path,
+                f"prompt_generated pdf={pdf_abs_path} md_work={md_work_path} md_final={md_abs_path}",
+            )
+
+            if dry_run:
+                progress_write(progress, "DRY RUN prompt:")
+                progress_write(progress, prompt)
+                log_event(log_path, f"dry_run_skip pdf={pdf_abs_path}")
+                progress.update(name, "dry-run")
+                continue
+
+            # Adjust CODEX_EXEC_ARGS above to change how Codex runs (e.g., --full-auto).
+            future = executor.submit(
+                process_pdf_task,
+                pdf_abs_path,
+                md_abs_path,
+                prompt,
+                codex_cmd,
+                codex_cwd,
+                add_dir,
+                skip_git_check,
+                log_path,
+                stop_event,
+            )
+            futures[future] = (pdf_abs_path, md_abs_path, md_work_path, name, prompt)
+
+        if executor is not None:
+            for future in as_completed(futures):
+                pdf_abs_path, md_abs_path, md_work_path, name, prompt = futures[
+                    future
+                ]
+                try:
+                    success, error = future.result()
+                except CancelledError:
+                    log_event(log_path, f"codex_cancelled pdf={pdf_abs_path}")
+                    remove_temp_md(md_work_path, log_path)
+                    temp_paths.discard(md_work_path)
+                    progress.update(name, "cancelled")
+                    continue
+                except Exception as exc:
+                    log_event(log_path, f"codex_failure pdf={pdf_abs_path} error={exc}")
+                    remove_temp_md(md_work_path, log_path)
+                    temp_paths.discard(md_work_path)
+                    progress.update(name, "failed")
+                    continue
+                if success:
+                    if md_has_content(md_work_path):
+                        try:
+                            md_bytes = os.path.getsize(md_work_path)
+                        except OSError:
+                            md_bytes = 0
+                        try:
+                            os.replace(md_work_path, md_abs_path)
+                        except Exception as exc:
+                            log_event(
+                                log_path,
+                                f"md_replace_failed pdf={pdf_abs_path} error={exc}",
+                            )
+                            remove_temp_md(md_work_path, log_path)
+                            temp_paths.discard(md_work_path)
+                            progress.update(name, "failed")
+                            continue
+                        temp_paths.discard(md_work_path)
+                        log_event(
+                            log_path,
+                            f"md_written pdf={pdf_abs_path} bytes={md_bytes} md_final={md_abs_path}",
+                        )
+                        completed[pdf_abs_path] = now_iso()
+                        state["completed"] = completed
+                        save_state(state_path, state, log_path)
+                        progress.update(name, "done")
+                    else:
+                        log_event(log_path, f"md_empty pdf={pdf_abs_path}")
+                        progress_write(
+                            progress,
+                            f"  warning: output file is empty for {name} (see log)",
+                        )
+                        remove_temp_md(md_work_path, log_path)
+                        temp_paths.discard(md_work_path)
+                        progress.update(name, "empty")
+                else:
+                    log_event(log_path, f"codex_failure pdf={pdf_abs_path} error={error}")
+                    remove_temp_md(md_work_path, log_path)
+                    temp_paths.discard(md_work_path)
+                    if error == "codex_missing":
+                        progress_write(
+                            progress,
+                            "Codex CLI not found. Paste this prompt into Codex manually:",
+                        )
+                        prompt_final = build_prompt(
+                            pdf_abs_path, md_abs_path, survey_md_path
+                        )
+                        progress_write(progress, prompt_final)
+                        log_event(
+                            log_path, f"manual_prompt_printed pdf={pdf_abs_path}"
+                        )
+                    status = "failed"
+                    if error == "interrupted":
+                        status = "interrupted"
+                    progress.update(name, status)
+            executor.shutdown(wait=True)
+            executor = None
+    except KeyboardInterrupt:
+        interrupted = True
+        stop_event.set()
+        log_event(log_path, "run_interrupted")
+        progress_write(progress, "Interrupted. Cancelling pending tasks...")
+    except Exception as exc:
+        stop_event.set()
+        log_event(log_path, f"run_exception error={exc}")
+        raise
+    finally:
+        if executor is not None:
+            executor.shutdown(wait=True, cancel_futures=True)
+        cleanup_temp_paths(temp_paths, log_path)
+        if progress is not None:
+            progress.close()
+        log_event(log_path, "run_end")
+    if interrupted:
+        return 1
     return 0
 
 
