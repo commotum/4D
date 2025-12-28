@@ -34,14 +34,6 @@
   **Critique:** entangled content and position
   **Improvement:** polar-coordinate positional encoding
 
----  
-
-# Increasing Transformer's Dimensions
-
-**Criteria:**
-
-Here is the **second section only**, with formatting adjusted to better match the style and emphasis of the others. **No wording has been changed.**
-
 ---
 
 # Increasing Transformer's Dimensions
@@ -118,3 +110,76 @@ Here is the **second section only**, with formatting adjusted to better match th
 - *LAION-5B: An open large-scale dataset for training next generation image-text models* (2022)  
   **Target Domain:** large-scale vision–language pretraining (image–text representation learning + text-to-image generation)  
   **Resource:** *LAION-5B*, 5.85B CLIP-filtered image–text pairs (2.32B English)
+
+---
+
+# ML Foundations & Principles
+
+**Criteria:**
+
+1. The paper makes a **substantive contribution** to machine learning or neural modeling that does **not cleanly fall into categories 1–4**.
+2. The contribution is *not primarily about* positional encoding, dimensional lifting, computation mechanisms, or datasets/benchmarks.
+3. The paper may focus on **training methods**, **optimization**, **scaling laws**, **theory**, **interpretability**, **robustness**, **alignment**, **regularization**, or **system-level concerns**.
+
+**Examples:**
+
+- *Attention Is All You Need* (2017)  
+  **Contribution Type:** architectural unification  
+  **Reason:** introduces the Transformer itself rather than refining an existing class
+
+- *Scaling Laws for Neural Language Models* (2020)  
+  **Contribution Type:** empirical theory  
+  **Reason:** characterizes performance–compute–data relationships, not a modeling mechanism
+
+- *LoRA: Low-Rank Adaptation of Large Language Models* (2021)  
+  **Contribution Type:** parameter-efficient training  
+  **Reason:** focuses on fine-tuning efficiency rather than model structure or representation
+
+- *RLHF: Training Language Models to Follow Instructions* (2022)  
+  **Contribution Type:** alignment & training methodology  
+  **Reason:** centers on optimization objectives and human feedback pipelines
+
+---
+
+# External Foundations & Cross-Disciplinary Context
+
+**Criteria:**
+
+1. The paper does **not cleanly fall** into any of the primary classifications (1–5).
+2. The paper originates from a **different discipline** (e.g., cognitive science, neuroscience, physics, mathematics, biology).
+3. The paper is included because it provides **theoretical grounding**, **conceptual motivation**, or **explanatory context** relevant to machine learning research.
+
+**Common Source Domains:**
+
+- Cognitive science and psychology
+- Neuroscience and biology
+- Physics (e.g., statistical mechanics, dynamical systems)
+- Mathematics (e.g., information theory, optimization, geometry)
+- Philosophy of mind and epistemology (selectively)
+
+**Interpretation:**
+
+These papers are **out-of-scope by design, not by error**.  
+They inform *why* learning systems behave as they do or *what* they may be approximating, rather than contributing directly to model design.
+
+---
+
+# Misclassifications
+
+**Criteria:**
+
+1. The paper does **not satisfy the criteria** of any classification in this taxonomy.
+2. The paper was **not intentionally included** for cross-disciplinary context or conceptual grounding.
+3. Inclusion is best explained by **curation error**, **surface-level similarity**, or **misinterpretation** of relevance.
+
+**Common Causes:**
+
+- Keyword overlap without substantive contribution
+- Tangential or incidental use of attention or Transformers
+- Purely applied results without methodological insight
+- Accidental inclusion during broad literature collection
+
+**Interpretation:**
+
+Papers in this category are candidates for **removal or reassignment**.  
+This section exists to support **taxonomy hygiene**, not qualitative judgment.
