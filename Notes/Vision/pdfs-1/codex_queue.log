@@ -1,0 +1,364 @@
+2025-12-28T02:42:13Z run_start folder=/home/jake/Developer/4D/Notes/Vision/pdfs-1 dry_run=True overwrite=False sort_mode=alpha
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_Taming.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_Taming.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_Taming.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_Taming.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_Taming.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_ViT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_ViT.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_ViT.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_ViT.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_ViT.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_ALIGN.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_ALIGN.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_ALIGN.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_ALIGN.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_ALIGN.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_BEiT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_BEiT.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_BEiT.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_BEiT.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_BEiT.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CLIP.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CLIP.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CLIP.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CLIP.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CLIP.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CoAtNet.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CoAtNet.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CoAtNet.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CoAtNet.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CoAtNet.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CrossViT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CrossViT.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CrossViT.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CrossViT.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CrossViT.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CSWin.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CSWin.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CSWin.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CSWin.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CSWin.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CvT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CvT.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CvT.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CvT.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CvT.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_DALLE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_DALLE.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_DALLE.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_DALLE.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_DALLE.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_MAE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_MAE.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_MAE.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_MAE.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_MAE.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_PVT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_PVT.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_PVT.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_PVT.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_PVT.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SegFormer.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SegFormer.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SegFormer.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SegFormer.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SegFormer.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Swin.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Swin.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Swin.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Swin.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Swin.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SwinV2.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SwinV2.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SwinV2.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SwinV2.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SwinV2.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TimeSformer.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TimeSformer.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TimeSformer.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TimeSformer.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TimeSformer.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TNT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TNT.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TNT.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TNT.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TNT.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Twins.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Twins.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Twins.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Twins.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Twins.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BEiT3.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BEiT3.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BEiT3.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BEiT3.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BEiT3.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BLIP.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BLIP.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BLIP.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BLIP.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BLIP.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_Flamingo.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_Flamingo.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_Flamingo.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_Flamingo.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_Flamingo.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_MaxViT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_MaxViT.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_MaxViT.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_MaxViT.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_MaxViT.pdf
+2025-12-28T02:42:13Z file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2023_SAM.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2023_SAM.md
+2025-12-28T02:42:13Z dry_run_md_prepare path=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2023_SAM.md overwrite=False
+2025-12-28T02:42:13Z prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2023_SAM.pdf
+2025-12-28T02:42:13Z dry_run_skip pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2023_SAM.pdf
+2025-12-28T02:42:13Z run_end
+2025-12-28T02:43:28+00:00 run_start folder=/home/jake/Developer/4D/Notes/Vision/pdfs-1 dry_run=False overwrite=False sort_mode=alpha
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_Taming.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_Taming.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_Taming.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_Taming.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_Taming.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_ViT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_ViT.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_ViT.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_ViT.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_ViT.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_ALIGN.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_ALIGN.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_ALIGN.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_ALIGN.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_ALIGN.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_BEiT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_BEiT.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_BEiT.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_BEiT.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_BEiT.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CLIP.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CLIP.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CLIP.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CLIP.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CLIP.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CoAtNet.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CoAtNet.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CoAtNet.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CoAtNet.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CoAtNet.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CrossViT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CrossViT.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CrossViT.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CrossViT.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CrossViT.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CSWin.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CSWin.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CSWin.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CSWin.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CSWin.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CvT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CvT.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CvT.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CvT.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CvT.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_DALLE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_DALLE.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_DALLE.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_DALLE.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_DALLE.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_MAE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_MAE.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_MAE.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_MAE.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_MAE.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_PVT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_PVT.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_PVT.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_PVT.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_PVT.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SegFormer.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SegFormer.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SegFormer.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SegFormer.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SegFormer.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Swin.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Swin.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Swin.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Swin.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Swin.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SwinV2.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SwinV2.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SwinV2.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SwinV2.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SwinV2.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TimeSformer.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TimeSformer.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TimeSformer.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TimeSformer.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TimeSformer.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TNT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TNT.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TNT.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TNT.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TNT.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Twins.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Twins.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Twins.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Twins.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Twins.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BEiT3.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BEiT3.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BEiT3.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BEiT3.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BEiT3.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BLIP.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BLIP.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BLIP.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BLIP.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BLIP.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_Flamingo.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_Flamingo.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_Flamingo.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_Flamingo.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_Flamingo.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_MaxViT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_MaxViT.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_MaxViT.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_MaxViT.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_MaxViT.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2023_SAM.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2023_SAM.md
+2025-12-28T02:43:28+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2023_SAM.pdf
+2025-12-28T02:43:28+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2023_SAM.pdf
+2025-12-28T02:43:28+00:00 codex_exception error=out of pty devices
+2025-12-28T02:43:28+00:00 codex_failure pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2023_SAM.pdf error=out of pty devices
+2025-12-28T02:43:28+00:00 run_end
+2025-12-28T02:52:05+00:00 run_start folder=/home/jake/Developer/4D/Notes/Vision/pdfs-1 dry_run=False overwrite=False sort_mode=alpha
+2025-12-28T02:52:05+00:00 pexpect_unavailable_manual_mode
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_Taming.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_Taming.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_Taming.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_ViT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_ViT.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_ViT.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_ALIGN.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_ALIGN.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_ALIGN.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_BEiT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_BEiT.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_BEiT.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CLIP.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CLIP.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CLIP.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CoAtNet.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CoAtNet.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CoAtNet.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CrossViT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CrossViT.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CrossViT.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CSWin.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CSWin.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CSWin.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CvT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CvT.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CvT.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_DALLE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_DALLE.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_DALLE.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_MAE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_MAE.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_MAE.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_PVT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_PVT.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_PVT.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SegFormer.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SegFormer.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SegFormer.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Swin.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Swin.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Swin.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SwinV2.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SwinV2.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_SwinV2.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TimeSformer.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TimeSformer.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TimeSformer.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TNT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TNT.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_TNT.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Twins.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Twins.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_Twins.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BEiT3.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BEiT3.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BEiT3.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BLIP.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BLIP.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_BLIP.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_Flamingo.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_Flamingo.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_Flamingo.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_MaxViT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_MaxViT.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2022_MaxViT.pdf
+2025-12-28T02:52:05+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2023_SAM.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2023_SAM.md
+2025-12-28T02:52:05+00:00 skipped_existing_md pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2023_SAM.pdf
+2025-12-28T02:52:05+00:00 run_end
+2025-12-28T02:54:07+00:00 run_start folder=/home/jake/Developer/4D/Notes/Vision/pdfs-1 dry_run=False overwrite=True sort_mode=alpha
+2025-12-28T02:54:07+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.md
+2025-12-28T02:54:07+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.pdf
+2025-12-28T02:54:07+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.pdf
+2025-12-28T02:54:10+00:00 codex_success pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeformableDETR.pdf
+2025-12-28T02:54:10+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.md
+2025-12-28T02:54:10+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.pdf
+2025-12-28T02:54:10+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.pdf
+2025-12-28T02:54:12+00:00 codex_success pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DeiT.pdf
+2025-12-28T02:54:12+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.md
+2025-12-28T02:54:12+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.pdf
+2025-12-28T02:54:12+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.pdf
+2025-12-28T02:54:14+00:00 codex_success pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_DETR.pdf
+2025-12-28T02:54:14+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.md
+2025-12-28T02:54:14+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.pdf
+2025-12-28T02:54:14+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.pdf
+2025-12-28T02:54:17+00:00 codex_success pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_iGPT.pdf
+2025-12-28T02:54:17+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_Taming.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_Taming.md
+2025-12-28T02:54:17+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_Taming.pdf
+2025-12-28T02:54:17+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_Taming.pdf
+2025-12-28T02:54:19+00:00 codex_success pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_Taming.pdf
+2025-12-28T02:54:19+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_ViT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_ViT.md
+2025-12-28T02:54:19+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_ViT.pdf
+2025-12-28T02:54:19+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_ViT.pdf
+2025-12-28T02:54:21+00:00 codex_success pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2020_ViT.pdf
+2025-12-28T02:54:21+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_ALIGN.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_ALIGN.md
+2025-12-28T02:54:21+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_ALIGN.pdf
+2025-12-28T02:54:21+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_ALIGN.pdf
+2025-12-28T02:54:24+00:00 codex_success pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_ALIGN.pdf
+2025-12-28T02:54:24+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_BEiT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_BEiT.md
+2025-12-28T02:54:24+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_BEiT.pdf
+2025-12-28T02:54:24+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_BEiT.pdf
+2025-12-28T02:54:26+00:00 codex_success pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_BEiT.pdf
+2025-12-28T02:54:26+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CLIP.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CLIP.md
+2025-12-28T02:54:26+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CLIP.pdf
+2025-12-28T02:54:26+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CLIP.pdf
+2025-12-28T02:54:29+00:00 codex_success pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CLIP.pdf
+2025-12-28T02:54:29+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CoAtNet.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CoAtNet.md
+2025-12-28T02:54:29+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CoAtNet.pdf
+2025-12-28T02:54:29+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CoAtNet.pdf
+2025-12-28T02:54:31+00:00 codex_success pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CoAtNet.pdf
+2025-12-28T02:54:31+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CrossViT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CrossViT.md
+2025-12-28T02:54:31+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CrossViT.pdf
+2025-12-28T02:54:31+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CrossViT.pdf
+2025-12-28T02:54:33+00:00 codex_success pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CrossViT.pdf
+2025-12-28T02:54:33+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CSWin.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CSWin.md
+2025-12-28T02:54:33+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CSWin.pdf
+2025-12-28T02:54:33+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CSWin.pdf
+2025-12-28T02:54:36+00:00 codex_success pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CSWin.pdf
+2025-12-28T02:54:36+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CvT.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CvT.md
+2025-12-28T02:54:36+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CvT.pdf
+2025-12-28T02:54:36+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CvT.pdf
+2025-12-28T02:54:38+00:00 codex_success pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_CvT.pdf
+2025-12-28T02:54:38+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_DALLE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_DALLE.md
+2025-12-28T02:54:38+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_DALLE.pdf
+2025-12-28T02:54:38+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_DALLE.pdf
+2025-12-28T02:54:41+00:00 codex_success pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_DALLE.pdf
+2025-12-28T02:54:41+00:00 file_start pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_MAE.pdf md=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_MAE.md
+2025-12-28T02:54:41+00:00 prompt_generated pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_MAE.pdf
+2025-12-28T02:54:41+00:00 codex_launch pdf=/home/jake/Developer/4D/Notes/Vision/pdfs-1/2021_MAE.pdf
