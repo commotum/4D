@@ -151,6 +151,50 @@
 
 ---
 
+# Reinforcement Learning Foundations
+
+**Criteria:**
+
+1. The paper’s primary setting is **reinforcement learning**: an agent interacts with an environment over time to maximize **expected cumulative return** (typically formalized as an **MDP/POMDP**), with learning driven by reward signals and/or bootstrapped value estimates.
+2. The paper makes a **foundational contribution** to RL as a field: a core **problem formulation**, a **learning objective**, a **control/evaluation algorithm**, a **stability principle**, or a **scalable paradigm** (e.g., self-play, replay, actor–critic) that becomes a reusable building block across tasks.
+3. The paper’s main value is **mechanistic and general** (not a narrow application): it either (a) introduces an algorithmic family (e.g., TD methods, Q-learning, policy gradients), (b) establishes a unifying viewpoint (e.g., value vs policy vs model-based control), or (c) demonstrates a breakthrough system where the **RL component is central** to the result.
+
+**Examples:**
+
+- *Learning to Predict by the Methods of Temporal Differences* (1988)  
+  **Core idea:** bootstrap targets to learn predictions from incomplete sequences  
+  **Breakthrough:** establishes **TD learning** as a distinct alternative to MC/DP for prediction
+
+- *Q-learning* (1989)  
+  **Core idea:** off-policy control via **max** backup of action-values  
+  **Breakthrough:** simple, general **model-free** control algorithm with broad downstream influence
+
+- *TD-Gammon, a Self-Teaching Backgammon Program, Achieves Master-Level Play* (1992)  
+  **Core idea:** **self-play + TD(λ) + function approximation** for policy improvement  
+  **Breakthrough:** early iconic demonstration that TD methods can yield strong play without explicit search
+
+- *Policy Gradient Methods for Reinforcement Learning with Function Approximation* (2000)  
+  **Core idea:** optimize expected return directly via **policy gradients**  
+  **Breakthrough:** formalizes REINFORCE-style gradients as a scalable foundation for continuous control
+
+- *Human-level Control through Deep Reinforcement Learning* (2015)  
+  **Core idea:** deep value learning stabilized by **experience replay** and **target networks**  
+  **Breakthrough:** establishes the modern template for **deep RL** at scale (Atari benchmark era)
+
+- *Mastering the game of Go with deep neural networks and tree search* (2016)  
+  **Core idea:** combine deep networks with **MCTS**; use **policy/value learning** with RL fine-tuning  
+  **Breakthrough:** first widely recognized superhuman Go system with RL as a core training signal
+
+- *Mastering Chess and Shogi by Self-Play with a General Reinforcement Learning Algorithm* (2018)  
+  **Core idea:** **pure self-play RL** (no human data) + MCTS + single general algorithm  
+  **Breakthrough:** unifies multiple board games under one scalable RL recipe (the “AlphaZero pattern”)
+
+- *DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning* (2025)  
+  **Core idea:** treat multi-step reasoning as a **reinforcement learning objective** rather than a prompting artifact  
+  **Breakthrough:** demonstrates that large-scale RL fine-tuning alone (including a pure-RL, no-SFT variant) can reliably induce sustained reasoning behaviors in language models
+
+---
+
 # External Foundations & Cross-Disciplinary Context
 
 **Criteria:**
