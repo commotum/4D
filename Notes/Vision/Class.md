@@ -89,6 +89,14 @@
   **Missing capability:** adaptive depth  
   **Mechanism:** learned halting for variable per-input computation
 
+- *Hierarchical Reasoning Model* (2025)  
+  **Missing capability:** deep, stable latent reasoning with variable compute  
+  **Mechanism:** hierarchical recurrent computation with fast–slow modules, adaptive halting (ACT), and one-step equilibrium-style training
+
+- *DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning* (2025)  
+  **Missing capability:** strong multi-step reasoning emerging from training (not just prompting)  
+  **Mechanism:** large-scale RL fine-tuning of a base LLM to reinforce reasoning behaviors (with an R1-Zero variant trained via pure RL without SFT)
+
 ---
 
 # Data, Benchmarks & Measurement
