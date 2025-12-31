@@ -1,6 +1,11 @@
 # Vectorized NumPy version of the "Fast-scalar MonSTER Triad" (no Python loops over frequencies)
 from __future__ import annotations
+import csv
+import math
+from pathlib import Path
+
 import numpy as np
+import matplotlib.pyplot as plt
 
 # =============================================================================
 # 1) Minkowski helpers
@@ -43,7 +48,7 @@ class TriadMonSTERFastVec:
         self.dim      = dim
         self.num_freq = dim // SLICE
         self.base     = float(base)
-        self.unit     = 1.0 / float(top_delta)  # global unit (dimensionless per step)
+        self.unit     = 10 / float(top_delta)  # global unit (dimensionless per step)
         j = np.arange(self.num_freq, dtype=np.float64)
         self.inv_freq = self.base ** (- j / self.num_freq)
         self._cache = {}
@@ -186,6 +191,360 @@ def report_remote_attenuation(monster, dim, distances=None, num_runs=128, seed=1
         print(f"trend slope (log10 dist vs avg abs sim): {slope:+.6f}")
         print(f"attenuation observed? {tail_smaller and slope < 0}")
 
+def sigmoid(x: float) -> float:
+    if x >= 0:
+        return 1.0 / (1.0 + math.exp(-x))
+    exp_x = math.exp(x)
+    return exp_x / (1.0 + exp_x)
+
+def build_permutation_table(spatial_radii, temporal_radii, mixed_temporal):
+    rows = []
+
+    def add_row(dt, dx, dy, dz, category):
+        r = math.sqrt(dx * dx + dy * dy + dz * dz)
+        s2 = dt * dt - r * r
+        if abs(s2) < 1e-9:
+            interval_class = "null"
+        elif s2 > 0:
+            interval_class = "timelike"
+        else:
+            interval_class = "spacelike"
+        if dt > 0:
+            dt_dir = "future"
+        elif dt < 0:
+            dt_dir = "past"
+        else:
+            dt_dir = "simultaneous"
+
+        axis = ""
+        if dx != 0 and dy == 0 and dz == 0:
+            axis = "x"
+        elif dy != 0 and dx == 0 and dz == 0:
+            axis = "y"
+        elif dz != 0 and dx == 0 and dy == 0:
+            axis = "z"
+
+        r_mult = ""
+        if dt != 0 and r != 0:
+            r_mult = r / abs(dt)
+
+        rows.append(
+            {
+                "category": category,
+                "dt": float(dt),
+                "dx": float(dx),
+                "dy": float(dy),
+                "dz": float(dz),
+                "dt_abs": float(abs(dt)),
+                "r": float(r),
+                "s2": float(s2),
+                "interval_class": interval_class,
+                "dt_dir": dt_dir,
+                "axis": axis,
+                "r_mult": r_mult,
+            }
+        )
+
+    add_row(0.0, 0.0, 0.0, 0.0, "baseline")
+
+    for r in spatial_radii:
+        for axis in ("x", "y", "z"):
+            for sign in (-1.0, 1.0):
+                dx = dy = dz = 0.0
+                if axis == "x":
+                    dx = sign * r
+                elif axis == "y":
+                    dy = sign * r
+                else:
+                    dz = sign * r
+                add_row(0.0, dx, dy, dz, "space_only")
+
+    for t in temporal_radii:
+        for sign in (-1.0, 1.0):
+            add_row(sign * t, 0.0, 0.0, 0.0, "time_only")
+
+    for t in mixed_temporal:
+        for sign in (-1.0, 1.0):
+            dt = sign * abs(t)
+            for r_mult in (0.5, 1.0, 2.0):
+                r = r_mult * abs(t)
+                for axis in ("x", "y", "z"):
+                    dx = dy = dz = 0.0
+                    if axis == "x":
+                        dx = r
+                    elif axis == "y":
+                        dy = r
+                    else:
+                        dz = r
+                    add_row(dt, dx, dy, dz, "mixed")
+
+    for i, row in enumerate(rows):
+        row["row_id"] = i
+    return rows
+
+def write_csv(path: Path, rows, fieldnames):
+    with path.open("w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({key: row.get(key, "") for key in fieldnames})
+
+def compute_attention_stats(monster, dim, rows, num_runs=128, seed=0, w_seed=123):
+    rng = np.random.default_rng(seed)
+    rng_w = np.random.default_rng(w_seed)
+    Wq = rng_w.normal(1.0, 0.02, size=dim).astype(np.float64)
+    Wk = rng_w.normal(1.0, 0.02, size=dim).astype(np.float64)
+
+    X = rng.uniform(-0.6, 0.6, size=(num_runs, dim)).astype(np.float64)
+    Q0 = X * Wq
+    K0 = X * Wk
+
+    l_AA_samples = np.array([minkowski_dot_big_vec(Q0[i], K0[i]) for i in range(num_runs)], dtype=np.float64)
+    mean_l_AA = float(np.mean(l_AA_samples))
+
+    out_rows = []
+    for row in rows:
+        s = np.array([row["dt"], row["dx"], row["dy"], row["dz"]], dtype=np.float64)
+        T_B = monster.forward(s)
+
+        sum_l_AB = 0.0
+        sum_l_BA = 0.0
+        sum_l_BB = 0.0
+        sum_gap_A = 0.0
+        sum_gap_B = 0.0
+        sum_p_A_B = 0.0
+        sum_p_B_A = 0.0
+        cnt_AB_lt_AA = 0
+        cnt_BA_lt_BB = 0
+        cnt_AB_lt_0 = 0
+        cnt_BA_lt_0 = 0
+
+        for i in range(num_runs):
+            qA = Q0[i]
+            kA = K0[i]
+            l_AA = l_AA_samples[i]
+
+            qB = apply_monster_triad_fast_vec(qA, T_B, dim=dim)
+            kB = apply_monster_triad_fast_vec(kA, T_B, dim=dim)
+
+            l_AB = minkowski_dot_big_vec(qA, kB)
+            l_BA = minkowski_dot_big_vec(qB, kA)
+            l_BB = minkowski_dot_big_vec(qB, kB)
+
+            gap_A = l_AB - l_AA
+            gap_B = l_BA - l_BB
+            p_A_B = sigmoid(gap_A)
+            p_B_A = sigmoid(gap_B)
+
+            sum_l_AB += l_AB
+            sum_l_BA += l_BA
+            sum_l_BB += l_BB
+            sum_gap_A += gap_A
+            sum_gap_B += gap_B
+            sum_p_A_B += p_A_B
+            sum_p_B_A += p_B_A
+            cnt_AB_lt_AA += int(l_AB < l_AA)
+            cnt_BA_lt_BB += int(l_BA < l_BB)
+            cnt_AB_lt_0 += int(l_AB < 0.0)
+            cnt_BA_lt_0 += int(l_BA < 0.0)
+
+        inv = 1.0 / num_runs
+        out = dict(row)
+        out.update(
+            {
+                "mean_l_AA": mean_l_AA,
+                "mean_l_AB": sum_l_AB * inv,
+                "mean_l_BA": sum_l_BA * inv,
+                "mean_l_BB": sum_l_BB * inv,
+                "mean_gap_A": sum_gap_A * inv,
+                "mean_gap_B": sum_gap_B * inv,
+                "mean_p_A_B": sum_p_A_B * inv,
+                "mean_p_B_A": sum_p_B_A * inv,
+                "frac_AB_lt_AA": cnt_AB_lt_AA * inv,
+                "frac_BA_lt_BB": cnt_BA_lt_BB * inv,
+                "frac_AB_lt_0": cnt_AB_lt_0 * inv,
+                "frac_BA_lt_0": cnt_BA_lt_0 * inv,
+            }
+        )
+        out_rows.append(out)
+
+    return out_rows
+
+def fmt_tick(x):
+    if abs(x - round(x)) < 1e-9:
+        return str(int(round(x)))
+    return f"{x:.2f}"
+
+def plot_time_only(stats_rows, out_path: Path):
+    rows = [r for r in stats_rows if r["r"] < 1e-9 and r["category"] in ("baseline", "time_only")]
+    baseline = [r for r in rows if abs(r["dt"]) < 1e-9]
+    base_val = baseline[0]["mean_p_A_B"] if baseline else None
+
+    future = sorted([r for r in rows if r["dt"] > 0], key=lambda r: r["dt_abs"])
+    past = sorted([r for r in rows if r["dt"] < 0], key=lambda r: r["dt_abs"])
+
+    x_f = [r["dt_abs"] for r in future]
+    y_f = [r["mean_p_A_B"] for r in future]
+    x_p = [r["dt_abs"] for r in past]
+    y_p = [r["mean_p_A_B"] for r in past]
+
+    if base_val is not None:
+        x_f = [0.0] + x_f
+        y_f = [base_val] + y_f
+        x_p = [0.0] + x_p
+        y_p = [base_val] + y_p
+
+    fig, ax = plt.subplots(figsize=(6, 4))
+    ax.plot(x_f, y_f, marker="o", label="future dt")
+    ax.plot(x_p, y_p, marker="o", label="past dt")
+    ax.set_xlabel("abs(dt)")
+    ax.set_ylabel("mean p_A_to_B")
+    ax.set_title("Time-only attenuation")
+    ax.grid(True, alpha=0.3)
+    ax.legend()
+    fig.tight_layout()
+    fig.savefig(out_path, dpi=160)
+    plt.close(fig)
+
+def plot_space_only(stats_rows, out_path: Path):
+    rows = [r for r in stats_rows if r["category"] == "space_only"]
+    axis_map = {"x": {}, "y": {}, "z": {}}
+    for r in rows:
+        axis = r["axis"]
+        if axis not in axis_map:
+            continue
+        rad = r["r"]
+        axis_map[axis].setdefault(rad, []).append(r["mean_p_A_B"])
+
+    fig, ax = plt.subplots(figsize=(6, 4))
+    for axis, r_map in axis_map.items():
+        if not r_map:
+            continue
+        r_vals = sorted(r_map.keys())
+        y_vals = [float(np.mean(r_map[v])) for v in r_vals]
+        ax.plot(r_vals, y_vals, marker="o", label=f"{axis}-axis")
+
+    ax.set_xlabel("r (spatial radius)")
+    ax.set_ylabel("mean p_A_to_B")
+    ax.set_title("Space-only attenuation")
+    ax.grid(True, alpha=0.3)
+    ax.legend()
+    fig.tight_layout()
+    fig.savefig(out_path, dpi=160)
+    plt.close(fig)
+
+def plot_mixed_heatmap(stats_rows, out_path: Path):
+    rows = [r for r in stats_rows if r["category"] == "mixed"]
+    if not rows:
+        return
+
+    dt_vals = sorted({r["dt_abs"] for r in rows})
+    r_vals = sorted({r["r"] for r in rows})
+    grid = np.full((len(dt_vals), len(r_vals)), np.nan, dtype=np.float64)
+    counts = np.zeros_like(grid)
+    class_grid = [["" for _ in r_vals] for _ in dt_vals]
+
+    dt_index = {v: i for i, v in enumerate(dt_vals)}
+    r_index = {v: j for j, v in enumerate(r_vals)}
+
+    for r in rows:
+        i = dt_index[r["dt_abs"]]
+        j = r_index[r["r"]]
+        if np.isnan(grid[i, j]):
+            grid[i, j] = 0.0
+        grid[i, j] += r["mean_p_A_B"]
+        counts[i, j] += 1.0
+        class_grid[i][j] = r["interval_class"]
+
+    grid = np.divide(grid, np.where(counts > 0, counts, 1.0))
+    masked = np.ma.masked_invalid(grid)
+
+    fig, ax = plt.subplots(figsize=(7, 4))
+    im = ax.imshow(masked, origin="lower", aspect="auto", cmap="viridis")
+    ax.set_xticks(np.arange(len(r_vals)))
+    ax.set_xticklabels([fmt_tick(v) for v in r_vals])
+    ax.set_yticks(np.arange(len(dt_vals)))
+    ax.set_yticklabels([fmt_tick(v) for v in dt_vals])
+    ax.set_xlabel("r (spatial radius)")
+    ax.set_ylabel("abs(dt)")
+    ax.set_title("Mixed spacetime attenuation")
+    fig.colorbar(im, ax=ax, label="mean p_A_to_B")
+
+    for i in range(len(dt_vals)):
+        for j in range(len(r_vals)):
+            if counts[i, j] <= 0:
+                continue
+            cls = class_grid[i][j]
+            if not cls:
+                continue
+            letter = {"timelike": "T", "null": "N", "spacelike": "S"}.get(cls, "?")
+            ax.text(j, i, letter, ha="center", va="center", color="white", fontsize=8)
+
+    fig.tight_layout()
+    fig.savefig(out_path, dpi=160)
+    plt.close(fig)
+
+def run_permutation_demo(monster, dim, num_runs=128, seed=0, w_seed=123, output_dir=None):
+    spatial_radii = [8, 16, 32, 64, 128, 256]
+    temporal_radii = [8, 16, 32, 64, 128, 256]
+    mixed_temporal = [64, 128, 256]
+
+    rows = build_permutation_table(spatial_radii, temporal_radii, mixed_temporal)
+    stats_rows = compute_attention_stats(monster, dim, rows, num_runs=num_runs, seed=seed, w_seed=w_seed)
+
+    out_dir = Path(output_dir) if output_dir else Path(__file__).resolve().parent / "v13_proof_demo"
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    table_path = out_dir / "monster_spacetime_permutation_table.csv"
+    stats_path = out_dir / "monster_attention_demo_stats.csv"
+    plot_time = out_dir / "monster_time_only.png"
+    plot_space = out_dir / "monster_space_only.png"
+    plot_mixed = out_dir / "monster_mixed_heatmap.png"
+
+    table_fields = [
+        "row_id",
+        "category",
+        "dt",
+        "dx",
+        "dy",
+        "dz",
+        "dt_abs",
+        "r",
+        "s2",
+        "interval_class",
+        "dt_dir",
+        "axis",
+        "r_mult",
+    ]
+    stats_fields = table_fields + [
+        "mean_l_AA",
+        "mean_l_AB",
+        "mean_l_BA",
+        "mean_l_BB",
+        "mean_gap_A",
+        "mean_gap_B",
+        "mean_p_A_B",
+        "mean_p_B_A",
+        "frac_AB_lt_AA",
+        "frac_BA_lt_BB",
+        "frac_AB_lt_0",
+        "frac_BA_lt_0",
+    ]
+
+    write_csv(table_path, rows, table_fields)
+    write_csv(stats_path, stats_rows, stats_fields)
+
+    plot_time_only(stats_rows, plot_time)
+    plot_space_only(stats_rows, plot_space)
+    plot_mixed_heatmap(stats_rows, plot_mixed)
+
+    print(f"\nProof demo outputs written to: {out_dir}")
+    print(f"  permutation table: {table_path.name}")
+    print(f"  stats table      : {stats_path.name}")
+    print(f"  time-only plot   : {plot_time.name}")
+    print(f"  space-only plot  : {plot_space.name}")
+    print(f"  mixed heatmap    : {plot_mixed.name}")
+
 
 # =============================================================================
 # 4) Demo / Sanity checks
@@ -231,5 +590,6 @@ if __name__ == "__main__":
     print("Per-4D Minkowski norms preserved? ", ok, "| max abs err:", max_err)
 
     report_remote_attenuation(monster, DIM)
+    run_permutation_demo(monster, DIM)
 
     print("NUM_FREQ:", DIM // SLICE, " | DIM:", DIM, " | SLICE per freq:", SLICE)

@@ -1,0 +1,70 @@
+label,case,dt_dir,interval,dt,dx,dy,dz,r,s2,spatial_dir
+"baseline | dt=0 | dxyz=(0,0,0) | null",baseline,simultaneous,null,0.0,0.0,0.0,0.0,0.0,0.0,none
+"space_only | dt=0 | dxyz=(64,0,0) | spacelike",space_only,simultaneous,spacelike,0.0,64.0,0.0,0.0,64.0,-4096.0,+1 x-axis
+"space_only | dt=0 | dxyz=(-64,-0,-0) | spacelike",space_only,simultaneous,spacelike,0.0,-64.0,-0.0,-0.0,64.0,-4096.0,-1 x-axis
+"space_only | dt=0 | dxyz=(0,64,0) | spacelike",space_only,simultaneous,spacelike,0.0,0.0,64.0,0.0,64.0,-4096.0,+1 y-axis
+"space_only | dt=0 | dxyz=(-0,-64,-0) | spacelike",space_only,simultaneous,spacelike,0.0,-0.0,-64.0,-0.0,64.0,-4096.0,-1 y-axis
+"space_only | dt=0 | dxyz=(0,0,64) | spacelike",space_only,simultaneous,spacelike,0.0,0.0,0.0,64.0,64.0,-4096.0,+1 z-axis
+"space_only | dt=0 | dxyz=(-0,-0,-64) | spacelike",space_only,simultaneous,spacelike,0.0,-0.0,-0.0,-64.0,64.0,-4096.0,-1 z-axis
+"space_only | dt=0 | dxyz=(36.9504,36.9504,36.9504) | spacelike",space_only,simultaneous,spacelike,0.0,36.950417228136054,36.950417228136054,36.950417228136054,64.0,-4096.000000000001,+1 diag-xyz
+"space_only | dt=0 | dxyz=(-36.9504,-36.9504,-36.9504) | spacelike",space_only,simultaneous,spacelike,0.0,-36.950417228136054,-36.950417228136054,-36.950417228136054,64.0,-4096.000000000001,-1 diag-xyz
+"space_only | dt=0 | dxyz=(256,0,0) | spacelike",space_only,simultaneous,spacelike,0.0,256.0,0.0,0.0,256.0,-65536.0,+1 x-axis
+"space_only | dt=0 | dxyz=(-256,-0,-0) | spacelike",space_only,simultaneous,spacelike,0.0,-256.0,-0.0,-0.0,256.0,-65536.0,-1 x-axis
+"space_only | dt=0 | dxyz=(0,256,0) | spacelike",space_only,simultaneous,spacelike,0.0,0.0,256.0,0.0,256.0,-65536.0,+1 y-axis
+"space_only | dt=0 | dxyz=(-0,-256,-0) | spacelike",space_only,simultaneous,spacelike,0.0,-0.0,-256.0,-0.0,256.0,-65536.0,-1 y-axis
+"space_only | dt=0 | dxyz=(0,0,256) | spacelike",space_only,simultaneous,spacelike,0.0,0.0,0.0,256.0,256.0,-65536.0,+1 z-axis
+"space_only | dt=0 | dxyz=(-0,-0,-256) | spacelike",space_only,simultaneous,spacelike,0.0,-0.0,-0.0,-256.0,256.0,-65536.0,-1 z-axis
+"space_only | dt=0 | dxyz=(147.802,147.802,147.802) | spacelike",space_only,simultaneous,spacelike,0.0,147.80166891254422,147.80166891254422,147.80166891254422,256.0,-65536.00000000001,+1 diag-xyz
+"space_only | dt=0 | dxyz=(-147.802,-147.802,-147.802) | spacelike",space_only,simultaneous,spacelike,0.0,-147.80166891254422,-147.80166891254422,-147.80166891254422,256.0,-65536.00000000001,-1 diag-xyz
+"space_only | dt=0 | dxyz=(1024,0,0) | spacelike",space_only,simultaneous,spacelike,0.0,1024.0,0.0,0.0,1024.0,-1048576.0,+1 x-axis
+"space_only | dt=0 | dxyz=(-1024,-0,-0) | spacelike",space_only,simultaneous,spacelike,0.0,-1024.0,-0.0,-0.0,1024.0,-1048576.0,-1 x-axis
+"space_only | dt=0 | dxyz=(0,1024,0) | spacelike",space_only,simultaneous,spacelike,0.0,0.0,1024.0,0.0,1024.0,-1048576.0,+1 y-axis
+"space_only | dt=0 | dxyz=(-0,-1024,-0) | spacelike",space_only,simultaneous,spacelike,0.0,-0.0,-1024.0,-0.0,1024.0,-1048576.0,-1 y-axis
+"space_only | dt=0 | dxyz=(0,0,1024) | spacelike",space_only,simultaneous,spacelike,0.0,0.0,0.0,1024.0,1024.0,-1048576.0,+1 z-axis
+"space_only | dt=0 | dxyz=(-0,-0,-1024) | spacelike",space_only,simultaneous,spacelike,0.0,-0.0,-0.0,-1024.0,1024.0,-1048576.0,-1 z-axis
+"space_only | dt=0 | dxyz=(591.207,591.207,591.207) | spacelike",space_only,simultaneous,spacelike,0.0,591.2066756501769,591.2066756501769,591.2066756501769,1024.0,-1048576.0000000002,+1 diag-xyz
+"space_only | dt=0 | dxyz=(-591.207,-591.207,-591.207) | spacelike",space_only,simultaneous,spacelike,0.0,-591.2066756501769,-591.2066756501769,-591.2066756501769,1024.0,-1048576.0000000002,-1 diag-xyz
+"time_only | dt=64 | dxyz=(0,0,0) | timelike",time_only,future,timelike,64.0,0.0,0.0,0.0,0.0,4096.0,none
+"time_only | dt=-64 | dxyz=(0,0,0) | timelike",time_only,past,timelike,-64.0,0.0,0.0,0.0,0.0,4096.0,none
+"time_only | dt=256 | dxyz=(0,0,0) | timelike",time_only,future,timelike,256.0,0.0,0.0,0.0,0.0,65536.0,none
+"time_only | dt=-256 | dxyz=(0,0,0) | timelike",time_only,past,timelike,-256.0,0.0,0.0,0.0,0.0,65536.0,none
+"time_only | dt=1024 | dxyz=(0,0,0) | timelike",time_only,future,timelike,1024.0,0.0,0.0,0.0,0.0,1048576.0,none
+"time_only | dt=-1024 | dxyz=(0,0,0) | timelike",time_only,past,timelike,-1024.0,0.0,0.0,0.0,0.0,1048576.0,none
+"time_only | dt=4096 | dxyz=(0,0,0) | timelike",time_only,future,timelike,4096.0,0.0,0.0,0.0,0.0,16777216.0,none
+"time_only | dt=-4096 | dxyz=(0,0,0) | timelike",time_only,past,timelike,-4096.0,0.0,0.0,0.0,0.0,16777216.0,none
+"mixed_r=0.5 | dt=256 | dxyz=(128,0,0) | timelike",mixed_r=0.5,future,timelike,256.0,128.0,0.0,0.0,128.0,49152.0,x-axis
+"mixed_r=0.5 | dt=256 | dxyz=(73.9008,73.9008,73.9008) | timelike",mixed_r=0.5,future,timelike,256.0,73.90083445627211,73.90083445627211,73.90083445627211,128.0,49151.99999999999,diag-xyz
+"mixed_r=1 | dt=256 | dxyz=(256,0,0) | null",mixed_r=1,future,null,256.0,256.0,0.0,0.0,256.0,0.0,x-axis
+"mixed_r=1 | dt=256 | dxyz=(147.802,147.802,147.802) | spacelike",mixed_r=1,future,spacelike,256.0,147.80166891254422,147.80166891254422,147.80166891254422,256.0,-2.1827872842550278e-11,diag-xyz
+"mixed_r=2 | dt=256 | dxyz=(512,0,0) | spacelike",mixed_r=2,future,spacelike,256.0,512.0,0.0,0.0,512.0,-196608.0,x-axis
+"mixed_r=2 | dt=256 | dxyz=(295.603,295.603,295.603) | spacelike",mixed_r=2,future,spacelike,256.0,295.60333782508843,295.60333782508843,295.60333782508843,512.0,-196608.00000000006,diag-xyz
+"mixed_r=0.5 | dt=-256 | dxyz=(128,0,0) | timelike",mixed_r=0.5,past,timelike,-256.0,128.0,0.0,0.0,128.0,49152.0,x-axis
+"mixed_r=0.5 | dt=-256 | dxyz=(73.9008,73.9008,73.9008) | timelike",mixed_r=0.5,past,timelike,-256.0,73.90083445627211,73.90083445627211,73.90083445627211,128.0,49151.99999999999,diag-xyz
+"mixed_r=1 | dt=-256 | dxyz=(256,0,0) | null",mixed_r=1,past,null,-256.0,256.0,0.0,0.0,256.0,0.0,x-axis
+"mixed_r=1 | dt=-256 | dxyz=(147.802,147.802,147.802) | spacelike",mixed_r=1,past,spacelike,-256.0,147.80166891254422,147.80166891254422,147.80166891254422,256.0,-2.1827872842550278e-11,diag-xyz
+"mixed_r=2 | dt=-256 | dxyz=(512,0,0) | spacelike",mixed_r=2,past,spacelike,-256.0,512.0,0.0,0.0,512.0,-196608.0,x-axis
+"mixed_r=2 | dt=-256 | dxyz=(295.603,295.603,295.603) | spacelike",mixed_r=2,past,spacelike,-256.0,295.60333782508843,295.60333782508843,295.60333782508843,512.0,-196608.00000000006,diag-xyz
+"mixed_r=0.5 | dt=1024 | dxyz=(512,0,0) | timelike",mixed_r=0.5,future,timelike,1024.0,512.0,0.0,0.0,512.0,786432.0,x-axis
+"mixed_r=0.5 | dt=1024 | dxyz=(295.603,295.603,295.603) | timelike",mixed_r=0.5,future,timelike,1024.0,295.60333782508843,295.60333782508843,295.60333782508843,512.0,786431.9999999999,diag-xyz
+"mixed_r=1 | dt=1024 | dxyz=(1024,0,0) | null",mixed_r=1,future,null,1024.0,1024.0,0.0,0.0,1024.0,0.0,x-axis
+"mixed_r=1 | dt=1024 | dxyz=(591.207,591.207,591.207) | spacelike",mixed_r=1,future,spacelike,1024.0,591.2066756501769,591.2066756501769,591.2066756501769,1024.0,-3.4924596548080444e-10,diag-xyz
+"mixed_r=2 | dt=1024 | dxyz=(2048,0,0) | spacelike",mixed_r=2,future,spacelike,1024.0,2048.0,0.0,0.0,2048.0,-3145728.0,x-axis
+"mixed_r=2 | dt=1024 | dxyz=(1182.41,1182.41,1182.41) | spacelike",mixed_r=2,future,spacelike,1024.0,1182.4133513003537,1182.4133513003537,1182.4133513003537,2048.0,-3145728.000000001,diag-xyz
+"mixed_r=0.5 | dt=-1024 | dxyz=(512,0,0) | timelike",mixed_r=0.5,past,timelike,-1024.0,512.0,0.0,0.0,512.0,786432.0,x-axis
+"mixed_r=0.5 | dt=-1024 | dxyz=(295.603,295.603,295.603) | timelike",mixed_r=0.5,past,timelike,-1024.0,295.60333782508843,295.60333782508843,295.60333782508843,512.0,786431.9999999999,diag-xyz
+"mixed_r=1 | dt=-1024 | dxyz=(1024,0,0) | null",mixed_r=1,past,null,-1024.0,1024.0,0.0,0.0,1024.0,0.0,x-axis
+"mixed_r=1 | dt=-1024 | dxyz=(591.207,591.207,591.207) | spacelike",mixed_r=1,past,spacelike,-1024.0,591.2066756501769,591.2066756501769,591.2066756501769,1024.0,-3.4924596548080444e-10,diag-xyz
+"mixed_r=2 | dt=-1024 | dxyz=(2048,0,0) | spacelike",mixed_r=2,past,spacelike,-1024.0,2048.0,0.0,0.0,2048.0,-3145728.0,x-axis
+"mixed_r=2 | dt=-1024 | dxyz=(1182.41,1182.41,1182.41) | spacelike",mixed_r=2,past,spacelike,-1024.0,1182.4133513003537,1182.4133513003537,1182.4133513003537,2048.0,-3145728.000000001,diag-xyz
+"mixed_r=0.5 | dt=4096 | dxyz=(2048,0,0) | timelike",mixed_r=0.5,future,timelike,4096.0,2048.0,0.0,0.0,2048.0,12582912.0,x-axis
+"mixed_r=0.5 | dt=4096 | dxyz=(1182.41,1182.41,1182.41) | timelike",mixed_r=0.5,future,timelike,4096.0,1182.4133513003537,1182.4133513003537,1182.4133513003537,2048.0,12582911.999999998,diag-xyz
+"mixed_r=1 | dt=4096 | dxyz=(4096,0,0) | null",mixed_r=1,future,null,4096.0,4096.0,0.0,0.0,4096.0,0.0,x-axis
+"mixed_r=1 | dt=4096 | dxyz=(2364.83,2364.83,2364.83) | spacelike",mixed_r=1,future,spacelike,4096.0,2364.8267026007074,2364.8267026007074,2364.8267026007074,4096.0,-5.587935447692871e-09,diag-xyz
+"mixed_r=2 | dt=4096 | dxyz=(8192,0,0) | spacelike",mixed_r=2,future,spacelike,4096.0,8192.0,0.0,0.0,8192.0,-50331648.0,x-axis
+"mixed_r=2 | dt=4096 | dxyz=(4729.65,4729.65,4729.65) | spacelike",mixed_r=2,future,spacelike,4096.0,4729.653405201415,4729.653405201415,4729.653405201415,8192.0,-50331648.000000015,diag-xyz
+"mixed_r=0.5 | dt=-4096 | dxyz=(2048,0,0) | timelike",mixed_r=0.5,past,timelike,-4096.0,2048.0,0.0,0.0,2048.0,12582912.0,x-axis
+"mixed_r=0.5 | dt=-4096 | dxyz=(1182.41,1182.41,1182.41) | timelike",mixed_r=0.5,past,timelike,-4096.0,1182.4133513003537,1182.4133513003537,1182.4133513003537,2048.0,12582911.999999998,diag-xyz
+"mixed_r=1 | dt=-4096 | dxyz=(4096,0,0) | null",mixed_r=1,past,null,-4096.0,4096.0,0.0,0.0,4096.0,0.0,x-axis
+"mixed_r=1 | dt=-4096 | dxyz=(2364.83,2364.83,2364.83) | spacelike",mixed_r=1,past,spacelike,-4096.0,2364.8267026007074,2364.8267026007074,2364.8267026007074,4096.0,-5.587935447692871e-09,diag-xyz
+"mixed_r=2 | dt=-4096 | dxyz=(8192,0,0) | spacelike",mixed_r=2,past,spacelike,-4096.0,8192.0,0.0,0.0,8192.0,-50331648.0,x-axis
+"mixed_r=2 | dt=-4096 | dxyz=(4729.65,4729.65,4729.65) | spacelike",mixed_r=2,past,spacelike,-4096.0,4729.653405201415,4729.653405201415,4729.653405201415,8192.0,-50331648.000000015,diag-xyz
