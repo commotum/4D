@@ -98,6 +98,26 @@ Many combinations and derivatives treated, in the first edition, within the entr
 
 A certain number of *Supplement* entries directed the reader to delete the existing Dictionary entry and substitute a new one, the text of which then follows. Not infrequently, these entries also borrowed snatches of text from the former entry, especially the quotations given there. Before the original entries were discarded, the borrowed text was transferred to the new entries. 
 
+There were also entries in the *Supplement* which added further information to a different main word in the first edition, but nevertheless did not require a new entry to be created. There were two principal kinds. First, where the entry for a main word in the first edition had a derivative listed under it and the only addition to that entry in the *Supplement* related to the derivative, the latter was given, as it were, the temporary status of a main word solely for the purposes of supplementation. In such cases, the new material has been accommodated within the framework of the original main entry and the supplementary one has been discarded. Secondly, a variant form of a main word could be treated in a separate entry with illustrative quotations, because the variant in question either had not been listed and illustrated under the principal form, or had recently become recognized as the predominant spelling. In both cases the intention was that the two entries should be merged, in the latter with a change of spelling in the headword. Again, detecting such pairs of entries (and some forming larger groups) has been very difficult, especially as the spelling variation can bridge widely separated parts of the Dictionary (C and K, or E and Æ, for example), a factor which has occasionally frustrated the fulfilment of the *Supplement*’s intentions.
+
+**MATCHING ENTRIES**
+
+The remaining 28,000 entries in the *Supplement* had counterparts in the *OED* with which they were integrated. Four basic procedures were followed, in line with the main instructions to the user included in each entry: *addition*, *deletion*, *transference*, and *substitution*. Naturally not every one of the thousands of occasions when any of these changes was made is explicitly indicated in the text, but the intentions are nearly always quite clear.
+
+In the headword section of the entry (the *identification*), the usual supplementary material consisted of a pronunciation or one or more variant forms or inflexions. Deletions were mainly of status labels (especially ‘obsolete’). Transference of labels into a sense section was common. Substitution of a different spelling of the headword or a modified label occurred from time to time.
+
+Etymologies were occasionally added or modified by deletion or substitution.
+
+In the *signification*, additions made up the bulk of the changes occasioned by the *Supplement*. Where a complete new sense section was added, its numbering normally indicated the correct position. If the first edition had only one sense section at that level in the hierarchy, the absent sense number or letter (the first in the series: **A**, **1**, **a**, or (**a**)) was supplied. *Supplement* sense sections introduced by starred numbers were added at the appropriate point in the sequence, and the ensuing sense divisions were renumbered to accommodate them. When a section division (headed by a capital letter), covering the use of a word in a new grammatical category, was added at the end of an entry, the identification was altered to include the new part of speech. Sections containing derivatives were added at the end of the entry.
+
+Supplementary material was frequently added to definitions; this was commonly made plain by the introductory word ‘also’, which sometimes became superfluous and was edited out. Occasions when the new material could merely be added, without modification, at the end of the existing definition were relatively rare. Often the new material had to be inserted within the old, or the whole rewritten into one definition. The domain of a label had sometimes to be restricted to cover only the intended portion of the definition. So multifarious were the modifications that the results can scarcely be distinguished from the deletions, transferences, and substitutions indicated from time to time by the *Supplement*.
+
+The parts of the Dictionary which the *Supplement* especially augmented are the sections in which defined and undefined combinations are listed. Considerable labour was required to merge the corresponding lists (usually in alphabetical order). The defined combinations, resembling as they do complete entries in miniature, were susceptible to supplementation, deletion, modification, and 
+
+
+
+
+
 
 
 
