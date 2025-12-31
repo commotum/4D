@@ -139,6 +139,53 @@ def apply_monster_triad_fast_vec(emb: np.ndarray, tables: dict, dim: int = 768) 
 
     return out.reshape(dim,)
 
+def report_remote_attenuation(monster, dim, distances=None, num_runs=128, seed=1):
+    print("\nRemote attenuation (identical embeddings)")
+    if distances is None:
+        distances = [0, 8, 16, 32, 64, 128, 256, 512]
+    distances = np.array(distances, dtype=np.float64)
+    direction = np.array([1.0, 0.6, -0.4, 0.2], dtype=np.float64)
+
+    tables = [monster.forward(direction * d) for d in distances]
+    rng = np.random.default_rng(seed)
+
+    avg_abs = np.zeros(distances.size, dtype=np.float64)
+    used = 0
+    for _ in range(num_runs):
+        v = rng.uniform(-0.6, 0.6, size=dim).astype(np.float64)
+        vv = minkowski_dot_big_vec(v, v)
+        denom = abs(vv)
+        if denom < 1e-12:
+            continue
+        used += 1
+        inv_denom = 1.0 / denom
+        for j, T in enumerate(tables):
+            v_rel = apply_monster_triad_fast_vec(v, T, dim=dim)
+            dot = minkowski_dot_big_vec(v, v_rel)
+            avg_abs[j] += abs(dot) * inv_denom
+
+    if used == 0:
+        print("No valid samples (near-lightlike vectors).")
+        return
+
+    avg_abs /= used
+    print(f"direction (t,x,y,z): {direction}")
+    print(f"samples: {used} | distances: {distances.astype(int).tolist()}")
+    print("avg abs similarity = |<v, L(d)v>| / |<v,v>|")
+    print("distance | avg | bar")
+    max_abs = max(1e-12, np.max(avg_abs))
+    for d, s in zip(distances, avg_abs):
+        bar = "#" * int((abs(s) / max_abs) * 20)
+        print(f"{int(d):>8} | {s:>8.5f} | {bar}")
+
+    nonzero = distances > 0
+    if np.any(nonzero):
+        slope = np.polyfit(np.log10(distances[nonzero]), avg_abs[nonzero], 1)[0]
+        first_nz = int(np.flatnonzero(nonzero)[0])
+        tail_smaller = avg_abs[-1] < avg_abs[first_nz]
+        print(f"trend slope (log10 dist vs avg abs sim): {slope:+.6f}")
+        print(f"attenuation observed? {tail_smaller and slope < 0}")
+
 
 # =============================================================================
 # 4) Demo / Sanity checks
@@ -182,5 +229,7 @@ if __name__ == "__main__":
     ok = np.allclose(norms_before, norms_after, rtol=1e-11, atol=1e-12)
     max_err = np.max(np.abs(norms_before - norms_after))
     print("Per-4D Minkowski norms preserved? ", ok, "| max abs err:", max_err)
+
+    report_remote_attenuation(monster, DIM)
 
     print("NUM_FREQ:", DIM // SLICE, " | DIM:", DIM, " | SLICE per freq:", SLICE)
