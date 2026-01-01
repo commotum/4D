@@ -2,9 +2,9 @@
 
 In a nutshell, the idea of the proposed approach can be summarized as follows:
 
-> 1. associate with each word in the vocabulary a distributed *word feature vector* (a real-valued vector in $\mathbb{R}^m$),
-> 2. express the joint *probability function* of word sequences in terms of the feature vectors of these words in the sequence, and
-> 3. learn simultaneously the *word feature vectors* and the parameters of that *probability function*.
+1. associate with each word in the vocabulary a distributed *word feature vector* (a real-valued vector in $\mathbb{R}^m$),
+2. express the joint *probability function* of word sequences in terms of the feature vectors of these words in the sequence, and
+3. learn simultaneously the *word feature vectors* and the parameters of that *probability function*.
 
 The feature vector represents different aspects of the word: each word is associated with a point in a vector space. The number of features (e.g. $m$ =30, 60 or 100 in the experiments) is much smaller than the size of the vocabulary (e.g. 17,000). The probability function is expressed as a product of conditional probabilities of the next word given the previous ones, (e.g. using a multi-layer neural network to predict the next word given the previous ones, in the experiments). This function has parameters that can be iteratively tuned in order to **maximize the log-likelihood of the training data** or a regularized criterion, e.g. by adding a weight decay penalty.$^2$ The feature vectors associated with each word are learned, but they could be initialized using prior knowledge of semantic features.
 Why does it work? In the previous example, if we knew that dog and cat played similar roles (semantically and syntactically), and similarly for (the,a), (bedroom,room), (is,was), (running,walking), we could naturally generalize (i.e. transfer probability mass) from:
