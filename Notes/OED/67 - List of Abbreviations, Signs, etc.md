@@ -250,3 +250,270 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | Ir. | Irish |
 | irreg. | irregular, -ly |
 | It. | Italian |
+| | |
+| J., (J.) | (quoted from) Johnson's<br>&nbsp;&nbsp;*Dictionary* |
+| (Jam.) | Jamieson, *Scottish Dict.* |
+| Jap. | Japanese |
+| joc. | jocular, -ly |
+| *Jrnl.* | (in titles) *Journal* |
+| *Jun.* | (in titles) *Junior* |
+| | |
+| *Knowl.* | (in titles) *Knowledge* |
+| | |
+
+| | |
+| :--- | :--- |
+| l. | line |
+| L. | Latin |
+| lang. | language |
+| *Lect.* | (in titles) *Lecture, -s* |
+| *Less.* | (in titles) *Lesson, -s* |
+| *Let., Lett.* | letter, letters |
+| LG. | Low German |
+| lit. | literal, -ly |
+| *Lit.* | Literary |
+| Lith. | Lithuanian |
+| LXX | Septuagint |
+
+| | |
+| :--- | :--- |
+| m. | masculine |
+| *Mag.* | (in titles) *Magazine* |
+| *Magn.* | (in titles) *Magnetic, -ism* |
+| Mal. | Malay, Malayan |
+| *Man.* | (in titles) *Manual* |
+| *Managem.* | (in titles) *Management* |
+| *Manch.* | (in titles) *Manchester* |
+| *Manuf.* | in Manufacture, -ing |
+| *Mar.* | (in titles) *Marine* |
+
+| | |
+| :--- | :--- |
+| masc. (*rarely* m.) | masculine |
+| *Math.* | (as label) in Mathematics;<br>(in titles) *Mathematics, -al* |
+| MDu. | Middle Dutch |
+| ME. | Middle English |
+| *Mech.* | (as label) in Mechanics;<br>(in titles) *Mechanics, -al* |
+| *Med.* | (as label) in Medicine;<br>(in titles) *Medicine, -ical* |
+| med.L. | medieval Latin |
+| *Mem.* | (in titles) *Memoir, -s* |
+| *Metaph.* | in Metaphysics |
+| *Meteorol.* | (as label) in Meteorology;<br>(in titles) *Meteorology, -ical* |
+
+| | |
+| :--- | :--- |
+| MHG. | Middle High German |
+| midl. | midland (dialect) |
+| *Mil.* | in military usage |
+| *Min.* | (as label) in Mineralogy;<br>(in titles) *Ministry* |
+| *Mineral.* | (in titles) *Mineralogy, -ical* |
+| MLG. | Middle Low German |
+| *Misc.* | (in titles) *Miscellany, -eous* |
+| mod. | modern |
+| mod.L | modern Latin |
+| (Morris), | (quoted from) E. E.<br>&nbsp;&nbsp;*Morris's Austral English* |
+| *Mus.* | (as label) in Music;<br>(in titles) *Music, -al;*<br>&nbsp;&nbsp;*Museum* |
+| *Myst.* | (in titles) *Mystery* |
+| *Mythol.* | in Mythology |
+
+| | |
+| :--- | :--- |
+| N. | North |
+| n. | neuter |
+| *N. Amer.* | North America, -n |
+| *N. & Q.* | *Notes and Queries* |
+| *Narr.* | (in titles) *Narrative* |
+| *Nat.* | (in titles) *Natural* |
+| *Nat. Hist.* | in Natural History |
+| *Naut.* | in nautical language |
+| N.E. | North East |
+| N.E.D. | *New English Dictionary*,<br>&nbsp;&nbsp;original title of the *Oxford*<br>&nbsp;&nbsp;*English Dictionary* (first<br>&nbsp;&nbsp;edition) |
+
+| | |
+| :--- | :--- |
+| *Neurol.* | in Neurology |
+| neut. (*rarely* n.) | neuter |
+| NF., NFr. | Northern French |
+| No. | Number |
+| nom. | nominative |
+| north. | northern (dialect) |
+| Norw. | Norwegian |
+| n.q. | no quotations |
+| N.T. | New Testament |
+| *Nucl.* | Nuclear |
+| *Numism.* | in Numismatics |
+| N.W. | North West |
+| *N.Z.* | New Zealand |
+
+| | |
+| :--- | :--- |
+| obj. | object |
+| obl. | oblique |
+| *Obs., obs.* | obsolete |
+| *Obstetr.* | (in titles) *Obstetrics* |
+| occas. | occasionally |
+| OE. | Old English<br>&nbsp;&nbsp;(= Anglo-Saxon) |
+| OF., OFr. | Old French |
+| OFris. | Old Frisian |
+| OHG. | Old High German |
+| OIr. | Old Irish |
+| ON. | Old Norse |
+
+| | |
+| :--- | :--- |
+| ONF. | Old Northern French |
+| *Ophthalm.* | in Ophthalmology |
+| opp. | opposed (to), the opposite<br>&nbsp;&nbsp;(of) |
+| *Opt.* | in Optics |
+| *Org.* | (in titles) *Organic* |
+| orig. | origin, -al, -ally |
+| *Ornith.* | (as label) in Ornithology;<br>(in titles) *Ornithology, -ical* |
+| OS. | Old Saxon |
+| OSl. | Old (Church) Slavonic |
+| O.T. | Old Testament |
+| *Outl.* | (in titles) *Outline* |
+| *Oxf.* | (in titles) *Oxford* |
+
+| | |
+| :--- | :--- |
+| p. | page |
+| *Palæogr.* | in Palæography |
+| *Palæont.* | (as label) in Palæontology;<br>(in titles) *Palæontology, -ical* |
+| pa. pple. | passive participle, past<br>&nbsp;&nbsp;participle |
+| (Partridge), | (quoted from) E.<br>&nbsp;&nbsp;Partridge's *Dictionary of*<br>&nbsp;&nbsp;*Slang and Unconventional*<br>&nbsp;&nbsp;*English* |
+| *pass.* | passive, -ly |
+| pa.t. | past tense |
+| *Path.* | (as label) in Pathology;<br>(in titles) *Pathology, -ical* |
+| perh. | perhaps |
+| Pers. | Persian |
+| *pers.* | person, -al |
+| *Petrogr.* | in Petrography |
+| *Petrol.* | (as label) in Petrology;<br>(in titles) *Petrology, -ical* |
+| (Pettman), | (quoted from) C. Pettman's<br>&nbsp;&nbsp;*Africanderisms* |
+
+| | |
+| :--- | :--- |
+| pf. | perfect |
+| Pg. | Portuguese |
+| *Pharm.* | in Pharmacology |
+| *Philol.* | (as label) in Philology;<br>&nbsp;&nbsp;(in titles) *Philology, -ical* |
+| *Philos.* | (as label) in Philosophy;<br>&nbsp;&nbsp;(in titles) *Philosophy, -ic* |
+| phonet. | phonetic, -ally |
+| *Photogr.* | (as label) in Photography;<br>&nbsp;&nbsp;(in titles) *Photography, -ical* |
+| phr. | phrase |
+| *Phys.* | physical; (*rarely*) in<br>&nbsp;&nbsp;Physiology |
+| *Physiol.* | (as label) in Physiology;<br>&nbsp;&nbsp;(in titles) *Physiology, -ical* |
+| *Pict.* | (in titles) *Picture, Pictorial* |
+
+| | |
+| :--- | :--- |
+| pl., plur. | plural |
+| *poet.* | poetic, -al |
+| Pol. | Polish |
+| *Pol.* | (as label) in Politics;<br>(in titles) *Politics, -al* |
+| *Pol. Econ.* | in Political Economy |
+| *Polit.* | (in titles) *Politics, -al* |
+| pop. | popular, -ly |
+| *Porc.* | (in titles) *Porcelain* |
+| poss. | possessive |
+| *Pott.* | (in titles) *Pottery* |
+| *ppl. a.*, pple. adj. | participial adjective |
+| pple. | participle |
+| Pr. | Provençal |
+
+| | |
+| :--- | :--- |
+| pr. | present |
+| *Pract.* | (in titles) *Practice, -al* |
+| prec. | preceding (word or article) |
+| *pred.* | predicative |
+| *pref.* | prefix |
+| pref., Pref. | preface |
+| *prep.* | preposition |
+| *pres.* | present |
+| *Princ.* | (in titles) *Principle, -s* |
+| priv. | privative |
+| prob. | probably |
+| *Probl.* | (in titles) *Problem* |
+| *Proc.* | (in titles) *Proceedings* |
+
+| | |
+| :--- | :--- |
+| *pron.* | pronoun |
+| pronunc. | pronunciation |
+| prop. | properly |
+| *Pros.* | in Prosody |
+| Prov. | Provençal |
+| pr. pple. | present participle |
+| *Psych.* | in Psychology |
+| *Psychol.* | (as label) in Psychology;<br>(in titles) *Psychology, -ical* |
+| *Publ.* | (in titles) *Publications* |
+
+| | |
+| :--- | :--- |
+| *Q.* | (in titles) *Quarterly* |
+| quot(s). | quotation(s) |
+| q.v. | *quod vide*, ‘which see’ |
+
+| | |
+| :--- | :--- |
+| *R.* | (in titles) *Royal* |
+| *Radiol.* | in Radiology |
+| R.C.Ch. | Roman Catholic Church |
+| *Rec.* | (in titles) *Record* |
+| redupl. | reduplicating |
+| *Ref.* | (in titles) *Reference* |
+| refash. | refashioned, -ing |
+| refl. | reflexive |
+| *Reg.* | (in titles) *Register* |
+
+| | |
+| :--- | :--- |
+| reg. | regular |
+| rel. | related to |
+| *Reminisc.* | (in titles) *Reminiscence, -s* |
+| *Rep.* | (in titles) *Report, -s* |
+| repr. | representative, representing |
+| *Res.* | (in titles) *Research* |
+| *Rev.* | (in titles) *Review* |
+| rev. | revised |
+| *Rhet.* | in Rhetoric |
+| Rom. | Roman, -ce, -ic |
+| Rum. | Rumanian |
+| Russ. | Russian |
+
+| | |
+| :--- | :--- |
+| S. | South |
+| *S. Afr.* | South Africa, -n |
+| *sb.* | substantive |
+| *sc.* | *scilicet*, ‘understand’ or ‘supply’ |
+| *Sc., Scot.* | Scottish |
+| *Scand.* | (in titles) *Scandinavia, -n* |
+| *Sch.* | (in titles) *School* |
+| *Sc. Nat. Dict.* | *Scottish National Dictionary* |
+| *Scotl.* | (in titles) *Scotland* |
+| *Sel.* | (in titles) *Selection, -s* |
+
+| | |
+| :--- | :--- |
+| Ser. | Series |
+| sing. | singular |
+| *Sk.* | (in titles) *Sketch* |
+| Skr. | Sanskrit |
+| Slav. | Slavonic |
+| S.N.D. | *Scottish National Dictionary* |
+| *Soc.* | (in titles) *Society* |
+| *Sociol.* | (as label) in Sociology;<br>&nbsp;&nbsp;(in titles) *Sociology, -ical* |
+
+| | |
+| :--- | :--- |
+| Sp. | Spanish |
+| *Sp.* | (in titles) *Speech, -es* |
+| sp. | spelling |
+| *spec.* | specifically |
+| *Spec.* | (in titles) *Specimen* |
+| St. | Saint |
+| *Stand.* | (in titles) *Standard* |
+| *Stanf.* | (quoted from) *Stanford*<br>&nbsp;&nbsp;*Dictionary of Anglicised*<br>&nbsp;&nbsp;*Words & Phrases* |
+
