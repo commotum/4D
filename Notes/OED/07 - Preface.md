@@ -41,9 +41,6 @@ project; the University of Waterloo, in Canada, which provided valuable help in 
 text and was an ever-ready source of technical advice; and the Department of Trade and Industry,
 which provided a grant—from its Support for Innovation Fund—to help cover the cost of lexico-
 graphical research. The very professional service provided by International Computaprint
-
-viii                                     PREFACE
-
 Corporation in converting the text of the *Oxford English Dictionary* and *Supplement* into machine-
 readable form was of crucial importance.
   The successful completion of the project is attributable in very large measure to the application and
