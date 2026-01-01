@@ -260,9 +260,6 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | | |
 | *Knowl.* | (in titles) *Knowledge* |
 | | |
-
-| | |
-| :--- | :--- |
 | l. | line |
 | L. | Latin |
 | lang. | language |
@@ -274,9 +271,7 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | *Lit.* | Literary |
 | Lith. | Lithuanian |
 | LXX | Septuagint |
-
 | | |
-| :--- | :--- |
 | m. | masculine |
 | *Mag.* | (in titles) *Magazine* |
 | *Magn.* | (in titles) *Magnetic, -ism* |
@@ -286,9 +281,6 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | *Manch.* | (in titles) *Manchester* |
 | *Manuf.* | in Manufacture, -ing |
 | *Mar.* | (in titles) *Marine* |
-
-| | |
-| :--- | :--- |
 | masc. (*rarely* m.) | masculine |
 | *Math.* | (as label) in Mathematics;<br>(in titles) *Mathematics, -al* |
 | MDu. | Middle Dutch |
@@ -299,9 +291,6 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | *Mem.* | (in titles) *Memoir, -s* |
 | *Metaph.* | in Metaphysics |
 | *Meteorol.* | (as label) in Meteorology;<br>(in titles) *Meteorology, -ical* |
-
-| | |
-| :--- | :--- |
 | MHG. | Middle High German |
 | midl. | midland (dialect) |
 | *Mil.* | in military usage |
@@ -315,9 +304,7 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | *Mus.* | (as label) in Music;<br>(in titles) *Music, -al;*<br>&nbsp;&nbsp;*Museum* |
 | *Myst.* | (in titles) *Mystery* |
 | *Mythol.* | in Mythology |
-
 | | |
-| :--- | :--- |
 | N. | North |
 | n. | neuter |
 | *N. Amer.* | North America, -n |
@@ -328,9 +315,6 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | *Naut.* | in nautical language |
 | N.E. | North East |
 | N.E.D. | *New English Dictionary*,<br>&nbsp;&nbsp;original title of the *Oxford*<br>&nbsp;&nbsp;*English Dictionary* (first<br>&nbsp;&nbsp;edition) |
-
-| | |
-| :--- | :--- |
 | *Neurol.* | in Neurology |
 | neut. (*rarely* n.) | neuter |
 | NF., NFr. | Northern French |
@@ -344,9 +328,7 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | *Numism.* | in Numismatics |
 | N.W. | North West |
 | *N.Z.* | New Zealand |
-
 | | |
-| :--- | :--- |
 | obj. | object |
 | obl. | oblique |
 | *Obs., obs.* | obsolete |
@@ -358,9 +340,6 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | OHG. | Old High German |
 | OIr. | Old Irish |
 | ON. | Old Norse |
-
-| | |
-| :--- | :--- |
 | ONF. | Old Northern French |
 | *Ophthalm.* | in Ophthalmology |
 | opp. | opposed (to), the opposite<br>&nbsp;&nbsp;(of) |
@@ -373,9 +352,7 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | O.T. | Old Testament |
 | *Outl.* | (in titles) *Outline* |
 | *Oxf.* | (in titles) *Oxford* |
-
 | | |
-| :--- | :--- |
 | p. | page |
 | *Palæogr.* | in Palæography |
 | *Palæont.* | (as label) in Palæontology;<br>(in titles) *Palæontology, -ical* |
@@ -390,9 +367,6 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | *Petrogr.* | in Petrography |
 | *Petrol.* | (as label) in Petrology;<br>(in titles) *Petrology, -ical* |
 | (Pettman), | (quoted from) C. Pettman's<br>&nbsp;&nbsp;*Africanderisms* |
-
-| | |
-| :--- | :--- |
 | pf. | perfect |
 | Pg. | Portuguese |
 | *Pharm.* | in Pharmacology |
@@ -404,9 +378,6 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | *Phys.* | physical; (*rarely*) in<br>&nbsp;&nbsp;Physiology |
 | *Physiol.* | (as label) in Physiology;<br>&nbsp;&nbsp;(in titles) *Physiology, -ical* |
 | *Pict.* | (in titles) *Picture, Pictorial* |
-
-| | |
-| :--- | :--- |
 | pl., plur. | plural |
 | *poet.* | poetic, -al |
 | Pol. | Polish |
@@ -420,9 +391,6 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | *ppl. a.*, pple. adj. | participial adjective |
 | pple. | participle |
 | Pr. | Provençal |
-
-| | |
-| :--- | :--- |
 | pr. | present |
 | *Pract.* | (in titles) *Practice, -al* |
 | prec. | preceding (word or article) |
@@ -436,9 +404,6 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | prob. | probably |
 | *Probl.* | (in titles) *Problem* |
 | *Proc.* | (in titles) *Proceedings* |
-
-| | |
-| :--- | :--- |
 | *pron.* | pronoun |
 | pronunc. | pronunciation |
 | prop. | properly |
@@ -448,15 +413,11 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | *Psych.* | in Psychology |
 | *Psychol.* | (as label) in Psychology;<br>(in titles) *Psychology, -ical* |
 | *Publ.* | (in titles) *Publications* |
-
 | | |
-| :--- | :--- |
 | *Q.* | (in titles) *Quarterly* |
 | quot(s). | quotation(s) |
 | q.v. | *quod vide*, ‘which see’ |
-
 | | |
-| :--- | :--- |
 | *R.* | (in titles) *Royal* |
 | *Radiol.* | in Radiology |
 | R.C.Ch. | Roman Catholic Church |
@@ -466,9 +427,6 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | refash. | refashioned, -ing |
 | refl. | reflexive |
 | *Reg.* | (in titles) *Register* |
-
-| | |
-| :--- | :--- |
 | reg. | regular |
 | rel. | related to |
 | *Reminisc.* | (in titles) *Reminiscence, -s* |
@@ -481,9 +439,7 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | Rom. | Roman, -ce, -ic |
 | Rum. | Rumanian |
 | Russ. | Russian |
-
 | | |
-| :--- | :--- |
 | S. | South |
 | *S. Afr.* | South Africa, -n |
 | *sb.* | substantive |
@@ -494,9 +450,6 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | *Sc. Nat. Dict.* | *Scottish National Dictionary* |
 | *Scotl.* | (in titles) *Scotland* |
 | *Sel.* | (in titles) *Selection, -s* |
-
-| | |
-| :--- | :--- |
 | Ser. | Series |
 | sing. | singular |
 | *Sk.* | (in titles) *Sketch* |
@@ -505,9 +458,6 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | S.N.D. | *Scottish National Dictionary* |
 | *Soc.* | (in titles) *Society* |
 | *Sociol.* | (as label) in Sociology;<br>&nbsp;&nbsp;(in titles) *Sociology, -ical* |
-
-| | |
-| :--- | :--- |
 | Sp. | Spanish |
 | *Sp.* | (in titles) *Speech, -es* |
 | sp. | spelling |
@@ -516,4 +466,78 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | St. | Saint |
 | *Stand.* | (in titles) *Standard* |
 | *Stanf.* | (quoted from) *Stanford*<br>&nbsp;&nbsp;*Dictionary of Anglicised*<br>&nbsp;&nbsp;*Words & Phrases* |
-
+| str. | strong |
+| *Struct.* | (in titles) *Structure, -al* |
+| *Stud.* | (in titles) *Studies* |
+| subj. | subject |
+| *subord. cl.* | subordinate clause |
+| subseq. | subsequent, -ly |
+| subst. | substantively |
+| *suff.* | suffix |
+| superl. | superlative |
+| Suppl. | Supplement |
+| *Surg.* | (as label) in Surgery;<br>&nbsp;&nbsp;(in titles) *Surgery, Surgical* |
+| s.v. | *sub voce*, ‘under the word’ |
+| Sw. | Swedish |
+| s.w. | south-western (dialect) |
+| *Syd. Soc. Lex.* | *Sydenham Society, Lexicon of Medicine & Allied Sciences* |
+| syll. | syllable |
+| Syr. | Syrian |
+| *Syst.* | (in titles) *System, -atic* |
+| | |
+| *Taxon.* | (in titles) *Taxonomy, -ical* |
+| techn. | technical, -ly |
+| *Technol.* | (in titles) *Technology, -ical* |
+| *Telegr.* | in Telegraphy |
+| *Teleph.* | in Telephony |
+| (Th.), | (quoted from) Thornton’s<br>&nbsp;&nbsp;*American Glossary* |
+| *Theatr.* | in the Theatre, theatrical |
+| *Theol.* | (as label) in Theology;<br>(in titles) *Theology, -ical* |
+| *Theoret.* | (in titles) *Theoretical* |
+| Tokh. | Tokharian |
+| tr., transl. | translated, translation |
+| *Trans.* | (in titles) *Transactions* |
+| *trans.* | transitive |
+| *transf.* | transferred sense |
+| *Trav.* | (in titles) *Travel(s)* |
+| *Treas.* | (in titles) *Treasury* |
+| *Treat.* | (in titles) *Treatise* |
+| *Treatm.* | (in titles) *Treatment* |
+| *Trig.* | in Trigonometry |
+| *Trop.* | (in titles) *Tropical* |
+| Turk. | Turkish |
+| *Typog., Typogr.* | in Typography |
+| | |
+| ult. | ultimately |
+| *Univ.* | (in titles) *University* |
+| unkn. | unknown |
+| *U.S.* | United States |
+| U.S.S.R. | Union of Soviet Socialist<br>&nbsp;&nbsp;Republics |
+| usu. | usually |
+| | |
+| *v.*, vb. | verb |
+| var(r)., vars. | variant(s) of |
+| *vbl. sb.* | verbal substantive |
+| *Vertebr.* | (in titles) *Vertebrate, -s* |
+| *Vet.* | (as label) in Veterinary Science;<br>(in titles) *Veterinary* |
+| *Vet. Sci.* | in Veterinary Science |
+| viz. | *videlicet*, ‘namely’ |
+| *Voy.* | (in titles) *Voyage, -s* |
+| *v.str.* | strong verb |
+| vulg. | vulgar |
+| *v.w.* | weak verb |
+| | |
+| W. | Welsh; West |
+| wd. | word |
+| Webster | *Webster’s (New International) Dictionary* |
+| *Westm.* | (in titles) *Westminster* |
+| WGmc. | West Germanic |
+| *Wks.* | (in titles) *Works* |
+| w.midl. | west midland (dialect) |
+| WS. | West Saxon |
+| | |
+| (Y.), | (quoted from) Yule &<br>&nbsp;&nbsp;Burnell’s *Hobson-Jobson* |
+| *Yrs.* | (in titles) *Years* |
+| | |
+| *Zoogeogr.* | in Zoogeography |
+| *Zool.* | (as label) in Zoology;<br>(in titles) *Zoology, -ical* |
