@@ -56,6 +56,8 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | *Austral.* | Australian |
 | *Autobiogr.* | (in titles) *Autobiography,*<br>&nbsp;&nbsp;*-ical* |
 | A.V. | Authorized Version |
+
+| | |
 | :--- | :--- |
 | B.C. | Before Christ |
 | B.C. | (in titles) British Columbia |
@@ -69,6 +71,8 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | *Brit.* | (in titles) *Britain, British* |
 | Bulg. | Bulgarian |
 | *Bull.* | (in titles) *Bulletin* |
+
+| | |
 | :--- | :--- |
 | *c* (as *c* 1700) | *circa*, ‘about’ |
 | c. (as 19th c.) | century |
@@ -122,6 +126,8 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | *Cryst.* | in Crystallography |
 | *Cycl.* | (in titles) *Cyclopædia, -ic* |
 | *Cytol.* | (in titles) *Cytology, -ical* |
+
+| | |
 | :--- | :--- |
 | Da. | Danish |
 | D.A. | *Dictionary of Americanisms* |
@@ -143,6 +149,8 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | *Diss.* | (in titles) *Dissertation* |
 | D.O.S.T. | *Dictionary of the Older*<br>&nbsp;&nbsp;*Scottish Tongue* |
 | Du. | Dutch |
+
+| | |
 | :--- | :--- |
 | E. | East |
 | *Eccl.* | (as label) in Ecclesiastical<br>&nbsp;&nbsp;usage;<br>(in titles) *Ecclesiastical* |
@@ -178,6 +186,8 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | *Exerc.* | (in titles) *Exercise, -s* |
 | *Exper.* | (in titles) *Experiment, -al* |
 | *Explor.* | (in titles) *Exploration, -s* |
+
+| | |
 | :--- | :--- |
 | f. | feminine |
 | f. (in Etym.) | formed on |
@@ -193,6 +203,8 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | Fris. | Frisian |
 | *Fund.* | (in titles) *Fundamental, -s* |
 | Funk or<br>Funk's Stand.<br>&nbsp;&nbsp;Dict. | *Funk and Wagnalls*<br>&nbsp;&nbsp;*Standard Dictionary* |
+
+| | |
 | :--- | :--- |
 | G. | German |
 | Gael. | Gaelic |
@@ -212,6 +224,8 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | Gr. | Greek |
 | *Gram.* | (as label) in Grammar;<br>(in titles) *Grammar, -tical* |
 | Gt. | Great |
+
+| | |
 | :--- | :--- |
 | Heb. | Hebrew |
 | *Her.* | in Heraldry |
@@ -223,6 +237,8 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | *Hort.* | in Horticulture |
 | *Househ.* | (in titles) *Household* |
 | *Housek.* | (in titles) *Housekeeping* |
+
+| | |
 | :--- | :--- |
 | *Ibid.* | *Ibidem*, ‘in the same book or<br>&nbsp;&nbsp;passage’ |
 | Icel. | Icelandic |
@@ -250,6 +266,8 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | Ir. | Irish |
 | irreg. | irregular, -ly |
 | It. | Italian |
+
+| | |
 | :--- | :--- |
 | J., (J.) | (quoted from) Johnson's<br>&nbsp;&nbsp;*Dictionary* |
 | (Jam.) | Jamieson, *Scottish Dict.* |
@@ -257,8 +275,12 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | joc. | jocular, -ly |
 | *Jrnl.* | (in titles) *Journal* |
 | *Jun.* | (in titles) *Junior* |
+
+| | |
 | :--- | :--- |
 | *Knowl.* | (in titles) *Knowledge* |
+
+| | |
 | :--- | :--- |
 | l. | line |
 | L. | Latin |
@@ -271,6 +293,8 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | *Lit.* | Literary |
 | Lith. | Lithuanian |
 | LXX | Septuagint |
+
+| | |
 | :--- | :--- |
 | m. | masculine |
 | *Mag.* | (in titles) *Magazine* |
@@ -304,6 +328,8 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | *Mus.* | (as label) in Music;<br>(in titles) *Music, -al;*<br>&nbsp;&nbsp;*Museum* |
 | *Myst.* | (in titles) *Mystery* |
 | *Mythol.* | in Mythology |
+
+| | |
 | :--- | :--- |
 | N. | North |
 | n. | neuter |
@@ -328,6 +354,8 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | *Numism.* | in Numismatics |
 | N.W. | North West |
 | *N.Z.* | New Zealand |
+
+| | |
 | :--- | :--- |
 | obj. | object |
 | obl. | oblique |
@@ -352,6 +380,8 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | O.T. | Old Testament |
 | *Outl.* | (in titles) *Outline* |
 | *Oxf.* | (in titles) *Oxford* |
+
+| | |
 | :--- | :--- |
 | p. | page |
 | *Palæogr.* | in Palæography |
@@ -413,10 +443,14 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | *Psych.* | in Psychology |
 | *Psychol.* | (as label) in Psychology;<br>(in titles) *Psychology, -ical* |
 | *Publ.* | (in titles) *Publications* |
+
+| | |
 | :--- | :--- |
 | *Q.* | (in titles) *Quarterly* |
 | quot(s). | quotation(s) |
 | q.v. | *quod vide*, ‘which see’ |
+
+| | |
 | :--- | :--- |
 | *R.* | (in titles) *Royal* |
 | *Radiol.* | in Radiology |
@@ -439,6 +473,8 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | Rom. | Roman, -ce, -ic |
 | Rum. | Rumanian |
 | Russ. | Russian |
+
+| | |
 | :--- | :--- |
 | S. | South |
 | *S. Afr.* | South Africa, -n |
@@ -484,6 +520,8 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | syll. | syllable |
 | Syr. | Syrian |
 | *Syst.* | (in titles) *System, -atic* |
+
+| | |
 | :--- | :--- |
 | *Taxon.* | (in titles) *Taxonomy, -ical* |
 | techn. | technical, -ly |
@@ -507,6 +545,8 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | *Trop.* | (in titles) *Tropical* |
 | Turk. | Turkish |
 | *Typog., Typogr.* | in Typography |
+
+| | |
 | :--- | :--- |
 | ult. | ultimately |
 | *Univ.* | (in titles) *University* |
@@ -514,6 +554,8 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | *U.S.* | United States |
 | U.S.S.R. | Union of Soviet Socialist<br>&nbsp;&nbsp;Republics |
 | usu. | usually |
+
+| | |
 | :--- | :--- |
 | *v.*, vb. | verb |
 | var(r)., vars. | variant(s) of |
@@ -526,6 +568,8 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | *v.str.* | strong verb |
 | vulg. | vulgar |
 | *v.w.* | weak verb |
+
+| | |
 | :--- | :--- |
 | W. | Welsh; West |
 | wd. | word |
@@ -535,9 +579,13 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | *Wks.* | (in titles) *Works* |
 | w.midl. | west midland (dialect) |
 | WS. | West Saxon |
+
+| | |
 | :--- | :--- |
 | (Y.), | (quoted from) Yule &<br>&nbsp;&nbsp;Burnell’s *Hobson-Jobson* |
 | *Yrs.* | (in titles) *Years* |
+
+| | |
 | :--- | :--- |
 | *Zoogeogr.* | in Zoogeography |
 | *Zool.* | (as label) in Zoology;<br>(in titles) *Zoology, -ical* |
