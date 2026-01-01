@@ -41,6 +41,8 @@ Tʜᴇ pronunciations given are those in use in the educated speech of southern 
 
 b, d, f, k, l, m, n, p, t, v, z *have their usual English values*
 
+
+| :--- | :--- | :--- |
 | g as in go (gəʊ) | θ as in *thin* (θɪn), *bath* (bɑ:θ) | (FOREIGN AND NON-SOUTHERN) |
 | h ... *ho!* (həʊ) | ð ... *then* (ðɛn), *bathe* (beɪð) | ʎ as in It. *serraglio* (ser'raʎo) |
 | r ... *run* (rʌn), *terrier* ('tεrɪə(r)) | ʃ ... *shop* (ʃɒp), *dish* (dɪʃ) | ɲ ... Fr. *cognac* (kɔɲak) |
