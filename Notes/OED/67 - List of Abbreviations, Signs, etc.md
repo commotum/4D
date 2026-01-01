@@ -200,3 +200,53 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | gen. | genitive |
 | *gen.* | general, -ly |
 | *Geogr.* | (as label) in Geography;<br>(in titles) *Geography, -ical* |
+| *Geol.* | (as label) in Geology;<br>(in titles) *Geology, -ical* |
+| *Geom.* | in Geometry |
+| *Geomorphol.* | in Geomorphology |
+| Ger. | German |
+| Gloss. | Glossary |
+| Gmc. | Germanic |
+| Godef. | F. Godefroy, *Dictionnaire*<br>&nbsp;&nbsp;*de l'ancienne langue*<br>&nbsp;&nbsp;*française* |
+| Goth. | Gothic |
+| *Govt.* | (in titles) *Government* |
+| Gr. | Greek |
+| *Gram.* | (as label) in Grammar;<br>(in titles) *Grammar, -tical* |
+| Gt. | Great |
+| | |
+| Heb. | Hebrew |
+| *Her.* | in Heraldry |
+| *Herb.* | among herbalists |
+| Hind. | Hindustani |
+| *Hist.* | (as label) in History;<br>(in titles) *History, -ical* |
+| hist. | historical |
+| *Histol.* | (in titles) *Histology, -ical* |
+| *Hort.* | in Horticulture |
+| *Househ.* | (in titles) *Household* |
+| *Housek.* | (in titles) *Housekeeping* |
+| | |
+| *Ibid.* | *Ibidem*, ‘in the same book or<br>&nbsp;&nbsp;passage’ |
+| Icel. | Icelandic |
+| *Ichthyol.* | in Ichthyology |
+| id. | *idem*, ‘the same’ |
+| i.e. | *id est*, ‘that is’ |
+| IE. | Indo-European |
+| *Illustr.* | (in titles) *Illustration, -ted* |
+| imit. | imitative |
+| *Immunol.* | in Immunology |
+| imp. | imperative |
+| *impers.* | impersonal |
+| impf. | imperfect |
+| ind. | indicative |
+| indef. | indefinite |
+| *Industr.* | (in titles) *Industry, -ial* |
+| inf. | infinitive |
+| infl. | influenced |
+| *Inorg.* | (in titles) *Inorganic* |
+| *Ins.* | (in titles) *Insurance* |
+| *Inst.* | (in titles) *Institute, -tion* |
+| *int.* | interjection |
+| *intr.* | intransitive |
+| *Introd.* | (in titles) *Introduction* |
+| Ir. | Irish |
+| irreg. | irregular, -ly |
+| It. | Italian |
