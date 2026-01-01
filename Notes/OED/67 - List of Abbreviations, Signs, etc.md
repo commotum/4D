@@ -618,3 +618,4 @@ The printing of a word in SMALL CAPITALS indicates that further information will
 ## PROPRIETARY NAMES
 
 THIS Dictionary includes some words which are or are asserted to be proprietary names or trade marks. Their inclusion does not imply that they have acquired for legal purposes a non-proprietary or general significance nor any other judgement concerning their legal status. In cases where the editorial staff have established in the records of the Patent Offices of the United Kingdom and of the United States that a word is registered as a proprietary name or trade mark this is indicated, but no judgement concerning the legal status of such words is made or implied thereby.
+
