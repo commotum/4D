@@ -610,3 +610,11 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 
 * indicates a word or form not actually found, but of which the existence is inferred
 :— = normal development of
+
+The printing of a word in SMALL CAPITALS indicates that further information will be found under the word so referred to.
+.. indicates an omitted part of a quotation.
+**~** (in a quotation) indicates a hyphen doubtfully present in the original; (in other text) indicates a hyphen inserted only for the sake of a line-break.
+
+## PROPRIETARY NAMES
+
+THIS Dictionary includes some words which are or are asserted to be proprietary names or trade marks. Their inclusion does not imply that they have acquired for legal purposes a non-proprietary or general significance nor any other judgement concerning their legal status. In cases where the editorial staff have established in the records of the Patent Offices of the United Kingdom and of the United States that a word is registered as a proprietary name or trade mark this is indicated, but no judgement concerning the legal status of such words is made or implied thereby.
