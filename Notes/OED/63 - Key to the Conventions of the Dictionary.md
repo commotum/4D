@@ -186,3 +186,16 @@ Where many combinations are treated together, the quotations illustrating each a
 
 For an explanation of the typographical conventions used in quotations, see p. xxx.
 
+#### Superior numbers
+
+Superior numbers are used to distinguish homonyms (see alphabetical order above) and after the labels *Obs.* and *rare* to indicate words or senses for which only one (-¹) or no (-⁰) contextual example from a printed source was available to the editors.
+
+#### Variant forms
+
+Variant forms of a word are printed in light bold type, and are introduced by ‘Also’ or ‘Forms’:
+
+> || **abaca** ('æbəkə). Also **abaka**. The native name of the palm (*Musa textilis*) which furnishes what is commonly known as Manilla Hemp; [etc.]
+>
+> **aback** (ə'bæk), *adv.* Forms: 1 **on bæc**; 2 **a bec**; 2-3 **on bak**, **o bak**; 2-5 **a bak**, **abak**; 4-8 **a-back(e**, **abacke**; 6- **aback**. [OE. *on* prep. *bæc* sb. = unto [etc.]
+
+Numerals are used before variant forms to indicate the century during which a particular form is recorded: see p. xxvii.
