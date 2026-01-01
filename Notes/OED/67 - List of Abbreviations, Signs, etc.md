@@ -589,3 +589,24 @@ Some abbreviations listed here in italics are also in certain cases printed in r
 | :--- | :--- |
 | *Zoogeogr.* | in Zoogeography |
 | *Zool.* | (as label) in Zoology;<br>(in titles) *Zoology, -ical* |
+
+***Signs and Other Conventions***
+
+**Before a word or sense**
+
+† = obsolete
+|| = not naturalized, alien
+¶ = catachrestic and erroneous uses
+
+**In the listing of Forms**
+
+* **1** = before **1100**
+* **2** = **12th c.** (**1100** to **1200**)
+* **3** = **13th c.** (**1200** to **1300**), etc.
+* **5-7** = **15th** to **17th century**
+* **20** = **20th century**
+
+**In the etymologies**
+
+* indicates a word or form not actually found, but of which the existence is inferred
+:— = normal development of
