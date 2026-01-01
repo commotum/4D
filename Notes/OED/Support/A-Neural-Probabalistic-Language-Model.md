@@ -29,3 +29,10 @@ The dog was walking in the room
 ```
 
 and many other combinations. In the proposed model, it will so generalize because “similar” words are expected to have a similar feature vector, and because the probability function is a *smooth* function of these feature values, a small change in the features will induce a small change in the probability. Therefore, the presence of only one of the above sentences in the training data will increase the probability, not only of that sentence, but also of its combinatorial number of “neighbors” in sentence space (as represented by sequences of feature vectors).
+
+
+---
+
+# The feature vectors associated with each word are learned, but they could be initialized using prior knowledge of semantic features.
+
+---
