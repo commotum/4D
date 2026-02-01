@@ -1,5 +1,5 @@
 ---
-title: "4D Generalized RoPE Model"
+title: "MonSTER Models are Domain-Agnostic Multitask Learners"
 source: "https://chatgpt.com/c/697f3140-f0b4-8322-a3dc-5798f16d3078"
 author:
   - "[[ChatGPT]]"
