@@ -23,7 +23,7 @@ an additional positional
 encoding mechanism of some form. 
 
 
- some form of additional 
+some form of additional 
 addition of have no 
 built-in sense of order or geometry
 
