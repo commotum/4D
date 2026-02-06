@@ -1,0 +1,203 @@
+(Transcribed by TurboScribe.ai. Go Unlimited to remove this message.)
+
+Good morning, everyone. I'm really happy to be here to talk to you all and tell you, because today I'm going to tell you I'm going to announce a breakthrough in reinforcement learning. I've been working on this for a long time, maybe 15 years.
+
+And we've finally gotten to the point where I'm comfortable saying that I think we might have solved this outstanding open problem of off-policy learning. So first, let me acknowledge my massive friends and colleagues, and five of whom are here. Hamid is here, and Chab are here.
+
+They just asked the last two questions. Doina, of course. Shilab is visiting us from India this year.
+
+David Silver, Chab I said, and Eric Wewora. So a breakthrough in reinforcement learning. Um, this thing doesn't work.
+
+OK. So the breakthrough, basically, it's a simple thing to say. It's basically that temporal difference learning with function approximation is now straightforward, as straightforward as it is with supervised learning.
+
+Sometimes we can, I think we're finally fulfilling the promise of the phrase in neurodynamic programming. We can do function approximation as it is done in neural networks, gradient descent methods, and by extension in others. And we can do it by gradient descent with this novel Bell-Dolman error.
+
+OK, so a breakthrough. So a breakthrough is not necessarily an instantaneous thing, at least not in my experience. In this case, it's been going on for over a year already, and it'll probably go on for several more years.
+
+But we have enough experience with the algorithms. We've been able to show empirically that they're efficient, as well as having the theoretical results, the new convergence results that give us much more robust, reliable convergence. So limitations for this paper, I should acknowledge right at the beginning, we're talking about linear function approximation, we're talking about one-step TD methods, and we're talking about prediction, not control.
+
+So that's for this paper, but in our ongoing work, we are rapidly generalizing this and removing all these limitations. OK, so the keys, there's just two keys. And at the end here, it's going to be, it really feels very simple.
+
+I hope to communicate that. And in the talk, I'm going to just talk about these two key techniques to make it work. So the key is there's a new Bellman objective function, and there's a new algorithmic trick that's based on first introduced in prior work.
+
+So the outline then, I'm going to talk a little bit, I think you all have a sense of how function approximation, once you introduce TD, is not entirely straightforward. It's a little bit fragile, it's a little bit tricky. But I'm going to spend just a couple slides on that, and then I'll emphasize the two things, the new Bellman objective function and the algorithmic trick, and then show the results.
+
+So TD with function approximation, not straightforward. Well, the classic counterexample, Dewey-Baird, showing that linear TD learning, which includes Q-learning in this case, so it can diverge. There was a talk the other day where someone said that Q-learning is very well understood, has very good convergence properties.
+
+Well, it doesn't. It actually will diverge. It's not sound method when used with even linear function approximation.
+
+Table lookup is fine, but OK, we can't do table lookup all our lives. We want to do AI, we want to do large problems. We have to get reinforcement, it has to move beyond table lookup methods.
+
+In the nonlinear case, then even in regular on-policy learning, we'll get divergence. So linear, it's even worse. In fact, the way to think about it is that we only have assured convergence.
+
+We only have sound algorithms in one very important, but one special case. And that's the case with linear function approximation and where you're trying to follow and learn about the same policy. That's what on-policy learning just means.
+
+OK, I'm trying to learn the right way to behave, for example, and I'm actually behaving that way. Whereas in Q-learning, of course, you will behave in a more exploratory fashion while trying to compute the value of the greedy policy. So that's off-policy.
+
+Now, there are lots of different kinds of solutions. I've worked on a bunch of different solutions. I've published two previous ICML papers with partial solutions and NIPS papers.
+
+And we had just heard about the second order methods, least squares LSTD. And those methods are too complex, or at least we're trying to do something more complex. TD learning, like TD lambda, is order, I'm going to say order n, for n being the number of parameters.
+
+Whereas LS least squares methods are second order methods. They're order n squared. So it's n squared computation per time step.
+
+And we want to be order n. And finally, we've been able to do that. So another way of saying it is that the problem is there aren't any true gradient descent methods. Gradient descent methods are typically order n. And they give us reliable convergence under quite a wide variety of conditions.
+
+And you often think that the TD methods are gradient descent because they have a gradient in them. When you write the algorithm, there's a gradient in them. But they're not the gradient of an objective function.
+
+And in fact, they're not true gradient descent methods. If you're interested, there's actually a very simple proof that they are not the gradient of anything. And that's due to Etienne Barnard from 1993.
+
+OK, so here's the classic counterexample. Baird's counterexample is a simple Markov chain. It's just got these six or seven states that are all a bit similar to each other and similar to the bottom state.
+
+And all the transitions deterministically move to the bottom state, which stays with itself. So it's a simple. And each state has a feature vector that is then.
+
+So I'm just sketching it out here. So it's a linear function approximation. All the rewards are zero.
+
+The transitions are, in fact, all deterministic. We're going to use expected backups so that we backup the expected values, as in dynamic programming. And we update the states once in a sweep.
+
+And under these conditions, the weights will just diverge to infinity. The parameters will diverge to infinity, as shown in the red line here for TD. And the other lines are all for our new algorithms, which converge reliably to zero in the error.
+
+OK, so let's get to the thing. So I hope I've made it clear the idea. TD learning with function approximation is now relatively straightforward.
+
+And the two tricks, we're going to just spend maybe five minutes on each one of them. So the Bellman error objective function, the new objective function, as you know, particularly nowadays in machine learning, new objective functions make a big difference. It open up lots of different possibilities.
+
+So let's think about the Go example just to do the linear function approximation. I guess I can do this fairly quickly because of all that Zico set it up. Linear function approximation, we're typically dealing with large numbers of states, like AI has a large number of states, and computer Go, right, just a tiny part of life.
+
+It's a tiny part of the world. And yet, it itself involves vastly too many states. I was really struck by this yesterday when we hear so many talks with bounds, and the bounds had the number of states in the bounds.
+
+Like they were happy that it was only the square or the number of states, log number of states. But of course, the number of states is ridiculously large. And arguably, any bound that has the number of states in it is meaningless because there's no way we're going to be able to do anything order the number of states.
+
+So instead, we would use a bunch of parameters. We take features of the state, and we multiply them times some parameters. We find where the inner product, and then we compute an estimated value for the position.
+
+Some function, some prediction in particular could be a value. So 10 to the 5 here, 10 to the 6 maybe typically in Go would be the size of the feature vector, the number of parameters. And so not only do I not want to do the number of states, I don't want to be polynomial in the number of features.
+
+Well, one of the main points of this work is I don't want to be n squared. I want to be n. Don't want to be even polynomial even in the smaller number. And it matters.
+
+If you're going to arguably order n is the right thing. I'll just give a loose argument. So you have a machine.
+
+The machine's order is as big as size n. So you can have n parameters. And that means think about how computers work. You basically have as much computation per step as you have machinery.
+
+So if your order n, if your machine has n parameters n, you can probably do a little bit to each parameter in each moment in time. So per time step, order n computation is the goal. I'm going to have to just do a little bit of notation.
+
+And we have state transition. So we're going to be processing IID state transitions from state to state s to state s prime with a reward along the way. We're going to convert each one of those states to a feature vector.
+
+So we'll talk about phi and phi prime. These are both in r to the n, where n is much less than the number of states. Then we're going to compute our value function.
+
+So it's a value function parameterized by the parameter theta, where theta is the same size as the feature vectors. So for state, we'll take the parameter vector inner product. With the feature vector, that's the feature vector for the state s. So it's implicit.
+
+The notation has the state implicit in the feature vector. And so given that, we can make some algorithms. So this is the TD algorithm.
+
+First, we have the TD error. The delta TD error is the reward plus gamma. Gamma is a discount factor, slightly less than 1, times the value.
+
+This is the value of the next state, value of phi prime. And subtract out, compare that to the value of the preceding state. And then the TD algorithm is very simple, just the step size alpha times the TD error times the current feature vector.
+
+So that's a good touchstone as we look at the more complicated algorithm. The more complicated algorithm, yes, I confess, it is a more complicated algorithm. It's much more complex than this.
+
+The complexity of this is basically n. And the new algorithm is going to be 2n. So we're order n. And it's actually exactly twice the complexity. We have twice, we're going to have a second parameter.
+
+And we're going to have a separate second, unfortunately. Unfortunately, with the downside, we are going to have a second step size. But it's basically 2n.
+
+OK, so now the true values and the Bellman equation. So this equation gives us, this is the Bellman equation, v star, so the notation I'm going to use for the correct values, absolutely exact true values of a state. It's the expected reward plus the probable value of the next state.
+
+That's the Bellman equation. And this is often abstracted into what's called the Bellman operator, T. So this maps right on. These are vectors over states.
+
+These are giant vectors. But you can take a giant vector over states and look at the immediate reward vector, which is basically this, and then times the transition probability matrix. And that is basically looking forward one step.
+
+And so it's a way of writing the Bellman equation. And so v star is the unique solution to v star equals Tv star. And I wanted to bring that Bellman equation, because this is how I'm going to, or the T Bellman operation, because that's how I'm going to intuitively explain the objective function.
+
+Remember, that's where we're going. So we see this kind of diagram pretty often in the literature, where we have the space of all possible value functions. It's supposed to be represented by this space here.
+
+It's the space spanned by the feature vectors, weighted by the distribution with which you encounter the states. So any point in the space is going to be a value function, an approximate value function. Whereas the larger space, like into the third dimension, has all possible value functions.
+
+So a value function, in general, is a point in the big space, the space with a component for every state. So the true value function would be somewhere out in three-dimensional space. We can't reach it.
+
+We can't represent it with our value functions. But we can have points in the space. So this is an approximate value function.
+
+Now we project ahead with the Bellman operator, reaching towards, in some sense, some informal sense, towards v star. So we get, look ahead, Tv theta. This point is generally going to be outside the space.
+
+So we have to project it back into the space. And so that's pi Tv theta. And so then there's two distances involved.
+
+This is the Bellman error kind of distance. This is what I just said. And the Bellman error is what previous work has focused on.
+
+And it's a natural thing. But basically, the realization that I think we've come to is that this was just a mistake, that the correct measure was the measure after projection. How far have you had to move after projection? So we call this the mean square projected Bellman error.
+
+And that's the whole idea. So I'm going to hope to get a little bit deeper than that. But I guess I'm going to go fairly quickly.
+
+So I'm going to show here's three objective functions. First is error from the true value. So v theta minus v star, this is the natural, often used as a ground truth, but maybe not.
+
+Anyway, it's clear it's not a Tv measure. It's not comparing the value of a state to the value of its successors. That's the temporal difference idea or the bootstrapping idea.
+
+The Bellman error is more like that. It's comparing v minus Tv. But the argument today is that it's not the correct one.
+
+And the projected Bellman error is arguably right. And so let's get a little intuition about this. This is the TD fixed point that Zico was talking about.
+
+So this is where all the TD methods, TD, LSTD, and the new algorithms I'm going to tell you about today, all had, in some sense, are heading for. So it's always been an objective. But it's not an objective because it's not a function that has degrees of value.
+
+It's just a target, a single point, a fixed point. And LSTD just computes this fixed point. And TD goes to that fixed point, but doesn't go down the gradient of anything.
+
+So the trick is to move from this point to an objective function. And we can see that, really, the new objective function, the projected Bellman error, is exactly turning that into an objective function. So I'm saying one is right and one is wrong.
+
+So I have to give you the example of that. So let's just switch to the example. So here we have a simple deterministic problem.
+
+We have a state A1 that goes to state B and then goes to an outcome of 1. You can think of it as a reward of 1 with 0 in the other places. And then we have a state A2 that goes to C and then to 0. So now these two states, A1 and A2, we're using function approximations. So they look the same.
+
+They have to be given the same value. And since half the time, let's assume half the time we start in A1, half the time we start in A2. So the value of A as a whole has got to be 1 half.
+
+That's obvious. And also obvious, I think, is the value of state B, which is not confused with any other states, should be 1. And C should be 0. But if you just minimize the Bellman error, what's been traditionally viewed as the objective, you don't get those values. You get sort of intermediate values.
+
+You get values that sort of like this. It's just like saying, well, A has to be 1 half. And I don't like this error.
+
+This is like an error I'm shifting from A to B. And I don't like this one. And so I'm going to split the overall error from this 1 half to the 1 to be 1 quarter here and 1 quarter here. Mean square prefers that rather than then to have all the way up to 1 and then a 0. And if you just do the calculations, just the regular Bellman error criterion will just be minimized at these intermediate values.
+
+And that's why it's wrong. Whereas TD, of course, will find B equals 1 and C equals 0. And so will the new algorithms. OK, so just to finish that off, there's another couple of observations we can make.
+
+I've rewritten the TD solution not just as a fixed point but as the expected value of the change in theta under TD. I don't know if everyone can see that. But the expected value of the change under TD being 0. And so that's really what motivated our prior work, which just said, well, if the expected change in the theta being 0 is the fixed point, then let's just look at the size of the change and make that the objective function, the norm of the expected TD update.
+
+And that's how we did in previous work. And the insight in this paper was to move to the other objective function above. And this gave us much more efficient algorithms, as you'll see.
+
+OK, and this other measure is often thought of. You may often think of, well, let's just make the TD error 0. That's also known not to be correct, even though it's used in residual gradient algorithms. OK, so that's the first main thing I wanted to do.
+
+And I have two minutes to do the last bit. So that's OK. I knew I wasn't.
+
+So gradient descent, you just have your objective function. You compute the gradient. And you step down it.
+
+And you can fairly straightforwardly. It's probably best that I don't have time to go through this. But you can start with delta theta equals 1 half the gradient minus the gradient of the subjective function, J, which is the projected Bellman error.
+
+And you can just go step by step with calculus and end up down at the bottom as a, like, the ultimate problem that's held things back is that we need to sample these expectations. And we have a product of expectations, which is difficult to sample, impossible to sample by with a single sample. And the trick is that we take a group of expectations.
+
+And we compute it separately as a separate set of weights, w. And then we can just, if we can estimate those separately, we can then sample the remaining expectations to get the algorithm. So this is the algorithm where the two expectations are just, you just remove them with a sample because they're not being multiplied anymore. Safe to do.
+
+So let's take a closer look at that algorithm. We have an update for theta and an update for w. And the update for theta is, that part should be familiar from the very beginning. That's the TD update.
+
+And now we're just adding in the second a gradient correction term. The second set of weights learns an estimate of the TD error. So now phi times w, the second set of weights, you see there's an error between that computed, the thing computed with the second set of weights and delta.
+
+So it's basically trying to match delta. So let me show the results. This can be done quite quickly.
+
+There are basically three algorithms, the older algorithm, GTD. On empirical results, we've just done a bunch of small problems. And we basically find an ordering.
+
+So all these panels have, here's some learning curves. And we see the old algorithm is relatively slow. And the new ones are faster, very close to TD.
+
+Some places that we'd even actually do better than TD. But the general summary is that the older algorithm is significantly slower than the new ones. And we're comparable with TD, or better.
+
+And this is the one larger experiment we've done, which is in Computer Go. So we've actually done some Computer Go, 9x9 Computer Go, where we're learning the value function. We have a million features.
+
+And we're able to show essentially the same pattern, and that our speeds are comparable to conventional TD. And all this is on policy. So the conclusions there is that the new algorithms are roughly the same efficiency as conventional TD.
+
+So we can replace TD now with something that is sound in the general case. They're guaranteed convergent under the off-policy case as well. You saw the initial example.
+
+And it extends, because it's gradient descent, it's a very simple, straightforward proof procedure, convergence procedure. So it's going to be straightforward to extend them to these other cases, to the control case, to general lambda, to non-linear function approximators. We're doing that right now.
+
+It should also extend to just general dynamic programming, not just to temporal difference learning. It should generalize to intra-option learning and to TD nets. So that's our summary that TD learning with function approximation is now straightforward.
+
+And I'm thinking this may really get us to the place where the curse of dimensionality has been lifted. Thank you very much. I think we're running a bit late, so let's just take one question.
+
+Yeah, if you want to step straight up. Really? I have a question. Nobody else? Mohamed? Go, go, go.
+
+So I saw some divergence in the goal algorithm for your Yes. So I think, except that TDC, the others had some divergence. That's the limitation.
+
+The what? I'm talking about the learning rate back there. Oh, the rate. So that's actually, there's no stochasticity in that, probably, because it's expected backups.
+
+And so, yeah, there isn't really much to say about the rate of convergence, just that they all converge. OK, let's thank our speaker. You guys can talk.
+
+Thank you.
+
+(Transcribed by TurboScribe.ai. Go Unlimited to remove this message.)
