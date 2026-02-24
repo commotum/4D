@@ -1,0 +1,354 @@
+{
+  "table_of_contents": [
+    {
+      "title": "Human Brain Computational Capacity: Exaflop-\nLevel Estimates",
+      "heading_level": null,
+      "page_id": 0,
+      "polygon": [
+        [
+          76.5,
+          118.72265625
+        ],
+        [
+          501.0,
+          118.72265625
+        ],
+        [
+          501.0,
+          159.75
+        ],
+        [
+          76.5,
+          159.75
+        ]
+      ]
+    },
+    {
+      "title": "Overview of Brain FLOPS Estimates",
+      "heading_level": null,
+      "page_id": 0,
+      "polygon": [
+        [
+          76.5,
+          183.3046875
+        ],
+        [
+          314.25,
+          183.3046875
+        ],
+        [
+          314.25,
+          194.25
+        ],
+        [
+          76.5,
+          194.25
+        ]
+      ]
+    },
+    {
+      "title": "Exaflop-Scale Requirements for Brain Simulation",
+      "heading_level": null,
+      "page_id": 0,
+      "polygon": [
+        [
+          76.5,
+          499.640625
+        ],
+        [
+          405.75,
+          499.640625
+        ],
+        [
+          405.75,
+          515.109375
+        ],
+        [
+          76.5,
+          515.109375
+        ]
+      ]
+    },
+    {
+      "title": "Brain's Performance vs Modern Computers",
+      "heading_level": null,
+      "page_id": 1,
+      "polygon": [
+        [
+          77.25,
+          266.8359375
+        ],
+        [
+          367.5,
+          266.8359375
+        ],
+        [
+          367.5,
+          280.7578125
+        ],
+        [
+          77.25,
+          280.7578125
+        ]
+      ]
+    },
+    {
+      "title": "Expert Perspectives and Upper-Bound Claims",
+      "heading_level": null,
+      "page_id": 2,
+      "polygon": [
+        [
+          77.25,
+          171.703125
+        ],
+        [
+          382.5,
+          171.703125
+        ],
+        [
+          382.5,
+          185.625
+        ],
+        [
+          77.25,
+          185.625
+        ]
+      ]
+    },
+    {
+      "title": "Conclusion: Exaflop Brain - Context and Caveats",
+      "heading_level": null,
+      "page_id": 2,
+      "polygon": [
+        [
+          76.5,
+          623.390625
+        ],
+        [
+          402.75,
+          623.390625
+        ],
+        [
+          402.75,
+          638.859375
+        ],
+        [
+          76.5,
+          638.859375
+        ]
+      ]
+    },
+    {
+      "title": "Sources:",
+      "heading_level": null,
+      "page_id": 3,
+      "polygon": [
+        [
+          76.5,
+          374.25
+        ],
+        [
+          117.0,
+          375.0
+        ],
+        [
+          117.0,
+          383.25
+        ],
+        [
+          76.5,
+          382.8515625
+        ]
+      ]
+    }
+  ],
+  "page_stats": [
+    {
+      "page_id": 0,
+      "text_extraction_method": "surya",
+      "block_counts": [
+        [
+          "Line",
+          45
+        ],
+        [
+          "Span",
+          42
+        ],
+        [
+          "SectionHeader",
+          3
+        ],
+        [
+          "Text",
+          3
+        ],
+        [
+          "Picture",
+          1
+        ],
+        [
+          "PageFooter",
+          1
+        ]
+      ],
+      "block_metadata": {
+        "llm_request_count": 0,
+        "llm_error_count": 0,
+        "llm_tokens_used": 0,
+        "previous_text": "",
+        "previous_type": "",
+        "previous_order": 0
+      }
+    },
+    {
+      "page_id": 1,
+      "text_extraction_method": "surya",
+      "block_counts": [
+        [
+          "Span",
+          54
+        ],
+        [
+          "Line",
+          48
+        ],
+        [
+          "Text",
+          3
+        ],
+        [
+          "SectionHeader",
+          1
+        ],
+        [
+          "PageFooter",
+          1
+        ]
+      ],
+      "block_metadata": {
+        "llm_request_count": 0,
+        "llm_error_count": 0,
+        "llm_tokens_used": 0,
+        "previous_text": "",
+        "previous_type": "",
+        "previous_order": 0
+      }
+    },
+    {
+      "page_id": 2,
+      "text_extraction_method": "surya",
+      "block_counts": [
+        [
+          "Line",
+          49
+        ],
+        [
+          "Span",
+          46
+        ],
+        [
+          "Text",
+          4
+        ],
+        [
+          "SectionHeader",
+          2
+        ],
+        [
+          "PageFooter",
+          1
+        ]
+      ],
+      "block_metadata": {
+        "llm_request_count": 0,
+        "llm_error_count": 0,
+        "llm_tokens_used": 0,
+        "previous_text": "",
+        "previous_type": "",
+        "previous_order": 0
+      }
+    },
+    {
+      "page_id": 3,
+      "text_extraction_method": "surya",
+      "block_counts": [
+        [
+          "Line",
+          53
+        ],
+        [
+          "Span",
+          40
+        ],
+        [
+          "ListItem",
+          7
+        ],
+        [
+          "Text",
+          4
+        ],
+        [
+          "SectionHeader",
+          1
+        ],
+        [
+          "PageFooter",
+          1
+        ],
+        [
+          "ListGroup",
+          1
+        ]
+      ],
+      "block_metadata": {
+        "llm_request_count": 0,
+        "llm_error_count": 0,
+        "llm_tokens_used": 0,
+        "previous_text": "",
+        "previous_type": "",
+        "previous_order": 0
+      }
+    },
+    {
+      "page_id": 4,
+      "text_extraction_method": "surya",
+      "block_counts": [
+        [
+          "Line",
+          28
+        ],
+        [
+          "Span",
+          12
+        ],
+        [
+          "ListItem",
+          5
+        ],
+        [
+          "Text",
+          5
+        ],
+        [
+          "ListGroup",
+          2
+        ],
+        [
+          "PageFooter",
+          1
+        ]
+      ],
+      "block_metadata": {
+        "llm_request_count": 0,
+        "llm_error_count": 0,
+        "llm_tokens_used": 0,
+        "previous_text": "",
+        "previous_type": "",
+        "previous_order": 0
+      }
+    }
+  ],
+  "debug_data_path": "debug_data/Human Brain Computational Capacity_ Exaflop-Level Estimates"
+}
