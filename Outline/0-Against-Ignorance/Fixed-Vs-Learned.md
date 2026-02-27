@@ -1,0 +1,1 @@
+The transformer, in particular GPT, can be seen as the culmination of an evolutionary process that embroils the community within a debate over which values given a model should be fixed, and which should be learned. 
