@@ -8,16 +8,16 @@ If the goal is **a stable geometric contract that enables broad generalization a
 
 A **geometric contract** is an agreement between:
 
-- the *world* (space, time, objects, viewpoints), and
-- the *model* (tokens, attention, memory, computation),
+* the *world* (space, time, objects, viewpoints), and
+* the *model* (tokens, attention, memory, computation),
 
 such that **geometric transformations in the world induce predictable, low-cost transformations in computation**.
 
 Language has this:
 
-- reordering → attention shifts
-- syntax → locality patterns
-- discourse → long-range attention
+* reordering → attention shifts
+* syntax → locality patterns
+* discourse → long-range attention
 
 Vision does not—yet.
 
@@ -27,38 +27,38 @@ Vision does not—yet.
 
 Vision violates three assumptions implicit in the transformer interface:
 
-### 1) Multiplicity of reference frames
+### 1) **Multiplicity of reference frames**
 
 Vision simultaneously cares about:
 
-- image coordinates
-- object-local coordinates
-- camera/view coordinates
-- scene/world coordinates
-- temporal coordinates
+* image coordinates
+* object-local coordinates
+* camera/view coordinates
+* scene/world coordinates
+* temporal coordinates
 
 A flat positional encoding must choose one *privileged* frame. Any choice is wrong some of the time.
 
-### 2) Variable cardinality and granularity
+### 2) **Variable cardinality and granularity**
 
-Objects appear, disappear, merge, split, and recur.  
+Objects appear, disappear, merge, split, and recur.
 Tokens want to represent:
 
-- pixels
-- patches
-- objects
-- parts
-- trajectories
+* pixels
+* patches
+* objects
+* parts
+* trajectories
 
 A fixed tokenization + index scheme can’t change granularity without re-encoding the entire scene.
 
-### 3) Relational meaning dominates absolute location
+### 3) **Relational meaning dominates absolute location**
 
 For most vision reasoning:
 
-- “left of”, “same object as”, “corresponds to in next frame”  
-	matter more than
-- “token index 1532”
+* “left of”, “same object as”, “corresponds to in next frame”
+  matter more than
+* “token index 1532”
 
 A contract built around absolute indices forces the model to *derive* relations indirectly.
 
@@ -70,17 +70,17 @@ Positional encoding is where the contract *leaks*.
 
 Researchers keep asking:
 
-- absolute vs relative?
-- sinusoidal vs learned?
-- rotary vs ALiBi?
-- 2D vs 3D vs separable?
+* absolute vs relative?
+* sinusoidal vs learned?
+* rotary vs ALiBi?
+* 2D vs 3D vs separable?
 
 Because none of these choices:
 
-- eliminate padding and masking
-- reduce quadratic blowups
-- stabilize cross-resolution generalization
-- make correspondence cheap
+* eliminate padding and masking
+* reduce quadratic blowups
+* stabilize cross-resolution generalization
+* make correspondence cheap
 
 That’s the telltale sign of a missing contract.
 
@@ -92,21 +92,21 @@ A solved geometric contract would make the following *invariant or cheap*:
 
 ### Spatial guarantees
 
-- Translation, scaling, cropping → predictable token transformations
-- Resolution changes → no re-learning
-- Multi-view alignment → shared latent geometry
+* Translation, scaling, cropping → predictable token transformations
+* Resolution changes → no re-learning
+* Multi-view alignment → shared latent geometry
 
 ### Temporal guarantees
 
-- Variable frame rate → stable trajectories
-- Long-range correspondence → sparse, persistent links
-- Occlusion/reappearance → recoverable identity
+* Variable frame rate → stable trajectories
+* Long-range correspondence → sparse, persistent links
+* Occlusion/reappearance → recoverable identity
 
 ### Computational guarantees
 
-- Cost grows with *entities*, not *pixels*
-- Attention is mostly sparse by default
-- Grouping does not require re-encoding context
+* Cost grows with *entities*, not *pixels*
+* Attention is mostly sparse by default
+* Grouping does not require re-encoding context
 
 ---
 
@@ -118,10 +118,10 @@ Here’s the key insight:
 
 That doesn’t mean “throw away transformers,” but it does mean:
 
-- Tokens must be *addressable by relation*, not just index
-- Geometry must modulate *routing*, not just embeddings
-- Grouping must be explicit or cheaply emergent
-- Memory must persist across time and scale
+* Tokens must be *addressable by relation*, not just index
+* Geometry must modulate *routing*, not just embeddings
+* Grouping must be explicit or cheaply emergent
+* Memory must persist across time and scale
 
 In other words: **position becomes a property of interaction, not annotation**.
 
@@ -131,11 +131,11 @@ In other words: **position becomes a property of interaction, not annotation**.
 
 Despite many partial successes:
 
-- CNN equivariance is too rigid
-- Vision Transformers are too flat
-- Graph models lack scale and efficiency
-- Object-centric models struggle with realism
-- 3D/world models require supervision or sensors
+* CNN equivariance is too rigid
+* Vision Transformers are too flat
+* Graph models lack scale and efficiency
+* Object-centric models struggle with realism
+* 3D/world models require supervision or sensors
 
 No existing approach satisfies:
 
@@ -157,11 +157,12 @@ That’s a clean, defensible, and important framing.
 
 If you want to push this further, the natural next steps are:
 
-- formalizing *what invariances must be cheap*
-- identifying *which geometry should be explicit vs learned*
-- designing *benchmarks that break flat token models*
+* formalizing *what invariances must be cheap*
+* identifying *which geometry should be explicit vs learned*
+* designing *benchmarks that break flat token models*
 
 I’m happy to help with any of those directions.
+
 
 Good question — this is a subtle point, and it’s easy to overstate it if we’re not careful. Let me unpack exactly what I mean, and also where the analogy *breaks*.
 
@@ -179,20 +180,20 @@ The three bullets are shorthand for that alignment.
 
 In language:
 
-- Meaning is largely invariant to *where* words occur in absolute index
-- What matters is **relative order and dependency**
+* Meaning is largely invariant to *where* words occur in absolute index
+* What matters is **relative order and dependency**
 
 If you paraphrase a sentence or move a clause:
 
-- token identities stay the same
-- relative relations change in small, local ways
-- attention redistributes accordingly
+* token identities stay the same
+* relative relations change in small, local ways
+* attention redistributes accordingly
 
 Crucially:
 
-- the sequence order *is* the linguistic axis
-- “next token” is a meaningful primitive
-- attention shifting is exactly what’s needed
+* the sequence order *is* the linguistic axis
+* “next token” is a meaningful primitive
+* attention shifting is exactly what’s needed
 
 So when you reorder language, you’re not fighting the interface — you’re using it.
 
@@ -202,20 +203,20 @@ So when you reorder language, you’re not fighting the interface — you’re u
 
 Syntax induces **mostly local dependencies**:
 
-- determiners ↔ nouns
-- adjectives ↔ nouns
-- auxiliaries ↔ verbs
+* determiners ↔ nouns
+* adjectives ↔ nouns
+* auxiliaries ↔ verbs
 
 Transformers naturally express this as:
 
-- high attention weight to nearby tokens
-- occasional long jumps for movement or agreement
+* high attention weight to nearby tokens
+* occasional long jumps for movement or agreement
 
 This matches the model’s bias:
 
-- quadratic attention is affordable
-- locality emerges without enforcement
-- syntax trees are *implicit*, not simulated via padding or hacks
+* quadratic attention is affordable
+* locality emerges without enforcement
+* syntax trees are *implicit*, not simulated via padding or hacks
 
 The sequence is already the right topology.
 
@@ -225,21 +226,21 @@ The sequence is already the right topology.
 
 Discourse phenomena (coreference, topic continuity, causal chains):
 
-- are sparse
-- occur at low frequency
-- but require long-range links
+* are sparse
+* occur at low frequency
+* but require long-range links
 
 Transformers handle this well:
 
-- most attention is local
-- a few heads specialize in long-range jumps
-- cost grows, but meaningfully
+* most attention is local
+* a few heads specialize in long-range jumps
+* cost grows, but meaningfully
 
 Again, the *rare but important* long-range edges fit the attention pattern.
 
 ---
 
-## Why vision does not have this (yet)
+## Why vision does **not** have this (yet)
 
 Now contrast with vision.
 
@@ -247,9 +248,9 @@ Now contrast with vision.
 
 If you reorder image patches:
 
-- you destroy spatial adjacency
-- attention must *reconstruct* geometry
-- invariance is not free
+* you destroy spatial adjacency
+* attention must *reconstruct* geometry
+* invariance is not free
 
 There is no canonical “next patch” primitive.
 
@@ -259,12 +260,12 @@ There is no canonical “next patch” primitive.
 
 Vision locality depends on:
 
-- scale
-- object boundaries
-- depth
-- motion
+* scale
+* object boundaries
+* depth
+* motion
 
-Two nearby pixels might be unrelated.  
+Two nearby pixels might be unrelated.
 Two distant pixels might be the same object.
 
 So “local attention” is often *wrong*, and “global attention” is too expensive.
@@ -275,9 +276,9 @@ So “local attention” is often *wrong*, and “global attention” is too exp
 
 In vision:
 
-- object identity
-- correspondence across frames
-- part–whole relations
+* object identity
+* correspondence across frames
+* part–whole relations
 
 are **core**, not rare.
 
@@ -289,16 +290,16 @@ But attention treats them as expensive special cases.
 
 Language structure aligns with:
 
-- a 1D sequence
-- relative order
-- sparse long-range links
+* a 1D sequence
+* relative order
+* sparse long-range links
 
 Vision structure aligns with:
 
-- multi-frame geometry
-- dynamic grouping
-- reference-frame shifts
-- entity persistence
+* multi-frame geometry
+* dynamic grouping
+* reference-frame shifts
+* entity persistence
 
 Trying to express vision through a language-shaped interface causes friction.
 
@@ -308,8 +309,8 @@ So when I say *language has this*, I mean:
 
 That’s why:
 
-- positional encoding in language is boring and settled
-- positional encoding in vision is endlessly debated
+* positional encoding in language is boring and settled
+* positional encoding in vision is endlessly debated
 
 ---
 
@@ -317,13 +318,13 @@ That’s why:
 
 This does **not** mean:
 
-- language is solved
-- transformers are optimal
-- discourse/world modeling is easy
+* language is solved
+* transformers are optimal
+* discourse/world modeling is easy
 
 It means only that:
 
-- the **index-based attention interface is closer to the natural structure of language than to that of vision**
+* the **index-based attention interface is closer to the natural structure of language than to that of vision**
 
 That’s a contingent fact, not a theoretical guarantee.
 
