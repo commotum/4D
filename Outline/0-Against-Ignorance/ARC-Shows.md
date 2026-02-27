@@ -2,6 +2,12 @@ If you had to make the argument that the ARC-AGI challenge highlights the modern
 
 ---
 
+ARC-AGI highlights several shortcomings of the modern transformer stack:
+
+1. positional encoding flaws (anisotropic (diagonal), implicit address, fixed/ordered/static, dimensionality, no nesting or hierarchy of objects)
+2. vocab flaws (exploding vocab size, softmax, fixed vocab)
+3. 
+
 1. positional encoding for higher dimensions remains unsolved (hence the proliferation of so many adaptations, and the absence of a clear/dominant method. RoPE is there for 1D, but for 2D researchers continue to use row-major flattening, learned encodings for a fixed  context area, and the most prominent method, axial RoPE, simply factorizes the 1D case by splitting the embedding into 2 independent arrays, one for x, and one for y, which means it can't see diagonals)
 
 2. vocabulary sets balloon and take up large amounts of memory and are fixed (this is especially problematic when one considers that there are ~16 million RGB values, ~65,000 int values, and most SOTA LLMs have vocabs maxing out at around 200,000 tokens, and you have to remember the softmax at the end has to calculate the probability for each token, which takes O(n) time)
