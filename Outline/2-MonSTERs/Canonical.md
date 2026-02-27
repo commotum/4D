@@ -4,6 +4,28 @@ The absence of a canonical positional encoding in vision is a strong signal that
 
 DRAFTS:
 
+# MonSTERs for N-Dimension Attention
+
+# MonSTERs are n-Dimensional Multi-Task Learners
+
+# MonSTER Models Are N-Dimensional Multitask Reasoners
+
+# MonSTERs & More
+## Structural Encodings for Native 4-Dimension-Attention
+
+### Abstract
+
+- No dominant method for tasks beyond 1D / proliferation of variants
+- In single-task settings, the encoding method is inconsequential
+
+- Improvements to RoPE come in two flavors:
+   - Extensions
+   - Compromises
+   
+- Majority of researchers take the trade:
+   - Abandon structural constraint
+   - Implement task-specific improvement
+
 While RoPE has become the dominant positional encoding method for 1D tasks, no equivalent 
 
 The absence of a singular favored method for extending 
