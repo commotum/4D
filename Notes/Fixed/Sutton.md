@@ -1,14 +1,3 @@
----
-title: "ChatGPT"
-source: "https://chatgpt.com/g/g-p-67b2203a323081918f787aa12bdb7877/c/69911dcc-40d0-8322-89ba-c1e064f0f696"
-author:
-  - "[[ChatGPT]]"
-published:
-created: 2026-02-15
-description: "ChatGPT is your AI chatbot for everyday use. Chat with the most advanced AI to explore ideas, solve problems, and learn faster."
-tags:
-  - "clippings"
----
 I’ll pull authoritative publication lists (Sutton’s CV/homepage, Google Scholar, DBLP/Semantic Scholar) and merge them into one deduped list, then mark the “most significant” works (highly cited/award-winning/field-shaping) with quick notes and links.
 
 “Every significant paper” is a judgment call (Sutton has **hundreds** of publications). So I treated *significant* as: papers that (a) introduced a named idea/algorithm/framework that became standard in RL, (b) are canonical references in RL courses/texts, or (c) are major theoretical/architectural advances (especially around off-policy learning + function approximation). I cross-checked against Sutton’s DBLP bibliography. [DBLP](https://dblp.org/pid/48/6070)
