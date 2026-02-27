@@ -1,5 +1,7 @@
 # MonSTER Models are Domain-Agnostic Multitask Learners
 
+---
+
 ## Core Model Interface Claims
 
 The modern stack starts with:
@@ -19,6 +21,10 @@ At a high level, the baseline transformer interface assumes a predetermined, sta
 the predetermined vocabulary, within the predetermined window, by a static, fixed set of positional encodings, implicitly mapped to their tokens by index. 
 
 While researchers may modify x, y, and z, they rarely modify these 3 core elements as their interdependencies preclude isolated modification. 
+
+
+---
+
 
 ## Translation Tax / Triumvirate Framing
 
@@ -50,6 +56,10 @@ sway even one of them, cognizant of ....
 
 ever endeavor to seatun them from their rightful throne.
 
+
+---
+
+
 ## Enumerated Weaknesses
 
 1. positional encoding for higher dimensions remains unsolved (hence the proliferation of so many adaptations, and the absence of a clear/dominant method. RoPE is there for 1D, but for 2D researchers continue to use row-major flattening, learned encodings for a fixed  context area, and the most prominent method, axial RoPE, simply factorizes the 1D case by splitting the embedding into 2 independent arrays, one for x, and one for y, which means it can't see diagonals)
@@ -59,6 +69,10 @@ ever endeavor to seatun them from their rightful throne.
 3. context window size is too limited for images (it's why we have to do patches for images with clip and dalle and diffusion)
 
 4. continual learning is not yet possible.
+
+
+---
+
 
 ## Cowboy Scientist Narrative Variants
 
