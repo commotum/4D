@@ -1,0 +1,1 @@
+One of the highest-leverage actions in engineering is removing steps, constraints, or components entirely. 

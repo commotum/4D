@@ -1,3 +1,12 @@
+The absence of a canonical positional encoding in vision is a strong signal that the transformer interface is doing unnecessary work to emulate spatial structure it does not natively support.
+
+
+
+
+
+
+---
+
 Do you agree or disagree? By adopting the standard transformer architecture, researchers implicitly commit to a fixed-index, fixed-context positional scheme. For single-task vision models—such as classification, detection, or image generation—this restriction is largely inconsequential, as the task structure, dimensionality, and invariances are known in advance and can be amortized over scale. However, for unrestrained multi-task spatiotemporal learning, this architectural commitment becomes a dominant constraint. Expressing variable-dimensional structure, dynamic grouping, and cross-instance comparison within a fixed positional index requires increasingly long contexts, heavy padding, and complex attention approximations, driving up computational cost and model size. In this regime, positional encoding is not the primary limitation but a proxy for a deeper architectural friction: the effort required to simulate flexible spatiotemporal structure within a fixed-index sequence model. The absence of a canonical positional encoding in vision is therefore best understood not as an unresolved encoding choice, but as evidence that the standard transformer interface imposes an unnecessary burden on unrestrained spatial reasoning.
 
 **Short answer:** I mostly agree with the thrust of the argument, with one important qualification about *where* the constraint actually bites and *why* transformers have remained competitive despite it.
