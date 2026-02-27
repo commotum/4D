@@ -1,3 +1,8 @@
+Radford et al. showed that aligning positional representations with a domain’s true underlying dimensionality can unlock substantial generalization gains, enabling few- or even zero-shot performance on previously unseen tasks.
+
+Radford et al demonstrated that by aligning positional encoding to the domain's actual (reality) dimension/space unleashes previously unimaginable generalization benefits, permitting few or zero shot performance on previously unseen tasks. Taken seriously, this premise suggests that the obvious dimension for an ideal positional encoding mechansim would be spatio-temporal, and that ....
+
+
 1. **Everything that exists has a spacetime address, so a 4D positional code is a universal representational substrate.**
 
 2. **If you can encode *where-and-when* in 3+1 dimensions, you can in principle encode anything that can ever be observed.**
