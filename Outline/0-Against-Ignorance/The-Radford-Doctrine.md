@@ -1,4 +1,25 @@
-# The Radford Doctrine:
+# The Radford Doctrine
+
+It's simple really. Build for the task that eats the rest and the rest will take care of itself.
+
+Now, I promise I'll explain more shortly, but we have to start by ....
+
+
+You see, I've always been frustrated by the way people try to explain the divergence of language modeling from reinforcement learning. It's been phrased as the war against supervised methods. An unwinnable war, truly. Because creating labeled data was expensive. 
+
+I refuse to accept that. 
+
+Misconception about knowledge vs anti-knowledge
+
+present an alternative history of 
+
+
+
+
+
+
+Now, I'm not saying that Sutton is wrong, exactly. Just, he might've been a bit early. 
+
 
 We refer to this principle as the Radford Doctrine: if you build for the task that eats the rest, then the rest will take care of itself. 
 
