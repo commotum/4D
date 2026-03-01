@@ -1,8 +1,37 @@
 # The Radford Doctrine
 
+Tried as I might, a gentler statement of what seems to me obvious, appears destined to elude my grasp. The longer I look, the clearer it becomes: 
+
+Richard Sutton is the emperor. And he has no clothes.  
+s
+
+Now, like I said, this is harsher than I would like to be. 
+
+
+
+
+
+
+continues to elude my grasp. You see, Richard Sutton is the emperor. And he has no clothes.
+
+
+
+
+
+
 It's simple really. Build for the task that eats the rest and the rest will take care of itself.
 
-Now, I promise I'll explain more shortly, but we have to start by ....
+You see, Richard Sutton is the emperor. And he has no clothes. 
+
+
+
+
+It's a better explanation than most for our short history, if that's what you want to call it. 
+
+You see, The Bitter Lesson is actually a claim about causality. 
+
+
+Now, as hard as he tries to say otherwise, Richard Sutton is in fact a huge proponent of human knowledge. You see, in February of 2019 when he wrote the bitter lesson 
 
 
 You see, I've always been frustrated by the way people try to explain the divergence of language modeling from reinforcement learning. It's been phrased as the war against supervised methods. An unwinnable war, truly. Because creating labeled data was expensive. 
@@ -113,7 +142,11 @@ If you tell me which abstract you’re leaning toward (your Abstract 1 feels clo
 
 You're still not quite seeing what I'm saying. Sutton's argument is too broad and is actually inaccurate if one analyzes it at a deeper level. However, he is directionally correct, that when we fix the architecture ahead of time we hobble the models.
 
-He's still framing it as, "expert systems," vs, "general methods," and therefore argues that human knowledge is a weakness. This is wrong. The correct view isn't "we shouldn't give it our knowledge," or give the architecture a head start by sharing what we know, the correct view is, "we need to remove the fixed parts of the architecture that are arbitrary, that exist because we didn't know what we were doing, or were too tired to figure it out." One hot encoding for symbols and text doesn't work because the input is not structural or based on the real world or knowledge. In fact one-hot-symbolic-encoding is exactly the opposite of baking in knowledge. It's baking in ignorance. It's forcing structure that is meaningless at best, and destructive or interferential as worst.
+He's still framing it as, "expert systems," vs, "general methods," and therefore argues that human knowledge is a weakness. This is wrong. The correct view isn't "we shouldn't give it our knowledge," or give the architecture a head start by sharing what we know, the correct view is, "we need to remove the fixed parts of the architecture that are arbitrary, that exist because we didn't know what we were doing, or were too tired to figure it out." One hot encoding for symbols and text doesn't work because the input is not structural or based on the real world or knowledge. 
+
+**In fact one-hot-symbolic-encoding is exactly the opposite of baking in knowledge. It's baking in ignorance.**
+
+**It's forcing structure that is meaningless at best, and destructive or interferential as worst.**
 
 Do you see what I'm saying? So forcing a model to use a pre-determined attention method, like  fixing the attention window to be full self-attention for all tokens, or as fixing it to be sliding window, is just as bad as forcing the model to represent things as one-hot-encoding IDs. 
 
@@ -123,7 +156,11 @@ Do you think you could articulate this idea succinctly?
 Sutton is directionally correct that generality can be hobbled by hard-coded design time architectural decisions. 
 
 
-However, he  can hobble generality, but the problem isn’t “giving the system knowledge.” The problem is freezing arbitrary design choices—constraints that exist because we didn’t know better, not because the world demands them. A one-hot ID encoding isn’t “neutral”; it’s a strong prior that denies structure (it bakes in ignorance by making all symbols equally unrelated). Likewise, forcing a fixed attention pattern (full, sliding, etc.) is a computational one-hot: it hard-codes which interactions are allowed instead of letting the model learn what should interact and when. The goal isn’t to remove priors; it’s to remove arbitrary priors and let the system learn both its representations and its compute routing (what to compare/attend/retrieve) from experience.
+However, he  can hobble generality, but the problem isn’t “giving the system knowledge.” The problem is freezing arbitrary design choices—constraints that exist because we didn’t know better, not because the world demands them. A one-hot ID encoding isn’t “neutral”; it’s a strong prior that denies structure (it bakes in ignorance by making all symbols equally unrelated). Likewise, forcing a fixed attention pattern (full, sliding, etc.) is a computational one-hot: it hard-codes which interactions are allowed instead of letting the model learn what should interact and when. 
+
+The goal isn’t to remove priors; it’s to remove arbitrary priors.
+
+and let the system learn both its representations and its compute routing (what to compare/attend/retrieve) from experience.
 
 If you want it even tighter (one sentence):
 
