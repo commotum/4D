@@ -1,6 +1,6 @@
 # **From MonSTERs to Domain-Agnosticism**
 
-# **Table of Contents**
+## **Table of Contents**
 
 1. **Summer Context: From MonSTER Theory to Empirical Revision**  
     1.1. Original Assumption Entering the Summer  
