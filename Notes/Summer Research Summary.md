@@ -80,11 +80,11 @@ One of the most important technical developments this summer was deciding what M
 
 ## **2.1. From Pairwise Relative Formulation to Practical Absolute Encoding**
 
-The original MonSTER presentation emphasized a relative construction. For a query at position \(P_q\) and a key at position \(P_k\), one computes the displacement
+The original MonSTER presentation emphasized a relative construction. For a query at position $P_q$ and a key at position $P_k$, one computes the displacement
 
-\[
+$$
 \Delta P = P_k - P_q = (\Delta t, \Delta x, \Delta y, \Delta z),
-\]
+$$
 
 and then uses that delta to build an effective Lorentz transformation for the relevant embedding block. This mirrors the intuitive story that attention should depend on the relative relationship between two events in spacetime.
 
@@ -98,16 +98,16 @@ The triadic formulation resolves this by returning to the deeper insight behind 
 
 In the triadic form, the embedding is divided into frequency buckets, and each frequency bucket occupies 12 dimensions arranged as three 4D spacetime blocks:
 
-\[
+$$
 [X_4 \mid Y_4 \mid Z_4].
-\]
+$$
 
 Each 4D block is associated with one spatial axis. Instead of constructing a full arbitrary-axis Lorentz transform from scratch for every token pair, the encoding applies a structured combination of:
 
 * an axis-aligned **boost** involving the time component and the spatial component associated with that block, and  
 * a 2D **rotation** in the spatial plane orthogonal to that axis.
 
-This gives a triad of coupled spacetime transforms per frequency bucket. The implementation then precomputes scalar tables—\(\cosh\), \(\sinh\), \(\cos\), and \(\sin\)—from each token’s **absolute** position. In other words, MonSTER becomes a cacheable absolute positional system rather than a pairwise reconstruction system.
+This gives a triad of coupled spacetime transforms per frequency bucket. The implementation then precomputes scalar tables—$\cosh$, $\sinh$, $\cos$, and $\sin$—from each token’s **absolute** position. In other words, MonSTER becomes a cacheable absolute positional system rather than a pairwise reconstruction system.
 
 In its current HRM integration, this should be understood as a restricted but faithful first deployment rather than the final form of the full theory. The practical implementation emphasizes the triadic spatial structure most relevant to grid reasoning, while preserving the broader 4D spacetime logic that motivated MonSTER in the first place.
 
@@ -119,15 +119,15 @@ This is not a retreat from the original theory. It is the practical factorizatio
 
 The most important thing the triadic form preserves is the original goal: **absolute position encodings whose effect in attention depends only on relative position**.
 
-In Euclidean RoPE, this happens because the dot product of two separately rotated vectors depends only on the difference in their rotation angles. In MonSTER, the same principle survives in Minkowski space. If \(L(s)\) is the Lorentz-style transform associated with absolute spacetime position \(s\), and if the attention score uses the Minkowski metric \(\eta = \mathrm{diag}(1,-1,-1,-1)\), then the desired identity is
+In Euclidean RoPE, this happens because the dot product of two separately rotated vectors depends only on the difference in their rotation angles. In MonSTER, the same principle survives in Minkowski space. If $L(s)$ is the Lorentz-style transform associated with absolute spacetime position $s$, and if the attention score uses the Minkowski metric $\eta = \mathrm{diag}(1,-1,-1,-1)$, then the desired identity is
 
-\[
+$$
 \langle L(s_q) q,\; L(s_k) k \rangle_{\eta}
 =
 \langle q,\; L(s_k - s_q) k \rangle_{\eta}.
-\]
+$$
 
-This is the central reason the triad implementation is correct. It means that the model can encode each token once using its **absolute** position, yet the resulting attention score depends only on the **relative** difference between tokens. The fusion of absolute and relative information is retained, but the cost of explicitly recomputing \(\Delta P\) for every pair is eliminated.
+This is the central reason the triad implementation is correct. It means that the model can encode each token once using its **absolute** position, yet the resulting attention score depends only on the **relative** difference between tokens. The fusion of absolute and relative information is retained, but the cost of explicitly recomputing $\Delta P$ for every pair is eliminated.
 
 This was one of the major conceptual clarifications of the summer. The original relative story is still the right intuition, but the triadic implementation is the right engineering realization.
 
@@ -141,7 +141,7 @@ Settling on the triad form produced several concrete advantages.
   The model does not need to build a fresh Lorentz transform for every query-key pair.
 
 * **Cacheable scalar tables**  
-  Absolute positions can be converted into \(\cosh/\sinh/\cos/\sin\) tables once and then reused.
+  Absolute positions can be converted into $\cosh/\sinh/\cos/\sin$ tables once and then reused.
 
 * **Vectorized implementation**  
   The transforms can be applied in closed form using broadcasted tensor operations rather than full matrix construction.
