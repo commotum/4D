@@ -122,9 +122,11 @@ The most important thing the triadic form preserves is the original goal: **abso
 In Euclidean RoPE, this happens because the dot product of two separately rotated vectors depends only on the difference in their rotation angles. In MonSTER, the same principle survives in Minkowski space. If $L(s)$ is the Lorentz-style transform associated with absolute spacetime position $s$, and if the attention score uses the Minkowski metric $\eta = \mathrm{diag}(1,-1,-1,-1)$, then the desired identity is
 
 $$
+\begin{aligned}
 \langle L(s_q) q,\; L(s_k) k \rangle_{\eta}
-=
+&=
 \langle q,\; L(s_k - s_q) k \rangle_{\eta}.
+\end{aligned}
 $$
 
 This is the central reason the triad implementation is correct. It means that the model can encode each token once using its **absolute** position, yet the resulting attention score depends only on the **relative** difference between tokens. The fusion of absolute and relative information is retained, but the cost of explicitly recomputing $\Delta P$ for every pair is eliminated.
