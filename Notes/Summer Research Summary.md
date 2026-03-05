@@ -1,48 +1,48 @@
-# **Research Findings/Timeline:** **Summer Research Summary — From MonSTER Theory to a Broader Domain-Agnostic Transformer Agenda**
+# **From MonSTERs to Domain-Agnosticism**
 
 # **Table of Contents**
 
 1. **Summer Context: From MonSTER Theory to Empirical Revision**  
-    1.1. **Original Assumption Entering the Summer**  
-    1.2. **Immediate Experimental Goal: Integrating MonSTER into HRM**  
-    1.3. **What Actually Changed**
+    1.1. Original Assumption Entering the Summer  
+    1.2. Immediate Experimental Goal: Integrating MonSTER into HRM  
+    1.3. What Actually Changed
 
 2. **Settling on the Triadic Form of MonSTER**  
-    2.1. **From Pairwise Relative Formulation to Practical Absolute Encoding**  
-    2.2. **The Structure of the Triad**  
-    2.3. **Preserving Absolute–Relative Fusion in the Minkowski Dot Product**  
-    2.4. **Benefits for Performance, Efficiency, and Implementation**
+    2.1. From Pairwise Relative Formulation to Practical Absolute Encoding  
+    2.2. The Structure of the Triad  
+    2.3. Preserving Absolute–Relative Fusion in the Minkowski Dot Product  
+    2.4. Benefits for Performance, Efficiency, and Implementation
 
 3. **The Empirical Surprise: Positional Encoding Is Not the Bottleneck in Single-Task Transformers**  
-    3.1. **Integrating MonSTER into HRM and the Initial Result**  
-    3.2. **Why the Gains Were Smaller Than Expected**  
-    3.3. **Single-Task Models Can Wash Out Better Inductive Priors**  
-    3.4. **Why the Literature Tolerates So Many Positional Encoding Variants**
+    3.1. Integrating MonSTER into HRM and the Initial Result  
+    3.2. Why the Gains Were Smaller Than Expected  
+    3.3. Single-Task Models Can Wash Out Better Inductive Priors  
+    3.4. Why the Literature Tolerates So Many Positional Encoding Variants
 
 4. **Revised Hypothesis: Where MonSTERs Should Actually Matter**  
-    4.1. **From Single-Task Evaluation to Multitask Evaluation**  
-    4.2. **One Geometry for 1D, 2D+t, and 3D+t**  
-    4.3. **Why Ad Hoc Multi-Encoder Systems Are the Wrong Long-Term Answer**  
-    4.4. **The Scaling Constraints That Now Define the Problem**
+    4.1. From Single-Task Evaluation to Multitask Evaluation  
+    4.2. One Geometry for 1D, 2D+t, and 3D+t  
+    4.3. Why Ad Hoc Multi-Encoder Systems Are the Wrong Long-Term Answer  
+    4.4. The Scaling Constraints That Now Define the Problem
 
 5. **A Second Realization: Static Context Windows Miss the Point of ARC-Style Meta-Learning**  
-    5.1. **Why HRM Still Misses the Few-Shot Structure of ARC-AGI**  
-    5.2. **Token Explosion and Context Pollution**  
-    5.3. **Dynamic Attention Threads as Working Memory**  
-    5.4. **Implications for Future Reasoning Architectures**
+    5.1. Why HRM Still Misses the Few-Shot Structure of ARC-AGI  
+    5.2. Token Explosion and Context Pollution  
+    5.3. Dynamic Attention Threads as Working Memory  
+    5.4. Implications for Future Reasoning Architectures
 
 6. **Rethinking Tokens and Learning Objectives**  
-    6.1. **The RGB Vocabulary Problem**  
-    6.2. **Quaternion Type-Value Tokens and On-the-Fly Token Synthesis**  
-    6.3. **Hierarchical Compression, Concept Tokens, and Relay Learning**  
-    6.4. **Moving Beyond Next-Token Prediction**
+    6.1. The RGB Vocabulary Problem  
+    6.2. Quaternion Type-Value Tokens and On-the-Fly Token Synthesis  
+    6.3. Hierarchical Compression, Concept Tokens, and Relay Learning  
+    6.4. Moving Beyond Next-Token Prediction
 
 7. **Updated Research Program, Paper Roadmap, and Long-Term Vision**  
-    7.1. **Spatial Reasoning MonSTERs**  
-    7.2. **Dynamic Attention Threads for Transformer Working Memory**  
-    7.3. **Relay Learning**  
-    7.4. **MonSTER Models as Domain-Agnostic Multitask Learners**  
-    7.5. **Immediate Next Steps**
+    7.1. Spatial Reasoning MonSTERs  
+    7.2. Dynamic Attention Threads for Transformer Working Memory  
+    7.3. Relay Learning  
+    7.4. MonSTER Models as Domain-Agnostic Multitask Learners  
+    7.5. Immediate Next Steps
 
 # **1\. Summer Context: From MonSTER Theory to Empirical Revision**
 
@@ -76,6 +76,8 @@ Third, this led to a revised hypothesis. The real value of MonSTER is unlikely t
 
 One of the most important technical developments this summer was deciding what MonSTER should actually look like in practice. The original writeup focused on the clean theoretical story: for each query-key pair, compute a relative spacetime displacement and derive a Lorentz transformation from that delta. That framing was conceptually useful, but it was not the best implementation target.
 
+---
+
 ## **2.1. From Pairwise Relative Formulation to Practical Absolute Encoding**
 
 The original MonSTER presentation emphasized a relative construction. For a query at position \(P_q\) and a key at position \(P_k\), one computes the displacement
@@ -89,6 +91,8 @@ and then uses that delta to build an effective Lorentz transformation for the re
 The problem is that implementing MonSTER this way inside attention is expensive and awkward. A direct relative construction suggests rebuilding positional structure for every query-key pair, which is precisely the kind of pairwise overhead that makes an otherwise elegant encoding impractical.
 
 The triadic formulation resolves this by returning to the deeper insight behind RoPE: one does **not** need to explicitly compute a fresh relative transform for every pair if absolute encodings are chosen so that the inner product collapses to a relative dependence automatically.
+
+---
 
 ## **2.2. The Structure of the Triad**
 
@@ -109,6 +113,8 @@ In its current HRM integration, this should be understood as a restricted but fa
 
 This is not a retreat from the original theory. It is the practical factorization of that theory into a form that can be broadcast efficiently over large tensors and reused across attention steps.
 
+---
+
 ## **2.3. Preserving Absolute–Relative Fusion in the Minkowski Dot Product**
 
 The most important thing the triadic form preserves is the original goal: **absolute position encodings whose effect in attention depends only on relative position**.
@@ -124,6 +130,8 @@ In Euclidean RoPE, this happens because the dot product of two separately rotate
 This is the central reason the triad implementation is correct. It means that the model can encode each token once using its **absolute** position, yet the resulting attention score depends only on the **relative** difference between tokens. The fusion of absolute and relative information is retained, but the cost of explicitly recomputing \(\Delta P\) for every pair is eliminated.
 
 This was one of the major conceptual clarifications of the summer. The original relative story is still the right intuition, but the triadic implementation is the right engineering realization.
+
+---
 
 ## **2.4. Benefits for Performance, Efficiency, and Implementation**
 
@@ -150,11 +158,15 @@ In hindsight, this triadic form was one of the clearest technical wins of the su
 
 If the summer had stopped at the triad implementation, the story would have been relatively straightforward: theory refined into implementation. But the experiments produced a more surprising and more important result.
 
+---
+
 ## **3.1. Integrating MonSTER into HRM and the Initial Result**
 
 After integrating MonSTER into HRM, the results improved, but only modestly. The gains were on the order of roughly **3–7%**, depending on the training run and configuration. That is enough to suggest that MonSTER is not useless; there is likely some real signal there. At the same time, the improvement is small enough that it can easily be confounded by run-to-run variance, hyperparameter choices, and the normal noise floor of this class of experiments. It is not the dramatic jump I originally expected from replacing a theoretically flawed spatial prior with a principled one.
 
 This result was confusing at first. If row-major indexing creates anisotropy, if flattened sequence order distorts true spatial relations, and if MonSTER fixes those issues, why are the gains not much larger?
+
+---
 
 ## **3.2. Why the Gains Were Smaller Than Expected**
 
@@ -163,6 +175,8 @@ The answer that emerged is that the benchmark regime matters just as much as the
 This does not mean the geometry is irrelevant in principle. It means that on a narrow enough task, the model can learn to treat even a flawed positional encoding as a workable addressing system. The recurrence, depth, and sheer flexibility of the transformer are enough to adapt to the quirks of the chosen encoding.
 
 In that setting, MonSTER may still help a bit, but the model is already capable of learning around the defect it is supposed to fix.
+
+---
 
 ## **3.3. Single-Task Models Can Wash Out Better Inductive Priors**
 
@@ -173,6 +187,8 @@ A **single-task transformer** can often overcome not only a weak positional prio
 If the only goal is to solve one dataset, then the model can absorb the geometry of the encoder as yet another texture in its input space. It can learn that certain sequence offsets correspond to rows, others to columns, and still others to repeated motifs in the training distribution. The positional system no longer needs to be “right” in a domain-agnostic sense. It merely needs to be stable enough for the model to memorize how to use it.
 
 This explains why my MonSTER gains inside HRM were real but not decisive. HRM is still a transformer with enough expressive power to partially repair a bad prior on its own.
+
+---
 
 ## **3.4. Why the Literature Tolerates So Many Positional Encoding Variants**
 
@@ -188,6 +204,8 @@ This does **not** imply that all positional encodings are truly equivalent. It i
 
 The natural consequence of the summer results is a revised hypothesis about what MonSTER is for and how it should be evaluated.
 
+---
+
 ## **4.1. From Single-Task Evaluation to Multitask Evaluation**
 
 If single-task models can learn around poor positional priors, then evaluating MonSTER inside one narrow benchmark is not the right test. The real stress test is a model that must operate across **different kinds of data**, **different dimensionalities**, and **different reasoning regimes** without being given a separate handcrafted encoder for each one.
@@ -197,6 +215,8 @@ That is the setting where a domain-agnostic positional system should matter. A s
 This is now my central hypothesis:
 
 **MonSTER’s advantages will become most visible in multitask, multidomain models that must share one encoding mechanism across heterogeneous data types.**
+
+---
 
 ## **4.2. One Geometry for 1D, 2D+t, and 3D+t**
 
@@ -213,6 +233,8 @@ The target is no longer just ARC-AGI or grid puzzles in isolation. The target is
 
 In that setting, the positional encoding cannot be a domain-specific afterthought. It must serve as a common geometric substrate. This is exactly the kind of setting where I expect MonSTER to stop looking like a minor improvement and start looking like necessary infrastructure.
 
+---
+
 ## **4.3. Why Ad Hoc Multi-Encoder Systems Are the Wrong Long-Term Answer**
 
 A common way to handle diverse domains is to assemble an ad hoc stack: one encoder for text, one for images, one for video, one for grids, one for 3D worlds, and then build a system that glues them together. This can work in practice, but it is not the kind of unification I am interested in.
@@ -220,6 +242,8 @@ A common way to handle diverse domains is to assemble an ad hoc stack: one encod
 My interest is in a model architecture that does **not** need to be told, case by case, which positional system is appropriate for which modality. The long-term goal is a single model with a single general geometric language for tokens. MonSTER is attractive precisely because it points in that direction.
 
 The broader claim, then, is not merely “MonSTER beats RoPE on ARC.” It is closer to: **future generalist reasoning models will need one coherent positional framework rather than a patchwork of incompatible encoders.**
+
+---
 
 ## **4.4. The Scaling Constraints That Now Define the Problem**
 
@@ -240,6 +264,8 @@ That was another major lesson of the summer: the positional problem, the context
 
 While thinking through why MonSTER did not unlock dramatic gains inside HRM, another architectural issue became impossible to ignore. Even if the positional encoding is correct, the **static context window** remains a poor fit for ARC-style reasoning.
 
+---
+
 ## **5.1. Why HRM Still Misses the Few-Shot Structure of ARC-AGI**
 
 ARC-AGI is not merely a sequence-to-sequence problem over one grid. It is a **few-shot meta-learning problem**. Each task provides several correlated input-output examples, and the solver must infer the hidden transformation rule that links them, then apply that rule to a new test input.
@@ -247,6 +273,8 @@ ARC-AGI is not merely a sequence-to-sequence problem over one grid. It is a **fe
 HRM is clever, and its recurrent setup plus augmentation tricks are genuinely strong. But the basic treatment of the task still misses something central: it does not fully exploit the episode structure of ARC. The architecture is still fundamentally closer to “map this input grid to this output grid” than to “read a small set of demonstrations, compare them, induce the shared rule, and then solve a new case.”
 
 That matters. It means that even a better positional system may not show its full value if the surrounding model is not actually performing the kind of cross-example abstraction the benchmark is designed to test.
+
+---
 
 ## **5.2. Token Explosion and Context Pollution**
 
@@ -257,6 +285,8 @@ As more grids, scenes, or environment states are added, token counts explode. Pa
 This is especially severe once one starts thinking beyond ARC. In higher-dimensional domains, the number of raw tokens can become enormous. Even if MonSTER supplies the correct geometry, the model still faces the practical problem of being drowned in its own context.
 
 This is what I mean by **context pollution**: the context window contains the right information in principle, but too much of it is present at once in the wrong granularity.
+
+---
 
 ## **5.3. Dynamic Attention Threads as Working Memory**
 
@@ -273,6 +303,8 @@ The rough idea is to let a policy select what to inspect and compare over time. 
 This creates **dynamic attention threads** rather than one static attention field. The model can zoom in, zoom out, compare one example against another, and explicitly accumulate intermediate findings.
 
 For ARC-style tasks, that looks much closer to the procedure a competent human solver actually uses: inspect one example, inspect another, write down invariants, compare before and after states, propose a rule, test it, revise it.
+
+---
 
 ## **5.4. Implications for Future Reasoning Architectures**
 
@@ -291,6 +323,8 @@ That broader architecture is where I now think the real ARC-AGI opportunity lies
 
 The more I pushed toward domain-agnostic reasoning, the more another bottleneck became clear: the standard token vocabulary paradigm itself looks increasingly unnatural for visual and structured world-state data.
 
+---
+
 ## **6.1. The RGB Vocabulary Problem**
 
 If one treats raw RGB values as ordinary discrete tokens, the vocabulary becomes enormous. A full RGB space contains more than 16 million possible values. That is a very different regime from the subword vocabularies used by modern language models.
@@ -303,6 +337,8 @@ This creates several problems:
 
 For visual reasoning systems, this suggests that the usual “large embedding table plus softmax over token IDs” paradigm may be the wrong abstraction.
 
+---
+
 ## **6.2. Quaternion Type-Value Tokens and On-the-Fly Token Synthesis**
 
 One idea that emerged from the summer was to represent values such as RGB not as arbitrary discrete IDs, but as structured typed values. Quaternions are especially interesting here because they naturally package multi-channel information and have algebraic properties that make them attractive for compact color or spatial representations.
@@ -310,6 +346,8 @@ One idea that emerged from the summer was to represent values such as RGB not as
 The idea is not simply “replace real vectors with quaternions everywhere.” The more interesting possibility is to build **type-value tokens** in which a token type supplies the learned projection behavior and the value is synthesized on the fly. A COLOR token, for example, could use one learned up-projection mechanism, while the specific RGB quaternion value provides the instance-level content.
 
 In that setup, the model does not need a separate learned embedding row for every possible RGB value. Instead, it learns how a **type** should lift a structured **value** into the model’s token space. This points toward a more general notion of token synthesis, where the model generates or interprets token values rather than merely indexing into a fixed lookup table.
+
+---
 
 ## **6.3. Hierarchical Compression, Concept Tokens, and Relay Learning**
 
@@ -320,6 +358,8 @@ The intuition is easy to state. In text, a model could compress words into sente
 This line of thought led me to what I have been calling **Relay Learning**. The central idea is that intelligence is not best framed as “remove all human knowledge” or “hand-design everything.” Rather, humans and machines should iteratively hand off abstractions to one another. The model learns compressions and reusable concepts; humans inspect, refine, and formalize them; the system then incorporates those improved abstractions and continues learning.
 
 In that picture, the goal is to reduce the translation tax between human concepts, machine representations, and environment states as much as possible.
+
+---
 
 ## **6.4. Moving Beyond Next-Token Prediction**
 
@@ -341,6 +381,8 @@ This is another place where the summer changed my thinking. The project is no lo
 
 By the end of the summer, the work had become much broader than the original expectation. The good news is that the pieces fit together cleanly enough that they can be separated into a coherent research program.
 
+---
+
 ## **7.1. Spatial Reasoning MonSTERs**
 
 The first paper is still the clearest starting point. This paper would focus on:
@@ -352,6 +394,8 @@ The first paper is still the clearest starting point. This paper would focus on:
 * and empirical evidence that the real benefits of principled geometry emerge under cross-domain rather than purely single-task evaluation.
 
 This paper is the foundation because it establishes the geometric language.
+
+---
 
 ## **7.2. Dynamic Attention Threads for Transformer Working Memory**
 
@@ -366,6 +410,8 @@ Its focus would be:
 
 This paper would shift the contribution from “better positions” to “better reasoning procedures over positioned data.”
 
+---
+
 ## **7.3. Relay Learning**
 
 The third paper would focus on the token and objective side of the problem:
@@ -377,6 +423,8 @@ The third paper would focus on the token and objective side of the problem:
 * and training objectives that extend beyond next-token prediction.
 
 This is the paper where the vocabulary problem, the abstraction problem, and the human-machine handoff problem come together.
+
+---
 
 ## **7.4. MonSTER Models as Domain-Agnostic Multitask Learners**
 
@@ -395,6 +443,8 @@ Instead, it should provide:
 * and structured token synthesis with abstraction learning.
 
 This is the sense in which I now think of “MonSTER Models” as domain-agnostic multitask learners. The phrase no longer refers only to a positional encoding. It refers to an architectural family.
+
+---
 
 ## **7.5. Immediate Next Steps**
 
@@ -418,4 +468,3 @@ The most important next steps are now clearer than they were before the summer b
 The main conclusion of the summer is therefore not that my original idea was wrong. It is that the original idea was only one piece of the real problem.
 
 MonSTER remains, in my view, the right direction for positional geometry. But the summer made it clear that geometry alone is not enough. To build a model that genuinely reasons across domains, one must solve geometry, memory, tokenization, and abstraction together. That is a larger agenda than the one I started with, but it is also a more coherent one.
-
