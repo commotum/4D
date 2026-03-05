@@ -40,12 +40,12 @@
 6. **Current Objectives: A 4D Transformer Pipeline and Unified Data Model**  
     6.1. Dual Thrust: Dataset Creation and Model Architecture  
     6.2. Dataset: 4D-Addressed Code-Image Pairs and Holarchic Tokens  
-     6.2.1. The Holarchic 4D Token: \[Parent, Name, Type, Value, Position (t, x, y, z)\]  
+     6.2.1. The Holarchic 4D Token: [Parent, Name, Type, Value, Position (t, x, y, z)]  
      6.2.2. Representing Code with 4D Tokens  
      6.2.3. Representing Images and ARC Tasks with 4D Tokens  
     6.3. Proposed Model Architecture: Leveraging MonSTER and Latent Attention  
      6.3.1. Inspiration from DeepSeek: Multi-Head Latent Attention (MLA)  
-     6.3.2. Structured Input Token Processing: \[Name, Type, Value\]  
+     6.3.2. Structured Input Token Processing: [Name, Type, Value]  
      6.3.3. Latent Space Projection and MonSTER Integration  
      6.3.4. Concatenated Latent Representation  
      6.3.5. Simultaneous, Structured Output Generation
@@ -168,12 +168,10 @@ The ideal positional encoding would:
 Rotary Positional Embeddings (RoPE), introduced by Su et al. (2021), emerged as a particularly promising candidate that met many of these criteria for 1D sequences. RoPE offers a unique way to inject positional information by rotating the query and key vectors in the self-attention mechanism by an angle dependent on their absolute position.
 
 * **Mechanism:**  
-   Instead of adding a positional vector, RoPE multiplies the query q\\mathbf{q} and key k\\mathbf{k} vectors by position-dependent rotation matrices R(m)R(m) and R(n)R(n) respectively (for positions mm and nn). The rotation is typically applied in 2D subspaces (pairs of coordinates) of the embedding, with rotation angles proportional to the position index and varying across frequencies (analogous to sinusoidal encoding frequencies).
+   Instead of adding a positional vector, RoPE multiplies the query $q$ and key $k$ vectors by position-dependent rotation matrices $R(m)$ and $R(n)$ respectively (for positions $m$ and $n$). The rotation is typically applied in 2D subspaces (pairs of coordinates) of the embedding, with rotation angles proportional to the position index and varying across frequencies (analogous to sinusoidal encoding frequencies).
 
 * **Relative Dependence:**  
-   The crucial insight is that the dot product in the attention score,  
-   ⟨qmR(m),knR(n)⟩, \\langle \\mathbf{q}\_m R(m), \\mathbf{k}\_n R(n)\\rangle,  
-   becomes a function of the relative position (m−n)(m \- n) due to the properties of rotation matrices (R(m) R(n)T=R(m−n))\\bigl(R(m)\\,R(n)^{T} \= R(m \- n)\\bigr). This means RoPE effectively encodes relative positions implicitly within the attention mechanism itself.
+   The crucial insight is that the dot product in the attention score, $\langle \mathbf{q}_m R(m), \mathbf{k}_n R(n)\rangle$, becomes a function of the relative position $(m-n)$ due to the properties of rotation matrices, $\bigl(R(m)\,R(n)^T = R(m-n)\bigr)$. This means RoPE effectively encodes relative positions implicitly within the attention mechanism itself.
 
 * **Advantages:**
 
@@ -187,16 +185,16 @@ Its widespread adoption in models like LLaMA, PaLM, and GPT-J attests to its eff
 
 ## **3.3. Limitations of Real Vector Representations for Geometric Data**
 
-My exploration into generalizing RoPE quickly led to a broader consideration of how neural networks represent geometric information. Traditional real-valued embeddings (dense vectors in Rn\\mathbb{R}^n) face inherent limitations when tasked with capturing complex geometric structures or transformations:
+My exploration into generalizing RoPE quickly led to a broader consideration of how neural networks represent geometric information. Traditional real-valued embeddings (dense vectors in $\mathbb{R}^n$) face inherent limitations when tasked with capturing complex geometric structures or transformations:
 
 1. **Rotations and Symmetries:**  
-   Representing a 3D rotation with standard real-valued neural network layers typically requires learning a 3×33 \\times 3 matrix with nine parameters. Ensuring orthogonality (to preserve lengths and angles) is not guaranteed without specific constraints or architectural choices. Simple vector addition or element-wise multiplication—common in neural networks—do not naturally correspond to rotations.
+   Representing a 3D rotation with standard real-valued neural network layers typically requires learning a $3 \times 3$ matrix with nine parameters. Ensuring orthogonality (to preserve lengths and angles) is not guaranteed without specific constraints or architectural choices. Simple vector addition or element-wise multiplication—common in neural networks—do not naturally correspond to rotations.
 
 2. **Hierarchies:**  
    Euclidean space is not well-suited for embedding tree-like hierarchies efficiently. The number of nodes in a balanced tree grows exponentially with depth, but Euclidean distances grow only polynomially with radius. This mismatch leads to “crowding” and distortion when embedding large hierarchies in low-dimensional Euclidean spaces.
 
 3. **Internal Dependencies:**  
-   For multidimensional input features where dimensions are intrinsically correlated (e.g., the R, G, B channels of a pixel, or the x,y,zx, y, z components of a 3D point), treating these as independent scalar inputs in a real-valued network means the model must learn these correlations from scratch. This can be inefficient and may fail to preserve essential relationships.
+   For multidimensional input features where dimensions are intrinsically correlated (e.g., the R, G, B channels of a pixel, or the $x,y,z$ components of a 3D point), treating these as independent scalar inputs in a real-valued network means the model must learn these correlations from scratch. This can be inefficient and may fail to preserve essential relationships.
 
 4. **Parameter Inefficiency:**  
    To approximate complex geometric transformations or capture coupled features, real-valued networks might require significantly more parameters than networks whose algebraic structure inherently supports these operations.
@@ -208,85 +206,120 @@ My exploration into generalizing RoPE quickly led to a broader consideration of 
 These limitations motivated my investigation into hypercomplex number systems and geometric algebras, which offer more structured ways to represent and manipulate multidimensional data:
 
 * **Quaternions:**  
-  Quaternions (H\\mathbb{H}) extend complex numbers to four dimensions (one real, three imaginary units i,j,ki, j, k) and their multiplication (the Hamilton product) naturally encodes 3D rotations. Quaternion Neural Networks (QNNs) leverage this by using quaternion-valued weights and activations. This allows them to treat 4D feature vectors as single entities, inherently learn rotational transformations, and often achieve better performance with fewer parameters by enforcing weight sharing through the Hamilton product. QNNs have shown success in modeling 3D spatial relations and internal dependencies in multidimensional signals—such as color pixels or speech features. For instance, quaternion RNNs/LSTMs can capture inter-dimensional correlations in speech signals, leading to significant parameter reduction (e.g., 3.3× fewer parameters than real LSTMs for improved speech recognition accuracy).
+  Quaternions ($\mathbb{H}$) extend complex numbers to four dimensions (one real, three imaginary units $i,j,k$) and their multiplication (the Hamilton product) naturally encodes 3D rotations. Quaternion Neural Networks (QNNs) leverage this by using quaternion-valued weights and activations. This allows them to treat 4D feature vectors as single entities, inherently learn rotational transformations, and often achieve better performance with fewer parameters by enforcing weight sharing through the Hamilton product. QNNs have shown success in modeling 3D spatial relations and internal dependencies in multidimensional signals—such as color pixels or speech features. For instance, quaternion RNNs/LSTMs can capture inter-dimensional correlations in speech signals, leading to significant parameter reduction (e.g., 3.3× fewer parameters than real LSTMs for improved speech recognition accuracy).
 
 * **Clifford Algebras (Geometric Algebras):**  
-  Clifford algebras provide a powerful and unified framework for geometry, generalizing complex numbers, quaternions, and vector algebra. A Clifford algebra is defined over a vector space equipped with a quadratic form (like a dot product). For our goal of representing 4D spacetime, the Clifford algebra Cl(1,3)\\mathrm{Cl}(1,3), associated with the Minkowski metric (+,−,−,−)(+,-,-,-), seemed particularly relevant. This algebra naturally incorporates vectors, bivectors (representing oriented planes, rotations, or Lorentz boosts), and higher-grade elements, allowing for the representation of Lorentz transformations as algebraic operations (rotors).
+  Clifford algebras provide a powerful and unified framework for geometry, generalizing complex numbers, quaternions, and vector algebra. A Clifford algebra is defined over a vector space equipped with a quadratic form (like a dot product). For our goal of representing 4D spacetime, the Clifford algebra $\mathrm{Cl}(1,3)$, associated with the Minkowski metric $(+,-,-,-)$, seemed particularly relevant. This algebra naturally incorporates vectors, bivectors (representing oriented planes, rotations, or Lorentz boosts), and higher-grade elements, allowing for the representation of Lorentz transformations as algebraic operations (rotors).
 
-The key insight was that using an algebraic structure that inherently matches the geometry of the problem domain (such as 3D rotations for quaternions, or Lorentz transformations for Cl(1,3)\\mathrm{Cl}(1,3) in spacetime) could provide a much stronger inductive bias and more efficient representations than attempting to learn these structures from scratch with generic real-valued vectors. This theoretical underpinning set the stage for the development of **MonSTER**.
+The key insight was that using an algebraic structure that inherently matches the geometry of the problem domain (such as 3D rotations for quaternions, or Lorentz transformations for $\mathrm{Cl}(1,3)$ in spacetime) could provide a much stronger inductive bias and more efficient representations than attempting to learn these structures from scratch with generic real-valued vectors. This theoretical underpinning set the stage for the development of **MonSTER**.
 
 # **4\. Breakthrough: MonSTER – Minkowski SpaceTime Embedding Rotors**
 
-Armed with the insights from RoPE’s success, the limitations of standard spatialization, and the potential of geometric algebras, MonSTER (Minkowski SpaceTime Embedding Rotors) was developed. MonSTER is conceived as a principled generalization of RoPE from 2D planar rotations (effectively, complex number multiplications for each block) to full 4D Lorentz transformations operating within the Clifford algebra Cl(1,3). Its primary purpose is to allow transformer models to natively process and reason about data embedded in a 4D Minkowski spacetime.
+Armed with the insights from RoPE’s success, the limitations of standard spatialization, and the potential of geometric algebras, MonSTER (Minkowski SpaceTime Embedding Rotors) was developed. MonSTER is conceived as a principled generalization of RoPE from 2D planar rotations (effectively, complex number multiplications for each block) to full 4D Lorentz transformations operating within the Clifford algebra $\mathrm{Cl}(1,3)$. Its primary purpose is to allow transformer models to natively process and reason about data embedded in a 4D Minkowski spacetime.
 
 ---
 
 ## **4.1. Conceptual Foundation: Clifford(1,3) Algebra and Minkowski Spacetime**
 
-The choice of Cl(1,3) algebra with a (+,−,−,−) metric signature is deliberate. This is the mathematical framework of Special Relativity, describing spacetime where the interval
+The choice of $\mathrm{Cl}(1,3)$ algebra with a $(+,-,-,-)$ metric signature is deliberate. This is the mathematical framework of Special Relativity, describing spacetime where the interval
 
-ds2=c2dt2−dx2−dy2−dz2ds^2 \= c^2 dt^2 \- dx^2 \- dy^2 \- dz^2
+$$
+ds^2 = c^2 dt^2 - dx^2 - dy^2 - dz^2
+$$
 
 is invariant under Lorentz transformations (rotations in space and boosts, which mix space and time). By encoding positional information using transformations that respect this Minkowski metric, MonSTER aims to provide the transformer with a notion of:
 
 * **Spacetime Intervals**: The “distance” or relationship between two events (tokens at different spacetime positions) is measured by the Lorentz-invariant interval, not just Euclidean distance or sequential offset.
 
-* **Causal Structure**: The sign of the spacetime interval (ds2\>0ds^2 \> 0 for timelike, ds2\<0ds^2 \< 0 for spacelike, ds2=0ds^2 \= 0 for lightlike) implicitly encodes causal relationships. While MonSTER does not explicitly enforce causality, operating in Minkowski space provides the geometric substrate for the model to learn such relationships.
+* **Causal Structure**: The sign of the spacetime interval ($ds^2 > 0$ for timelike, $ds^2 < 0$ for spacelike, $ds^2 = 0$ for lightlike) implicitly encodes causal relationships. While MonSTER does not explicitly enforce causality, operating in Minkowski space provides the geometric substrate for the model to learn such relationships.
 
 * **Lorentz Invariance**: Ideally, the attention mechanism’s perception of the relationship between two tokens should be independent of the inertial reference frame, a property guaranteed by Lorentz transformations.
 
-MonSTER moves beyond simply tagging tokens with (t,x,y,z)(t, x, y, z) coordinates to embedding them so that attention computations inherently respect spacetime geometry.
+MonSTER moves beyond simply tagging tokens with $(t,x,y,z)$ coordinates to embedding them so that attention computations inherently respect spacetime geometry.
 
 ---
 
 ## **4.2. Mathematical Formulation of MonSTER**
 
-MonSTER calculates a unique 4D Lorentz transformation, ReffR\_{\\mathrm{eff}}, based directly on the relative spacetime displacement ΔP=(Δt,Δx,Δy,Δz)\\Delta P \= (\\Delta t, \\Delta x, \\Delta y, \\Delta z) between a query token at PqP\_q and a key token at PkP\_k. ReffR\_{\\mathrm{eff}} is generated block-wise: the embedding dimension is divided into blocks (typically 4D each), and a distinct (but frequency-scaled) Lorentz transformation is applied to each block. This multi-frequency approach—analogous to RoPE—allows for a richer, multi-scale representation of relative positions.
+MonSTER calculates a unique 4D Lorentz transformation, $R_{\mathrm{eff}}$, based directly on the relative spacetime displacement $\Delta P = (\Delta t, \Delta x, \Delta y, \Delta z)$ between a query token at $P_q$ and a key token at $P_k$. $R_{\mathrm{eff}}$ is generated block-wise: the embedding dimension is divided into blocks (typically 4D each), and a distinct (but frequency-scaled) Lorentz transformation is applied to each block. This multi-frequency approach—analogous to RoPE—allows for a richer, multi-scale representation of relative positions.
 
 ### **4.2.1. Relative Spacetime Displacement**
 
 First, the raw displacement is computed:
 
-ΔPraw=Pk−Pq=(Δtraw,Δxraw,Δyraw,Δzraw).\\Delta P\_{\\text{raw}} \= P\_k \- P\_q \= (\\Delta t\_{\\text{raw}}, \\Delta x\_{\\text{raw}}, \\Delta y\_{\\text{raw}}, \\Delta z\_{\\text{raw}}).
+$$
+\Delta P_{\text{raw}} = P_k - P_q = (\Delta t_{\text{raw}}, \Delta x_{\text{raw}}, \Delta y_{\text{raw}}, \Delta z_{\text{raw}}).
+$$
 
 For applications like ARC-AGI, these raw deltas might correspond to pixel differences in grid coordinates and step differences in time (e.g., input vs. output frame).
 
 ### **4.2.2. Block-wise Lorentz Transformations**
 
-For each block b∈{1,…,B}b \\in \\{1, \\ldots, B\\}:
+For each block $b \in \{1, \ldots, B\}$:
 
 1. **Scaled Displacements**  
-    Δtscaled,b=Δtraw  ×  inv\_freq\_timebΔsscaled,b=(Δxraw×inv\_freq\_spaceb,  Δyraw×inv\_freq\_spaceb,  Δzraw×inv\_freq\_spaceb)\\Delta t\_{\\text{scaled}, b} \= \\Delta t\_{\\text{raw}} \\;\\times\\; \\text{inv\\\_freq\\\_time}\_b \\\\\[6pt\] \\Delta s\_{\\text{scaled}, b} \= \\bigl(\\Delta x\_{\\text{raw}}\\times \\text{inv\\\_freq\\\_space}\_b,\\;\\Delta y\_{\\text{raw}}\\times \\text{inv\\\_freq\\\_space}\_b,\\;\\Delta z\_{\\text{raw}}\\times \\text{inv\\\_freq\\\_space}\_b\\bigr)  
-    where inv\_freq\_timeb\\text{inv\\\_freq\\\_time}\_b and inv\_freq\_spaceb\\text{inv\\\_freq\\\_space}\_b are derived from base values (e.g., 10000\) and the block index bb, ensuring different “wavelengths” for each block.
+    $$
+    \begin{aligned}
+    \Delta t_{\text{scaled}, b} &= \Delta t_{\text{raw}} \times \operatorname{inv\_freq\_time}_b \\
+    \Delta s_{\text{scaled}, b} &= \bigl(
+    \Delta x_{\text{raw}} \times \operatorname{inv\_freq\_space}_b,\;
+    \Delta y_{\text{raw}} \times \operatorname{inv\_freq\_space}_b,\;
+    \Delta z_{\text{raw}} \times \operatorname{inv\_freq\_space}_b
+    \bigr)
+    \end{aligned}
+    $$
+    where $\operatorname{inv\_freq\_time}_b$ and $\operatorname{inv\_freq\_space}_b$ are derived from base values (e.g., 10000) and the block index $b$, ensuring different “wavelengths” for each block.
 
 2. **Spatial Rotation Angle and Axis**  
-    θb=∥Δsscaled,b∥2,u^rot,b={Δsscaled,bθb,θb≠0,default axis (e.g., (0,0,1)),θb=0.\\theta\_b \= \\|\\Delta s\_{\\text{scaled}, b}\\|\_2, \\qquad \\hat{u}^{\\mathrm{rot}, b} \= \\begin{cases} \\displaystyle \\frac{\\Delta s\_{\\text{scaled}, b}}{\\theta\_b}, & \\theta\_b \\neq 0, \\\\\[8pt\] \\text{default axis (e.g., }(0,0,1)\\text{)}, & \\theta\_b \= 0\. \\end{cases}  
-    A 3×3 spatial rotation matrix R3,bR\_{3,b} is constructed using Rodrigues’ formula from u^rot,b\\hat{u}^{\\mathrm{rot}, b} and θb\\theta\_b. Embedding into 4×4 yields Mrot,bM\_{\\text{rot}, b}, which acts as identity on the time component and R3,bR\_{3,b} on spatial components.
+    $$
+    \begin{aligned}
+    \theta_b &= \lVert \Delta s_{\text{scaled}, b} \rVert_2, \\
+    \hat{u}^{\mathrm{rot}, b} &=
+    \begin{cases}
+    \displaystyle \frac{\Delta s_{\text{scaled}, b}}{\theta_b}, & \theta_b \neq 0, \\
+    \text{default axis (e.g., }(0,0,1)\text{)}, & \theta_b = 0.
+    \end{cases}
+    \end{aligned}
+    $$
+    A $3 \times 3$ spatial rotation matrix $R_{3,b}$ is constructed using Rodrigues’ formula from $\hat{u}^{\mathrm{rot}, b}$ and $\theta_b$. Embedding into $4 \times 4$ yields $M_{\text{rot}, b}$, which acts as identity on the time component and $R_{3,b}$ on spatial components.
 
 3. **Boost Rapidity and Axis**  
-    The scaled temporal displacement Δtscaled,b\\Delta t\_{\\text{scaled}, b} determines the boost rapidity φb\\varphi\_b. In the provided code, φb=Δtscaled,b\\varphi\_b \= \\Delta t\_{\\text{scaled}, b} directly, though a refinement φb=Cttanh⁡(Δtscaled,b/Ct)\\varphi\_b \= C\_t \\tanh(\\Delta t\_{\\text{scaled}, b}/C\_t) may be used for numerical stability at large deltas. The boost axis u^boost,b\\hat{u}^{\\mathrm{boost}, b} is typically chosen to match u^rot,b\\hat{u}^{\\mathrm{rot}, b}. A 4×4 Lorentz boost matrix Mboost,bM\_{\\text{boost}, b} is constructed using cosh⁡(φb)\\cosh(\\varphi\_b) and sinh⁡(φb)\\sinh(\\varphi\_b), preserving orthonormality within the Minkowski metric.
+    The scaled temporal displacement $\Delta t_{\text{scaled}, b}$ determines the boost rapidity $\varphi_b$. In the provided code, $\varphi_b = \Delta t_{\text{scaled}, b}$ directly, though a refinement $\varphi_b = C_t \tanh(\Delta t_{\text{scaled}, b}/C_t)$ may be used for numerical stability at large deltas. The boost axis $\hat{u}^{\mathrm{boost}, b}$ is typically chosen to match $\hat{u}^{\mathrm{rot}, b}$. A $4 \times 4$ Lorentz boost matrix $M_{\text{boost}, b}$ is constructed using $\cosh(\varphi_b)$ and $\sinh(\varphi_b)$, preserving orthonormality within the Minkowski metric.
 
 4. **Combine Transformations**  
-    Reff,b  =  Mboost,b Mrot,b.R\_{\\text{eff}, b} \\;=\\; M\_{\\text{boost}, b}\\,M\_{\\text{rot}, b}.  
-    Operationally, spatial rotation is applied first, then the boost. Since rotation and boost share the same axis, these operations commute: Mrot,bMboost,b=Mboost,bMrot,bM\_{\\text{rot}, b}M\_{\\text{boost}, b} \= M\_{\\text{boost}, b}M\_{\\text{rot}, b}.
+    $$
+    R_{\text{eff}, b} = M_{\text{boost}, b} M_{\text{rot}, b}.
+    $$
+    Operationally, spatial rotation is applied first, then the boost. Since rotation and boost share the same axis, these operations commute:
+    $$
+    M_{\text{rot}, b} M_{\text{boost}, b} = M_{\text{boost}, b} M_{\text{rot}, b}.
+    $$
 
-Repeating this for all BB blocks yields a stack of 4×4 matrices that encode the relative spacetime transformation across multiple frequency scales.
+Repeating this for all $B$ blocks yields a stack of $4 \times 4$ matrices that encode the relative spacetime transformation across multiple frequency scales.
 
 ### **4.2.3. Preserving the Minkowski Dot Product**
 
-A crucial aspect of MonSTER is ensuring each Reff,bR\_{\\text{eff}, b} is a true Lorentz transformation that preserves the Minkowski metric
+A crucial aspect of MonSTER is ensuring each $R_{\text{eff}, b}$ is a true Lorentz transformation that preserves the Minkowski metric
 
-η=diag(1,−1,−1,−1).\\eta \= \\mathrm{diag}(1, \-1, \-1, \-1).
+$$
+\eta = \mathrm{diag}(1,-1,-1,-1).
+$$
 
 That is,
 
-Reff,bT η Reff,b  =  η.R\_{\\text{eff}, b}^\\mathsf{T} \\,\\eta\\, R\_{\\text{eff}, b} \\;=\\; \\eta.
+$$
+R_{\text{eff}, b}^T \eta R_{\text{eff}, b} = \eta.
+$$
 
 This guarantee means that when these transformations modulate query and key vectors within self-attention—via a Minkowski dot product such as
 
-qbT η (Reff,b kb)or(R(Pq) qb)T η (R(Pk) kb),\\mathbf{q}\_b^\\mathsf{T}\\,\\eta\\,\\bigl(R\_{\\text{eff}, b}\\,\\mathbf{k}\_b\\bigr)\\quad\\text{or}\\quad \\bigl(R(P\_q)\\,\\mathbf{q}\_b\\bigr)^\\mathsf{T}\\,\\eta\\,\\bigl(R(P\_k)\\,\\mathbf{k}\_b\\bigr),
+$$
+\mathbf{q}_b^T \eta \bigl(R_{\text{eff}, b} \mathbf{k}_b\bigr)
+\quad \text{or} \quad
+\bigl(R(P_q)\mathbf{q}_b\bigr)^T \eta \bigl(R(P_k)\mathbf{k}_b\bigr),
+$$
 
-the resulting attention scores depend on Lorentz-invariant spacetime intervals rather than just Euclidean or linearized offsets. Constructing Mrot,bM\_{\\text{rot}, b} via Rodrigues’ formula and Mboost,bM\_{\\text{boost}, b} via standard Lorentz boost formulas inherently yields matrices that satisfy this preservation (within numerical precision). The underlying code, as presented, assumes these constructions are correct; if needed, explicit orthonormalization can correct small numerical errors to enforce Reff,bTηReff,b=ηR\_{\\text{eff}, b}^\\mathsf{T}\\eta R\_{\\text{eff}, b} \= \\eta.
+the resulting attention scores depend on Lorentz-invariant spacetime intervals rather than just Euclidean or linearized offsets. Constructing $M_{\text{rot}, b}$ via Rodrigues’ formula and $M_{\text{boost}, b}$ via standard Lorentz boost formulas inherently yields matrices that satisfy this preservation (within numerical precision). The underlying code, as presented, assumes these constructions are correct; if needed, explicit orthonormalization can correct small numerical errors to enforce $R_{\text{eff}, b}^T \eta R_{\text{eff}, b} = \eta$.
 
 ---
 
@@ -401,7 +434,7 @@ A core hypothesis is that intelligence arises from understanding compositional, 
 
 ### **6.2.1. The Holarchic 4D Token:**
 
-**\[Parent, Name, Type, Value, Position (t, x, y, z)\]**
+**[Parent, Name, Type, Value, Position (t, x, y, z)]**
 
 This token structure is inspired by Arthur Koestler’s concept of “holons” (entities that are simultaneously wholes and parts) and fact-based systems like Entity-Attribute-Value-Time (EAVT) used in databases such as Datomic. Each piece of information, regardless of domain, is represented as a 5-tuple token:
 
@@ -443,7 +476,7 @@ For program source code, the hierarchy flows from **Project/Codebase** down to *
 
 This results in a representation akin to an Abstract Syntax Tree (AST) where each node is augmented with precise source location and versioning information.
 
-*(See example table in \[reference\].)*
+*(See example table in [reference].)*
 
 ---
 
@@ -473,7 +506,7 @@ For ARC-AGI tasks, which involve transformations of colored pixel grids:
 
 This tokenization allows a solver to reason about pixel changes by comparing tokens with the same `(x, y, z)` but different `t` values, or to track the movement of “objects” (collections of pixel tokens) through changes in their `(x, y)` coordinates over `t`.
 
-*(See example table in \[reference\].)*
+*(See example table in [reference].)*
 
 ---
 
@@ -487,7 +520,7 @@ DeepSeek models introduced **Multi-Head Latent Attention (MLA)**, a technique th
 
 ---
 
-### **6.3.2. Structured Input Token Processing: \[Name, Type, Value\]**
+### **6.3.2. Structured Input Token Processing: [Name, Type, Value]**
 
 Our input tokens are `[Parent, Name, Type, Value, Position (t, x, y, z)]`. We will first process the content-bearing part: `[Name, Type, Value]`. Each of these sub-tokens (or a combined representation) will be embedded into a high-dimensional vector. This embedding serves as the initial representation for the “content” of the token. This high-dimensional embedding can be thought of as an “ID” that uniquely represents the essence of that specific `[Name, Type, Value]` combination.
 
@@ -507,14 +540,14 @@ While the actual mechanics involve MonSTER modulating the Q–K interaction, con
 
 1. **A Parent ID Embedding**  
    * Possibly a summary embedding of its Parent token.  
-2. **The Latent Q, K, V Derived from Its \[Name, Type, Value\] Content**  
+2. **The Latent Q, K, V Derived from Its [Name, Type, Value] Content**  
 3. **Its `Position (t, x, y, z)` as Processed by MonSTER**
 
 Implied is a final latent representation concatenating these aspects:
 
-\[Parent\_ID\_embedding, Name\_Type\_Value\_embedding (source of Q/K/V), Position\_ID\_embedding (post-MonSTER application)\]
+[Parent_ID_embedding, Name_Type_Value_embedding (source of Q/K/V), Position_ID_embedding (post-MonSTER application)]
 
-More precisely, MonSTER-transformed positional information directly influences the Q⋅KTQ \\cdot K^T dot products within the attention heads. The `Parent_ID` might be incorporated either:
+More precisely, MonSTER-transformed positional information directly influences the $QK^T$ dot products within the attention heads. The `Parent_ID` might be incorporated either:
 
 * As an additional feature to the content embedding before projection, or  
 * Used in a separate attention mechanism to model hierarchical context.
