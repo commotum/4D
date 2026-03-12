@@ -54,13 +54,20 @@ class FibonacciMonSTERFastVec:
         ch, sh, c, s:  (F,)   # cosh/sinh(phi), cos/sin(theta)
         axis:          (F,3)  # one unit axis per 4-D block
     """
-    def __init__(self, dim: int = 768, base: float = 10000.0, top_delta: int = 1024):
+    def __init__(
+        self,
+        dim: int = 768,
+        base: float = 10000.0,
+        top_delta: int = 1024,
+        span: float = 2.0 * np.pi,
+    ):
         if dim % 4 != 0:
             raise ValueError(f"dim must be divisible by 4, got {dim}.")
         self.dim      = dim
         self.num_freq = dim // 4
         self.base     = float(base)
-        self.unit     = (2.0 * np.pi) / float(top_delta)  # global unit (radians per step)
+        self.span     = float(span)
+        self.unit     = self.span / float(top_delta)  # global unit (argument units per step)
         j = np.arange(self.num_freq, dtype=np.float64)
         self.inv_freq = self.base ** (- j / self.num_freq)
 

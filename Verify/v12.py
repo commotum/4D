@@ -20,8 +20,6 @@ def minkowski_dot_big_vec(u: np.ndarray, v: np.ndarray) -> float:
 # =============================================================================
 # 2) Vectorized scalar-table builder
 # =============================================================================
-SLICE = 12  # 12 dims per frequency: [X4 | Y4 | Z4]
-
 class TriadMonSTERFastVec:
     """
     Vectorized cache of scalar tables for fast absolute/relative transforms.
@@ -37,13 +35,20 @@ class TriadMonSTERFastVec:
         ch, sh:     (F,)          # cosh/sinh(phi)
         c_axes, s_axes: (F,3)     # cos/sin for X,Y,Z axes respectively
     """
-    def __init__(self, dim: int = 768, base: float = 10000.0, top_delta: int = 1024):
-        if dim % SLICE != 0:
-            raise ValueError(f"dim must be divisible by {SLICE}, got {dim}.")
+    def __init__(
+        self,
+        dim: int = 768,
+        base: float = 10000.0,
+        top_delta: int = 1024,
+        span: float = 2.0 * np.pi,
+    ):
+        if dim % 12 != 0:
+            raise ValueError(f"dim must be divisible by 12, got {dim}.")
         self.dim      = dim
-        self.num_freq = dim // SLICE
+        self.num_freq = dim // 12
         self.base     = float(base)
-        self.unit     = (2.0 * np.pi) / float(top_delta)  # global unit (radians per step)
+        self.span     = float(span)
+        self.unit     = self.span / float(top_delta)  # global unit (argument units per step)
         j = np.arange(self.num_freq, dtype=np.float64)
         self.inv_freq = self.base ** (- j / self.num_freq)
         self._cache = {}
@@ -90,7 +95,7 @@ def apply_monster_triad_fast_vec(emb: np.ndarray, tables: dict, dim: int = 768) 
     """
     if emb.shape != (dim,):
         raise ValueError(f"embedding must be shape ({dim},), got {emb.shape}")
-    F = dim // SLICE
+    F = dim // 12
 
     # Reshape into (F, 3, 4): freq buckets × {X,Y,Z} × [t,x,y,z]
     V = emb.reshape(F, 3, 4).astype(np.float64, copy=False)
@@ -183,4 +188,4 @@ if __name__ == "__main__":
     max_err = np.max(np.abs(norms_before - norms_after))
     print("Per-4D Minkowski norms preserved? ", ok, "| max abs err:", max_err)
 
-    print("NUM_FREQ:", DIM // SLICE, " | DIM:", DIM, " | SLICE per freq:", SLICE)
+    print("NUM_FREQ:", DIM // 12, " | DIM:", DIM, " | BLOCK dim:", 12)
