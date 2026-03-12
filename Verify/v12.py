@@ -43,7 +43,7 @@ class TriadMonSTERFastVec:
         self.dim      = dim
         self.num_freq = dim // SLICE
         self.base     = float(base)
-        self.unit     = 1.0 / float(top_delta)  # global unit (dimensionless per step)
+        self.unit     = (2.0 * np.pi) / float(top_delta)  # global unit (radians per step)
         j = np.arange(self.num_freq, dtype=np.float64)
         self.inv_freq = self.base ** (- j / self.num_freq)
         self._cache = {}
