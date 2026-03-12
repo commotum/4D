@@ -37,8 +37,6 @@ def fibonacci_sphere(n: int) -> np.ndarray:
 # =============================================================================
 # 2) Vectorized scalar-table builder
 # =============================================================================
-SLICE = 4  # 4 dims per frequency: one Lorentz block per frequency.
-
 class FibonacciMonSTERFastVec:
     """
     Vectorized cache of scalar tables for fast absolute/relative transforms.
@@ -57,10 +55,10 @@ class FibonacciMonSTERFastVec:
         axis:          (F,3)  # one unit axis per 4-D block
     """
     def __init__(self, dim: int = 768, base: float = 10000.0, top_delta: int = 1024):
-        if dim % SLICE != 0:
-            raise ValueError(f"dim must be divisible by {SLICE}, got {dim}.")
+        if dim % 4 != 0:
+            raise ValueError(f"dim must be divisible by 4, got {dim}.")
         self.dim      = dim
-        self.num_freq = dim // SLICE
+        self.num_freq = dim // 4
         self.base     = float(base)
         self.unit     = (2.0 * np.pi) / float(top_delta)  # global unit (radians per step)
         j = np.arange(self.num_freq, dtype=np.float64)
@@ -126,7 +124,7 @@ def apply_monster_fibonacci_fast_vec(emb: np.ndarray, tables: dict, dim: int = 7
     """
     if emb.shape != (dim,):
         raise ValueError(f"embedding must be shape ({dim},), got {emb.shape}")
-    F = dim // SLICE
+    F = dim // 4
 
     # Reshape into (F, 4): freq blocks × [t,x,y,z]
     V = emb.reshape(F, 4).astype(np.float64, copy=False)
@@ -213,5 +211,5 @@ if __name__ == "__main__":
     max_err = np.max(np.abs(norms_before - norms_after))
     print("Per-4D Minkowski norms preserved? ", ok, "| max abs err:", max_err)
 
-    print("NUM_FREQ:", DIM // SLICE, " | DIM:", DIM, " | SLICE per freq:", SLICE)
-    print("NUM_AXES:", DIM // SLICE)
+    print("NUM_FREQ:", DIM // 4, " | DIM:", DIM, " | BLOCK dim:", 4)
+    print("NUM_AXES:", DIM // 4)
