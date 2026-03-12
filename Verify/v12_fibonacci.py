@@ -1,5 +1,5 @@
 
-# Vectorized NumPy version of the "Fast-scalar MonSTER Triad" with
+# Vectorized NumPy version of fast MonSTER with
 # isotropic Fibonacci-sphere axes (no Python loops over frequencies)
 from __future__ import annotations
 import numpy as np
@@ -7,7 +7,7 @@ import numpy as np
 # =============================================================================
 # 1) Minkowski helpers
 # =============================================================================
-ETA4 = np.diag([-1.0, 1.0, 1.0, 1.0]).astype(np.float64)
+ETA4 = np.diag([1.0, -1.0, -1.0, -1.0]).astype(np.float64)
 
 def minkowski_dot_big_vec(u: np.ndarray, v: np.ndarray) -> float:
     """
@@ -37,26 +37,24 @@ def fibonacci_sphere(n: int) -> np.ndarray:
 # =============================================================================
 # 2) Vectorized scalar-table builder
 # =============================================================================
-SLICE = 12  # 12 dims per frequency: [A4 | B4 | C4], but each 4-D block gets its own Fibonacci axis.
+SLICE = 4  # 4 dims per frequency: one Lorentz block per frequency.
 
-class TriadMonSTERFastVec:
+class FibonacciMonSTERFastVec:
     """
     Vectorized cache of scalar tables for fast absolute/relative transforms.
-    Frequencies: lam_j = base^{-j / F}, j=0..F-1, where F = dim // 12.
+    Frequencies: lam_j = base^{-j / F}, j=0..F-1, where F = dim // 4.
 
-    Compared to the canonical triad version, we keep the same 12-D frequency
-    bucket structure, but replace the repeated X/Y/Z axes with three distinct
-    unit axes drawn from a Fibonacci sphere for each frequency bucket.
+    Each 4-D block gets:
+        1) its own frequency lam_j
+        2) its own unit spatial axis a_j sampled from a Fibonacci sphere
 
-    For frequency j and local block b in {0,1,2}:
-
-        phi_j       = (t * unit) * lam_j
-        theta_{j,b} = ((axis_{j,b} · [x,y,z]) * unit) * lam_j
+    For block j:
+        phi_j   = (t * unit) * lam_j
+        theta_j = ((a_j · [x,y,z]) * unit) * lam_j
 
     Forward returns a dict with shapes:
-        ch, sh:        (F,)          # cosh/sinh(phi)
-        c_axes, s_axes:(F,3)         # cos/sin for the 3 axes in each bucket
-        axis:          (F,3,3)       # the 3 unit spatial axes per bucket
+        ch, sh, c, s:  (F,)   # cosh/sinh(phi), cos/sin(theta)
+        axis:          (F,3)  # one unit axis per 4-D block
     """
     def __init__(self, dim: int = 768, base: float = 10000.0, top_delta: int = 1024):
         if dim % SLICE != 0:
@@ -68,8 +66,8 @@ class TriadMonSTERFastVec:
         j = np.arange(self.num_freq, dtype=np.float64)
         self.inv_freq = self.base ** (- j / self.num_freq)
 
-        # One new isotropic axis for each 4-D block in the embedding.
-        axes = fibonacci_sphere(3 * self.num_freq).reshape(self.num_freq, 3, 3)
+        # One isotropic axis per 4-D block.
+        axes = fibonacci_sphere(self.num_freq)
         # Re-normalize defensively in case of accumulated FP error.
         self.axes = axes / np.linalg.norm(axes, axis=-1, keepdims=True)
 
@@ -91,19 +89,19 @@ class TriadMonSTERFastVec:
         phi = (t * u) * lam
 
         # Project the spatial position onto each block's Fibonacci axis.
-        proj = np.einsum("fab,b->fa", self.axes, spatial)  # (F,3)
-        theta = (u * lam)[:, None] * proj                  # (F,3)
+        proj = self.axes @ spatial  # (F,)
+        theta = (u * lam) * proj    # (F,)
 
-        ch = np.cosh(phi)      # (F,)
-        sh = np.sinh(phi)      # (F,)
-        c_axes = np.cos(theta) # (F,3)
-        s_axes = np.sin(theta) # (F,3)
+        ch = np.cosh(phi)   # (F,)
+        sh = np.sinh(phi)   # (F,)
+        c = np.cos(theta)   # (F,)
+        s = np.sin(theta)   # (F,)
 
         out = {
             "ch": ch,
             "sh": sh,
-            "c": c_axes,
-            "s": s_axes,
+            "c": c,
+            "s": s,
             "axis": self.axes,
         }
         self._cache[key] = out
@@ -113,15 +111,15 @@ class TriadMonSTERFastVec:
 # =============================================================================
 # 3) Vectorized apply (no loops over frequencies)
 # =============================================================================
-def apply_monster_triad_fast_vec(emb: np.ndarray, tables: dict, dim: int = 768) -> np.ndarray:
+def apply_monster_fibonacci_fast_vec(emb: np.ndarray, tables: dict, dim: int = 768) -> np.ndarray:
     """
-    Apply the isotropic Fibonacci-axis triad transforms to a full embedding
+    Apply isotropic Fibonacci-axis transforms to a full embedding
     using only vectorized broadcasting.
 
     Args:
         emb   : (dim,) row vector.
-        tables: dict with "ch","sh","c","s","axis" from TriadMonSTERFastVec.forward.
-        dim   : total embedding dimension (multiple of 12).
+        tables: dict with "ch","sh","c","s","axis" from FibonacciMonSTERFastVec.forward.
+        dim   : total embedding dimension (multiple of 4).
 
     Returns:
         (dim,) transformed row vector.
@@ -130,44 +128,44 @@ def apply_monster_triad_fast_vec(emb: np.ndarray, tables: dict, dim: int = 768) 
         raise ValueError(f"embedding must be shape ({dim},), got {emb.shape}")
     F = dim // SLICE
 
-    # Reshape into (F, 3, 4): freq buckets × 3 local blocks × [t,x,y,z]
-    V = emb.reshape(F, 3, 4).astype(np.float64, copy=False)
+    # Reshape into (F, 4): freq blocks × [t,x,y,z]
+    V = emb.reshape(F, 4).astype(np.float64, copy=False)
     out = V.copy()
 
     # Broadcasted scalars / axes
-    ch = tables["ch"]             # (F,)
-    sh = tables["sh"]             # (F,)
-    c_axes = tables["c"]          # (F,3)
-    s_axes = tables["s"]          # (F,3)
-    axis = tables["axis"]         # (F,3,3)
+    ch = tables["ch"]    # (F,)
+    sh = tables["sh"]    # (F,)
+    c = tables["c"]      # (F,)
+    s = tables["s"]      # (F,)
+    axis = tables["axis"]  # (F,3)
 
-    t = out[:, :, 0]              # (F,3)
-    spatial = out[:, :, 1:]       # (F,3,3)
+    t = out[:, 0]        # (F,)
+    spatial = out[:, 1:] # (F,3)
 
     # --------------------
     # Step 1: Boost along each block's own Fibonacci axis
     # --------------------
-    proj = np.sum(spatial * axis, axis=-1)  # (F,3) = a · x
+    proj = np.sum(spatial * axis, axis=-1)  # (F,) = a · x
 
-    t1 = ch[:, None] * t - sh[:, None] * proj
+    t1 = ch * t - sh * proj
     spatial1 = spatial + (
-        ((ch[:, None] - 1.0) * proj - sh[:, None] * t)[..., None] * axis
+        (((ch - 1.0) * proj - sh * t)[:, None] * axis)
     )
 
     # --------------------
     # Step 2: Rotate the spatial part around the same axis
     # --------------------
-    proj1 = np.sum(spatial1 * axis, axis=-1)  # (F,3) = a · x'
-    cross = np.cross(axis, spatial1)          # (F,3,3) = a × x'
+    proj1 = np.sum(spatial1 * axis, axis=-1)  # (F,) = a · x'
+    cross = np.cross(axis, spatial1)          # (F,3) = a × x'
 
     spatial2 = (
-        c_axes[..., None] * spatial1
-        + s_axes[..., None] * cross
-        + (1.0 - c_axes)[..., None] * proj1[..., None] * axis
+        c[:, None] * spatial1
+        + s[:, None] * cross
+        + (1.0 - c)[:, None] * proj1[:, None] * axis
     )
 
-    out[:, :, 0] = t1
-    out[:, :, 1:] = spatial2
+    out[:, 0] = t1
+    out[:, 1:] = spatial2
 
     return out.reshape(dim,)
 
@@ -178,7 +176,7 @@ def apply_monster_triad_fast_vec(emb: np.ndarray, tables: dict, dim: int = 768) 
 if __name__ == "__main__":
     np.random.seed(0)
     DIM = 768
-    monster = TriadMonSTERFastVec(dim=DIM, base=10000.0, top_delta=1024)
+    monster = FibonacciMonSTERFastVec(dim=DIM, base=10000.0, top_delta=1024)
 
     # Absolute 4D positions (in "steps")
     s_q  = np.array([ 700.0,  500.0, -300.0,  200.0], dtype=np.float64)  # (t,x,y,z)
@@ -195,12 +193,12 @@ if __name__ == "__main__":
     k = np.random.uniform(-0.6, 0.6, size=DIM).astype(np.float64)
 
     # Apply absolute maps
-    q_abs = apply_monster_triad_fast_vec(q, T_abs_q, dim=DIM)
-    k_abs = apply_monster_triad_fast_vec(k, T_abs_k, dim=DIM)
+    q_abs = apply_monster_fibonacci_fast_vec(q, T_abs_q, dim=DIM)
+    k_abs = apply_monster_fibonacci_fast_vec(k, T_abs_k, dim=DIM)
 
     # RoPE-style identity check
     lhs = minkowski_dot_big_vec(q_abs, k_abs)
-    k_rel = apply_monster_triad_fast_vec(k, T_rel, dim=DIM)
+    k_rel = apply_monster_fibonacci_fast_vec(k, T_rel, dim=DIM)
     rhs = minkowski_dot_big_vec(q, k_rel)
 
     print("RoPE-style identity holds? ", np.allclose(lhs, rhs, rtol=1e-12, atol=1e-12))
@@ -216,4 +214,4 @@ if __name__ == "__main__":
     print("Per-4D Minkowski norms preserved? ", ok, "| max abs err:", max_err)
 
     print("NUM_FREQ:", DIM // SLICE, " | DIM:", DIM, " | SLICE per freq:", SLICE)
-    print("NUM_AXES:", 3 * (DIM // SLICE))
+    print("NUM_AXES:", DIM // SLICE)
