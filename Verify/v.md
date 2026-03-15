@@ -2,7 +2,7 @@
 
 To show that a RoPE implementation works in all cases, you would need to demonstrate the following:
 
-### 1. Equivalence of Formulations
+### 1. Formulation Equivalence (Absolute-Relative Fusion)
 
     - Show that applying separate rotations to absolute positions yields the same 
       result as the complex relative position formula. For any 2D vectors q and k 
@@ -28,11 +28,11 @@ To show that a RoPE implementation works in all cases, you would need to demonst
       np.dot(apply_rotation_2d(q, m), apply_rotation_2d(k, n)) must equal 
       np.dot(apply_rotation_2d(q, m+d), apply_rotation_2d(k, n+d)).
 
-### 4. Extensibility to N-Dimensional Vectors
+### 4. Block-Diagonal Structure
 
-    - Show that by applying rotations blockwise to pairs of dimensions RoPE 
-      naturally extends to higher-dimensional embeddings, interpreting the 
-      embedding vector as complex pairs:
+    - Show that by applying 2x2 rotations blockwise to pairs of embedding 
+      coordinates RoPE is equivalent to multiplication by a block-diagonal 
+      rotation matrix, viewing the embedding vector as complex-valued pairs:
 
     - For an embedding vector $\mathbf{q} = (q_1, q_2, q_3, q_4, \dots, q_d)$, 
       treat it as complex-valued pairs:
