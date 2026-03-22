@@ -21,3 +21,6 @@ x^\mu=(t, x, y, z), c \neq 1 \quad \Rightarrow \quad\left(\frac{1}{c}, 1,1,1\rig
 x^\mu=(t, x, y, z), c=1 \quad \Rightarrow \quad(1,1,1,1)
 \end{gathered}
 $$
+
+
+codex resume 019d179f-f24f-7b33-a468-73a6be452e59
