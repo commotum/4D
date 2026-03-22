@@ -8,6 +8,7 @@ import numpy as np
 # 1) Minkowski helpers
 # =============================================================================
 ETA4 = np.diag([-1.0, 1.0, 1.0, 1.0]).astype(np.float64)
+L = 1.0 / 1024.0
 
 def minkowski_dot_big_vec(u: np.ndarray, v: np.ndarray) -> float:
     """
@@ -47,8 +48,8 @@ class FibonacciMonSTERFastVec:
         2) its own unit spatial axis a_j sampled from a Fibonacci sphere
 
     For block j:
-        phi_j   = (t * unit) * lam_j
-        theta_j = ((a_j · [x,y,z]) * unit) * lam_j
+        phi_j   = (L * t) * lam_j
+        theta_j = (a_j · [x,y,z]) * lam_j
 
     Forward returns a dict with shapes:
         ch, sh, c, s:  (F,)   # cosh/sinh(phi), cos/sin(theta)
@@ -58,16 +59,13 @@ class FibonacciMonSTERFastVec:
         self,
         dim: int = 768,
         base: float = 10000.0,
-        top_delta: int = 1024,
-        span: float = 2.0 * np.pi,
     ):
         if dim % 4 != 0:
             raise ValueError(f"dim must be divisible by 4, got {dim}.")
         self.dim      = dim
         self.num_freq = dim // 4
         self.base     = float(base)
-        self.span     = float(span)
-        self.unit     = self.span / float(top_delta)  # global unit (argument units per step)
+        self.L        = L
         j = np.arange(self.num_freq, dtype=np.float64)
         self.inv_freq = self.base ** (- j / self.num_freq)
 
@@ -82,20 +80,19 @@ class FibonacciMonSTERFastVec:
         s = np.asarray(s, dtype=np.float64)
         if s.shape != (4,):
             raise ValueError("position must be a 4D vector (t, x, y, z).")
-        key = (s[0], s[1], s[2], s[3], self.unit, self.base)
+        key = (s[0], s[1], s[2], s[3])
         if key in self._cache:
             return self._cache[key]
 
         t = s[0]
         spatial = s[1:]
         lam = self.inv_freq  # (F,)
-        u = self.unit
 
-        phi = (t * u) * lam
+        phi = (self.L * t) * lam
 
         # Project the spatial position onto each block's Fibonacci axis.
         proj = self.axes @ spatial  # (F,)
-        theta = (u * lam) * proj    # (F,)
+        theta = lam * proj          # (F,)
 
         ch = np.cosh(phi)   # (F,)
         sh = np.sinh(phi)   # (F,)
@@ -181,9 +178,9 @@ def apply_monster_fibonacci_fast_vec(emb: np.ndarray, tables: dict, dim: int = 7
 if __name__ == "__main__":
     np.random.seed(0)
     DIM = 768
-    monster = FibonacciMonSTERFastVec(dim=DIM, base=10000.0, top_delta=1024)
+    monster = FibonacciMonSTERFastVec(dim=DIM, base=10000.0)
 
-    # Absolute 4D positions (in "steps")
+    # Absolute 4D positions
     s_q  = np.array([ 700.0,  500.0, -300.0,  200.0], dtype=np.float64)  # (t,x,y,z)
     s_k  = np.array([ -40.0,  -20.0,   60.0,  -10.0], dtype=np.float64)
     dskq = s_k - s_q
