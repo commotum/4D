@@ -142,6 +142,31 @@ def apply_monster_triad_fast_vec(emb: np.ndarray, tables: dict, dim: int = 768) 
     return out.reshape(dim,)
 
 
+def absolute_minkowski_score(
+    q: np.ndarray,
+    k: np.ndarray,
+    s_q: np.ndarray,
+    s_k: np.ndarray,
+    monster: "TriadMonSTERFastVec",
+    dim: int = 768,
+) -> float:
+    q_abs = apply_monster_triad_fast_vec(q, monster.forward(s_q), dim=dim)
+    k_abs = apply_monster_triad_fast_vec(k, monster.forward(s_k), dim=dim)
+    return minkowski_dot_big_vec(q_abs, k_abs)
+
+
+def relative_minkowski_score(
+    q: np.ndarray,
+    k: np.ndarray,
+    s_q: np.ndarray,
+    s_k: np.ndarray,
+    monster: "TriadMonSTERFastVec",
+    dim: int = 768,
+) -> float:
+    k_rel = apply_monster_triad_fast_vec(k, monster.forward(s_k - s_q), dim=dim)
+    return minkowski_dot_big_vec(q, k_rel)
+
+
 # =============================================================================
 # 4) Demo / Sanity checks
 # =============================================================================
@@ -153,28 +178,19 @@ if __name__ == "__main__":
     # Absolute 4D positions
     s_q  = np.array([ 700.0,  500.0, -300.0,  200.0], dtype=np.float64)  # (t,x,y,z)
     s_k  = np.array([ -40.0,  -20.0,   60.0,  -10.0], dtype=np.float64)
-    dskq = s_k - s_q
-
-    # Tables
-    T_abs_q = monster.forward(s_q)
-    T_abs_k = monster.forward(s_k)
-    T_rel   = monster.forward(dskq)
 
     # Random embeddings
     q = np.random.uniform(-0.6, 0.6, size=DIM).astype(np.float64)
     k = np.random.uniform(-0.6, 0.6, size=DIM).astype(np.float64)
 
-    # Apply absolute maps
-    q_abs = apply_monster_triad_fast_vec(q, T_abs_q, dim=DIM)
-    k_abs = apply_monster_triad_fast_vec(k, T_abs_k, dim=DIM)
-
     # RoPE-style identity check
-    lhs = minkowski_dot_big_vec(q_abs, k_abs)
-    k_rel = apply_monster_triad_fast_vec(k, T_rel, dim=DIM)
-    rhs = minkowski_dot_big_vec(q, k_rel)
+    lhs = absolute_minkowski_score(q, k, s_q, s_k, monster, dim=DIM)
+    rhs = relative_minkowski_score(q, k, s_q, s_k, monster, dim=DIM)
 
     print("RoPE-style identity holds? ", np.allclose(lhs, rhs, rtol=1e-12, atol=1e-12))
     print(f"lhs: {lhs:+.12f}  rhs: {rhs:+.12f}")
+
+    q_abs = apply_monster_triad_fast_vec(q, monster.forward(s_q), dim=DIM)
 
     # Per-4D Minkowski norm preservation
     Q_blocks = q.reshape(-1, 4)
@@ -184,5 +200,30 @@ if __name__ == "__main__":
     ok = np.allclose(norms_before, norms_after, rtol=1e-11, atol=1e-12)
     max_err = np.max(np.abs(norms_before - norms_after))
     print("Per-4D Minkowski norms preserved? ", ok, "| max abs err:", max_err)
+
+    # The bilinear form is symmetric, so identical q/k content removes the odd sinh term.
+    demo_pos_a = np.array([1024.0, 0.0, 0.0, 0.0], dtype=np.float64)
+    demo_pos_b = np.array([0.0, 0.0, 0.0, 0.0], dtype=np.float64)
+    demo_rng = np.random.default_rng()
+    hidden = demo_rng.uniform(-0.6, 0.6, size=DIM).astype(np.float64)
+
+    w_scale = 1.0 / np.sqrt(DIM)
+    w_q = demo_rng.normal(0.0, w_scale, size=(DIM, DIM)).astype(np.float64)
+    w_k = demo_rng.normal(0.0, w_scale, size=(DIM, DIM)).astype(np.float64)
+
+    q_proj = hidden @ w_q
+    k_proj = hidden @ w_k
+
+    same_forward = absolute_minkowski_score(hidden, hidden, demo_pos_a, demo_pos_b, monster, dim=DIM)
+    same_reverse = absolute_minkowski_score(hidden, hidden, demo_pos_b, demo_pos_a, monster, dim=DIM)
+    projected_forward = absolute_minkowski_score(q_proj, k_proj, demo_pos_a, demo_pos_b, monster, dim=DIM)
+    projected_reverse = absolute_minkowski_score(q_proj, k_proj, demo_pos_b, demo_pos_a, monster, dim=DIM)
+    projected_odd = 0.5 * (projected_reverse - projected_forward)
+
+    print("Same-vector score is even in dt? ", np.allclose(same_forward, same_reverse, rtol=1e-12, atol=1e-12))
+    print(f"same vector: dt=-1024 -> {same_forward:+.12f} | dt=+10 -> {same_reverse:+.12f}")
+    print("Projected q/k score depends on time order? ", not np.allclose(projected_forward, projected_reverse, rtol=1e-12, atol=1e-12))
+    print(f"projected q/k: dt=-1024 -> {projected_forward:+.12f} | dt=+10 -> {projected_reverse:+.12f}")
+    print(f"projected q/k odd directional component: {projected_odd:+.12f}")
 
     print("NUM_FREQ:", DIM // 12, " | DIM:", DIM, " | BLOCK dim:", 12)
