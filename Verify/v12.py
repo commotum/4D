@@ -6,7 +6,7 @@ import numpy as np
 # 1) Minkowski helpers
 # =============================================================================
 ETA4 = np.diag([-1.0, 1.0, 1.0, 1.0]).astype(np.float64)
-L = 1.0 / 1024.0
+L = 1.0 / 4096.0
 
 def minkowski_dot_big_vec(u: np.ndarray, v: np.ndarray) -> float:
     """

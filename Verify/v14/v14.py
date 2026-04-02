@@ -7,6 +7,8 @@ import numpy as np
 # =============================================================================
 ETA4 = np.diag([-1.0, 1.0, 1.0, 1.0]).astype(np.float64)
 L = 1.0 / 1024.0
+QUERY_T_VALUES = (0.0, 256.0, 512.0, 1024.0, 2048.0, 3072.0, 4096.0)
+QUERY_RADIAL_VALUES = QUERY_T_VALUES
 
 def minkowski_dot_big_vec(u: np.ndarray, v: np.ndarray) -> float:
     """
@@ -16,6 +18,42 @@ def minkowski_dot_big_vec(u: np.ndarray, v: np.ndarray) -> float:
     U = u.reshape(-1, 4)
     V = v.reshape(-1, 4)
     return np.sum((U @ ETA4) * V)
+
+
+def minkowski_dot_rowwise_big_vec(u: np.ndarray, v: np.ndarray) -> np.ndarray:
+    """
+    Rowwise big Minkowski inner products for batches of row vectors.
+    Returns a length-n array where entry i is the Minkowski dot between
+    u[i] and v[i].
+    """
+    u = np.asarray(u, dtype=np.float64)
+    v = np.asarray(v, dtype=np.float64)
+    if u.ndim != 2 or v.ndim != 2:
+        raise ValueError("u and v must be rank-2 arrays of shape (num_vecs, dim).")
+    if u.shape != v.shape:
+        raise ValueError(f"u and v must have the same shape, got {u.shape} and {v.shape}.")
+
+    U = u.reshape(u.shape[0], -1, 4)
+    V = v.reshape(v.shape[0], -1, 4)
+    return np.einsum("nbi,ij,nbj->n", U, ETA4, V, optimize=True)
+
+
+def minkowski_dot_pairwise_big_vec(u: np.ndarray, v: np.ndarray) -> np.ndarray:
+    """
+    Pairwise big Minkowski inner products for batches of row vectors.
+    Returns an (n_u, n_v) matrix where entry [i, j] is the Minkowski dot
+    between u[i] and v[j].
+    """
+    u = np.asarray(u, dtype=np.float64)
+    v = np.asarray(v, dtype=np.float64)
+    if u.ndim != 2 or v.ndim != 2:
+        raise ValueError("u and v must be rank-2 arrays of shape (num_vecs, dim).")
+    if u.shape[1] != v.shape[1]:
+        raise ValueError(f"u and v must have the same dim, got {u.shape[1]} and {v.shape[1]}.")
+
+    U = u.reshape(u.shape[0], -1, 4)
+    V = v.reshape(v.shape[0], -1, 4)
+    return np.einsum("nbi,ij,mbj->nm", U, ETA4, V, optimize=True)
 
 
 # =============================================================================
@@ -142,6 +180,48 @@ def apply_monster_triad_fast_vec(emb: np.ndarray, tables: dict, dim: int = 768) 
     return out.reshape(dim,)
 
 
+def apply_monster_triad_fast_batch_vec(embs: np.ndarray, tables: dict, dim: int = 768) -> np.ndarray:
+    """
+    Batched version of apply_monster_triad_fast_vec for arrays of shape
+    (num_vecs, dim).
+    """
+    embs = np.asarray(embs, dtype=np.float64)
+    if embs.ndim != 2 or embs.shape[1] != dim:
+        raise ValueError(f"embs must be shape (num_vecs, {dim}), got {embs.shape}")
+
+    F = dim // 12
+    out = embs.reshape(-1, F, 3, 4).copy()
+
+    ch = tables["ch"][None, :, None]
+    sh = tables["sh"][None, :, None]
+    c_axes = tables["c"][None, :, :]
+    s_axes = tables["s"][None, :, :]
+
+    axis_idx = np.arange(3)
+    spatial_idx = np.array([1, 2, 3], dtype=np.int64)
+    t = out[..., 0]
+    x_axis = out[:, :, axis_idx, spatial_idx]
+
+    t1 = ch * t - sh * x_axis
+    x1 = -sh * t + ch * x_axis
+
+    out[..., 0] = t1
+    out[:, :, axis_idx, spatial_idx] = x1
+
+    first_pair_idx = np.array([2, 1, 1], dtype=np.int64)
+    second_pair_idx = np.array([3, 3, 2], dtype=np.int64)
+    u = out[:, :, axis_idx, first_pair_idx]
+    v = out[:, :, axis_idx, second_pair_idx]
+
+    u2 = c_axes * u - s_axes * v
+    v2 = s_axes * u + c_axes * v
+
+    out[:, :, axis_idx, first_pair_idx] = u2
+    out[:, :, axis_idx, second_pair_idx] = v2
+
+    return out.reshape(embs.shape[0], dim)
+
+
 def absolute_minkowski_score(
     q: np.ndarray,
     k: np.ndarray,
@@ -167,63 +247,128 @@ def relative_minkowski_score(
     return minkowski_dot_big_vec(q, k_rel)
 
 
+def sample_distinct_ordered_pairs(num_tokens: int, num_pairs: int, rng: np.random.Generator) -> np.ndarray:
+    all_distinct_pairs = np.argwhere(~np.eye(num_tokens, dtype=bool))
+    pair_rows = rng.choice(all_distinct_pairs.shape[0], size=num_pairs, replace=False)
+    return all_distinct_pairs[pair_rows]
+
+
+def sample_positions_on_radius_shell(
+    radius: float,
+    num_positions: int,
+    rng: np.random.Generator,
+) -> np.ndarray:
+    if radius == 0.0:
+        return np.zeros((num_positions, 3), dtype=np.float64)
+
+    directions = rng.normal(size=(num_positions, 3)).astype(np.float64)
+    norms = np.linalg.norm(directions, axis=1, keepdims=True)
+    norms[norms == 0.0] = 1.0
+    directions /= norms
+    return radius * directions
+
+
+def pairwise_minkowski_by_query_time(
+    token_vectors: np.ndarray,
+    query_t_values: tuple[float, ...] = QUERY_T_VALUES,
+    dim: int = 768,
+    base: float = 10000.0,
+) -> dict[float, np.ndarray]:
+    """
+    For each query time in query_t_values, compute the ordered pairwise
+    Minkowski products between all distinct token pairs. The key time is fixed
+    at 0, and all xyz coordinates remain 0 for both query and key.
+
+    Returns a dict mapping q_t -> (num_tokens, num_tokens) score matrix with
+    NaN on the diagonal to exclude self-pairs.
+    """
+    token_vectors = np.asarray(token_vectors, dtype=np.float64)
+    if token_vectors.ndim != 2 or token_vectors.shape[1] != dim:
+        raise ValueError(f"token_vectors must be shape (num_tokens, {dim}), got {token_vectors.shape}")
+
+    monster = TriadMonSTERFastVec(dim=dim, base=base)
+    key_pos = np.zeros(4, dtype=np.float64)
+    key_tables = monster.forward(key_pos)
+    key_abs = apply_monster_triad_fast_batch_vec(token_vectors, key_tables, dim=dim)
+
+    results: dict[float, np.ndarray] = {}
+    for q_t in query_t_values:
+        query_pos = np.array([q_t, 0.0, 0.0, 0.0], dtype=np.float64)
+        query_tables = monster.forward(query_pos)
+        query_abs = apply_monster_triad_fast_batch_vec(token_vectors, query_tables, dim=dim)
+        pairwise_scores = minkowski_dot_pairwise_big_vec(query_abs, key_abs)
+        np.fill_diagonal(pairwise_scores, np.nan)
+        results[float(q_t)] = pairwise_scores
+
+    return results
+
+
+def sampled_spatial_minkowski_by_radius(
+    query_vectors: np.ndarray,
+    key_vectors: np.ndarray,
+    radial_values: tuple[float, ...] = QUERY_RADIAL_VALUES,
+    dim: int = 768,
+    base: float = 10000.0,
+    rng: np.random.Generator | None = None,
+) -> dict[float, np.ndarray]:
+    """
+    For each radius r in radial_values, sample one query position per token pair
+    uniformly on the radius-r sphere, keep query/key time fixed at 0, keep the
+    key at the spatial origin, and return the corresponding Minkowski products.
+    """
+    query_vectors = np.asarray(query_vectors, dtype=np.float64)
+    key_vectors = np.asarray(key_vectors, dtype=np.float64)
+    if query_vectors.ndim != 2 or query_vectors.shape[1] != dim:
+        raise ValueError(f"query_vectors must be shape (num_pairs, {dim}), got {query_vectors.shape}")
+    if key_vectors.shape != query_vectors.shape:
+        raise ValueError(f"key_vectors must match query_vectors shape, got {key_vectors.shape}")
+
+    if rng is None:
+        rng = np.random.default_rng()
+
+    monster = TriadMonSTERFastVec(dim=dim, base=base)
+    key_pos = np.zeros(4, dtype=np.float64)
+    key_abs = apply_monster_triad_fast_batch_vec(key_vectors, monster.forward(key_pos), dim=dim)
+
+    num_pairs = query_vectors.shape[0]
+    results: dict[float, np.ndarray] = {}
+    for radius in radial_values:
+        shell_positions = sample_positions_on_radius_shell(float(radius), num_pairs, rng)
+        query_abs = np.empty_like(query_vectors)
+        for i, xyz in enumerate(shell_positions):
+            query_pos = np.array([0.0, xyz[0], xyz[1], xyz[2]], dtype=np.float64)
+            query_abs[i] = apply_monster_triad_fast_vec(query_vectors[i], monster.forward(query_pos), dim=dim)
+        results[float(radius)] = minkowski_dot_rowwise_big_vec(query_abs, key_abs)
+
+    return results
+
+
 # =============================================================================
 # 4) Demo / Sanity checks
 # =============================================================================
 if __name__ == "__main__":
-    np.random.seed(0)
     DIM = 768
-    monster = TriadMonSTERFastVec(dim=DIM, base=10000.0)
+    NUM_TOKENS = 1000
+    NUM_PAIRS = 1000
+    rng = np.random.default_rng()
+    token_vectors = rng.uniform(-0.6, 0.6, size=(NUM_TOKENS, DIM)).astype(np.float64)
+    sampled_pairs = sample_distinct_ordered_pairs(NUM_TOKENS, NUM_PAIRS, rng)
+    query_pair_idx = sampled_pairs[:, 0]
+    key_pair_idx = sampled_pairs[:, 1]
+    query_vectors = token_vectors[query_pair_idx]
+    key_vectors = token_vectors[key_pair_idx]
 
-    # Absolute 4D positions
-    s_q  = np.array([ 700.0,  500.0, -300.0,  200.0], dtype=np.float64)  # (t,x,y,z)
-    s_k  = np.array([ -40.0,  -20.0,   60.0,  -10.0], dtype=np.float64)
+    spatial_scores_by_radius = sampled_spatial_minkowski_by_radius(
+        query_vectors,
+        key_vectors,
+        dim=DIM,
+        rng=rng,
+    )
 
-    # Random embeddings
-    q = np.random.uniform(-0.6, 0.6, size=DIM).astype(np.float64)
-    k = np.random.uniform(-0.6, 0.6, size=DIM).astype(np.float64)
+    print(f"Generated {NUM_TOKENS} token/hidden vectors with dim={DIM}.")
+    print(f"Averaging Minkowski products over {NUM_PAIRS} distinct ordered token pairs.")
+    print("Query/key time is fixed at 0. Key xyz is fixed at the origin.")
+    print("For each radius r, one query position per pair is sampled uniformly on the radius-r shell.")
 
-    # RoPE-style identity check
-    lhs = absolute_minkowski_score(q, k, s_q, s_k, monster, dim=DIM)
-    rhs = relative_minkowski_score(q, k, s_q, s_k, monster, dim=DIM)
-
-    print("RoPE-style identity holds? ", np.allclose(lhs, rhs, rtol=1e-12, atol=1e-12))
-    print(f"lhs: {lhs:+.12f}  rhs: {rhs:+.12f}")
-
-    q_abs = apply_monster_triad_fast_vec(q, monster.forward(s_q), dim=DIM)
-
-    # Per-4D Minkowski norm preservation
-    Q_blocks = q.reshape(-1, 4)
-    Q_abs_blocks = q_abs.reshape(-1, 4)
-    norms_before = np.sum((Q_blocks @ ETA4) * Q_blocks, axis=1)
-    norms_after  = np.sum((Q_abs_blocks @ ETA4) * Q_abs_blocks, axis=1)
-    ok = np.allclose(norms_before, norms_after, rtol=1e-11, atol=1e-12)
-    max_err = np.max(np.abs(norms_before - norms_after))
-    print("Per-4D Minkowski norms preserved? ", ok, "| max abs err:", max_err)
-
-    # The bilinear form is symmetric, so identical q/k content removes the odd sinh term.
-    demo_pos_a = np.array([1024.0, 0.0, 0.0, 0.0], dtype=np.float64)
-    demo_pos_b = np.array([0.0, 0.0, 0.0, 0.0], dtype=np.float64)
-    demo_rng = np.random.default_rng()
-    hidden = demo_rng.uniform(-0.6, 0.6, size=DIM).astype(np.float64)
-
-    w_scale = 1.0 / np.sqrt(DIM)
-    w_q = demo_rng.normal(0.0, w_scale, size=(DIM, DIM)).astype(np.float64)
-    w_k = demo_rng.normal(0.0, w_scale, size=(DIM, DIM)).astype(np.float64)
-
-    q_proj = hidden @ w_q
-    k_proj = hidden @ w_k
-
-    same_forward = absolute_minkowski_score(hidden, hidden, demo_pos_a, demo_pos_b, monster, dim=DIM)
-    same_reverse = absolute_minkowski_score(hidden, hidden, demo_pos_b, demo_pos_a, monster, dim=DIM)
-    projected_forward = absolute_minkowski_score(q_proj, k_proj, demo_pos_a, demo_pos_b, monster, dim=DIM)
-    projected_reverse = absolute_minkowski_score(q_proj, k_proj, demo_pos_b, demo_pos_a, monster, dim=DIM)
-    projected_odd = 0.5 * (projected_reverse - projected_forward)
-
-    print("Same-vector score is even in dt? ", np.allclose(same_forward, same_reverse, rtol=1e-12, atol=1e-12))
-    print(f"same vector: dt=-1024 -> {same_forward:+.12f} | dt=+10 -> {same_reverse:+.12f}")
-    print("Projected q/k score depends on time order? ", not np.allclose(projected_forward, projected_reverse, rtol=1e-12, atol=1e-12))
-    print(f"projected q/k: dt=-1024 -> {projected_forward:+.12f} | dt=+10 -> {projected_reverse:+.12f}")
-    print(f"projected q/k odd directional component: {projected_odd:+.12f}")
-
-    print("NUM_FREQ:", DIM // 12, " | DIM:", DIM, " | BLOCK dim:", 12)
+    for radius, scores in spatial_scores_by_radius.items():
+        print(f"r={radius:7.1f} | t_q=0.0 | t_k=0.0 | avg_product={scores.mean():+.12f}")

@@ -1,5 +1,9 @@
 # Embedding Dimension Candidates
 
+Autoresearch default dim = 512 or 768
+nanochat default dim = 512 or 1280
+
+
 Values divisible by both `12` and `128` occur every `384` dimensions because `LCM(12, 128) = 384`. The table below runs through `24576`.
 
 | Value | `128 x n` | `12 x n` |
