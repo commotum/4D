@@ -1,0 +1,1 @@
+"In other words, mind is already inherent in every electron, and the processes of human consciousness differ only in degree but not in kind from the processes of choice between quantum states which we call "chance" when they are made by electrons."
